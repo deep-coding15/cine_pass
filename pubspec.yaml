@@ -1,0 +1,13 @@
+name: _
+publish_to: none
+
+environment:
+  sdk: '^3.8.0'
+
+workspace:
+  - cine_pass_client
+  - cine_pass_server
+  - cine_pass_flutter
+dependency_overrides:
+  flutter_secure_storage: ^10.0.0
+

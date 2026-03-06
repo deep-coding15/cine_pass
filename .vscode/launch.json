@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "cine_pass_flutter",
+            "cwd": "${workspaceFolder}/cine_pass_flutter",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "cine_pass_server",
+            "cwd": "${workspaceFolder}/cine_pass_server",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "docker_compose_up",
+            "program": "bin/main.dart",
+            "env": {
+                "SERVERPOD_PASSWORD_database": "m2bkECGaKzJiMIfoltnRB966Tf1bWPLM"
+            },
+            "args": [
+                "--apply-migrations"
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "cine_pass (full stack)",
+            "configurations": [
+                "cine_pass_server",
+                "cine_pass_flutter"
+            ],
+            "presentation": {
+                "order": 1
+            }
+        }
+    ]
+}
