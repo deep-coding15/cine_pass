@@ -1,0 +1,14 @@
+class: BilletResult
+fields:
+  billetId: int
+  reservationId: int
+  siegeId: int
+  seanceId: int
+  filmId: int
+  salleId: int
+  produitsOptionnels: List<OptionnelReservation>
+  startTime: DateTime
+  endTime: DateTime
+  price: double
+  qrCode: String
+  estValide: bool

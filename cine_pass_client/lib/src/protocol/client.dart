@@ -16,8 +16,19 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i5;
-import 'protocol.dart' as _i6;
+import 'package:cine_pass_client/src/protocol/reservation_billet/reservation.dart'
+    as _i5;
+import 'package:cine_pass_client/src/protocol/reservation_billet/reservation_statut.dart'
+    as _i6;
+import 'package:cine_pass_client/src/protocol/reservation_billet/paiement_method.dart'
+    as _i7;
+import 'package:cine_pass_client/src/protocol/protocol.dart' as _i8;
+import 'package:cine_pass_client/src/protocol/reservation_billet/paiement_result.dart'
+    as _i9;
+import 'package:cine_pass_client/src/protocol/reservation_billet/paiement_statut.dart'
+    as _i10;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i11;
+import 'protocol.dart' as _i12;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -240,6 +251,88 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
+/// {@category Endpoint}
+class EndpointReservation extends _i2.EndpointRef {
+  EndpointReservation(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'reservation';
+
+  /// le prix final est calculé en fonction du prix de base de la séance + le prix des optionnels - la réduction du code promo
+  /// la reduction du code promo est appliquée sur le montant total (prix de base) et pas sur les optionnels)
+  _i3.Future<_i5.Reservation> createReservation({
+    required int userId,
+    required int cinemaId,
+    required int seanceId,
+    required Set<int> siegeIds,
+    required Map<int, int> optionnelIds,
+    required String dateReservation,
+    required double montantTotal,
+    required _i6.ReservationStatut statut,
+    required _i7.PaiementMethod paiementMethod,
+    required String codePromo,
+  }) => caller.callServerEndpoint<_i5.Reservation>(
+    'reservation',
+    'createReservation',
+    {
+      'userId': userId,
+      'cinemaId': cinemaId,
+      'seanceId': seanceId,
+      'siegeIds': siegeIds,
+      'optionnelIds': _i8.Protocol().mapContainerToJson(optionnelIds),
+      'dateReservation': dateReservation,
+      'montantTotal': montantTotal,
+      'statut': statut,
+      'paiementMethod': paiementMethod,
+      'codePromo': codePromo,
+    },
+  );
+
+  /// 1. Vérifie si les sièges appartiennent bien au cinéma et à la salle de la séance
+  _i3.Future<void> validerAppartenance({
+    required List<int> siegeIds,
+    required int cinemaId,
+    required int salleId,
+  }) => caller.callServerEndpoint<void>(
+    'reservation',
+    'validerAppartenance',
+    {
+      'siegeIds': siegeIds,
+      'cinemaId': cinemaId,
+      'salleId': salleId,
+    },
+  );
+
+  /// 2. Vérifie si les sièges ne sont pas déjà réservés pour une séance précise
+  _i3.Future<void> validerDisponibilite({
+    required List<int> siegeIds,
+    required int seanceId,
+  }) => caller.callServerEndpoint<void>(
+    'reservation',
+    'validerDisponibilite',
+    {
+      'siegeIds': siegeIds,
+      'seanceId': seanceId,
+    },
+  );
+
+  _i3.Future<_i9.PaiementResult> payerReservation({
+    required int reservationId,
+    required double montant,
+    required _i7.PaiementMethod paiementMethod,
+    required _i10.PaiementStatut statut,
+  }) => caller.callServerEndpoint<_i9.PaiementResult>(
+    'reservation',
+    'payerReservation',
+    {
+      'reservationId': reservationId,
+      'montant': montant,
+      'paiementMethod': paiementMethod,
+      'statut': statut,
+    },
+  );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -250,8 +343,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i3.Future<_i11.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i11.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -289,7 +382,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i6.Protocol(),
+         _i12.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -300,6 +393,7 @@ class Client extends _i2.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    reservation = EndpointReservation(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
@@ -307,6 +401,8 @@ class Client extends _i2.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointReservation reservation;
 
   late final EndpointGreeting greeting;
 
@@ -316,6 +412,7 @@ class Client extends _i2.ServerpodClientShared {
   Map<String, _i2.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'reservation': reservation,
     'greeting': greeting,
   };
 

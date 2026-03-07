@@ -1,0 +1,6 @@
+class: PaiementResult
+fields:
+  success: bool
+  transactionId: String
+  message: String
+  montantTotal: double

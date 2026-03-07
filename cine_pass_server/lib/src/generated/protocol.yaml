@@ -9,5 +9,10 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+reservation:
+  - createReservation:
+  - validerAppartenance:
+  - validerDisponibilite:
+  - payerReservation:
 greeting:
   - hello:

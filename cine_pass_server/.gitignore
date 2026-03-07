@@ -14,5 +14,16 @@ doc/api/
 # Passwords file
 config/passwords.yaml
 
-# Firebase service account key for Firebase auth
+# Firebase services account key for Firebase auth
 config/firebase_service_account_key.json
+config/google_services.json
+
+.env
+cine_pass_server/.serverpod
+cine_pass_server/.packages
+*.log
+
+cine_pass_server/lib/src/generated/
+cine_pass_server/.dart_tool
+cine_pass_client/.dart_tool
+cine_pass_flutter/.dart_tool

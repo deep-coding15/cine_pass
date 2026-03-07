@@ -10,8 +10,11 @@
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_client/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_client/build" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/build" />
+      <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/ios/Flutter/ephemeral" />
+      <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/linux/flutter/ephemeral" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/linux/flutter/ephemeral/.plugin_symlinks/connectivity_plus/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/linux/flutter/ephemeral/.plugin_symlinks/connectivity_plus/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/linux/flutter/ephemeral/.plugin_symlinks/connectivity_plus/build" />
@@ -51,6 +54,8 @@
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/linux/flutter/ephemeral/.plugin_symlinks/window_to_front/linux/flutter/ephemeral/.plugin_symlinks/window_to_front/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/linux/flutter/ephemeral/.plugin_symlinks/window_to_front/linux/flutter/ephemeral/.plugin_symlinks/window_to_front/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/linux/flutter/ephemeral/.plugin_symlinks/window_to_front/linux/flutter/ephemeral/.plugin_symlinks/window_to_front/build" />
+      <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/macos/Flutter/ephemeral" />
+      <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/windows/flutter/ephemeral" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/windows/flutter/ephemeral/.plugin_symlinks/connectivity_plus/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/windows/flutter/ephemeral/.plugin_symlinks/connectivity_plus/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_flutter/windows/flutter/ephemeral/.plugin_symlinks/connectivity_plus/build" />
@@ -96,8 +101,11 @@
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_server/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_server/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/cine_pass_server/build" />
+      <excludeFolder url="file://$MODULE_DIR$/cine_pass_server/web/app" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Dart SDK" level="project" />
+    <orderEntry type="library" name="Dart Packages" level="project" />
   </component>
 </module>
