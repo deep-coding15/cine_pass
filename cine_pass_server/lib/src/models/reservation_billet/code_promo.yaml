@@ -1,0 +1,25 @@
+class: CodePromo
+table: code_promo
+fields:
+  code: String
+  pourcentage: double
+  dateDebut: DateTime
+  dateFin: DateTime
+  statut: CodePromoStatut
+  description: String
+indexes:
+  code_promo_code_idx:
+    fields: code, id
+    unique: true
+  code_promo_pourcentage_idx:
+    fields: pourcentage, id
+    unique: true
+  code_promo_date_debut_idx:
+    fields: dateDebut, id
+    unique: true
+  code_promo_date_fin_idx:
+    fields: dateFin, id
+    unique: true
+  code_promo_statut_idx:
+    fields: statut, id
+    unique: true

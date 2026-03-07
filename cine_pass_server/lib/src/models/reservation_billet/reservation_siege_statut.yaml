@@ -1,0 +1,5 @@
+enum: ReservationSiegeStatut
+values:
+  - RESERVE
+  - LIBRE
+  - OCCUPEE

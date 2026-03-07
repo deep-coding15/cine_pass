@@ -1,0 +1,22 @@
+class: Reservation
+table: reservations
+fields:
+  userId: int
+  seance: Seance?, relation
+  reservationSieges: List<ReservationSiege>?, relation
+  produitsOptionnels: List<OptionnelReservation>?, relation
+  # siegeIds: Set<int>
+  dateReservation: DateTime
+  montantTotal: double
+  statut: ReservationStatut
+  codePromo: String?
+indexes:
+  reservation_user_idx:
+    fields: userId, id
+    unique: true
+  reservation_seance_idx:
+    fields: seanceId, id
+    unique: true
+  reservation_date_idx:
+    fields: dateReservation, id
+    unique: true

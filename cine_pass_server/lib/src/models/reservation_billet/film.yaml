@@ -1,0 +1,15 @@
+class: Film
+table: films
+fields:
+  title: String
+  description: String
+  duration: Duration?
+  releaseDate: DateTime
+  startTime: DateTime
+  endTime: DateTime
+  genre: String
+  posterUrl: String
+indexes:
+  film_title_idx:
+    fields: title, id
+    unique: true

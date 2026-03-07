@@ -1,0 +1,13 @@
+class: OptionnelReservation
+table: optionnel_reservation
+fields:
+  reservationId: int
+  optionnelId: int
+  number: int
+  dateAjout: DateTime
+indexes:
+  optionnel_reservation_reservation_idx:
+    fields: reservationId, id
+    unique: true
+  optionnel_reservation_optionnel_idx:
+    fields: optionnelId, id

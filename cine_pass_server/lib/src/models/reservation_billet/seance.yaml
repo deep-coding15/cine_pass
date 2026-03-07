@@ -1,0 +1,26 @@
+class: Seance
+table: seances
+fields:
+  filmId: int
+  salleId: int
+  date: DateTime
+  startTime: DateTime
+  endTime: DateTime
+  price: double
+  type: SeanceStatut
+indexes:
+  seance_film_idx:
+    fields: filmId, id
+    unique: true
+  seance_salle_idx:
+    fields: salleId, id
+    unique: true
+  seance_date_idx:
+    fields: date, id
+    unique: true
+  seance_price_idx:
+    fields: price, id
+    unique: true
+  seance_datetime_idx:
+    fields: date, startTime, endTime, id
+    unique: true

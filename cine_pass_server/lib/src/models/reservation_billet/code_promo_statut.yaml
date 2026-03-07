@@ -1,0 +1,5 @@
+enum: CodePromoStatut
+values:
+  - ACTIF
+  - INACTIF
+  - EXPIREE

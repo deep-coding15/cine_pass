@@ -1,0 +1,12 @@
+class: Cinema
+table: cinemas
+fields:
+  name: String
+  city: String
+  address: String
+  latitude: String
+  longitude: String
+indexes:
+  cinemas_localisation_idx:
+    fields: latitude, longitude
+    unique: true

@@ -1,0 +1,4 @@
+enum: PaiementStatut
+values:
+  - SUCCESS
+  - FAILED

@@ -1,0 +1,13 @@
+class: ReservationSiege
+table: reservation_siege
+fields:
+  reservation: Reservation?, relation
+  siegeId: int
+  statut: ReservationSiegeStatut
+indexes:
+  reservation_siege_unique_idx:
+    fields: reservationId, siegeId
+    unique: true
+  reservation_siege_siege_idx:
+    fields: siegeId
+    unique: false

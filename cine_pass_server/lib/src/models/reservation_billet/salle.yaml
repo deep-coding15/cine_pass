@@ -1,0 +1,16 @@
+class: Salle
+table: salles
+fields:
+  name: String
+  cinemaId: int
+  capacity: int
+indexes:
+  salle_cinema_idx:
+    fields: cinemaId, id
+    unique: true
+  salle_name_idx:
+    fields: name, id
+    unique: true
+  salle_capacity_idx:
+    fields: capacity, id
+    unique: true

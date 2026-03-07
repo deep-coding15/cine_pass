@@ -1,0 +1,5 @@
+enum: SeanceStatut
+values:
+  - TwoD
+  - ThreeD
+  - IMAX

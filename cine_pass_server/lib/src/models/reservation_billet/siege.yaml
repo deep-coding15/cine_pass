@@ -1,0 +1,14 @@
+class: Siege
+table: sieges
+fields:
+  salleId: int
+  row: String
+  number: int
+  cinemaId: int
+  type: SiegeStatut
+  statut: SiegeStatut
+  state: SiegeState
+indexes:
+  siege_cinema_idx:
+    fields: cinemaId, salleId
+    unique: true

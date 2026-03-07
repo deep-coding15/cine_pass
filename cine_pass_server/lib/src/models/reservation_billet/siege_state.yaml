@@ -1,0 +1,5 @@
+enum: SiegeState
+values:
+  - RESERVED
+  - AVAILABLE
+  - UNAVAILABLE

@@ -1,0 +1,5 @@
+enum: ReservationStatut
+values:
+  - EN_ATTENTE
+  - PAYEE
+  - ANNULEE

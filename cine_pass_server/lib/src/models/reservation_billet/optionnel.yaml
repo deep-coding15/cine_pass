@@ -1,0 +1,10 @@
+class: Optionnel
+table: optionnels
+fields:
+  name: String
+  stock: int
+  price: double
+indexes:
+  optionnel_name_idx:
+    fields: name
+    unique: true

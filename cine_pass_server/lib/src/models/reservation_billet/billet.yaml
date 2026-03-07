@@ -1,0 +1,20 @@
+class: Billet
+table: billets
+fields:
+  reservation: Reservation?, relation
+  paiement: Paiement?, relation
+  code: String
+  produitsOptionnel: List<OptionnelReservation>?, relation
+  dateEmission: DateTime
+  price: double
+  qrCode: String
+  estValide: bool
+indexes:
+  billets_reservation_idx:
+    fields: reservationId, id
+    unique: true
+  billets_paiement_idx:
+    fields: paiementId, id
+  billets_qr_code_idx:
+    fields: qrCode, id
+    unique: true

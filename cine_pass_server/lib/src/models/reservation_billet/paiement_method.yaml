@@ -1,0 +1,6 @@
+enum: PaiementMethod
+values:
+  - BANK
+  - ORANGE_MONEY
+  - PAYPAL
+  - STRIPE

@@ -1,0 +1,12 @@
+class: Paiement
+table: paiement
+fields:
+  reservationId: int
+  montant: double
+  method: String
+  statut: PaiementStatut
+  transactionId: String
+  datePaiement: DateTime
+indexes:
+  paiement_reservation_idx:
+    fields: reservationId, id
