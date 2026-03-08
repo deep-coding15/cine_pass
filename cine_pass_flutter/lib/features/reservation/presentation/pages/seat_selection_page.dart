@@ -105,8 +105,9 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   /// Pour mode par billet : le siège (row,col) est-il sélectionnable pour le billet d'index i ?
   bool _canSelectSeatForBillet(int row, int col, int billetIndex) {
     final state = ReservationState.instance;
-    if (billetIndex < 0 || billetIndex >= state.filmTickets.length)
+    if (billetIndex < 0 || billetIndex >= state.filmTickets.length) {
       return false;
+    }
     final seatId = _seatId(row, col);
     if (_assignedSeats!.contains(seatId)) return false;
     final isVipSeat = _isVipSeat(_rows[row], col + 1);
@@ -445,8 +446,9 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
 
   Widget _seatWidget(int row, int col) {
     final status = _seats[row][col];
-    if (status == SeatStatus.aisle)
+    if (status == SeatStatus.aisle) {
       return const SizedBox(width: 28, height: 28);
+    }
     final isOccupied = _isSeatOccupied(row, col);
     final isSelected = _isSeatSelectedByBillet(row, col);
     final isVip = _isVipSeat(_rows[row], col + 1);

@@ -171,8 +171,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
               validator: (v) {
-                if (v == null || v.trim().isEmpty)
+                if (v == null || v.trim().isEmpty) {
                   return 'Entrez votre mot de passe';
+                }
                 return null;
               },
             ),

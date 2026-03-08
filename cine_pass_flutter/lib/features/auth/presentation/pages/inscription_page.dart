@@ -129,9 +129,12 @@ class _InscriptionPageState extends State<InscriptionPage> {
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
               validator: (v) {
-                if (v == null || v.trim().isEmpty)
+                if (v == null || v.trim().isEmpty) {
                   return 'Choisissez un mot de passe';
-                if (v.length < 6) return 'Au moins 6 caractères';
+                }
+                if (v.length < 6) {
+                  return 'Au moins 6 caractères';
+                }
                 return null;
               },
             ),
