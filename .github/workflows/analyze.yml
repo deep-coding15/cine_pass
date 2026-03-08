@@ -13,14 +13,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
         with:
-          sdk: 3.8.0
+          flutter-version: '3.32.8'
+          cache: true
 
-      - name: Install dependencies
-        working-directory: cine_pass_server
-        run: dart pub get
+      - name: Install dependencies (workspace needs Flutter SDK)
+        run: flutter pub get
 
-      - name: Analyze
+      - name: Analyze server
         working-directory: cine_pass_server
         run: dart analyze --fatal-infos
+
+      - name: Analyze client
+        working-directory: cine_pass_client
+        run: dart analyze --fatal-infos
+
+      - name: Analyze Flutter app
+        working-directory: cine_pass_flutter
+        run: flutter analyze --fatal-infos

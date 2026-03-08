@@ -1,4 +1,6 @@
 ### Cinéma (lieu avec salles).
+# La relation "un cinéma a plusieurs salles" est portée par Salle (champ cinemaId).
+# Pas de bloc relation ici : en Serverpod, relation s'utilise sur un champ (ex: address: Address?, relation).
 class: Cinema
 extends: CinePassRow
 table: cine_pass_cinema
@@ -8,6 +10,3 @@ fields:
   adresse: String?
   codePostal: String?
   createdAt: DateTime, default=now
-relation:
-  CinePassRow: salle
-  field: cinemaId

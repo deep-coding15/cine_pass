@@ -13,14 +13,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
         with:
-          sdk: 3.8.0
+          flutter-version: '3.32.8'
+          cache: true
 
-      - name: Install dependencies
-        working-directory: cine_pass_server
-        run: dart pub get
+      - name: Install dependencies (workspace needs Flutter SDK)
+        run: flutter pub get
 
-      - name: Check formatting
+      - name: Check format server
         working-directory: cine_pass_server
+        run: dart format --set-exit-if-changed .
+
+      - name: Check format client
+        working-directory: cine_pass_client
+        run: dart format --set-exit-if-changed .
+
+      - name: Check format Flutter app
+        working-directory: cine_pass_flutter
         run: dart format --set-exit-if-changed .
