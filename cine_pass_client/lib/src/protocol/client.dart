@@ -16,12 +16,16 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i5;
-import 'package:cine_pass_client/src/protocol/cine_pass/film_response.dart' as _i7;
-import 'package:cine_pass_client/src/protocol/cine_pass/seance_response.dart' as _i8;
-import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart' as _i9;
-import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart' as _i10;
-import 'protocol.dart' as _i6;
+import 'package:cine_pass_client/src/protocol/cine_pass/film_response.dart'
+    as _i5;
+import 'package:cine_pass_client/src/protocol/cine_pass/seance_response.dart'
+    as _i6;
+import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
+    as _i7;
+import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
+    as _i8;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i9;
+import 'protocol.dart' as _i10;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -244,6 +248,87 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
+/// Endpoint CinePass : films, séances, cinémas, événements (données BDD).
+/// {@category Endpoint}
+class EndpointCinePass extends _i2.EndpointRef {
+  EndpointCinePass(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'cinePass';
+
+  /// Liste de tous les films.
+  _i3.Future<List<_i5.FilmResponse>> getFilms() =>
+      caller.callServerEndpoint<List<_i5.FilmResponse>>(
+        'cinePass',
+        'getFilms',
+        {},
+      );
+
+  /// Détail d'un film par id.
+  _i3.Future<_i5.FilmResponse?> getFilmById(String id) =>
+      caller.callServerEndpoint<_i5.FilmResponse?>(
+        'cinePass',
+        'getFilmById',
+        {'id': id},
+      );
+
+  /// Séances pour un film (avec nom cinéma, salle, ville).
+  _i3.Future<List<_i6.SeanceResponse>> getSeancesForFilm(String filmId) =>
+      caller.callServerEndpoint<List<_i6.SeanceResponse>>(
+        'cinePass',
+        'getSeancesForFilm',
+        {'filmId': filmId},
+      );
+
+  /// Liste des cinémas.
+  _i3.Future<List<_i7.CinemaResponse>> getCinemas() =>
+      caller.callServerEndpoint<List<_i7.CinemaResponse>>(
+        'cinePass',
+        'getCinemas',
+        {},
+      );
+
+  /// Liste des événements à venir.
+  _i3.Future<List<_i8.EventResponse>> getEvents() =>
+      caller.callServerEndpoint<List<_i8.EventResponse>>(
+        'cinePass',
+        'getEvents',
+        {},
+      );
+
+  /// Détail d'un événement par id.
+  _i3.Future<_i8.EventResponse?> getEventById(String id) =>
+      caller.callServerEndpoint<_i8.EventResponse?>(
+        'cinePass',
+        'getEventById',
+        {'id': id},
+      );
+
+  /// Villes distinctes (films + événements) pour les filtres.
+  _i3.Future<List<String>> getCities() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getCities',
+        {},
+      );
+
+  /// Genres distincts (films) pour les filtres.
+  _i3.Future<List<String>> getGenres() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getGenres',
+        {},
+      );
+
+  /// Catégories d'événements pour les filtres.
+  _i3.Future<List<String>> getEventCategories() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getEventCategories',
+        {},
+      );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -254,83 +339,11 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i3.Future<_i9.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i9.Greeting>(
         'greeting',
         'hello',
         {'name': name},
-      );
-}
-
-/// Endpoint CinePass : films, séances, cinémas, événements.
-/// {@category Endpoint}
-class EndpointCinePass extends _i2.EndpointRef {
-  EndpointCinePass(_i2.EndpointCaller caller) : super(caller);
-
-  @override
-  String get name => 'cinePass';
-
-  _i3.Future<List<_i7.FilmResponse>> getFilms() =>
-      caller.callServerEndpoint<List<_i7.FilmResponse>>(
-        'cinePass',
-        'getFilms',
-        {},
-      );
-
-  _i3.Future<_i7.FilmResponse?> getFilmById(String id) =>
-      caller.callServerEndpoint<_i7.FilmResponse?>(
-        'cinePass',
-        'getFilmById',
-        {'id': id},
-      );
-
-  _i3.Future<List<_i8.SeanceResponse>> getSeancesForFilm(String filmId) =>
-      caller.callServerEndpoint<List<_i8.SeanceResponse>>(
-        'cinePass',
-        'getSeancesForFilm',
-        {'filmId': filmId},
-      );
-
-  _i3.Future<List<_i10.CinemaResponse>> getCinemas() =>
-      caller.callServerEndpoint<List<_i10.CinemaResponse>>(
-        'cinePass',
-        'getCinemas',
-        {},
-      );
-
-  _i3.Future<List<_i9.EventResponse>> getEvents() =>
-      caller.callServerEndpoint<List<_i9.EventResponse>>(
-        'cinePass',
-        'getEvents',
-        {},
-      );
-
-  _i3.Future<_i9.EventResponse?> getEventById(String id) =>
-      caller.callServerEndpoint<_i9.EventResponse?>(
-        'cinePass',
-        'getEventById',
-        {'id': id},
-      );
-
-  _i3.Future<List<String>> getCities() =>
-      caller.callServerEndpoint<List<String>>(
-        'cinePass',
-        'getCities',
-        {},
-      );
-
-  _i3.Future<List<String>> getGenres() =>
-      caller.callServerEndpoint<List<String>>(
-        'cinePass',
-        'getGenres',
-        {},
-      );
-
-  _i3.Future<List<String>> getEventCategories() =>
-      caller.callServerEndpoint<List<String>>(
-        'cinePass',
-        'getEventCategories',
-        {},
       );
 }
 
@@ -365,7 +378,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i6.Protocol(),
+         _i10.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -376,8 +389,8 @@ class Client extends _i2.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
-    greeting = EndpointGreeting(this);
     cinePass = EndpointCinePass(this);
+    greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
 
@@ -385,9 +398,9 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
-  late final EndpointGreeting greeting;
-
   late final EndpointCinePass cinePass;
+
+  late final EndpointGreeting greeting;
 
   late final Modules modules;
 
@@ -395,8 +408,8 @@ class Client extends _i2.ServerpodClientShared {
   Map<String, _i2.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
-    'greeting': greeting,
     'cinePass': cinePass,
+    'greeting': greeting,
   };
 
   @override
