@@ -6,25 +6,25 @@
 # When running your server locally, the server ports are the same as the public
 # facing ports.
 
-# Configuration for the main API server.
+# Configuration for the main API server (ports 9xxx pour éviter conflits).
 apiServer:
-  port: 8080
+  port: 9080
   publicHost: localhost
-  publicPort: 8080
+  publicPort: 9080
   publicScheme: http
 
 # Configuration for the Insights server.
 insightsServer:
-  port: 8081
+  port: 9081
   publicHost: localhost
-  publicPort: 8081
+  publicPort: 9081
   publicScheme: http
 
 # Configuration for the web server.
 webServer:
-  port: 8082
+  port: 9082
   publicHost: localhost
-  publicPort: 8082
+  publicPort: 9082
   publicScheme: http
 
 # This is the database setup for your server.
