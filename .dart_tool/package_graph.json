@@ -30,6 +30,7 @@
       ],
       "devDependencies": [
         "lints",
+        "serverpod_cli",
         "serverpod_test",
         "test"
       ]
@@ -41,6 +42,9 @@
         "cine_pass_client",
         "cupertino_icons",
         "flutter",
+        "go_router",
+        "provider",
+        "qr_flutter",
         "serverpod_auth_idp_flutter",
         "serverpod_flutter"
       ],
@@ -151,6 +155,34 @@
       ]
     },
     {
+      "name": "qr_flutter",
+      "version": "4.1.0",
+      "dependencies": [
+        "flutter",
+        "qr"
+      ]
+    },
+    {
+      "name": "provider",
+      "version": "6.1.5+1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "nested"
+      ]
+    },
+    {
+      "name": "go_router",
+      "version": "14.8.1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "flutter_web_plugins",
+        "logging",
+        "meta"
+      ]
+    },
+    {
       "name": "serverpod_auth_idp_flutter",
       "version": "3.4.0",
       "dependencies": [
@@ -225,6 +257,44 @@
         "serverpod_lints",
         "synchronized",
         "test"
+      ]
+    },
+    {
+      "name": "serverpod_cli",
+      "version": "3.4.0",
+      "dependencies": [
+        "analyzer",
+        "archive",
+        "args",
+        "async",
+        "built_collection",
+        "ci",
+        "cli_tools",
+        "code_builder",
+        "collection",
+        "config",
+        "dart_style",
+        "http",
+        "intl",
+        "json_rpc_2",
+        "lsp_server",
+        "meta",
+        "package_config",
+        "path",
+        "pub_api_client",
+        "pub_semver",
+        "pubspec_parse",
+        "recase",
+        "serverpod_serialization",
+        "serverpod_service_client",
+        "serverpod_shared",
+        "source_span",
+        "stream_channel",
+        "super_string",
+        "uuid",
+        "watcher",
+        "yaml",
+        "yaml_edit"
       ]
     },
     {
@@ -436,6 +506,25 @@
       ]
     },
     {
+      "name": "qr",
+      "version": "3.0.2",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "nested",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "logging",
+      "version": "1.3.0",
+      "dependencies": []
+    },
+    {
       "name": "sign_in_with_apple",
       "version": "7.0.1",
       "dependencies": [
@@ -454,15 +543,6 @@
         "flutter_secure_storage",
         "meta",
         "serverpod_auth_core_client"
-      ]
-    },
-    {
-      "name": "provider",
-      "version": "6.1.5+1",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "nested"
       ]
     },
     {
@@ -783,13 +863,35 @@
       ]
     },
     {
-      "name": "sign_in_with_apple_server",
-      "version": "1.0.0",
+      "name": "yaml_edit",
+      "version": "2.2.4",
       "dependencies": [
-        "dart_jsonwebtoken",
-        "http",
-        "meta"
+        "collection",
+        "meta",
+        "source_span",
+        "yaml"
       ]
+    },
+    {
+      "name": "watcher",
+      "version": "1.2.1",
+      "dependencies": [
+        "async",
+        "path"
+      ]
+    },
+    {
+      "name": "uuid",
+      "version": "4.5.3",
+      "dependencies": [
+        "crypto",
+        "fixnum"
+      ]
+    },
+    {
+      "name": "super_string",
+      "version": "1.0.3",
+      "dependencies": []
     },
     {
       "name": "serverpod_shared",
@@ -800,6 +902,184 @@
         "path",
         "super_string",
         "yaml"
+      ]
+    },
+    {
+      "name": "serverpod_service_client",
+      "version": "3.4.0",
+      "dependencies": [
+        "meta",
+        "serverpod_client",
+        "serverpod_shared"
+      ]
+    },
+    {
+      "name": "serverpod_serialization",
+      "version": "3.4.0",
+      "dependencies": [
+        "meta",
+        "uuid",
+        "yaml"
+      ]
+    },
+    {
+      "name": "recase",
+      "version": "4.1.0",
+      "dependencies": []
+    },
+    {
+      "name": "pubspec_parse",
+      "version": "1.5.0",
+      "dependencies": [
+        "checked_yaml",
+        "collection",
+        "json_annotation",
+        "pub_semver",
+        "yaml"
+      ]
+    },
+    {
+      "name": "pub_semver",
+      "version": "2.2.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
+      "name": "pub_api_client",
+      "version": "3.2.0",
+      "dependencies": [
+        "dart_mappable",
+        "http",
+        "oauth2",
+        "path",
+        "pubspec_parse"
+      ]
+    },
+    {
+      "name": "lsp_server",
+      "version": "0.4.0",
+      "dependencies": [
+        "args",
+        "async",
+        "collection",
+        "dart_style",
+        "http",
+        "json_rpc_2",
+        "path",
+        "pub_semver",
+        "stream_channel"
+      ]
+    },
+    {
+      "name": "json_rpc_2",
+      "version": "4.1.0",
+      "dependencies": [
+        "stack_trace",
+        "stream_channel"
+      ]
+    },
+    {
+      "name": "intl",
+      "version": "0.20.2",
+      "dependencies": [
+        "clock",
+        "meta",
+        "path"
+      ]
+    },
+    {
+      "name": "http",
+      "version": "1.6.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "dart_style",
+      "version": "3.1.7",
+      "dependencies": [
+        "analyzer",
+        "args",
+        "collection",
+        "package_config",
+        "path",
+        "pub_semver",
+        "source_span",
+        "yaml"
+      ]
+    },
+    {
+      "name": "config",
+      "version": "0.8.4",
+      "dependencies": [
+        "args",
+        "collection",
+        "meta",
+        "path",
+        "rfc_6901",
+        "yaml"
+      ]
+    },
+    {
+      "name": "code_builder",
+      "version": "4.11.1",
+      "dependencies": [
+        "built_collection",
+        "built_value",
+        "collection",
+        "matcher",
+        "meta"
+      ]
+    },
+    {
+      "name": "cli_tools",
+      "version": "0.11.0",
+      "dependencies": [
+        "args",
+        "async",
+        "ci",
+        "config",
+        "http",
+        "path",
+        "pub_api_client",
+        "pub_semver",
+        "super_string"
+      ]
+    },
+    {
+      "name": "ci",
+      "version": "0.1.0",
+      "dependencies": []
+    },
+    {
+      "name": "built_collection",
+      "version": "5.1.1",
+      "dependencies": []
+    },
+    {
+      "name": "args",
+      "version": "2.7.0",
+      "dependencies": []
+    },
+    {
+      "name": "archive",
+      "version": "4.0.9",
+      "dependencies": [
+        "path",
+        "posix"
+      ]
+    },
+    {
+      "name": "sign_in_with_apple_server",
+      "version": "1.0.0",
+      "dependencies": [
+        "dart_jsonwebtoken",
+        "http",
+        "meta"
       ]
     },
     {
@@ -836,16 +1116,6 @@
         "dart_jsonwebtoken",
         "pointycastle",
         "uuid"
-      ]
-    },
-    {
-      "name": "http",
-      "version": "1.6.0",
-      "dependencies": [
-        "async",
-        "http_parser",
-        "meta",
-        "web"
       ]
     },
     {
@@ -890,27 +1160,10 @@
       "dependencies": []
     },
     {
-      "name": "uuid",
-      "version": "4.5.3",
-      "dependencies": [
-        "crypto",
-        "fixnum"
-      ]
-    },
-    {
       "name": "system_resources_2",
       "version": "2.2.2",
       "dependencies": [
         "ffi"
-      ]
-    },
-    {
-      "name": "serverpod_serialization",
-      "version": "3.4.0",
-      "dependencies": [
-        "meta",
-        "uuid",
-        "yaml"
       ]
     },
     {
@@ -949,11 +1202,6 @@
     {
       "name": "mustache_template",
       "version": "2.0.3",
-      "dependencies": []
-    },
-    {
-      "name": "args",
-      "version": "2.7.0",
       "dependencies": []
     },
     {
@@ -1063,13 +1311,6 @@
       ]
     },
     {
-      "name": "nested",
-      "version": "1.0.0",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
       "name": "google_sign_in_platform_interface",
       "version": "3.1.0",
       "dependencies": [
@@ -1165,15 +1406,6 @@
       ]
     },
     {
-      "name": "intl",
-      "version": "0.20.2",
-      "dependencies": [
-        "clock",
-        "meta",
-        "path"
-      ]
-    },
-    {
       "name": "nm",
       "version": "0.5.0",
       "dependencies": [
@@ -1188,11 +1420,6 @@
         "meta",
         "plugin_platform_interface"
       ]
-    },
-    {
-      "name": "logging",
-      "version": "1.3.0",
-      "dependencies": []
     },
     {
       "name": "source_maps",
@@ -1260,21 +1487,6 @@
       ]
     },
     {
-      "name": "watcher",
-      "version": "1.2.1",
-      "dependencies": [
-        "async",
-        "path"
-      ]
-    },
-    {
-      "name": "pub_semver",
-      "version": "2.2.0",
-      "dependencies": [
-        "collection"
-      ]
-    },
-    {
       "name": "_fe_analyzer_shared",
       "version": "93.0.0",
       "dependencies": [
@@ -1283,9 +1495,68 @@
       ]
     },
     {
-      "name": "super_string",
-      "version": "1.0.3",
+      "name": "fixnum",
+      "version": "1.1.1",
       "dependencies": []
+    },
+    {
+      "name": "json_annotation",
+      "version": "4.11.0",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "checked_yaml",
+      "version": "2.0.4",
+      "dependencies": [
+        "json_annotation",
+        "source_span",
+        "yaml"
+      ]
+    },
+    {
+      "name": "oauth2",
+      "version": "2.0.5",
+      "dependencies": [
+        "collection",
+        "crypto",
+        "http",
+        "http_parser"
+      ]
+    },
+    {
+      "name": "dart_mappable",
+      "version": "4.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "type_plus"
+      ]
+    },
+    {
+      "name": "rfc_6901",
+      "version": "0.2.1",
+      "dependencies": []
+    },
+    {
+      "name": "built_value",
+      "version": "8.12.4",
+      "dependencies": [
+        "built_collection",
+        "collection",
+        "fixnum",
+        "meta"
+      ]
+    },
+    {
+      "name": "posix",
+      "version": "6.5.0",
+      "dependencies": [
+        "ffi",
+        "meta",
+        "path"
+      ]
     },
     {
       "name": "image",
@@ -1331,11 +1602,6 @@
         "convert",
         "crypto"
       ]
-    },
-    {
-      "name": "fixnum",
-      "version": "1.1.1",
-      "dependencies": []
     },
     {
       "name": "relic_io",
@@ -1499,12 +1765,9 @@
       ]
     },
     {
-      "name": "archive",
-      "version": "4.0.9",
-      "dependencies": [
-        "path",
-        "posix"
-      ]
+      "name": "type_plus",
+      "version": "2.1.1",
+      "dependencies": []
     },
     {
       "name": "hex",
@@ -1556,15 +1819,6 @@
       "dependencies": [
         "collection",
         "meta"
-      ]
-    },
-    {
-      "name": "posix",
-      "version": "6.5.0",
-      "dependencies": [
-        "ffi",
-        "meta",
-        "path"
       ]
     }
   ],

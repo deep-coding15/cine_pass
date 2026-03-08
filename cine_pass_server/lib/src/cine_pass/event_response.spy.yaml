@@ -1,0 +1,17 @@
+# Réponse API pour un événement (concert, théâtre).
+class: EventResponse
+fields:
+  id: String
+  title: String
+  category: String
+  description: String?
+  location: String
+  address: String?
+  city: String
+  date: String
+  time: String
+  placesLeft: int
+  placesTotal: int
+  price: double
+  posterColor: int?
+  availableOptions: List<String>?

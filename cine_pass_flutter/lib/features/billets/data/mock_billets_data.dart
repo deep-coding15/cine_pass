@@ -1,4 +1,4 @@
-/// Billet mock (film ou événement).
+/// Modèle billet (film ou événement). Données réelles via backend (plus de mock).
 /// Un seul QR code par réservation : il couvre tous les billets de la réservation.
 class MockBillet {
   MockBillet({
@@ -28,32 +28,8 @@ class MockBillet {
   final DateTime sessionDateTime;
 }
 
-final mockBillets = [
-  MockBillet(
-    id: 'b1',
-    title: 'Horizon Quantique',
-    location: 'Gaumont Opéra - Paris',
-    dateTime: '7 mars 2026 à 14:00',
-    totalAmount: 25.00,
-    seats: ['A5', 'A6'],
-    isEvent: false,
-    room: 'Salle 2',
-    ticketTypes: ['VIP', 'VIP'],
-    sessionDateTime: DateTime(2026, 3, 7, 14, 0),
-  ),
-  MockBillet(
-    id: 'b2',
-    title: 'Concert Électro Night',
-    location: 'Gaumont Opéra - Paris',
-    dateTime: '15 mars 2026 à 21:00',
-    totalAmount: 70.00,
-    ticketCount: 2,
-    isEvent: true,
-    room: null,
-    ticketTypes: ['VIP', 'Normal'],
-    sessionDateTime: DateTime(2026, 3, 15, 21, 0),
-  ),
-];
+/// Liste vide : à alimenter via le backend.
+final mockBillets = <MockBillet>[];
 
 /// Barème remboursement : ≥48h 100%, 24-48h 80%, 2-24h 50%, <2h 0%.
 int getRefundPercent(DateTime sessionDateTime) {

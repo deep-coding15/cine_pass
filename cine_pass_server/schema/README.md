@@ -14,6 +14,14 @@ Exemple :
 psql -U postgres -d votre_base -f schema/cine_pass_schema.sql
 ```
 
+Pour **remplir la base avec des données de test** (films, cinémas, salles, sièges, séances, événements, FAQ) :
+
+```bash
+psql -U postgres -d cine_pass -f schema/seed_data.sql
+```
+
+À exécuter après le schéma. Le script est ré-exécutable (pas de doublons sur films, cinémas, salles, événements, FAQ).
+
 ## Utilisateurs
 
 - **Utilisateurs** = `serverpod_auth_core_user` (UUID) + `serverpod_auth_core_profile` (nom, email, etc.).

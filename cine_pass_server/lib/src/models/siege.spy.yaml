@@ -1,0 +1,8 @@
+### Siège dans une salle (plan de salle).
+class: Siege
+table: cine_pass_siege
+fields:
+  id: UuidValue, defaultModel=random
+  salleId: UuidValue
+  rangee: String
+  numero: int

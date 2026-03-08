@@ -1,0 +1,13 @@
+### Séance (film + salle + créneau).
+class: Seance
+extends: CinePassRow
+table: cine_pass_seance
+fields:
+  filmId: UuidValue
+  salleId: UuidValue
+  debutAt: DateTime
+  finAt: DateTime?
+  format: String, default=VF
+  type: String, default=2D
+  prixBase: double
+  availableOptions: List<String>?

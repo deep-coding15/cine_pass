@@ -1,0 +1,13 @@
+### Cinéma (lieu avec salles).
+class: Cinema
+extends: CinePassRow
+table: cine_pass_cinema
+fields:
+  nom: String
+  ville: String
+  adresse: String?
+  codePostal: String?
+  createdAt: DateTime, default=now
+relation:
+  CinePassRow: salle
+  field: cinemaId

@@ -1,8 +1,9 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../data/mock_events_data.dart';
+import '../../../../main.dart';
 import '../widgets/event_card.dart';
 
 class EventsListPage extends StatefulWidget {
@@ -14,20 +15,52 @@ class EventsListPage extends StatefulWidget {
 
 class _EventsListPageState extends State<EventsListPage> {
   final _searchController = TextEditingController();
-  String _selectedCity = 'Paris';
+  String _selectedCity = 'Toutes';
   String _selectedCategory = 'Toutes';
-  List<MockEvent> _filteredEvents = List.from(mockEvents);
+  List<EventResponse> _events = [];
+  List<String> _cities = ['Toutes'];
+  List<String> _categories = ['Toutes'];
+  List<EventResponse> _filteredEvents = [];
+  bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _applyFilters();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final events = await client.cinePass.getEvents();
+      final cities = await client.cinePass.getCities();
+      final categories = await client.cinePass.getEventCategories();
+      if (!mounted) return;
+      setState(() {
+        _events = events;
+        _cities = cities;
+        _categories = categories;
+        _loading = false;
+        _applyFilters();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+        _filteredEvents = [];
+      });
+    }
   }
 
   void _applyFilters() {
     final query = _searchController.text.trim().toLowerCase();
     setState(() {
-      _filteredEvents = mockEvents.where((e) {
+      _filteredEvents = _events.where((e) {
         final matchCity = _selectedCity == 'Toutes' || e.city == _selectedCity;
         final matchCategory = _selectedCategory == 'Toutes' || e.category == _selectedCategory;
         final matchSearch = query.isEmpty ||
@@ -41,15 +74,30 @@ class _EventsListPageState extends State<EventsListPage> {
 
   void _resetFilters() {
     setState(() {
-      _selectedCity = 'Paris';
+      _selectedCity = 'Toutes';
       _selectedCategory = 'Toutes';
       _searchController.clear();
-      _filteredEvents = List.from(mockEvents);
+      _filteredEvents = List.from(_events);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+    }
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Erreur: $_error', style: const TextStyle(color: AppTheme.textSecondary), textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: _load, child: const Text('Réessayer')),
+          ],
+        ),
+      );
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -85,7 +133,7 @@ class _EventsListPageState extends State<EventsListPage> {
               const SizedBox(width: 12),
               _DropdownFilter<String>(
                 value: _selectedCity,
-                items: mockCities,
+                items: _cities,
                 onChanged: (v) {
                   setState(() {
                     _selectedCity = v ?? 'Toutes';
@@ -96,7 +144,7 @@ class _EventsListPageState extends State<EventsListPage> {
               const SizedBox(width: 12),
               _DropdownFilter<String>(
                 value: _selectedCategory,
-                items: mockEventCategories,
+                items: _categories,
                 onChanged: (v) {
                   setState(() {
                     _selectedCategory = v ?? 'Toutes';

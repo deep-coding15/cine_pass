@@ -1,17 +1,18 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
-import '../../data/mock_events_data.dart';
 
 class EventCard extends StatelessWidget {
   const EventCard({super.key, required this.event});
 
-  final MockEvent event;
+  final EventResponse event;
 
   @override
   Widget build(BuildContext context) {
+    final posterColor = event.posterColor ?? 0xFF4E1B3D;
     return Card(
       color: AppTheme.cardDark,
       clipBehavior: Clip.antiAlias,
@@ -25,7 +26,7 @@ class EventCard extends StatelessWidget {
                 AspectRatio(
                   aspectRatio: 16 / 9,
                   child: Container(
-                    color: Color(event.posterColor),
+                    color: Color(posterColor),
                     child: Center(
                       child: Icon(
                         Icons.event_rounded,

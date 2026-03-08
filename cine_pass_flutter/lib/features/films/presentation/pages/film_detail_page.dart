@@ -1,3 +1,4 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import '../../../../core/state/auth_state.dart';
 import '../../../../core/state/favorites_state.dart';
 import '../../../../core/state/pending_reservation_state.dart';
 import '../../../../features/reservation/data/reservation_state.dart';
-import '../../data/mock_films_data.dart';
+import '../../../../main.dart';
 
 class FilmDetailPage extends StatefulWidget {
   const FilmDetailPage({super.key, required this.filmId});
@@ -21,15 +22,59 @@ class FilmDetailPage extends StatefulWidget {
 
 class _FilmDetailPageState extends State<FilmDetailPage> {
   int _quantity = 1;
+  FilmResponse? _film;
+  List<SeanceResponse> _seances = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final film = await client.cinePass.getFilmById(widget.filmId);
+      final seances = await client.cinePass.getSeancesForFilm(widget.filmId);
+      if (!mounted) return;
+      setState(() {
+        _film = film;
+        _seances = seances;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final film = getFilmById(widget.filmId);
-    final seances = getSeancesForFilm(widget.filmId);
-
-    if (film == null) {
-      return Center(child: Text('Film introuvable', style: TextStyle(color: AppTheme.textPrimary)));
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
     }
+    if (_error != null || _film == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_error ?? 'Film introuvable', style: const TextStyle(color: AppTheme.textPrimary), textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: _load, child: const Text('Réessayer')),
+          ],
+        ),
+      );
+    }
+    final film = _film!;
+    final seances = _seances;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -58,8 +103,8 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(film.posterColor),
-                      Color(film.posterColor).withValues(alpha: 0.6),
+                      Color(film.posterColor ?? 0xFF2D1B4E),
+                      Color(film.posterColor ?? 0xFF2D1B4E).withValues(alpha: 0.6),
                     ],
                   ),
                 ),
@@ -112,18 +157,21 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
           ),
           const SizedBox(height: 24),
           Text(
-            film.synopsis,
+            film.synopsis ?? '',
             style: const TextStyle(color: AppTheme.textPrimary, height: 1.5),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Réalisateur: ${film.director}',
-            style: const TextStyle(color: AppTheme.textSecondary),
-          ),
-          Text(
-            'Casting: ${film.casting}',
-            style: const TextStyle(color: AppTheme.textSecondary),
-          ),
+          if ((film.director ?? '').isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Réalisateur: ${film.director}',
+              style: const TextStyle(color: AppTheme.textSecondary),
+            ),
+          ],
+          if ((film.casting ?? '').isNotEmpty)
+            Text(
+              'Casting: ${film.casting}',
+              style: const TextStyle(color: AppTheme.textSecondary),
+            ),
           const SizedBox(height: 32),
           Card(
             color: AppTheme.cardDark,
@@ -197,11 +245,11 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                       cinemaLocation: s.location,
                       room: s.room,
                       dateTime: s.dateTime,
-                      format: s.format,
-                      type: s.type,
+                      format: s.format ?? 'VF',
+                      type: s.type ?? '2D',
                       pricePerSeat: s.price,
                       quantity: _quantity,
-                      availableOptions: s.availableOptions,
+                      availableOptions: s.availableOptions ?? [],
                     );
                     context.go(AppRouter.connexion);
                     return;
@@ -256,8 +304,8 @@ class _SeanceCard extends StatelessWidget {
     required this.onReserver,
   });
 
-  final MockFilm film;
-  final MockSeance seance;
+  final FilmResponse film;
+  final SeanceResponse seance;
   final int quantity;
   final VoidCallback onReserver;
 
@@ -308,7 +356,7 @@ class _SeanceCard extends StatelessWidget {
                           color: AppTheme.primaryRed,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(seance.type, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        child: Text(seance.type ?? '2D', style: const TextStyle(color: Colors.white, fontSize: 12)),
                       ),
                     ],
                   ),

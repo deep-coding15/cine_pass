@@ -1,0 +1,7 @@
+# Réponse API pour un cinéma (liste admin / séances).
+class: CinemaResponse
+fields:
+  id: String
+  name: String
+  city: String
+  address: String?

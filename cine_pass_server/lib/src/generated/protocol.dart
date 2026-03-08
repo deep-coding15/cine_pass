@@ -17,7 +17,15 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
 import 'greetings/greeting.dart' as _i5;
+import 'cine_pass/film_response.dart' as _i6;
+import 'cine_pass/seance_response.dart' as _i7;
+import 'cine_pass/event_response.dart' as _i8;
+import 'cine_pass/cinema_response.dart' as _i9;
 export 'greetings/greeting.dart';
+export 'cine_pass/film_response.dart';
+export 'cine_pass/seance_response.dart';
+export 'cine_pass/event_response.dart';
+export 'cine_pass/cinema_response.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -80,6 +88,10 @@ class Protocol extends _i1.SerializationManagerServer {
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _i5.Greeting => 'Greeting',
+      _i6.FilmResponse => 'FilmResponse',
+      _i7.SeanceResponse => 'SeanceResponse',
+      _i8.EventResponse => 'EventResponse',
+      _i9.CinemaResponse => 'CinemaResponse',
       _ => null,
     };
   }
@@ -120,6 +132,18 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (dataClassName == 'Greeting') {
       return deserialize<_i5.Greeting>(data['data']);
+    }
+    if (dataClassName == 'FilmResponse') {
+      return deserialize<_i6.FilmResponse>(data['data']);
+    }
+    if (dataClassName == 'SeanceResponse') {
+      return deserialize<_i7.SeanceResponse>(data['data']);
+    }
+    if (dataClassName == 'EventResponse') {
+      return deserialize<_i8.EventResponse>(data['data']);
+    }
+    if (dataClassName == 'CinemaResponse') {
+      return deserialize<_i9.CinemaResponse>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);

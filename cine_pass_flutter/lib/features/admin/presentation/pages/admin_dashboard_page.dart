@@ -1,14 +1,46 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/state/auth_state.dart';
-import '../../../../features/films/data/mock_films_data.dart';
-import '../../../../features/events/data/mock_events_data.dart';
+import '../../../../main.dart';
 
-class AdminDashboardPage extends StatelessWidget {
+class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
+
+  @override
+  State<AdminDashboardPage> createState() => _AdminDashboardPageState();
+}
+
+class _AdminDashboardPageState extends State<AdminDashboardPage> {
+  List<FilmResponse> _films = [];
+  List<EventResponse> _events = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final films = await client.cinePass.getFilms();
+      final events = await client.cinePass.getEvents();
+      if (!mounted) return;
+      setState(() {
+        _films = films;
+        _events = events;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _films = [];
+        _events = [];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +61,13 @@ class AdminDashboardPage extends StatelessWidget {
           const SizedBox(height: 32),
           Row(
             children: [
-              Expanded(child: _StatCard(title: 'Films actifs', value: '4', icon: Icons.movie_rounded, color: AppTheme.primaryRed)),
+              Expanded(child: _StatCard(title: 'Films actifs', value: '${_films.length}', icon: Icons.movie_rounded, color: AppTheme.primaryRed)),
               const SizedBox(width: 16),
-              Expanded(child: _StatCard(title: 'Événements à venir', value: '3', icon: Icons.calendar_today_rounded, color: Color(0xFF26A69A))),
+              Expanded(child: _StatCard(title: 'Événements à venir', value: '${_events.length}', icon: Icons.calendar_today_rounded, color: Color(0xFF26A69A))),
               const SizedBox(width: 16),
-              Expanded(child: _StatCard(title: 'Séances planifiées', value: '7', icon: Icons.schedule_rounded, color: Color(0xFF7E57C2))),
+              Expanded(child: _StatCard(title: 'Séances planifiées', value: '-', icon: Icons.schedule_rounded, color: Color(0xFF7E57C2))),
               const SizedBox(width: 16),
-              Expanded(child: _StatCard(title: 'Utilisateurs inscrits', value: '2', icon: Icons.people_rounded, color: AppTheme.accentGreen)),
+              Expanded(child: _StatCard(title: 'Utilisateurs inscrits', value: '-', icon: Icons.people_rounded, color: AppTheme.accentGreen)),
             ],
           ),
           const SizedBox(height: 40),
@@ -55,7 +87,7 @@ class AdminDashboardPage extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
                         ),
                         const SizedBox(height: 16),
-                        ...mockFilms.take(2).map(
+                        ..._films.take(2).map(
                               (f) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: Row(
@@ -64,7 +96,7 @@ class AdminDashboardPage extends StatelessWidget {
                                       width: 48,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: Color(f.posterColor),
+                                        color: Color(f.posterColor ?? 0xFF2D1B4E),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: const Icon(Icons.movie_rounded, color: Colors.white24),
@@ -102,7 +134,7 @@ class AdminDashboardPage extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
                         ),
                         const SizedBox(height: 16),
-                        ...mockEvents.take(2).map(
+                        ..._events.take(2).map(
                               (e) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: Row(
@@ -111,7 +143,7 @@ class AdminDashboardPage extends StatelessWidget {
                                       width: 48,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: Color(e.posterColor),
+                                        color: Color(e.posterColor ?? 0xFF4E1B3D),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: const Icon(Icons.event_rounded, color: Colors.white24),

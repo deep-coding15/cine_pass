@@ -14,6 +14,7 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import '../auth/email_idp_endpoint.dart' as _i2;
 import '../auth/jwt_refresh_endpoint.dart' as _i3;
 import '../greetings/greeting_endpoint.dart' as _i4;
+import '../cine_pass/cine_pass_endpoint.dart' as _i7;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i5;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
@@ -39,6 +40,12 @@ class Endpoints extends _i1.EndpointDispatch {
         ..initialize(
           server,
           'greeting',
+          null,
+        ),
+      'cinePass': _i7.CinePassEndpoint()
+        ..initialize(
+          server,
+          'cinePass',
           null,
         ),
     };
@@ -267,6 +274,120 @@ class Endpoints extends _i1.EndpointDispatch {
                 session,
                 params['name'],
               ),
+        ),
+      },
+    );
+    connectors['cinePass'] = _i1.EndpointConnector(
+      name: 'cinePass',
+      endpoint: endpoints['cinePass']!,
+      methodConnectors: {
+        'getFilms': _i1.MethodConnector(
+          name: 'getFilms',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getFilms(session),
+        ),
+        'getFilmById': _i1.MethodConnector(
+          name: 'getFilmById',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getFilmById(session, params['id']),
+        ),
+        'getSeancesForFilm': _i1.MethodConnector(
+          name: 'getSeancesForFilm',
+          params: {
+            'filmId': _i1.ParameterDescription(
+              name: 'filmId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getSeancesForFilm(session, params['filmId']),
+        ),
+        'getCinemas': _i1.MethodConnector(
+          name: 'getCinemas',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getCinemas(session),
+        ),
+        'getEvents': _i1.MethodConnector(
+          name: 'getEvents',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getEvents(session),
+        ),
+        'getEventById': _i1.MethodConnector(
+          name: 'getEventById',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getEventById(session, params['id']),
+        ),
+        'getCities': _i1.MethodConnector(
+          name: 'getCities',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getCities(session),
+        ),
+        'getGenres': _i1.MethodConnector(
+          name: 'getGenres',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getGenres(session),
+        ),
+        'getEventCategories': _i1.MethodConnector(
+          name: 'getEventCategories',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i7.CinePassEndpoint)
+                  .getEventCategories(session),
         ),
       },
     );

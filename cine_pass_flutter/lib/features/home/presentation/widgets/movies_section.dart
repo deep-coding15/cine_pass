@@ -1,3 +1,4 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,16 +7,35 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/state/favorites_state.dart';
+import '../../../../main.dart';
+import '../../../films/presentation/widgets/film_card.dart';
 
-class MoviesSection extends StatelessWidget {
+class MoviesSection extends StatefulWidget {
   const MoviesSection({super.key});
 
-  static const _movies = [
-    _MovieItem(id: '1', title: 'Horizon Quantique', genre: 'Science-Fiction', color: Color(0xFF2D1B4E)),
-    _MovieItem(id: '2', title: 'Les Gardiens du Temps', genre: 'Action', color: Color(0xFF1B3D4E)),
-    _MovieItem(id: '3', title: 'Rire et Préjugés', genre: 'Comédie', color: Color(0xFF4E3D1B)),
-    _MovieItem(id: '4', title: 'Le Dernier Refuge', genre: 'Drame', color: Color(0xFF2E1A1A)),
-  ];
+  @override
+  State<MoviesSection> createState() => _MoviesSectionState();
+}
+
+class _MoviesSectionState extends State<MoviesSection> {
+  List<FilmResponse> _films = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final films = await client.cinePass.getFilms();
+      if (!mounted) return;
+      setState(() => _films = films.take(6).toList());
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _films = []);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,106 +68,20 @@ class MoviesSection extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: _movies.length,
+            itemCount: _films.length,
             itemBuilder: (context, index) {
-              final m = _movies[index];
+              final film = _films[index];
               return Padding(
                 padding: const EdgeInsets.only(right: 16),
-                child: InkWell(
-                  onTap: () => context.go(AppRouter.filmDetailPath(m.id)),
-                  borderRadius: BorderRadius.circular(12),
-                  child: _MovieCard(item: m),
+                child: SizedBox(
+                  width: 160,
+                  child: FilmCard(film: film),
                 ),
               );
             },
           ),
         ),
       ],
-    );
-  }
-}
-
-class _MovieItem {
-  const _MovieItem({
-    required this.id,
-    required this.title,
-    required this.genre,
-    required this.color,
-  });
-  final String id;
-  final String title;
-  final String genre;
-  final Color color;
-}
-
-class _MovieCard extends StatelessWidget {
-  const _MovieCard({required this.item});
-
-  final _MovieItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthState>();
-    final favorites = context.watch<FavoritesState>();
-    final isFav = favorites.isFilmFavorite(item.id);
-    return SizedBox(
-      width: 160,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  height: 180,
-                  width: 160,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [item.color, item.color.withValues(alpha: 0.7)],
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.movie_rounded, size: 48, color: Colors.white.withValues(alpha: 0.5)),
-                  ),
-                ),
-              ),
-              if (auth.isLoggedIn)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: IconButton(
-                    onPressed: () => favorites.toggleFilm(item.id),
-                    icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: isFav ? AppTheme.primaryRed : Colors.white70, size: 24),
-                    style: IconButton.styleFrom(backgroundColor: Colors.black26, padding: const EdgeInsets.all(6)),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            item.title,
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            item.genre,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 13,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

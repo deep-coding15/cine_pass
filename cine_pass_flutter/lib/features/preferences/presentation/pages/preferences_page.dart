@@ -1,3 +1,4 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,12 +7,58 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/state/favorites_state.dart';
-import '../../../films/data/mock_films_data.dart';
-import '../../../events/data/mock_events_data.dart';
+import '../../../../main.dart';
 
 /// Page Préférences / Favoris : films et événements mis en favoris.
-class PreferencesPage extends StatelessWidget {
+class PreferencesPage extends StatefulWidget {
   const PreferencesPage({super.key});
+
+  @override
+  State<PreferencesPage> createState() => _PreferencesPageState();
+}
+
+class _PreferencesPageState extends State<PreferencesPage> {
+  List<FilmResponse> _films = [];
+  List<EventResponse> _events = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final favorites = FavoritesState.instance;
+    final filmIds = favorites.filmIds;
+    final eventIds = favorites.eventIds;
+    setState(() => _loading = true);
+    try {
+      final films = <FilmResponse>[];
+      for (final id in filmIds) {
+        final f = await client.cinePass.getFilmById(id);
+        if (f != null) films.add(f);
+      }
+      final events = <EventResponse>[];
+      for (final id in eventIds) {
+        final e = await client.cinePass.getEventById(id);
+        if (e != null) events.add(e);
+      }
+      if (!mounted) return;
+      setState(() {
+        _films = films;
+        _events = events;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _films = [];
+        _events = [];
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +91,12 @@ class PreferencesPage extends StatelessWidget {
       );
     }
 
-    final filmIds = favorites.filmIds;
-    final eventIds = favorites.eventIds;
-    final films = filmIds.map((id) => getFilmById(id)).whereType<MockFilm>().toList();
-    final events = eventIds.map((id) => getEventById(id)).whereType<MockEvent>().toList();
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+    }
+
+    final films = _films;
+    final events = _events;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),

@@ -12,11 +12,19 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'greetings/greeting.dart' as _i2;
+import 'cine_pass/film_response.dart' as _i5;
+import 'cine_pass/seance_response.dart' as _i6;
+import 'cine_pass/event_response.dart' as _i7;
+import 'cine_pass/cinema_response.dart' as _i8;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
 export 'greetings/greeting.dart';
+export 'cine_pass/film_response.dart';
+export 'cine_pass/seance_response.dart';
+export 'cine_pass/event_response.dart';
+export 'cine_pass/cinema_response.dart';
 export 'client.dart';
 
 class Protocol extends _i1.SerializationManager {
@@ -59,6 +67,45 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i2.Greeting?>()) {
       return (data != null ? _i2.Greeting.fromJson(data) : null) as T;
     }
+    if (t == _i5.FilmResponse) {
+      return _i5.FilmResponse.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i5.FilmResponse?>()) {
+      return (data != null ? _i5.FilmResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i6.SeanceResponse) {
+      return _i6.SeanceResponse.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i6.SeanceResponse?>()) {
+      return (data != null ? _i6.SeanceResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i7.EventResponse) {
+      return _i7.EventResponse.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i7.EventResponse?>()) {
+      return (data != null ? _i7.EventResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i8.CinemaResponse) {
+      return _i8.CinemaResponse.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i8.CinemaResponse?>()) {
+      return (data != null ? _i8.CinemaResponse.fromJson(data) : null) as T;
+    }
+    if (data is List && t == _i1.getType<List<_i5.FilmResponse>>()) {
+      return (data as List).map((e) => deserialize<_i5.FilmResponse>(e)).toList() as T;
+    }
+    if (data is List && t == _i1.getType<List<_i6.SeanceResponse>>()) {
+      return (data as List).map((e) => deserialize<_i6.SeanceResponse>(e)).toList() as T;
+    }
+    if (data is List && t == _i1.getType<List<_i7.EventResponse>>()) {
+      return (data as List).map((e) => deserialize<_i7.EventResponse>(e)).toList() as T;
+    }
+    if (data is List && t == _i1.getType<List<_i8.CinemaResponse>>()) {
+      return (data as List).map((e) => deserialize<_i8.CinemaResponse>(e)).toList() as T;
+    }
+    if (data is List && t == _i1.getType<List<String>>()) {
+      return (data as List).map((e) => e as String).toList() as T;
+    }
     try {
       return _i3.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
@@ -71,6 +118,10 @@ class Protocol extends _i1.SerializationManager {
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _i2.Greeting => 'Greeting',
+      _i5.FilmResponse => 'FilmResponse',
+      _i6.SeanceResponse => 'SeanceResponse',
+      _i7.EventResponse => 'EventResponse',
+      _i8.CinemaResponse => 'CinemaResponse',
       _ => null,
     };
   }
@@ -107,6 +158,18 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName == 'Greeting') {
       return deserialize<_i2.Greeting>(data['data']);
+    }
+    if (dataClassName == 'FilmResponse') {
+      return deserialize<_i5.FilmResponse>(data['data']);
+    }
+    if (dataClassName == 'SeanceResponse') {
+      return deserialize<_i6.SeanceResponse>(data['data']);
+    }
+    if (dataClassName == 'EventResponse') {
+      return deserialize<_i7.EventResponse>(data['data']);
+    }
+    if (dataClassName == 'CinemaResponse') {
+      return deserialize<_i8.CinemaResponse>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);

@@ -1,0 +1,18 @@
+### Événement (concert, théâtre, etc.).
+class: Evenement
+extends: CinePassRow
+table: cine_pass_evenement
+fields:
+  titre: String
+  categorie: String
+  description: String?
+  lieu: String
+  adresse: String?
+  ville: String
+  eventDate: DateTime
+  eventTime: DateTime
+  placesTotal: int
+  prixBase: double
+  posterColor: int?
+  posterUrl: String?
+  availableOptions: List<String>?

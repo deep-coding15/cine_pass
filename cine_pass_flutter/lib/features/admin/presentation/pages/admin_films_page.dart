@@ -1,7 +1,8 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../films/data/mock_films_data.dart';
+import '../../../../main.dart';
 import '../../data/mock_admin_data.dart';
 import '../widgets/admin_add_film_dialog.dart';
 
@@ -14,12 +15,13 @@ class AdminFilmsPage extends StatefulWidget {
 
 class _AdminFilmsPageState extends State<AdminFilmsPage> {
   final _searchController = TextEditingController();
-  List<MockFilm> _films = List.from(mockFilms);
+  List<FilmResponse> _films = [];
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _applySearch();
+    _load();
   }
 
   @override
@@ -28,20 +30,42 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
     super.dispose();
   }
 
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final films = await client.cinePass.getFilms();
+      if (!mounted) return;
+      setState(() {
+        _films = films;
+        _loading = false;
+        _applySearch();
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _films = [];
+        _loading = false;
+      });
+    }
+  }
+
   void _applySearch() {
     final q = _searchController.text.trim().toLowerCase();
     setState(() {
-      _films = mockFilms.where((f) {
+      _films = _films.where((f) {
         return q.isEmpty ||
             f.title.toLowerCase().contains(q) ||
             f.genre.toLowerCase().contains(q) ||
-            f.director.toLowerCase().contains(q);
+            (f.director ?? '').toLowerCase().contains(q);
       }).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -97,11 +121,12 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
 class _FilmAdminCard extends StatelessWidget {
   const _FilmAdminCard({required this.film});
 
-  final MockFilm film;
+  final FilmResponse film;
 
   @override
   Widget build(BuildContext context) {
     final audience = audienceForFilmId(film.id);
+    final posterColor = film.posterColor ?? 0xFF2D1B4E;
     return Card(
       color: AppTheme.cardDark,
       margin: const EdgeInsets.only(bottom: 16),
@@ -115,7 +140,7 @@ class _FilmAdminCard extends StatelessWidget {
               child: Container(
                 width: 80,
                 height: 110,
-                color: Color(film.posterColor),
+                color: Color(posterColor),
                 child: Icon(Icons.movie_rounded, color: Colors.white.withValues(alpha: 0.5), size: 36),
               ),
             ),
@@ -135,14 +160,14 @@ class _FilmAdminCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    film.synopsis,
+                    film.synopsis ?? '',
                     style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Réalisateur: ${film.director}',
+                    'Réalisateur: ${film.director ?? ''}',
                     style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
                   ),
                   const SizedBox(height: 8),

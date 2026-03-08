@@ -1,17 +1,18 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
-import '../../data/mock_films_data.dart';
 
 class FilmCard extends StatelessWidget {
   const FilmCard({super.key, required this.film});
 
-  final MockFilm film;
+  final FilmResponse film;
 
   @override
   Widget build(BuildContext context) {
+    final posterColor = film.posterColor ?? 0xFF2D1B4E;
     return Card(
       color: AppTheme.cardDark,
       clipBehavior: Clip.antiAlias,
@@ -23,7 +24,7 @@ class FilmCard extends StatelessWidget {
             AspectRatio(
               aspectRatio: 2 / 3,
               child: Container(
-                color: Color(film.posterColor),
+                color: Color(posterColor),
                 child: Center(
                   child: Icon(
                     Icons.movie_rounded,

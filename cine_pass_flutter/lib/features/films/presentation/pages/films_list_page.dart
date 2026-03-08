@@ -1,8 +1,9 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../data/mock_films_data.dart';
+import '../../../../main.dart';
 import '../widgets/film_card.dart';
 
 class FilmsListPage extends StatefulWidget {
@@ -15,24 +16,57 @@ class FilmsListPage extends StatefulWidget {
 class _FilmsListPageState extends State<FilmsListPage> {
   final _searchController = TextEditingController();
   String _selectedGenre = 'Tous';
-  String _selectedCity = 'Paris';
-  List<MockFilm> _filteredFilms = List.from(mockFilms);
+  String _selectedCity = 'Toutes';
+  List<FilmResponse> _films = [];
+  List<String> _cities = ['Toutes'];
+  List<String> _genres = ['Tous'];
+  List<FilmResponse> _filteredFilms = [];
+  bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _applyFilters();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final films = await client.cinePass.getFilms();
+      final cities = await client.cinePass.getCities();
+      final genres = await client.cinePass.getGenres();
+      if (!mounted) return;
+      setState(() {
+        _films = films;
+        _cities = cities;
+        _genres = genres;
+        _loading = false;
+        _applyFilters();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+        _filteredFilms = [];
+      });
+    }
   }
 
   void _applyFilters() {
     final query = _searchController.text.trim().toLowerCase();
     setState(() {
-      _filteredFilms = mockFilms.where((f) {
+      _filteredFilms = _films.where((f) {
         final matchGenre = _selectedGenre == 'Tous' || f.genre == _selectedGenre;
+        final matchCity = _selectedCity == 'Toutes';
         final matchSearch = query.isEmpty ||
             f.title.toLowerCase().contains(query) ||
             f.genre.toLowerCase().contains(query);
-        return matchGenre && matchSearch;
+        return matchGenre && matchCity && matchSearch;
       }).toList();
     });
   }
@@ -40,14 +74,29 @@ class _FilmsListPageState extends State<FilmsListPage> {
   void _resetFilters() {
     setState(() {
       _selectedGenre = 'Tous';
-      _selectedCity = 'Paris';
+      _selectedCity = 'Toutes';
       _searchController.clear();
-      _filteredFilms = List.from(mockFilms);
+      _filteredFilms = List.from(_films);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+    }
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Erreur: $_error', style: const TextStyle(color: AppTheme.textSecondary), textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: _load, child: const Text('Réessayer')),
+          ],
+        ),
+      );
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -83,7 +132,7 @@ class _FilmsListPageState extends State<FilmsListPage> {
               const SizedBox(width: 12),
               _DropdownFilter<String>(
                 value: _selectedGenre,
-                items: mockGenres,
+                items: _genres,
                 onChanged: (v) {
                   setState(() {
                     _selectedGenre = v ?? 'Tous';
@@ -94,10 +143,10 @@ class _FilmsListPageState extends State<FilmsListPage> {
               const SizedBox(width: 12),
               _DropdownFilter<String>(
                 value: _selectedCity,
-                items: mockCities,
+                items: _cities,
                 onChanged: (v) {
                   setState(() {
-                    _selectedCity = v ?? 'Paris';
+                    _selectedCity = v ?? 'Toutes';
                     _applyFilters();
                   });
                 },

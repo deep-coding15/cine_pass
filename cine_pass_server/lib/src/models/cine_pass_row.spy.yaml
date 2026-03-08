@@ -1,0 +1,6 @@
+# Base pour les entités CinePass (id UUID, createdAt).
+# Ne pas mettre de table ici : les sous-classes ont leur propre table.
+class: CinePassRow
+fields:
+  id: UuidValue, defaultModel=random
+  createdAt: DateTime, default=now

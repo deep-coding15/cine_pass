@@ -1,3 +1,4 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import '../../../../core/state/auth_state.dart';
 import '../../../../core/state/favorites_state.dart';
 import '../../../../core/state/pending_reservation_state.dart';
 import '../../../../features/reservation/data/reservation_state.dart';
-import '../../data/mock_events_data.dart';
+import '../../../../main.dart';
 
 class EventDetailPage extends StatefulWidget {
   const EventDetailPage({super.key, required this.eventId});
@@ -21,17 +22,55 @@ class EventDetailPage extends StatefulWidget {
 
 class _EventDetailPageState extends State<EventDetailPage> {
   int _quantity = 1;
+  EventResponse? _event;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final event = await client.cinePass.getEventById(widget.eventId);
+      if (!mounted) return;
+      setState(() {
+        _event = event;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final event = getEventById(widget.eventId);
-
-    if (event == null) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+    }
+    if (_error != null || _event == null) {
       return Center(
-        child: Text('Événement introuvable', style: TextStyle(color: AppTheme.textPrimary)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_error ?? 'Événement introuvable', style: const TextStyle(color: AppTheme.textPrimary), textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: _load, child: const Text('Réessayer')),
+          ],
+        ),
       );
     }
-
+    final event = _event!;
     final maxQty = event.placesLeft.clamp(1, 999);
     final total = event.price * _quantity;
 
@@ -71,8 +110,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(event.posterColor),
-                      Color(event.posterColor).withValues(alpha: 0.5),
+                      Color(event.posterColor ?? 0xFF4E1B3D),
+                      Color(event.posterColor ?? 0xFF4E1B3D).withValues(alpha: 0.5),
                     ],
                   ),
                 ),
@@ -125,7 +164,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              event.description,
+                              event.description ?? '',
                               style: const TextStyle(color: AppTheme.textSecondary, height: 1.5),
                             ),
                           ],
@@ -155,7 +194,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(event.location, style: const TextStyle(color: AppTheme.textPrimary)),
-                                      Text(event.address, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                                      Text(event.address ?? '', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
                                       Text(event.city, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
                                     ],
                                   ),
@@ -295,7 +334,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                   eventDateTime: '${event.date} à ${event.time}',
                                   quantity: _quantity,
                                   pricePerTicket: event.price,
-                                  availableOptions: event.availableOptions,
+                                  availableOptions: event.availableOptions ?? [],
                                 );
                                 context.go(AppRouter.connexion);
                                 return;
@@ -307,7 +346,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                 eventDateTime: '${event.date} à ${event.time}',
                                 quantity: _quantity,
                                 pricePerTicket: event.price,
-                                availableOptions: event.availableOptions,
+                                availableOptions: event.availableOptions ?? [],
                               );
                               context.push(AppRouter.reservationTypeBillet);
                             },

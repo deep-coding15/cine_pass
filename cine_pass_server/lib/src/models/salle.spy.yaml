@@ -1,0 +1,8 @@
+### Salle d'un cinéma (pas de created_at dans le schéma).
+class: Salle
+table: cine_pass_salle
+fields:
+  id: UuidValue, defaultModel=random
+  cinemaId: UuidValue
+  nom: String
+  capacite: int
