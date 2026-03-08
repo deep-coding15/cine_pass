@@ -117,12 +117,17 @@ class CinePassEndpoint extends Endpoint {
       final films = await session.db.unsafeQuery(
         r'SELECT DISTINCT ville FROM cine_pass_cinema ORDER BY ville',
       );
-      for (final row in films) set.add(row[0] as String);
+      for (final row in films) {
+        set.add(row[0] as String);
+      }
       final events = await session.db.unsafeQuery(
         r'SELECT DISTINCT ville FROM cine_pass_evenement ORDER BY ville',
       );
-      for (final row in events) set.add(row[0] as String);
-      return ['Toutes', ...set.toList()..sort()];
+      for (final row in events) {
+        set.add(row[0] as String);
+      }
+      final list = set.toList()..sort();
+      return ['Toutes', ...list];
     } catch (_) {
       return ['Toutes'];
     }
@@ -134,7 +139,7 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r'SELECT DISTINCT genre FROM cine_pass_film ORDER BY genre',
       );
-      return ['Tous', ...result.map((row) => row[0] as String).toList()];
+      return ['Tous', ...result.map((row) => row[0] as String)];
     } catch (_) {
       return ['Tous'];
     }
@@ -146,7 +151,7 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r'SELECT DISTINCT categorie FROM cine_pass_evenement ORDER BY categorie',
       );
-      return ['Toutes', ...result.map((row) => row[0] as String).toList()];
+      return ['Toutes', ...result.map((row) => row[0] as String)];
     } catch (_) {
       return ['Toutes'];
     }
