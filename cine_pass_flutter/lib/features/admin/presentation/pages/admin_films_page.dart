@@ -150,14 +150,6 @@ class _FilmAdminCard extends StatelessWidget {
                     spacing: 12,
                     runSpacing: 4,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
-                          const SizedBox(width: 4),
-                          Text('${film.rating}/10', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
                       Text('Sortie: ${releaseDateForFilmId(film.id)}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                       Text('Fin: ${endDateForFilmId(film.id)}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                     ],

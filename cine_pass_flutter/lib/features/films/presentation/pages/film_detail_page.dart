@@ -93,13 +93,6 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${film.rating}/10',
-                          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 16),
-                        ),
-                        const SizedBox(width: 16),
                         Icon(Icons.schedule_rounded, size: 18, color: AppTheme.textSecondary),
                         const SizedBox(width: 4),
                         Text(

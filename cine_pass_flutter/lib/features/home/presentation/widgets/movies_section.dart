@@ -11,10 +11,10 @@ class MoviesSection extends StatelessWidget {
   const MoviesSection({super.key});
 
   static const _movies = [
-    _MovieItem(id: '1', title: 'Horizon Quantique', genre: 'Science-Fiction', rating: 8.5, color: Color(0xFF2D1B4E)),
-    _MovieItem(id: '2', title: 'Les Gardiens du Temps', genre: 'Action', rating: 7.8, color: Color(0xFF1B3D4E)),
-    _MovieItem(id: '3', title: 'Rire et Préjugés', genre: 'Comédie', rating: 7.3, color: Color(0xFF4E3D1B)),
-    _MovieItem(id: '4', title: 'Le Dernier Refuge', genre: 'Drame', rating: 8.0, color: Color(0xFF2E1A1A)),
+    _MovieItem(id: '1', title: 'Horizon Quantique', genre: 'Science-Fiction', color: Color(0xFF2D1B4E)),
+    _MovieItem(id: '2', title: 'Les Gardiens du Temps', genre: 'Action', color: Color(0xFF1B3D4E)),
+    _MovieItem(id: '3', title: 'Rire et Préjugés', genre: 'Comédie', color: Color(0xFF4E3D1B)),
+    _MovieItem(id: '4', title: 'Le Dernier Refuge', genre: 'Drame', color: Color(0xFF2E1A1A)),
   ];
 
   @override
@@ -72,13 +72,11 @@ class _MovieItem {
     required this.id,
     required this.title,
     required this.genre,
-    required this.rating,
     required this.color,
   });
   final String id;
   final String title;
   final String genre;
-  final double rating;
   final Color color;
 }
 
@@ -147,21 +145,6 @@ class _MovieCard extends StatelessWidget {
               color: AppTheme.textSecondary,
               fontSize: 13,
             ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
-              const SizedBox(width: 4),
-              Text(
-                item.rating.toString(),
-                style: const TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
           ),
         ],
       ),

@@ -79,10 +79,6 @@ class AdminDashboardPage extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                    Text(
-                                      'Note ${f.rating}/10',
-                                      style: const TextStyle(color: AppTheme.accentGreen, fontSize: 13),
-                                    ),
                                   ],
                                 ),
                               ),

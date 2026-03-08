@@ -59,17 +59,6 @@ class FilmCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
-                      const SizedBox(width: 4),
-                      Text(
-                        film.rating.toString(),
-                        style: const TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
                       Icon(Icons.schedule_rounded, size: 16, color: AppTheme.textSecondary),
                       const SizedBox(width: 4),
                       Text(

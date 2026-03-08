@@ -4,7 +4,6 @@ class MockFilm {
     required this.id,
     required this.title,
     required this.genre,
-    required this.rating,
     required this.durationMinutes,
     required this.synopsis,
     required this.director,
@@ -14,7 +13,6 @@ class MockFilm {
   final String id;
   final String title;
   final String genre;
-  final double rating;
   final int durationMinutes;
   final String synopsis;
   final String director;
@@ -55,7 +53,6 @@ final mockFilms = [
     id: '1',
     title: 'Horizon Quantique',
     genre: 'Science-Fiction',
-    rating: 8.5,
     durationMinutes: 142,
     synopsis:
         'Dans un futur proche, une physicienne découvre un moyen de voyager entre les dimensions parallèles. Mais chaque saut fragilise la réalité elle-même.',
@@ -67,7 +64,6 @@ final mockFilms = [
     id: '2',
     title: 'Les Gardiens du Temps',
     genre: 'Action',
-    rating: 7.8,
     durationMinutes: 135,
     synopsis: 'Une équipe doit empêcher la manipulation du temps pour sauver le monde.',
     director: 'Jean Dupont',
@@ -78,7 +74,6 @@ final mockFilms = [
     id: '3',
     title: 'Rire et Préjugés',
     genre: 'Comédie',
-    rating: 7.2,
     durationMinutes: 108,
     synopsis: 'Adaptation moderne d\'un classique, entre quiproquos et amour.',
     director: 'Marie Leroy',
@@ -89,7 +84,6 @@ final mockFilms = [
     id: '4',
     title: 'Le Dernier Refuge',
     genre: 'Drame',
-    rating: 8.0,
     durationMinutes: 128,
     synopsis: 'Un père et sa fille luttent pour survivre dans un monde en ruines.',
     director: 'Thomas Bernard',
