@@ -9,4 +9,3 @@ fields:
   ville: String
   adresse: String?
   codePostal: String?
-  createdAt: DateTime, default=now

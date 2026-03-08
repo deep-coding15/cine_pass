@@ -7,7 +7,7 @@ fields:
   salleId: UuidValue
   debutAt: DateTime
   finAt: DateTime?
-  format: String, default=VF
-  type: String, default=2D
+  format: String, default="VF"
+  type: String, default="2D"
   prixBase: double
   availableOptions: List<String>?

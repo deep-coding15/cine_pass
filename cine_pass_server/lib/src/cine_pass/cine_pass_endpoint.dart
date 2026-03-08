@@ -14,7 +14,12 @@ class CinePassEndpoint extends Endpoint {
       );
       return result.map((row) => _rowToFilmResponse(row)).toList();
     } catch (e, st) {
-      session.log('CinePass getFilms', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getFilms',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -55,7 +60,12 @@ class CinePassEndpoint extends Endpoint {
       );
       return result.map((row) => _rowToSeanceResponse(row)).toList();
     } catch (e, st) {
-      session.log('CinePass getSeancesForFilm', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getSeancesForFilm',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -86,7 +96,12 @@ class CinePassEndpoint extends Endpoint {
       );
       return result.map((row) => _rowToEventResponse(row)).toList();
     } catch (e, st) {
-      session.log('CinePass getEvents', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getEvents',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -105,7 +120,12 @@ class CinePassEndpoint extends Endpoint {
       if (result.isEmpty) return null;
       return _rowToEventResponse(result.first);
     } catch (e, st) {
-      session.log('CinePass getEventById', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getEventById',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -237,7 +257,8 @@ class CinePassEndpoint extends Endpoint {
     if (date != null) {
       final d = _safeDateTime(date);
       if (d != null) {
-        dateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+        dateStr =
+            '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
       } else {
         final s = date.toString();
         dateStr = s.length >= 10 ? s.substring(0, 10) : s;
@@ -249,7 +270,9 @@ class CinePassEndpoint extends Endpoint {
       if (s.length >= 5) timeStr = s.substring(0, 5);
     }
     final price = row.length > 10 ? _safeDouble(row[10]) : 0.0;
-    final posterColor = row.length > 11 && row[11] != null ? _safeInt(row[11]) : null;
+    final posterColor = row.length > 11 && row[11] != null
+        ? _safeInt(row[11])
+        : null;
     return EventResponse(
       id: row[0].toString(),
       title: row[1] as String? ?? '',
