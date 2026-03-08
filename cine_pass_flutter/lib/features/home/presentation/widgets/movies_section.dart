@@ -1,12 +1,9 @@
 import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
-import '../../../../core/state/auth_state.dart';
-import '../../../../core/state/favorites_state.dart';
 import '../../../../main.dart';
 import '../../../films/presentation/widgets/film_card.dart';
 

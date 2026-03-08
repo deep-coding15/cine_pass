@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../films/data/mock_films_data.dart';
-import '../../data/mock_admin_data.dart';
 import '../widgets/admin_add_seance_dialog.dart';
 
 class AdminSeancesPage extends StatelessWidget {

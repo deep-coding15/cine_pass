@@ -1,4 +1,4 @@
-/// Modèles admin. Données réelles via backend (plus de mock).
+// Modèles admin. Données réelles via backend (plus de mock).
 
 class MockAdminUser {
   MockAdminUser({

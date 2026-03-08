@@ -1,6 +1,5 @@
 import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
@@ -203,7 +202,7 @@ class _DropdownFilter<T extends String> extends StatelessWidget {
           value: value,
           dropdownColor: AppTheme.cardDark,
           style: const TextStyle(color: AppTheme.textPrimary),
-          items: items.map((e) => DropdownMenuItem<T>(value: e as T, child: Text(e))).toList(),
+          items: items.map((e) => DropdownMenuItem<T>(value: e, child: Text(e))).toList(),
           onChanged: onChanged,
         ),
       ),

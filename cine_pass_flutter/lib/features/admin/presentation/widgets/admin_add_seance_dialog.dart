@@ -230,6 +230,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
+      // ignore: deprecated_member_use
       value: value,
       decoration: InputDecoration(
         labelText: label,

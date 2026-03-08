@@ -106,17 +106,6 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     return isVipSeat == billetIsVip;
   }
 
-  int get _selectedCount {
-    if (_assignedSeats != null) return _assignedSeats!.whereType<String>().length;
-    var n = 0;
-    for (var r = 0; r < _rows.length; r++) {
-      for (var c = 0; c < _seatsPerRow; c++) {
-        if (_seats[r][c] == SeatStatus.selected) n++;
-      }
-    }
-    return n;
-  }
-
   bool _canSelectSeat(int row, int col) {
     if (_isSeatOccupied(row, col)) return false;
     final state = ReservationState.instance;
@@ -307,7 +296,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
                     const SizedBox(height: 16),
                     _recapRow('Film', state.filmTitle ?? '-'),
                     _recapRow('Cinéma', '${state.cinemaName ?? ''}\n${state.cinemaLocation ?? ''}'),
-                    _recapRow('Date et heure', '${state.dateTime ?? ''}'),
+                    _recapRow('Date et heure', state.dateTime ?? ''),
                     const Divider(color: AppTheme.textSecondary, height: 24),
                     if (hasPerBilletMode && _assignedSeats != null) ...[
                       const Padding(

@@ -20,10 +20,10 @@ class AppDrawer extends StatelessWidget {
       location = '/';
     }
     if (location.isEmpty) location = '/';
-    final isActive = (String path) {
+    bool isActive(String path) {
       if (path == AppRouter.home) return location == '/' || location.isEmpty;
       return location == path || (path == AppRouter.admin && location.startsWith('/admin'));
-    };
+    }
 
     return Container(
       width: double.infinity,
@@ -201,11 +201,10 @@ class _DrawerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final useHighlight = isActive || highlight;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Material(
-        color: isActive ? AppTheme.sidebarActiveBg : (highlight && isActive ? AppTheme.primaryRed : Colors.transparent),
+        color: useHighlight ? AppTheme.sidebarActiveBg : (highlight && isActive ? AppTheme.primaryRed : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           onTap: onTap,

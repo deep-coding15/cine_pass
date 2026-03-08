@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../widgets/main_scaffold.dart';
@@ -57,11 +56,11 @@ class AppRouter {
         routes: [
           GoRoute(
             path: home,
-            pageBuilder: (_, __) => const NoTransitionPage(child: HomePage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: HomePage()),
           ),
           GoRoute(
             path: films,
-            pageBuilder: (_, __) => const NoTransitionPage(child: FilmsListPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: FilmsListPage()),
           ),
           GoRoute(
             path: '/films/:id',
@@ -72,58 +71,58 @@ class AppRouter {
           ),
           GoRoute(
             path: reservationSieges,
-            pageBuilder: (_, __) => const NoTransitionPage(child: SeatSelectionPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: SeatSelectionPage()),
           ),
           GoRoute(
             path: reservationTypeBillet,
-            pageBuilder: (_, __) => const NoTransitionPage(child: TicketTypePage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: TicketTypePage()),
           ),
           GoRoute(
             path: paiement,
-            pageBuilder: (_, __) => const NoTransitionPage(child: PaymentPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: PaymentPage()),
           ),
           GoRoute(
             path: confirmation,
-            pageBuilder: (_, __) => const NoTransitionPage(child: ConfirmationPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: ConfirmationPage()),
           ),
           GoRoute(
             path: events,
-            pageBuilder: (_, __) => const NoTransitionPage(child: EventsListPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: EventsListPage()),
           ),
           GoRoute(
             path: '/events/:id',
-            pageBuilder: (context, state) {
+            pageBuilder: (_, state) {
               final id = state.pathParameters['id'] ?? '';
               return NoTransitionPage(child: EventDetailPage(eventId: id));
             },
           ),
           GoRoute(
             path: billets,
-            pageBuilder: (_, __) => const NoTransitionPage(child: BilletsPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: BilletsPage()),
           ),
           GoRoute(
             path: profil,
-            pageBuilder: (_, __) => const NoTransitionPage(child: ProfilPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: ProfilPage()),
           ),
           GoRoute(
             path: preferences,
-            pageBuilder: (_, __) => const NoTransitionPage(child: PreferencesPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: PreferencesPage()),
           ),
           GoRoute(
             path: connexion,
-            pageBuilder: (_, __) => const NoTransitionPage(child: ConnexionPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: ConnexionPage()),
           ),
           GoRoute(
             path: inscription,
-            pageBuilder: (_, __) => const NoTransitionPage(child: InscriptionPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: InscriptionPage()),
           ),
           GoRoute(
             path: faq,
-            pageBuilder: (_, __) => const NoTransitionPage(child: FaqPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: FaqPage()),
           ),
           GoRoute(
             path: support,
-            pageBuilder: (_, __) => const NoTransitionPage(child: SupportPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: SupportPage()),
           ),
         ],
       ),
@@ -132,55 +131,34 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/admin',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AdminDashboardPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: AdminDashboardPage()),
           ),
           GoRoute(
             path: '/admin/films',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AdminFilmsPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: AdminFilmsPage()),
           ),
           GoRoute(
             path: '/admin/seances',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AdminSeancesPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: AdminSeancesPage()),
           ),
           GoRoute(
             path: '/admin/events',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AdminEventsPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: AdminEventsPage()),
           ),
           GoRoute(
             path: '/admin/users',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AdminUsersPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: AdminUsersPage()),
           ),
           GoRoute(
             path: '/admin/reservations',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AdminReservationsPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: AdminReservationsPage()),
           ),
           GoRoute(
             path: '/admin/stats',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AdminStatsReportPage()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: AdminStatsReportPage()),
           ),
         ],
       ),
     ],
   );
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  const _PlaceholderPage({required this.title, required this.icon});
-
-  final String title;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: Colors.white54),
-          const SizedBox(height: 16),
-          Text(title, style: Theme.of(context).textTheme.headlineMedium),
-        ],
-      ),
-    );
-  }
 }

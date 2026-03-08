@@ -22,6 +22,7 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
   final _posterUrlController = TextEditingController();
   String _venueType = 'other'; // 'cinema' | 'other'
   DateTime? _date;
+  // ignore: unused_field - utilisé pour envoi futur
   String _time = '';
 
   @override
@@ -114,6 +115,7 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
+                          // ignore: deprecated_member_use
                           value: _venueType,
                           decoration: _decoration('Type de lieu'),
                           dropdownColor: AppTheme.cardDark,

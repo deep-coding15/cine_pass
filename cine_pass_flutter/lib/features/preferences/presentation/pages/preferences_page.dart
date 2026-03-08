@@ -63,7 +63,6 @@ class _PreferencesPageState extends State<PreferencesPage> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthState>();
-    final favorites = context.watch<FavoritesState>();
 
     if (!auth.isLoggedIn) {
       return Center(
