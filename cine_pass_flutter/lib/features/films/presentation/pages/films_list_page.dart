@@ -60,9 +60,11 @@ class _FilmsListPageState extends State<FilmsListPage> {
     final query = _searchController.text.trim().toLowerCase();
     setState(() {
       _filteredFilms = _films.where((f) {
-        final matchGenre = _selectedGenre == 'Tous' || f.genre == _selectedGenre;
+        final matchGenre =
+            _selectedGenre == 'Tous' || f.genre == _selectedGenre;
         final matchCity = _selectedCity == 'Toutes';
-        final matchSearch = query.isEmpty ||
+        final matchSearch =
+            query.isEmpty ||
             f.title.toLowerCase().contains(query) ||
             f.genre.toLowerCase().contains(query);
         return matchGenre && matchCity && matchSearch;
@@ -82,14 +84,20 @@ class _FilmsListPageState extends State<FilmsListPage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
     }
     if (_error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Erreur: $_error', style: const TextStyle(color: AppTheme.textSecondary), textAlign: TextAlign.center),
+            Text(
+              'Erreur: $_error',
+              style: const TextStyle(color: AppTheme.textSecondary),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             FilledButton(onPressed: _load, child: const Text('Réessayer')),
           ],
@@ -104,8 +112,8 @@ class _FilmsListPageState extends State<FilmsListPage> {
           Text(
             "Films à l'affiche",
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 20),
           Row(
@@ -117,7 +125,10 @@ class _FilmsListPageState extends State<FilmsListPage> {
                   decoration: InputDecoration(
                     hintText: 'Rechercher un film...',
                     hintStyle: const TextStyle(color: AppTheme.textSecondary),
-                    prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppTheme.textSecondary,
+                    ),
                     filled: true,
                     fillColor: AppTheme.cardDark,
                     border: OutlineInputBorder(
@@ -172,7 +183,8 @@ class _FilmsListPageState extends State<FilmsListPage> {
                   mainAxisSpacing: 16,
                 ),
                 itemCount: _filteredFilms.length,
-                itemBuilder: (context, index) => FilmCard(film: _filteredFilms[index]),
+                itemBuilder: (context, index) =>
+                    FilmCard(film: _filteredFilms[index]),
               );
             },
           ),
@@ -206,7 +218,9 @@ class _DropdownFilter<T extends String> extends StatelessWidget {
           value: value,
           dropdownColor: AppTheme.cardDark,
           style: const TextStyle(color: AppTheme.textPrimary),
-          items: items.map((e) => DropdownMenuItem<T>(value: e, child: Text(e))).toList(),
+          items: items
+              .map((e) => DropdownMenuItem<T>(value: e, child: Text(e)))
+              .toList(),
           onChanged: onChanged,
         ),
       ),

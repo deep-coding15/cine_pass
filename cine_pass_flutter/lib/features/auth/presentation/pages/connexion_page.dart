@@ -100,7 +100,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
             const SizedBox(height: 32),
             Text(
               'Connexion',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 8),
             Builder(
@@ -111,9 +113,13 @@ class _ConnexionPageState extends State<ConnexionPage> {
                       ? 'Connectez-vous pour poursuivre votre réservation'
                       : 'Entrez vos identifiants pour accéder à votre compte',
                   style: TextStyle(
-                    color: pending.hasPending ? AppTheme.primaryRed : AppTheme.textSecondary,
+                    color: pending.hasPending
+                        ? AppTheme.primaryRed
+                        : AppTheme.textSecondary,
                     fontSize: 14,
-                    fontWeight: pending.hasPending ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: pending.hasPending
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 );
               },
@@ -128,7 +134,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 prefixIcon: const Icon(Icons.email_outlined),
                 filled: true,
                 fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
@@ -147,17 +155,24 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 hintText: '••••••••',
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: AppTheme.textSecondary),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: AppTheme.textSecondary,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                 ),
                 filled: true,
                 fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Entrez votre mot de passe';
+                if (v == null || v.trim().isEmpty)
+                  return 'Entrez votre mot de passe';
                 return null;
               },
             ),
@@ -167,7 +182,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.primaryRed,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const Text('Se connecter'),
             ),
@@ -175,7 +192,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Pas encore de compte ? ', style: TextStyle(color: AppTheme.textSecondary)),
+                Text(
+                  'Pas encore de compte ? ',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
                 TextButton(
                   onPressed: () => context.go(AppRouter.inscription),
                   child: const Text('S\'inscrire'),

@@ -61,8 +61,10 @@ class _EventsListPageState extends State<EventsListPage> {
     setState(() {
       _filteredEvents = _events.where((e) {
         final matchCity = _selectedCity == 'Toutes' || e.city == _selectedCity;
-        final matchCategory = _selectedCategory == 'Toutes' || e.category == _selectedCategory;
-        final matchSearch = query.isEmpty ||
+        final matchCategory =
+            _selectedCategory == 'Toutes' || e.category == _selectedCategory;
+        final matchSearch =
+            query.isEmpty ||
             e.title.toLowerCase().contains(query) ||
             e.category.toLowerCase().contains(query) ||
             e.location.toLowerCase().contains(query);
@@ -83,14 +85,20 @@ class _EventsListPageState extends State<EventsListPage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
     }
     if (_error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Erreur: $_error', style: const TextStyle(color: AppTheme.textSecondary), textAlign: TextAlign.center),
+            Text(
+              'Erreur: $_error',
+              style: const TextStyle(color: AppTheme.textSecondary),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             FilledButton(onPressed: _load, child: const Text('Réessayer')),
           ],
@@ -105,8 +113,8 @@ class _EventsListPageState extends State<EventsListPage> {
           Text(
             'Événements à venir',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 20),
           Row(
@@ -118,7 +126,10 @@ class _EventsListPageState extends State<EventsListPage> {
                   decoration: InputDecoration(
                     hintText: 'Rechercher un événement...',
                     hintStyle: const TextStyle(color: AppTheme.textSecondary),
-                    prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppTheme.textSecondary,
+                    ),
                     filled: true,
                     fillColor: AppTheme.cardDark,
                     border: OutlineInputBorder(
@@ -152,7 +163,10 @@ class _EventsListPageState extends State<EventsListPage> {
                 },
               ),
               const SizedBox(width: 12),
-              TextButton(onPressed: _resetFilters, child: const Text('Réinitialiser')),
+              TextButton(
+                onPressed: _resetFilters,
+                child: const Text('Réinitialiser'),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -168,7 +182,8 @@ class _EventsListPageState extends State<EventsListPage> {
                   mainAxisSpacing: 16,
                 ),
                 itemCount: _filteredEvents.length,
-                itemBuilder: (context, index) => EventCard(event: _filteredEvents[index]),
+                itemBuilder: (context, index) =>
+                    EventCard(event: _filteredEvents[index]),
               );
             },
           ),
@@ -202,7 +217,9 @@ class _DropdownFilter<T extends String> extends StatelessWidget {
           value: value,
           dropdownColor: AppTheme.cardDark,
           style: const TextStyle(color: AppTheme.textPrimary),
-          items: items.map((e) => DropdownMenuItem<T>(value: e, child: Text(e))).toList(),
+          items: items
+              .map((e) => DropdownMenuItem<T>(value: e, child: Text(e)))
+              .toList(),
           onChanged: onChanged,
         ),
       ),

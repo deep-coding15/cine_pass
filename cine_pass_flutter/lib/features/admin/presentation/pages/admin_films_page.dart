@@ -64,7 +64,9 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
     }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -79,20 +81,30 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
                 children: [
                   Text(
                     'Gestion des films',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Gérez les films disponibles sur la plateforme',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
               FilledButton.icon(
-                onPressed: () => showDialog(context: context, builder: (_) => const AdminAddFilmDialog()),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => const AdminAddFilmDialog(),
+                ),
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Nouveau film'),
-                style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryRed,
+                ),
               ),
             ],
           ),
@@ -103,10 +115,16 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
             decoration: InputDecoration(
               hintText: 'Rechercher un film...',
               hintStyle: const TextStyle(color: AppTheme.textSecondary),
-              prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppTheme.textSecondary,
+              ),
               filled: true,
               fillColor: AppTheme.cardDark,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
             ),
             style: const TextStyle(color: AppTheme.textPrimary),
           ),
@@ -141,7 +159,11 @@ class _FilmAdminCard extends StatelessWidget {
                 width: 80,
                 height: 110,
                 color: Color(posterColor),
-                child: Icon(Icons.movie_rounded, color: Colors.white.withValues(alpha: 0.5), size: 36),
+                child: Icon(
+                  Icons.movie_rounded,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 36,
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -151,32 +173,57 @@ class _FilmAdminCard extends StatelessWidget {
                 children: [
                   Text(
                     film.title,
-                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     '${film.genre} • ${film.durationMinutes} min • $audience',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     film.synopsis ?? '',
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Réalisateur: ${film.director ?? ''}',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 12,
                     runSpacing: 4,
                     children: [
-                      Text('Sortie: ${releaseDateForFilmId(film.id)}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
-                      Text('Fin: ${endDateForFilmId(film.id)}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      Text(
+                        'Sortie: ${releaseDateForFilmId(film.id)}',
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        'Fin: ${endDateForFilmId(film.id)}',
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -187,12 +234,18 @@ class _FilmAdminCard extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.edit_outlined, color: AppTheme.textSecondary),
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    color: AppTheme.textSecondary,
+                  ),
                   tooltip: 'Modifier',
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.delete_outline, color: AppTheme.primaryRed),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppTheme.primaryRed,
+                  ),
                   tooltip: 'Supprimer',
                 ),
               ],

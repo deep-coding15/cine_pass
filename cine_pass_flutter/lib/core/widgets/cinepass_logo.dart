@@ -87,13 +87,33 @@ class _TicketLogoPainter extends CustomPainter {
     final path = Path();
     path.moveTo(r, 0);
     path.lineTo(w - r, 0);
-    path.arcTo(Rect.fromCircle(center: Offset(w - r, r), radius: r), -0.5 * 3.14159, 3.14159, false);
+    path.arcTo(
+      Rect.fromCircle(center: Offset(w - r, r), radius: r),
+      -0.5 * 3.14159,
+      3.14159,
+      false,
+    );
     path.lineTo(w, h - r);
-    path.arcTo(Rect.fromCircle(center: Offset(w - r, h - r), radius: r), 0, 3.14159, false);
+    path.arcTo(
+      Rect.fromCircle(center: Offset(w - r, h - r), radius: r),
+      0,
+      3.14159,
+      false,
+    );
     path.lineTo(r, h);
-    path.arcTo(Rect.fromCircle(center: Offset(r, h - r), radius: r), 3.14159, 3.14159, false);
+    path.arcTo(
+      Rect.fromCircle(center: Offset(r, h - r), radius: r),
+      3.14159,
+      3.14159,
+      false,
+    );
     path.lineTo(0, r);
-    path.arcTo(Rect.fromCircle(center: Offset(r, r), radius: r), 1.5 * 3.14159, 3.14159, false);
+    path.arcTo(
+      Rect.fromCircle(center: Offset(r, r), radius: r),
+      1.5 * 3.14159,
+      3.14159,
+      false,
+    );
     path.close();
     canvas.drawPath(path, paint);
 
@@ -102,7 +122,11 @@ class _TicketLogoPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.4)
       ..strokeWidth = size.width * 0.06
       ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(w * 0.48, h * 0.2), Offset(w * 0.48, h * 0.8), linePaint);
+    canvas.drawLine(
+      Offset(w * 0.48, h * 0.2),
+      Offset(w * 0.48, h * 0.8),
+      linePaint,
+    );
   }
 
   @override

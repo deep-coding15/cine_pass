@@ -60,7 +60,8 @@ class AppRouter {
           ),
           GoRoute(
             path: films,
-            pageBuilder: (_, _) => const NoTransitionPage(child: FilmsListPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: FilmsListPage()),
           ),
           GoRoute(
             path: '/films/:id',
@@ -71,11 +72,13 @@ class AppRouter {
           ),
           GoRoute(
             path: reservationSieges,
-            pageBuilder: (_, _) => const NoTransitionPage(child: SeatSelectionPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: SeatSelectionPage()),
           ),
           GoRoute(
             path: reservationTypeBillet,
-            pageBuilder: (_, _) => const NoTransitionPage(child: TicketTypePage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: TicketTypePage()),
           ),
           GoRoute(
             path: paiement,
@@ -83,11 +86,13 @@ class AppRouter {
           ),
           GoRoute(
             path: confirmation,
-            pageBuilder: (_, _) => const NoTransitionPage(child: ConfirmationPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ConfirmationPage()),
           ),
           GoRoute(
             path: events,
-            pageBuilder: (_, _) => const NoTransitionPage(child: EventsListPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: EventsListPage()),
           ),
           GoRoute(
             path: '/events/:id',
@@ -106,15 +111,18 @@ class AppRouter {
           ),
           GoRoute(
             path: preferences,
-            pageBuilder: (_, _) => const NoTransitionPage(child: PreferencesPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: PreferencesPage()),
           ),
           GoRoute(
             path: connexion,
-            pageBuilder: (_, _) => const NoTransitionPage(child: ConnexionPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ConnexionPage()),
           ),
           GoRoute(
             path: inscription,
-            pageBuilder: (_, _) => const NoTransitionPage(child: InscriptionPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: InscriptionPage()),
           ),
           GoRoute(
             path: faq,
@@ -131,31 +139,38 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/admin',
-            pageBuilder: (_, _) => const NoTransitionPage(child: AdminDashboardPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminDashboardPage()),
           ),
           GoRoute(
             path: '/admin/films',
-            pageBuilder: (_, _) => const NoTransitionPage(child: AdminFilmsPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminFilmsPage()),
           ),
           GoRoute(
             path: '/admin/seances',
-            pageBuilder: (_, _) => const NoTransitionPage(child: AdminSeancesPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminSeancesPage()),
           ),
           GoRoute(
             path: '/admin/events',
-            pageBuilder: (_, _) => const NoTransitionPage(child: AdminEventsPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminEventsPage()),
           ),
           GoRoute(
             path: '/admin/users',
-            pageBuilder: (_, _) => const NoTransitionPage(child: AdminUsersPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminUsersPage()),
           ),
           GoRoute(
             path: '/admin/reservations',
-            pageBuilder: (_, _) => const NoTransitionPage(child: AdminReservationsPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminReservationsPage()),
           ),
           GoRoute(
             path: '/admin/stats',
-            pageBuilder: (_, _) => const NoTransitionPage(child: AdminStatsReportPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminStatsReportPage()),
           ),
         ],
       ),

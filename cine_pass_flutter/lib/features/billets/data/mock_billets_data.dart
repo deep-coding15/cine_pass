@@ -24,6 +24,7 @@ class MockBillet {
   final bool isEvent;
   final String? room;
   final List<String>? ticketTypes;
+
   /// Date/heure de la séance ou de l'événement (pour calcul annulation / remboursement).
   final DateTime sessionDateTime;
 }

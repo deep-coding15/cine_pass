@@ -40,12 +40,12 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
   }
 
   static InputDecoration _decoration(String hint) => InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: AppTheme.surfaceDark,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        labelStyle: const TextStyle(color: AppTheme.textSecondary),
-      );
+    hintText: hint,
+    filled: true,
+    fillColor: AppTheme.surfaceDark,
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -64,11 +64,16 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                 children: [
                   Text(
                     'Ajouter un nouvel événement',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -84,13 +89,16 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                           controller: _titleController,
                           decoration: _decoration('Titre de l\'événement'),
                           style: const TextStyle(color: AppTheme.textPrimary),
-                          validator: (v) => v?.trim().isEmpty == true ? 'Requis' : null,
+                          validator: (v) =>
+                              v?.trim().isEmpty == true ? 'Requis' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _descriptionController,
                           maxLines: 2,
-                          decoration: _decoration('Description de l\'événement'),
+                          decoration: _decoration(
+                            'Description de l\'événement',
+                          ),
                           style: const TextStyle(color: AppTheme.textPrimary),
                         ),
                         const SizedBox(height: 12),
@@ -100,7 +108,9 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                               child: TextFormField(
                                 controller: _categoryController,
                                 decoration: _decoration('Concert, Théâtre...'),
-                                style: const TextStyle(color: AppTheme.textPrimary),
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -108,7 +118,9 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                               child: TextFormField(
                                 controller: _cityController,
                                 decoration: _decoration('Ville'),
-                                style: const TextStyle(color: AppTheme.textPrimary),
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                ),
                               ),
                             ),
                           ],
@@ -120,10 +132,17 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                           decoration: _decoration('Type de lieu'),
                           dropdownColor: AppTheme.cardDark,
                           items: const [
-                            DropdownMenuItem(value: 'cinema', child: Text('Cinéma')),
-                            DropdownMenuItem(value: 'other', child: Text('Autre lieu')),
+                            DropdownMenuItem(
+                              value: 'cinema',
+                              child: Text('Cinéma'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'other',
+                              child: Text('Autre lieu'),
+                            ),
                           ],
-                          onChanged: (v) => setState(() => _venueType = v ?? 'other'),
+                          onChanged: (v) =>
+                              setState(() => _venueType = v ?? 'other'),
                         ),
                         if (_venueType == 'cinema') ...[
                           const SizedBox(height: 12),
@@ -160,10 +179,17 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                                   );
                                   if (d != null) setState(() => _date = d);
                                 },
-                                icon: const Icon(Icons.calendar_today, size: 18),
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 18,
+                                ),
                                 label: Text(
-                                  _date != null ? '${_date!.day}/${_date!.month}/${_date!.year}' : 'Date',
-                                  style: const TextStyle(color: AppTheme.textPrimary),
+                                  _date != null
+                                      ? '${_date!.day}/${_date!.month}/${_date!.year}'
+                                      : 'Date',
+                                  style: const TextStyle(
+                                    color: AppTheme.textPrimary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -172,7 +198,9 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                               child: TextFormField(
                                 onChanged: (v) => setState(() => _time = v),
                                 decoration: _decoration('--:--'),
-                                style: const TextStyle(color: AppTheme.textPrimary),
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                ),
                               ),
                             ),
                           ],
@@ -183,10 +211,22 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                             Expanded(
                               child: TextFormField(
                                 controller: _priceController,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
                                 decoration: _decoration('Prix (€)'),
-                                style: const TextStyle(color: AppTheme.textPrimary),
-                                validator: (v) => v == null || double.tryParse(v.replaceAll(',', '.')) == null ? 'Nombre requis' : null,
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                ),
+                                validator: (v) =>
+                                    v == null ||
+                                        double.tryParse(
+                                              v.replaceAll(',', '.'),
+                                            ) ==
+                                            null
+                                    ? 'Nombre requis'
+                                    : null,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -195,8 +235,13 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                                 controller: _placesController,
                                 keyboardType: TextInputType.number,
                                 decoration: _decoration('Places disponibles'),
-                                style: const TextStyle(color: AppTheme.textPrimary),
-                                validator: (v) => v == null || int.tryParse(v) == null ? 'Nombre requis' : null,
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                ),
+                                validator: (v) =>
+                                    v == null || int.tryParse(v) == null
+                                    ? 'Nombre requis'
+                                    : null,
                               ),
                             ),
                           ],
@@ -213,17 +258,22 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                             Expanded(
                               child: FilledButton(
                                 onPressed: () {
-                                  if (_formKey.currentState?.validate() == true) {
+                                  if (_formKey.currentState?.validate() ==
+                                      true) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('Événement enregistré (démo)'),
+                                        content: Text(
+                                          'Événement enregistré (démo)',
+                                        ),
                                         backgroundColor: AppTheme.accentGreen,
                                       ),
                                     );
                                     Navigator.of(context).pop();
                                   }
                                 },
-                                style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppTheme.primaryRed,
+                                ),
                                 child: const Text('Enregistrer'),
                               ),
                             ),

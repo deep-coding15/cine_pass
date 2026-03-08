@@ -29,6 +29,7 @@ class MockEvent {
   final int placesTotal;
   final double price;
   final int posterColor;
+
   /// Options sélectionnables par l'admin à la création (affichées à la résa).
   final List<String> availableOptions;
 }

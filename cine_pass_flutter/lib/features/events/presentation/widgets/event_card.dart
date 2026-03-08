@@ -40,14 +40,21 @@ class EventCard extends StatelessWidget {
                   top: 10,
                   right: 10,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryRed,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       event.category,
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -71,12 +78,19 @@ class EventCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           '${event.location} - ${event.city}',
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 13,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -86,9 +100,19 @@ class EventCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_rounded, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 4),
-                      Text(event.date, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                      Text(
+                        event.date,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -104,8 +128,11 @@ class EventCard extends StatelessWidget {
                         ),
                       ),
                       FilledButton(
-                        onPressed: () => context.push(AppRouter.eventDetailPath(event.id)),
-                        style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                        onPressed: () =>
+                            context.push(AppRouter.eventDetailPath(event.id)),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.primaryRed,
+                        ),
                         child: const Text('Réserver'),
                       ),
                     ],
@@ -113,7 +140,10 @@ class EventCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${event.placesLeft} places restantes',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),

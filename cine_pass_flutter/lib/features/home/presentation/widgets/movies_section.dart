@@ -47,14 +47,20 @@ class _MoviesSectionState extends State<MoviesSection> {
               Text(
                 "Films à l'affiche",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
+                  color: AppTheme.textPrimary,
+                ),
               ),
               TextButton.icon(
                 onPressed: () => context.go(AppRouter.films),
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18, color: AppTheme.textSecondary),
+                icon: const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 18,
+                  color: AppTheme.textSecondary,
+                ),
                 label: const Text('Voir tous les films'),
-                style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.textSecondary,
+                ),
               ),
             ],
           ),

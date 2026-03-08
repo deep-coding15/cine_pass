@@ -59,14 +59,20 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
     }
     if (_error != null || _film == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_error ?? 'Film introuvable', style: const TextStyle(color: AppTheme.textPrimary), textAlign: TextAlign.center),
+            Text(
+              _error ?? 'Film introuvable',
+              style: const TextStyle(color: AppTheme.textPrimary),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             FilledButton(onPressed: _load, child: const Text('Réessayer')),
           ],
@@ -85,7 +91,10 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
             onTap: () => context.go(AppRouter.films),
             child: Row(
               children: [
-                const Icon(Icons.arrow_back_rounded, color: AppTheme.textSecondary),
+                const Icon(
+                  Icons.arrow_back_rounded,
+                  color: AppTheme.textSecondary,
+                ),
                 const SizedBox(width: 8),
                 Text('Retour', style: TextStyle(color: AppTheme.textSecondary)),
               ],
@@ -104,7 +113,9 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                     end: Alignment.bottomRight,
                     colors: [
                       Color(film.posterColor ?? 0xFF2D1B4E),
-                      Color(film.posterColor ?? 0xFF2D1B4E).withValues(alpha: 0.6),
+                      Color(
+                        film.posterColor ?? 0xFF2D1B4E,
+                      ).withValues(alpha: 0.6),
                     ],
                   ),
                 ),
@@ -138,7 +149,11 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.schedule_rounded, size: 18, color: AppTheme.textSecondary),
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 18,
+                          color: AppTheme.textSecondary,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${film.durationMinutes} min',
@@ -182,13 +197,18 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                 children: [
                   const Text(
                     'Nombre de billets',
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       IconButton.filled(
-                        onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                        onPressed: _quantity > 1
+                            ? () => setState(() => _quantity--)
+                            : null,
                         style: IconButton.styleFrom(
                           backgroundColor: AppTheme.surfaceDark,
                           foregroundColor: AppTheme.textPrimary,
@@ -199,11 +219,16 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Text(
                           '$_quantity',
-                          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 20),
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 20,
+                          ),
                         ),
                       ),
                       IconButton.filled(
-                        onPressed: _quantity < 10 ? () => setState(() => _quantity++) : null,
+                        onPressed: _quantity < 10
+                            ? () => setState(() => _quantity++)
+                            : null,
                         style: IconButton.styleFrom(
                           backgroundColor: AppTheme.surfaceDark,
                           foregroundColor: AppTheme.textPrimary,
@@ -220,41 +245,29 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
           Text(
             'Séances disponibles',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 16),
-          ...seances.map((s) => _SeanceCard(
-                film: film,
-                seance: s,
-                quantity: _quantity,
-                onReserver: () {
-                  final auth = context.read<AuthState>();
-                  if (_quantity > s.placesLeft) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Pas assez de places pour cette séance (${s.placesLeft} restantes).')),
-                    );
-                    return;
-                  }
-                  if (!auth.isLoggedIn) {
-                    context.read<PendingReservationState>().setPendingFilm(
-                      filmId: film.id,
-                      filmTitle: film.title,
-                      seanceId: s.id,
-                      cinemaName: s.cinemaName,
-                      cinemaLocation: s.location,
-                      room: s.room,
-                      dateTime: s.dateTime,
-                      format: s.format ?? 'VF',
-                      type: s.type ?? '2D',
-                      pricePerSeat: s.price,
-                      quantity: _quantity,
-                      availableOptions: s.availableOptions ?? [],
-                    );
-                    context.go(AppRouter.connexion);
-                    return;
-                  }
-                  ReservationState.instance.setFilmReservation(
+          ...seances.map(
+            (s) => _SeanceCard(
+              film: film,
+              seance: s,
+              quantity: _quantity,
+              onReserver: () {
+                final auth = context.read<AuthState>();
+                if (_quantity > s.placesLeft) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Pas assez de places pour cette séance (${s.placesLeft} restantes).',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+                if (!auth.isLoggedIn) {
+                  context.read<PendingReservationState>().setPendingFilm(
                     filmId: film.id,
                     filmTitle: film.title,
                     seanceId: s.id,
@@ -262,15 +275,33 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
                     cinemaLocation: s.location,
                     room: s.room,
                     dateTime: s.dateTime,
-                    format: s.format,
-                    type: s.type,
+                    format: s.format ?? 'VF',
+                    type: s.type ?? '2D',
                     pricePerSeat: s.price,
                     quantity: _quantity,
-                    availableOptions: s.availableOptions,
+                    availableOptions: s.availableOptions ?? [],
                   );
-                  context.push(AppRouter.reservationTypeBillet);
-                },
-              )),
+                  context.go(AppRouter.connexion);
+                  return;
+                }
+                ReservationState.instance.setFilmReservation(
+                  filmId: film.id,
+                  filmTitle: film.title,
+                  seanceId: s.id,
+                  cinemaName: s.cinemaName,
+                  cinemaLocation: s.location,
+                  room: s.room,
+                  dateTime: s.dateTime,
+                  format: s.format,
+                  type: s.type,
+                  pricePerSeat: s.price,
+                  quantity: _quantity,
+                  availableOptions: s.availableOptions,
+                );
+                context.push(AppRouter.reservationTypeBillet);
+              },
+            ),
+          ),
           if (seances.isEmpty)
             Padding(
               padding: const EdgeInsets.all(24),
@@ -291,7 +322,10 @@ class _FilmDetailPageState extends State<FilmDetailPage> {
         color: AppTheme.surfaceDark,
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(label, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12)),
+      child: Text(
+        label,
+        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+      ),
     );
   }
 }
@@ -333,42 +367,78 @@ class _SeanceCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 4),
-                      Text(seance.location, style: const TextStyle(color: AppTheme.textSecondary)),
+                      Text(
+                        seance.location,
+                        style: const TextStyle(color: AppTheme.textSecondary),
+                      ),
                     ],
                   ),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_rounded, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 4),
-                      Text(seance.dateTime, style: const TextStyle(color: AppTheme.textSecondary)),
+                      Text(
+                        seance.dateTime,
+                        style: const TextStyle(color: AppTheme.textSecondary),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.language_rounded, size: 16, color: AppTheme.textSecondary),
-                      Text(' ${seance.format} ', style: const TextStyle(color: AppTheme.textSecondary)),
+                      Icon(
+                        Icons.language_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      Text(
+                        ' ${seance.format} ',
+                        style: const TextStyle(color: AppTheme.textSecondary),
+                      ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primaryRed,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(seance.type ?? '2D', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        child: Text(
+                          seance.type ?? '2D',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   RichText(
                     text: TextSpan(
-                      style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                      ),
                       children: [
                         const TextSpan(text: 'Places restantes: '),
                         TextSpan(
                           text: '${seance.placesLeft}',
-                          style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: AppTheme.accentGreen,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         TextSpan(text: '/${seance.placesTotal}'),
                       ],
@@ -381,10 +451,20 @@ class _SeanceCard extends StatelessWidget {
                     children: [
                       Text(
                         '${seance.price.toStringAsFixed(2)} €',
-                        style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          color: AppTheme.accentGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       const SizedBox(width: 4),
-                      const Text('par place', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      const Text(
+                        'par place',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -392,8 +472,14 @@ class _SeanceCard extends StatelessWidget {
             ),
             FilledButton(
               onPressed: quantity <= seance.placesLeft ? onReserver : null,
-              style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
-              child: Text(quantity <= seance.placesLeft ? 'Réserver ($quantity billet${quantity > 1 ? 's' : ''})' : 'Complet'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.primaryRed,
+              ),
+              child: Text(
+                quantity <= seance.placesLeft
+                    ? 'Réserver ($quantity billet${quantity > 1 ? 's' : ''})'
+                    : 'Complet',
+              ),
             ),
           ],
         ),
@@ -413,7 +499,11 @@ class _FavoriteHeart extends StatelessWidget {
     final isFav = favorites.isFilmFavorite(filmId);
     return IconButton(
       onPressed: () => favorites.toggleFilm(filmId),
-      icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: isFav ? AppTheme.primaryRed : Colors.white70, size: 28),
+      icon: Icon(
+        isFav ? Icons.favorite : Icons.favorite_border,
+        color: isFav ? AppTheme.primaryRed : Colors.white70,
+        size: 28,
+      ),
       style: IconButton.styleFrom(backgroundColor: Colors.black38),
     );
   }

@@ -71,17 +71,25 @@ class _PreferencesPageState extends State<PreferencesPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.favorite_border, size: 64, color: AppTheme.textSecondary),
+              Icon(
+                Icons.favorite_border,
+                size: 64,
+                color: AppTheme.textSecondary,
+              ),
               const SizedBox(height: 24),
               Text(
                 'Connectez-vous pour voir vos favoris',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
               ),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => context.go(AppRouter.connexion),
-                style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryRed,
+                ),
                 child: const Text('Se connecter'),
               ),
             ],
@@ -91,7 +99,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
     }
 
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
     }
 
     final films = _films;
@@ -104,11 +114,17 @@ class _PreferencesPageState extends State<PreferencesPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.favorite_rounded, color: AppTheme.primaryRed, size: 28),
+              Icon(
+                Icons.favorite_rounded,
+                color: AppTheme.primaryRed,
+                size: 28,
+              ),
               const SizedBox(width: 12),
               Text(
                 'Mes préférences',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ],
           ),
@@ -124,7 +140,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
                 padding: const EdgeInsets.all(32),
                 child: Column(
                   children: [
-                    Icon(Icons.favorite_border, size: 48, color: AppTheme.textSecondary),
+                    Icon(
+                      Icons.favorite_border,
+                      size: 48,
+                      color: AppTheme.textSecondary,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Aucun favori pour le moment',
@@ -134,7 +154,10 @@ class _PreferencesPageState extends State<PreferencesPage> {
                     Text(
                       'Cliquez sur le cœur sur un film ou un événement pour l\'ajouter ici.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -142,23 +165,37 @@ class _PreferencesPageState extends State<PreferencesPage> {
             )
           else ...[
             if (films.isNotEmpty) ...[
-              Text('Films', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary)),
+              Text(
+                'Films',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              ),
               const SizedBox(height: 12),
-              ...films.map((f) => _FavoriteTile(
-                    title: f.title,
-                    subtitle: f.genre,
-                    onTap: () => context.go(AppRouter.filmDetailPath(f.id)),
-                  )),
+              ...films.map(
+                (f) => _FavoriteTile(
+                  title: f.title,
+                  subtitle: f.genre,
+                  onTap: () => context.go(AppRouter.filmDetailPath(f.id)),
+                ),
+              ),
               const SizedBox(height: 24),
             ],
             if (events.isNotEmpty) ...[
-              Text('Événements', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary)),
+              Text(
+                'Événements',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              ),
               const SizedBox(height: 12),
-              ...events.map((e) => _FavoriteTile(
-                    title: e.title,
-                    subtitle: '${e.location} • ${e.date}',
-                    onTap: () => context.go(AppRouter.eventDetailPath(e.id)),
-                  )),
+              ...events.map(
+                (e) => _FavoriteTile(
+                  title: e.title,
+                  subtitle: '${e.location} • ${e.date}',
+                  onTap: () => context.go(AppRouter.eventDetailPath(e.id)),
+                ),
+              ),
             ],
           ],
         ],
@@ -168,7 +205,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
 }
 
 class _FavoriteTile extends StatelessWidget {
-  const _FavoriteTile({required this.title, required this.subtitle, required this.onTap});
+  const _FavoriteTile({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
   final String title;
   final String subtitle;
@@ -180,9 +221,22 @@ class _FavoriteTile extends StatelessWidget {
       color: AppTheme.cardDark,
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: const Icon(Icons.favorite, color: AppTheme.primaryRed, size: 24),
-        title: Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-        subtitle: Text(subtitle, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+        leading: const Icon(
+          Icons.favorite,
+          color: AppTheme.primaryRed,
+          size: 24,
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+        ),
         onTap: onTap,
       ),
     );

@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 /// Après connexion, on restaure dans [ReservationState] et on redirige vers type de billet.
 class PendingReservationState extends ChangeNotifier {
   static PendingReservationState? _instance;
-  static PendingReservationState get instance => _instance ??= PendingReservationState._();
+  static PendingReservationState get instance =>
+      _instance ??= PendingReservationState._();
 
   PendingReservationState._();
 

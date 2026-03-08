@@ -22,7 +22,8 @@ class AppDrawer extends StatelessWidget {
     if (location.isEmpty) location = '/';
     bool isActive(String path) {
       if (path == AppRouter.home) return location == '/' || location.isEmpty;
-      return location == path || (path == AppRouter.admin && location.startsWith('/admin'));
+      return location == path ||
+          (path == AppRouter.admin && location.startsWith('/admin'));
     }
 
     return Container(
@@ -55,10 +56,16 @@ class AppDrawer extends StatelessWidget {
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppTheme.textSecondary,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
                   ),
                 ],
               ),
@@ -73,7 +80,11 @@ class AppDrawer extends StatelessWidget {
                       backgroundColor: AppTheme.sidebarActiveLine,
                       child: Text(
                         auth.userInitials,
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -83,11 +94,17 @@ class AppDrawer extends StatelessWidget {
                         children: [
                           Text(
                             auth.userName,
-                            style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           Text(
                             auth.userEmail,
-                            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 13,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
@@ -204,7 +221,11 @@ class _DrawerTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Material(
-        color: useHighlight ? AppTheme.sidebarActiveBg : (highlight && isActive ? AppTheme.primaryRed : Colors.transparent),
+        color: useHighlight
+            ? AppTheme.sidebarActiveBg
+            : (highlight && isActive
+                  ? AppTheme.primaryRed
+                  : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           onTap: onTap,
@@ -216,7 +237,9 @@ class _DrawerTile extends StatelessWidget {
               border: isActive
                   ? Border(
                       left: BorderSide(
-                        color: highlight ? Colors.white : AppTheme.sidebarActiveLine,
+                        color: highlight
+                            ? Colors.white
+                            : AppTheme.sidebarActiveLine,
                         width: 3,
                       ),
                     )
@@ -227,13 +250,17 @@ class _DrawerTile extends StatelessWidget {
                 Icon(
                   icon,
                   size: 22,
-                  color: isActive ? (highlight ? Colors.white : AppTheme.textPrimary) : AppTheme.textSecondary,
+                  color: isActive
+                      ? (highlight ? Colors.white : AppTheme.textPrimary)
+                      : AppTheme.textSecondary,
                 ),
                 const SizedBox(width: 14),
                 Text(
                   label,
                   style: TextStyle(
-                    color: isActive ? (highlight ? Colors.white : AppTheme.textPrimary) : AppTheme.textSecondary,
+                    color: isActive
+                        ? (highlight ? Colors.white : AppTheme.textPrimary)
+                        : AppTheme.textSecondary,
                     fontSize: 16,
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                   ),

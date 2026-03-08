@@ -32,9 +32,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
   void _submit() {
     if (_formKey.currentState?.validate() != true) return;
     context.read<AuthState>().loginAsUser(
-          email: _emailController.text.trim(),
-          name: _nameController.text.trim(),
-        );
+      email: _emailController.text.trim(),
+      name: _nameController.text.trim(),
+    );
     if (context.mounted) context.go(AppRouter.home);
   }
 
@@ -52,7 +52,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
             const SizedBox(height: 32),
             Text(
               'Inscription',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
@@ -69,7 +71,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 prefixIcon: const Icon(Icons.person_outline),
                 filled: true,
                 fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
@@ -88,7 +92,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 prefixIcon: const Icon(Icons.email_outlined),
                 filled: true,
                 fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
@@ -107,17 +113,24 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 hintText: '••••••••',
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: AppTheme.textSecondary),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: AppTheme.textSecondary,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                 ),
                 filled: true,
                 fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Choisissez un mot de passe';
+                if (v == null || v.trim().isEmpty)
+                  return 'Choisissez un mot de passe';
                 if (v.length < 6) return 'Au moins 6 caractères';
                 return null;
               },
@@ -128,7 +141,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.primaryRed,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const Text('S\'inscrire'),
             ),
@@ -136,7 +151,10 @@ class _InscriptionPageState extends State<InscriptionPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Déjà un compte ? ', style: TextStyle(color: AppTheme.textSecondary)),
+                Text(
+                  'Déjà un compte ? ',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
                 TextButton(
                   onPressed: () => context.go(AppRouter.connexion),
                   child: const Text('Se connecter'),

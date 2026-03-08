@@ -66,11 +66,16 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                 children: [
                   Text(
                     'Ajouter une nouvelle séance',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -84,7 +89,14 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                         label: 'Film',
                         value: _selectedFilmId,
                         hint: 'Sélectionner un film',
-                        items: mockFilms.map((f) => DropdownMenuItem(value: f.id, child: Text(f.title))).toList(),
+                        items: mockFilms
+                            .map(
+                              (f) => DropdownMenuItem(
+                                value: f.id,
+                                child: Text(f.title),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) => setState(() {
                           _selectedFilmId = v;
                         }),
@@ -94,7 +106,14 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                         label: 'Cinéma',
                         value: _selectedCinemaId,
                         hint: 'Sélectionner un cinéma',
-                        items: mockCinemas.map((c) => DropdownMenuItem(value: c.id, child: Text('${c.name} - ${c.city}'))).toList(),
+                        items: mockCinemas
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text('${c.name} - ${c.city}'),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) => setState(() {
                           _selectedCinemaId = v;
                           _selectedRoomId = null;
@@ -106,7 +125,14 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                         label: 'Salle',
                         value: _selectedRoomId,
                         hint: 'Sélectionner une salle',
-                        items: _rooms.map((r) => DropdownMenuItem(value: r.id, child: Text(r.name))).toList(),
+                        items: _rooms
+                            .map(
+                              (r) => DropdownMenuItem(
+                                value: r.id,
+                                child: Text(r.name),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) => setState(() {
                           _selectedRoomId = v;
                           _selectedSlot = null;
@@ -124,14 +150,22 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                           if (d != null) setState(() => _date = d);
                         },
                         icon: const Icon(Icons.calendar_today, size: 18),
-                        label: Text(_date != null ? '${_date!.day}/${_date!.month}/${_date!.year}' : 'Date (mm/jj/aaaa)'),
+                        label: Text(
+                          _date != null
+                              ? '${_date!.day}/${_date!.month}/${_date!.year}'
+                              : 'Date (mm/jj/aaaa)',
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Heure',
                         value: _selectedSlot,
                         hint: '--:--',
-                        items: _slots.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                        items: _slots
+                            .map(
+                              (s) => DropdownMenuItem(value: s, child: Text(s)),
+                            )
+                            .toList(),
                         onChanged: (v) => setState(() => _selectedSlot = v),
                       ),
                       const SizedBox(height: 12),
@@ -160,12 +194,16 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _priceController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: const InputDecoration(
                           labelText: 'Prix (€)',
                           filled: true,
                           fillColor: AppTheme.surfaceDark,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                       ),
@@ -177,7 +215,9 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                           labelText: 'Places disponibles',
                           filled: true,
                           fillColor: AppTheme.surfaceDark,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                       ),
@@ -187,18 +227,32 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                           Expanded(
                             child: FilledButton(
                               onPressed: () {
-                                if (_selectedFilmId == null || _selectedCinemaId == null || _selectedRoomId == null || _selectedSlot == null || _date == null) {
+                                if (_selectedFilmId == null ||
+                                    _selectedCinemaId == null ||
+                                    _selectedRoomId == null ||
+                                    _selectedSlot == null ||
+                                    _date == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Remplissez tous les champs'), backgroundColor: AppTheme.primaryRed),
+                                    const SnackBar(
+                                      content: Text(
+                                        'Remplissez tous les champs',
+                                      ),
+                                      backgroundColor: AppTheme.primaryRed,
+                                    ),
                                   );
                                   return;
                                 }
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Séance enregistrée (démo)'), backgroundColor: AppTheme.accentGreen),
+                                  const SnackBar(
+                                    content: Text('Séance enregistrée (démo)'),
+                                    backgroundColor: AppTheme.accentGreen,
+                                  ),
                                 );
                                 Navigator.of(context).pop();
                               },
-                              style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppTheme.primaryRed,
+                              ),
                               child: const Text('Enregistrer'),
                             ),
                           ),
@@ -236,7 +290,9 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
         labelText: label,
         filled: true,
         fillColor: AppTheme.surfaceDark,
-        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
       ),
       dropdownColor: AppTheme.cardDark,
       hint: Text(hint, style: const TextStyle(color: AppTheme.textSecondary)),

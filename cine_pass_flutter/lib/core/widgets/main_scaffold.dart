@@ -37,16 +37,28 @@ class _MainScaffoldState extends State<MainScaffold> {
         centerTitle: true,
         actions: [
           if (auth.isLoggedIn) ...[
-          IconButton(
-            icon: const Icon(Icons.favorite_rounded),
-            color: AppTheme.primaryRed,
-            onPressed: () => context.go(AppRouter.preferences),
-            tooltip: 'Préférences',
-          ),
-            TextButton(onPressed: () => context.go(AppRouter.home), child: const Text('Accueil')),
-            TextButton(onPressed: () => context.go(AppRouter.films), child: const Text('Films')),
-            TextButton(onPressed: () => context.go(AppRouter.events), child: const Text('Événements')),
-            TextButton(onPressed: () => context.go(AppRouter.billets), child: const Text('Billets')),
+            IconButton(
+              icon: const Icon(Icons.favorite_rounded),
+              color: AppTheme.primaryRed,
+              onPressed: () => context.go(AppRouter.preferences),
+              tooltip: 'Préférences',
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRouter.home),
+              child: const Text('Accueil'),
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRouter.films),
+              child: const Text('Films'),
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRouter.events),
+              child: const Text('Événements'),
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRouter.billets),
+              child: const Text('Billets'),
+            ),
             PopupMenuButton<String>(
               offset: const Offset(0, 48),
               child: const Padding(
@@ -70,8 +82,14 @@ class _MainScaffoldState extends State<MainScaffold> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'profil', child: Text('Voir mon profil')),
-                const PopupMenuItem(value: 'deconnexion', child: Text('Déconnexion')),
+                const PopupMenuItem(
+                  value: 'profil',
+                  child: Text('Voir mon profil'),
+                ),
+                const PopupMenuItem(
+                  value: 'deconnexion',
+                  child: Text('Déconnexion'),
+                ),
               ],
             ),
             if (auth.isAdmin) ...[
@@ -80,7 +98,9 @@ class _MainScaffoldState extends State<MainScaffold> {
                 padding: const EdgeInsets.only(right: 16),
                 child: FilledButton(
                   onPressed: () => context.go(AppRouter.admin),
-                  style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.primaryRed,
+                  ),
                   child: const Text('Espace admin'),
                 ),
               ),
@@ -95,7 +115,9 @@ class _MainScaffoldState extends State<MainScaffold> {
               padding: const EdgeInsets.only(right: 16),
               child: FilledButton(
                 onPressed: () => context.go(AppRouter.inscription),
-                style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryRed,
+                ),
                 child: const Text('Inscription'),
               ),
             ),

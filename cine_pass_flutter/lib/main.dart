@@ -28,10 +28,18 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthState>.value(value: AuthState.instance),
-        ChangeNotifierProvider<FavoritesState>.value(value: FavoritesState.instance),
-        ChangeNotifierProvider<PendingReservationState>.value(value: PendingReservationState.instance),
-        ChangeNotifierProvider<BilletsState>.value(value: BilletsState.instance),
-        ChangeNotifierProvider<ReservationState>.value(value: ReservationState.instance),
+        ChangeNotifierProvider<FavoritesState>.value(
+          value: FavoritesState.instance,
+        ),
+        ChangeNotifierProvider<PendingReservationState>.value(
+          value: PendingReservationState.instance,
+        ),
+        ChangeNotifierProvider<BilletsState>.value(
+          value: BilletsState.instance,
+        ),
+        ChangeNotifierProvider<ReservationState>.value(
+          value: ReservationState.instance,
+        ),
       ],
       child: const CinePassApp(),
     ),

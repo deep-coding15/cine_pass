@@ -31,7 +31,10 @@ class TicketTypePage extends StatelessWidget {
             },
             child: Row(
               children: [
-                const Icon(Icons.arrow_back_rounded, color: AppTheme.textSecondary),
+                const Icon(
+                  Icons.arrow_back_rounded,
+                  color: AppTheme.textSecondary,
+                ),
                 const SizedBox(width: 8),
                 Text('Retour', style: TextStyle(color: AppTheme.textSecondary)),
               ],
@@ -40,7 +43,9 @@ class TicketTypePage extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             'Type de billet',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 8),
           Text(
@@ -53,7 +58,9 @@ class TicketTypePage extends StatelessWidget {
           if (state.isEvent) ...[
             Text(
               'Vos billets',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
@@ -78,52 +85,67 @@ class TicketTypePage extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Options supplémentaires (billets Normaux uniquement)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 12),
-            ...state.eventTickets.asMap().entries.where((e) => !e.value.isVip).map((e) {
-              final i = e.key;
-              final t = e.value;
-              final opts = state.eventAvailableOptions;
-              return Card(
-                color: AppTheme.cardDark,
-                margin: const EdgeInsets.only(bottom: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Billet ${i + 1} (Normal)', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      if (opts.contains('parking'))
-                        _OptionTile(
-                          icon: Icons.local_parking_rounded,
-                          label: 'Parking',
-                          price: '3,00 €',
-                          value: t.optionParking,
-                          onChanged: (v) => state.setEventTicketOption(i, 'parking', v),
-                        ),
-                      if (opts.contains('popcorn'))
-                        _OptionTile(
-                          icon: Icons.lunch_dining_rounded,
-                          label: 'Popcorn',
-                          price: '5,00 €',
-                          value: t.optionPopcorn,
-                          onChanged: (v) => state.setEventTicketOption(i, 'popcorn', v),
-                        ),
-                      if (opts.contains('boisson'))
-                        _OptionTile(
-                          icon: Icons.local_drink_rounded,
-                          label: '1 boisson',
-                          price: '2,00 €',
-                          value: t.optionBoisson,
-                          onChanged: (v) => state.setEventTicketOption(i, 'boisson', v),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            }),
+            ...state.eventTickets
+                .asMap()
+                .entries
+                .where((e) => !e.value.isVip)
+                .map((e) {
+                  final i = e.key;
+                  final t = e.value;
+                  final opts = state.eventAvailableOptions;
+                  return Card(
+                    color: AppTheme.cardDark,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Billet ${i + 1} (Normal)',
+                            style: TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (opts.contains('parking'))
+                            _OptionTile(
+                              icon: Icons.local_parking_rounded,
+                              label: 'Parking',
+                              price: '3,00 €',
+                              value: t.optionParking,
+                              onChanged: (v) =>
+                                  state.setEventTicketOption(i, 'parking', v),
+                            ),
+                          if (opts.contains('popcorn'))
+                            _OptionTile(
+                              icon: Icons.lunch_dining_rounded,
+                              label: 'Popcorn',
+                              price: '5,00 €',
+                              value: t.optionPopcorn,
+                              onChanged: (v) =>
+                                  state.setEventTicketOption(i, 'popcorn', v),
+                            ),
+                          if (opts.contains('boisson'))
+                            _OptionTile(
+                              icon: Icons.local_drink_rounded,
+                              label: '1 boisson',
+                              price: '2,00 €',
+                              value: t.optionBoisson,
+                              onChanged: (v) =>
+                                  state.setEventTicketOption(i, 'boisson', v),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
             if (state.eventTickets.every((t) => t.isVip))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -135,7 +157,9 @@ class TicketTypePage extends StatelessWidget {
           ] else if (state.filmTickets.isNotEmpty) ...[
             Text(
               'Vos billets',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
@@ -160,52 +184,67 @@ class TicketTypePage extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Options supplémentaires (billets Normaux uniquement)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 12),
-            ...state.filmTickets.asMap().entries.where((e) => !e.value.isVip).map((e) {
-              final i = e.key;
-              final t = e.value;
-              final opts = state.seanceAvailableOptions;
-              return Card(
-                color: AppTheme.cardDark,
-                margin: const EdgeInsets.only(bottom: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Billet ${i + 1} (Normal)', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      if (opts.contains('parking'))
-                        _OptionTile(
-                          icon: Icons.local_parking_rounded,
-                          label: 'Parking',
-                          price: '3,00 €',
-                          value: t.optionParking,
-                          onChanged: (v) => state.setFilmTicketOption(i, 'parking', v),
-                        ),
-                      if (opts.contains('popcorn'))
-                        _OptionTile(
-                          icon: Icons.lunch_dining_rounded,
-                          label: 'Popcorn',
-                          price: '5,00 €',
-                          value: t.optionPopcorn,
-                          onChanged: (v) => state.setFilmTicketOption(i, 'popcorn', v),
-                        ),
-                      if (opts.contains('boisson'))
-                        _OptionTile(
-                          icon: Icons.local_drink_rounded,
-                          label: '1 boisson',
-                          price: '2,00 €',
-                          value: t.optionBoisson,
-                          onChanged: (v) => state.setFilmTicketOption(i, 'boisson', v),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            }),
+            ...state.filmTickets
+                .asMap()
+                .entries
+                .where((e) => !e.value.isVip)
+                .map((e) {
+                  final i = e.key;
+                  final t = e.value;
+                  final opts = state.seanceAvailableOptions;
+                  return Card(
+                    color: AppTheme.cardDark,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Billet ${i + 1} (Normal)',
+                            style: TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (opts.contains('parking'))
+                            _OptionTile(
+                              icon: Icons.local_parking_rounded,
+                              label: 'Parking',
+                              price: '3,00 €',
+                              value: t.optionParking,
+                              onChanged: (v) =>
+                                  state.setFilmTicketOption(i, 'parking', v),
+                            ),
+                          if (opts.contains('popcorn'))
+                            _OptionTile(
+                              icon: Icons.lunch_dining_rounded,
+                              label: 'Popcorn',
+                              price: '5,00 €',
+                              value: t.optionPopcorn,
+                              onChanged: (v) =>
+                                  state.setFilmTicketOption(i, 'popcorn', v),
+                            ),
+                          if (opts.contains('boisson'))
+                            _OptionTile(
+                              icon: Icons.local_drink_rounded,
+                              label: '1 boisson',
+                              price: '2,00 €',
+                              value: t.optionBoisson,
+                              onChanged: (v) =>
+                                  state.setFilmTicketOption(i, 'boisson', v),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
             if (state.filmTickets.every((t) => t.isVip))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -217,7 +256,9 @@ class TicketTypePage extends StatelessWidget {
           ] else ...[
             Text(
               'Choisir une formule',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 12),
             Row(
@@ -226,7 +267,8 @@ class TicketTypePage extends StatelessWidget {
                   child: _TicketTypeCard(
                     title: 'Normal',
                     description: 'Siège standard',
-                    priceLabel: '${state.pricePerSeat.toStringAsFixed(2)} € / place',
+                    priceLabel:
+                        '${state.pricePerSeat.toStringAsFixed(2)} € / place',
                     isSelected: state.ticketType == 'normal',
                     onTap: () => state.setTicketType('normal'),
                   ),
@@ -235,8 +277,10 @@ class TicketTypePage extends StatelessWidget {
                 Expanded(
                   child: _TicketTypeCard(
                     title: 'VIP',
-                    description: 'Siège confort, espace prioritaire. Inclut: parking, popcorn, siège prioritaire, 1 boisson offerte.',
-                    priceLabel: '${(state.pricePerSeat * 1.5).toStringAsFixed(2)} € / place',
+                    description:
+                        'Siège confort, espace prioritaire. Inclut: parking, popcorn, siège prioritaire, 1 boisson offerte.',
+                    priceLabel:
+                        '${(state.pricePerSeat * 1.5).toStringAsFixed(2)} € / place',
                     isSelected: state.ticketType == 'vip',
                     onTap: () => state.setTicketType('vip'),
                     isVip: true,
@@ -246,8 +290,12 @@ class TicketTypePage extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             Text(
-              state.ticketType == 'vip' ? 'Inclus dans votre formule VIP' : 'Options supplémentaires',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              state.ticketType == 'vip'
+                  ? 'Inclus dans votre formule VIP'
+                  : 'Options supplémentaires',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 12),
             state.ticketType == 'vip'
@@ -257,12 +305,19 @@ class TicketTypePage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          Icon(Icons.check_circle_rounded, color: AppTheme.accentGreen, size: 24),
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: AppTheme.accentGreen,
+                            size: 24,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               'Parking, popcorn, siège prioritaire et 1 boisson sont inclus dans le billet VIP.',
-                              style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],
@@ -273,7 +328,9 @@ class TicketTypePage extends StatelessWidget {
                     color: AppTheme.cardDark,
                     child: Column(
                       children: [
-                        if (state.seanceAvailableOptions.contains('parking')) ...[
+                        if (state.seanceAvailableOptions.contains(
+                          'parking',
+                        )) ...[
                           _OptionTile(
                             icon: Icons.local_parking_rounded,
                             label: 'Parking',
@@ -283,7 +340,9 @@ class TicketTypePage extends StatelessWidget {
                           ),
                           const Divider(height: 1, color: AppTheme.surfaceDark),
                         ],
-                        if (state.seanceAvailableOptions.contains('popcorn')) ...[
+                        if (state.seanceAvailableOptions.contains(
+                          'popcorn',
+                        )) ...[
                           _OptionTile(
                             icon: Icons.lunch_dining_rounded,
                             label: 'Popcorn',
@@ -313,11 +372,21 @@ class TicketTypePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Total estimé', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                    Text(
+                      'Total estimé',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       '${(state.isEvent ? state.totalEvent : state.totalFilm).toStringAsFixed(2)} €',
-                      style: TextStyle(color: AppTheme.accentGreen, fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: AppTheme.accentGreen,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -332,9 +401,16 @@ class TicketTypePage extends StatelessWidget {
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.primaryRed,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                 ),
-                child: Text(state.isEvent ? 'Continuer vers le paiement' : 'Choisir mes sièges'),
+                child: Text(
+                  state.isEvent
+                      ? 'Continuer vers le paiement'
+                      : 'Choisir mes sièges',
+                ),
               ),
             ],
           ),
@@ -397,7 +473,9 @@ class _EventBilletCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isVip ? _gold.withValues(alpha: 0.3) : AppTheme.surfaceDark,
+                  color: isVip
+                      ? _gold.withValues(alpha: 0.3)
+                      : AppTheme.surfaceDark,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -412,7 +490,11 @@ class _EventBilletCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 '${(isVip ? priceVip : priceNormal).toStringAsFixed(2)} €',
-                style: TextStyle(color: AppTheme.accentGreen, fontSize: 13, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: AppTheme.accentGreen,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -437,20 +519,62 @@ class _RecapCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (state.isEvent) ...[
-              Text(state.eventTitle ?? '', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+              Text(
+                state.eventTitle ?? '',
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('${state.eventLocation ?? ''} • ${state.eventDateTime ?? ''}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              Text(
+                '${state.eventLocation ?? ''} • ${state.eventDateTime ?? ''}',
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('${state.eventQuantity} place(s)', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              Text(
+                '${state.eventQuantity} place(s)',
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
             ] else ...[
-              Text(state.filmTitle ?? '', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+              Text(
+                state.filmTitle ?? '',
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('${state.cinemaName ?? ''} • ${state.room ?? ''}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              Text(
+                '${state.cinemaName ?? ''} • ${state.room ?? ''}',
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(state.dateTime ?? '', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              Text(
+                state.dateTime ?? '',
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
               if (state.filmTickets.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text('${state.filmTickets.length} place(s)', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                Text(
+                  '${state.filmTickets.length} place(s)',
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
               ],
             ],
           ],
@@ -490,7 +614,9 @@ class _TicketTypeCard extends StatelessWidget {
             color: AppTheme.cardDark,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? (isVip ? AppTheme.primaryRed : AppTheme.accentGreen) : AppTheme.surfaceDark,
+              color: isSelected
+                  ? (isVip ? AppTheme.primaryRed : AppTheme.accentGreen)
+                  : AppTheme.surfaceDark,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -499,12 +625,22 @@ class _TicketTypeCard extends StatelessWidget {
             children: [
               if (isVip)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryRed.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text('VIP', style: TextStyle(color: AppTheme.primaryRed, fontSize: 12, fontWeight: FontWeight.w600)),
+                  child: Text(
+                    'VIP',
+                    style: TextStyle(
+                      color: AppTheme.primaryRed,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               if (isVip) const SizedBox(height: 12),
               Text(
@@ -523,7 +659,11 @@ class _TicketTypeCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 priceLabel,
-                style: TextStyle(color: AppTheme.accentGreen, fontSize: 15, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: AppTheme.accentGreen,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -559,7 +699,14 @@ class _OptionTile extends StatelessWidget {
           const SizedBox(width: 12),
           Text(label, style: const TextStyle(color: AppTheme.textPrimary)),
           const Spacer(),
-          Text(price, style: TextStyle(color: AppTheme.accentGreen, fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(
+            price,
+            style: TextStyle(
+              color: AppTheme.accentGreen,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
       activeColor: AppTheme.primaryRed,

@@ -48,7 +48,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         children: [
           Text(
             'Tableau de bord',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -58,13 +60,41 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           const SizedBox(height: 32),
           Row(
             children: [
-              Expanded(child: _StatCard(title: 'Films actifs', value: '${_films.length}', icon: Icons.movie_rounded, color: AppTheme.primaryRed)),
+              Expanded(
+                child: _StatCard(
+                  title: 'Films actifs',
+                  value: '${_films.length}',
+                  icon: Icons.movie_rounded,
+                  color: AppTheme.primaryRed,
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _StatCard(title: 'Événements à venir', value: '${_events.length}', icon: Icons.calendar_today_rounded, color: Color(0xFF26A69A))),
+              Expanded(
+                child: _StatCard(
+                  title: 'Événements à venir',
+                  value: '${_events.length}',
+                  icon: Icons.calendar_today_rounded,
+                  color: Color(0xFF26A69A),
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _StatCard(title: 'Séances planifiées', value: '-', icon: Icons.schedule_rounded, color: Color(0xFF7E57C2))),
+              Expanded(
+                child: _StatCard(
+                  title: 'Séances planifiées',
+                  value: '-',
+                  icon: Icons.schedule_rounded,
+                  color: Color(0xFF7E57C2),
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _StatCard(title: 'Utilisateurs inscrits', value: '-', icon: Icons.people_rounded, color: AppTheme.accentGreen)),
+              Expanded(
+                child: _StatCard(
+                  title: 'Utilisateurs inscrits',
+                  value: '-',
+                  icon: Icons.people_rounded,
+                  color: AppTheme.accentGreen,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 40),
@@ -81,10 +111,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       children: [
                         Text(
                           'Films récents',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(color: AppTheme.textPrimary),
                         ),
                         const SizedBox(height: 16),
-                        ..._films.take(2).map(
+                        ..._films
+                            .take(2)
+                            .map(
                               (f) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: Row(
@@ -93,18 +126,36 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                       width: 48,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: Color(f.posterColor ?? 0xFF2D1B4E),
+                                        color: Color(
+                                          f.posterColor ?? 0xFF2D1B4E,
+                                        ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: const Icon(Icons.movie_rounded, color: Colors.white24),
+                                      child: const Icon(
+                                        Icons.movie_rounded,
+                                        color: Colors.white24,
+                                      ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Text(f.title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-                                          Text(f.genre, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                                          Text(
+                                            f.title,
+                                            style: const TextStyle(
+                                              color: AppTheme.textPrimary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            f.genre,
+                                            style: const TextStyle(
+                                              color: AppTheme.textSecondary,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -128,10 +179,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       children: [
                         Text(
                           'Événements à venir',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(color: AppTheme.textPrimary),
                         ),
                         const SizedBox(height: 16),
-                        ..._events.take(2).map(
+                        ..._events
+                            .take(2)
+                            .map(
                               (e) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: Row(
@@ -140,24 +194,45 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                       width: 48,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: Color(e.posterColor ?? 0xFF4E1B3D),
+                                        color: Color(
+                                          e.posterColor ?? 0xFF4E1B3D,
+                                        ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: const Icon(Icons.event_rounded, color: Colors.white24),
+                                      child: const Icon(
+                                        Icons.event_rounded,
+                                        color: Colors.white24,
+                                      ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Text(e.title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-                                          Text(e.city, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                                          Text(
+                                            e.title,
+                                            style: const TextStyle(
+                                              color: AppTheme.textPrimary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            e.city,
+                                            style: const TextStyle(
+                                              color: AppTheme.textSecondary,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
                                     Text(
                                       'Prix ${e.price.toInt()}€',
-                                      style: const TextStyle(color: AppTheme.accentGreen, fontSize: 13),
+                                      style: const TextStyle(
+                                        color: AppTheme.accentGreen,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -177,7 +252,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   final String title;
   final String value;
@@ -195,15 +275,31 @@ class _StatCard extends StatelessWidget {
             Container(
               width: 48,
               height: 48,
-              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Icon(icon, color: Colors.white, size: 26),
             ),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
-                Text(value, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 24, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ],

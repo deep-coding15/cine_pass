@@ -30,21 +30,30 @@ class ConfirmationPage extends StatelessWidget {
                   color: AppTheme.accentGreen,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_rounded, color: Colors.white, size: 48),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 48,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 'Merci pour votre réservation !',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                isEvent ? "Votre billet d'événement a été confirmé" : 'Votre billet de cinéma a été confirmé',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                isEvent
+                    ? "Votre billet d'événement a été confirmé"
+                    : 'Votre billet de cinéma a été confirmé',
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 16,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -57,7 +66,10 @@ class ConfirmationPage extends StatelessWidget {
                     children: [
                       Text(
                         'Numéro de réservation',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -71,18 +83,28 @@ class ConfirmationPage extends StatelessWidget {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(Icons.email_outlined, size: 18, color: AppTheme.textSecondary),
+                          Icon(
+                            Icons.email_outlined,
+                            size: 18,
+                            color: AppTheme.textSecondary,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Un email de confirmation vous a été envoyé',
-                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Text(
                         "Présentez votre billet électronique (QR code) à l'entrée",
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -94,7 +116,9 @@ class ConfirmationPage extends StatelessWidget {
                 children: [
                   FilledButton(
                     onPressed: () => context.go(AppRouter.billets),
-                    style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.primaryRed,
+                    ),
                     child: const Text('Voir mes billets'),
                   ),
                   const SizedBox(width: 16),
@@ -119,13 +143,17 @@ class ConfirmationPage extends StatelessWidget {
                   children: [
                     Text(
                       'Informations importantes :',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppTheme.textPrimary),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     _bullet('Arrivez 15 minutes avant le début de la séance'),
                     _bullet('Présentez votre QR code à scanner à l\'entrée'),
                     _bullet('Les billets sont non remboursables'),
-                    _bullet('Consultez vos billets dans la section "Mes billets"'),
+                    _bullet(
+                      'Consultez vos billets dans la section "Mes billets"',
+                    ),
                   ],
                 ),
               ),
@@ -143,7 +171,15 @@ class ConfirmationPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('• ', style: TextStyle(color: AppTheme.textSecondary)),
-          Expanded(child: Text(text, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14))),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ),
         ],
       ),
     );

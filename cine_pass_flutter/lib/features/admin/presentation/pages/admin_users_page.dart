@@ -19,7 +19,9 @@ class AdminUsersPage extends StatelessWidget {
         children: [
           Text(
             'Gestion des utilisateurs',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -35,7 +37,10 @@ class AdminUsersPage extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                headingTextStyle: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
+                headingTextStyle: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
                 dataTextStyle: const TextStyle(color: AppTheme.textPrimary),
                 columns: const [
                   DataColumn(label: Text('Utilisateur')),
@@ -48,77 +53,127 @@ class AdminUsersPage extends StatelessWidget {
                 rows: mockAdminUsers.map((u) {
                   return DataRow(
                     cells: [
-                      DataCell(Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: AppTheme.primaryRed,
-                            child: Text(
-                              u.name.isNotEmpty ? u.name[0].toUpperCase() : '?',
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      DataCell(
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: AppTheme.primaryRed,
+                              child: Text(
+                                u.name.isNotEmpty
+                                    ? u.name[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  u.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (u.phone != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    u.phone!,
+                                    style: const TextStyle(
+                                      color: AppTheme.textSecondary,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      DataCell(Text(u.email)),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: u.role == 'Admin'
+                                ? AppTheme.primaryRed.withValues(alpha: 0.2)
+                                : AppTheme.surfaceDark,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            u.role,
+                            style: TextStyle(
+                              color: u.role == 'Admin'
+                                  ? AppTheme.primaryRed
+                                  : AppTheme.textPrimary,
+                              fontSize: 12,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(u.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                              if (u.phone != null) ...[
-                                const SizedBox(height: 2),
-                                Text(u.phone!, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
-                              ],
-                            ],
-                          ),
-                        ],
-                      )),
-                      DataCell(Text(u.email)),
-                      DataCell(Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: u.role == 'Admin'
-                              ? AppTheme.primaryRed.withValues(alpha: 0.2)
-                              : AppTheme.surfaceDark,
-                          borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(
-                          u.role,
-                          style: TextStyle(
-                            color: u.role == 'Admin' ? AppTheme.primaryRed : AppTheme.textPrimary,
-                            fontSize: 12,
+                      ),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentGreen.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            u.status,
+                            style: const TextStyle(
+                              color: AppTheme.accentGreen,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
-                      )),
-                      DataCell(Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppTheme.accentGreen.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(u.status, style: const TextStyle(color: AppTheme.accentGreen, fontSize: 12)),
-                      )),
+                      ),
                       DataCell(Text(u.createdAt)),
-                      DataCell(Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.shield_outlined, size: 20, color: AppTheme.textSecondary),
-                            tooltip: 'Permissions',
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.block, size: 20, color: AppTheme.primaryRed),
-                            tooltip: 'Bloquer',
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.visibility_outlined, size: 20, color: AppTheme.textSecondary),
-                            tooltip: 'Voir',
-                          ),
-                        ],
-                      )),
+                      DataCell(
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.shield_outlined,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                              tooltip: 'Permissions',
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.block,
+                                size: 20,
+                                color: AppTheme.primaryRed,
+                              ),
+                              tooltip: 'Bloquer',
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.visibility_outlined,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                              tooltip: 'Voir',
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   );
                 }).toList(),
@@ -129,15 +184,27 @@ class AdminUsersPage extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _StatCard(title: 'Total utilisateurs', value: '$total', color: AppTheme.textPrimary),
+                child: _StatCard(
+                  title: 'Total utilisateurs',
+                  value: '$total',
+                  color: AppTheme.textPrimary,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _StatCard(title: 'Administrateurs', value: '$admins', color: AppTheme.primaryRed),
+                child: _StatCard(
+                  title: 'Administrateurs',
+                  value: '$admins',
+                  color: AppTheme.primaryRed,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _StatCard(title: 'Comptes actifs', value: '$actifs', color: AppTheme.accentGreen),
+                child: _StatCard(
+                  title: 'Comptes actifs',
+                  value: '$actifs',
+                  color: AppTheme.accentGreen,
+                ),
               ),
             ],
           ),
@@ -148,7 +215,11 @@ class AdminUsersPage extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.title, required this.value, required this.color});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.color,
+  });
 
   final String title;
   final String value;
@@ -165,9 +236,19 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+          Text(
+            title,
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+          ),
           const SizedBox(height: 8),
-          Text(value, style: TextStyle(color: color, fontSize: 28, fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );

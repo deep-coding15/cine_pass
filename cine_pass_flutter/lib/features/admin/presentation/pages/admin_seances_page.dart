@@ -21,7 +21,9 @@ class AdminSeancesPage extends StatelessWidget {
 
   /// Format court pour affichage tableau (ex. "07/03 à 14:00").
   static String _shortDate(String dateTime) {
-    final match = RegExp(r'(\d{1,2})\s+\w+\s+\d{4}\s+à\s+(\d{2}:\d{2})').firstMatch(dateTime);
+    final match = RegExp(
+      r'(\d{1,2})\s+\w+\s+\d{4}\s+à\s+(\d{2}:\d{2})',
+    ).firstMatch(dateTime);
     if (match != null) {
       final day = match.group(1)!.padLeft(2, '0');
       return '$day/03 à ${match.group(2)}';
@@ -45,20 +47,30 @@ class AdminSeancesPage extends StatelessWidget {
                 children: [
                   Text(
                     'Gestion des séances',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Gérez les séances de cinéma',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
               FilledButton.icon(
-                onPressed: () => showDialog(context: context, builder: (_) => const AdminAddSeanceDialog()),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => const AdminAddSeanceDialog(),
+                ),
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Nouvelle séance'),
-                style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryRed,
+                ),
               ),
             ],
           ),
@@ -71,7 +83,10 @@ class AdminSeancesPage extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                headingTextStyle: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
+                headingTextStyle: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
                 dataTextStyle: const TextStyle(color: AppTheme.textPrimary),
                 columns: const [
                   DataColumn(label: Text('Film')),
@@ -93,29 +108,54 @@ class AdminSeancesPage extends StatelessWidget {
                       DataCell(Text(s.room)),
                       DataCell(Text(_shortDate(s.dateTime))),
                       DataCell(Text(s.format)),
-                      DataCell(Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryRed.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(6),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryRed.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            s.type,
+                            style: const TextStyle(
+                              color: AppTheme.primaryRed,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
-                        child: Text(s.type, style: const TextStyle(color: AppTheme.primaryRed, fontSize: 12)),
-                      )),
+                      ),
                       DataCell(Text('${s.price.toStringAsFixed(2)} €')),
-                      DataCell(Text('${s.placesTotal - s.placesLeft}/${s.placesTotal}')),
-                      DataCell(Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.edit_outlined, size: 20, color: AppTheme.textSecondary),
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.delete_outline, size: 20, color: AppTheme.primaryRed),
-                          ),
-                        ],
-                      )),
+                      DataCell(
+                        Text(
+                          '${s.placesTotal - s.placesLeft}/${s.placesTotal}',
+                        ),
+                      ),
+                      DataCell(
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: AppTheme.primaryRed,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   );
                 }).toList(),

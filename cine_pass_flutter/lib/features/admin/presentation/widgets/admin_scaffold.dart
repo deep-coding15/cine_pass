@@ -11,7 +11,8 @@ class AdminScaffold extends StatelessWidget {
 
   bool _isActive(BuildContext context, String path) {
     final location = GoRouterState.of(context).uri.path;
-    return location.startsWith(path) || (path == '/admin' && (location == '/admin' || location == '/admin/'));
+    return location.startsWith(path) ||
+        (path == '/admin' && (location == '/admin' || location == '/admin/'));
   }
 
   @override
@@ -32,25 +33,79 @@ class AdminScaffold extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Espace Admin', style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Espace Admin',
+                          style: TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         SizedBox(height: 4),
-                        Text('CinePass', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                        Text(
+                          'CinePass',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   const Divider(color: AppTheme.textSecondary, height: 1),
-                  _AdminNavTile(icon: Icons.dashboard_rounded, label: 'Tableau de bord', isActive: _isActive(context, '/admin'), onTap: () => context.go(AppRouter.admin)),
-                  _AdminNavTile(icon: Icons.movie_rounded, label: 'Films', isActive: _isActive(context, '/admin/films'), onTap: () => context.go('/admin/films')),
-                  _AdminNavTile(icon: Icons.schedule_rounded, label: 'Séances', isActive: _isActive(context, '/admin/seances'), onTap: () => context.go('/admin/seances')),
-                  _AdminNavTile(icon: Icons.calendar_today_rounded, label: 'Événements', isActive: _isActive(context, '/admin/events'), onTap: () => context.go('/admin/events')),
-                  _AdminNavTile(icon: Icons.people_rounded, label: 'Utilisateurs', isActive: _isActive(context, '/admin/users'), onTap: () => context.go('/admin/users')),
-                  _AdminNavTile(icon: Icons.confirmation_number_rounded, label: 'Réservations', isActive: _isActive(context, '/admin/reservations'), onTap: () => context.go('/admin/reservations')),
-                  _AdminNavTile(icon: Icons.assessment_rounded, label: 'Rapport de statistiques', isActive: _isActive(context, '/admin/stats'), onTap: () => context.go('/admin/stats')),
+                  _AdminNavTile(
+                    icon: Icons.dashboard_rounded,
+                    label: 'Tableau de bord',
+                    isActive: _isActive(context, '/admin'),
+                    onTap: () => context.go(AppRouter.admin),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.movie_rounded,
+                    label: 'Films',
+                    isActive: _isActive(context, '/admin/films'),
+                    onTap: () => context.go('/admin/films'),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.schedule_rounded,
+                    label: 'Séances',
+                    isActive: _isActive(context, '/admin/seances'),
+                    onTap: () => context.go('/admin/seances'),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.calendar_today_rounded,
+                    label: 'Événements',
+                    isActive: _isActive(context, '/admin/events'),
+                    onTap: () => context.go('/admin/events'),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.people_rounded,
+                    label: 'Utilisateurs',
+                    isActive: _isActive(context, '/admin/users'),
+                    onTap: () => context.go('/admin/users'),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.confirmation_number_rounded,
+                    label: 'Réservations',
+                    isActive: _isActive(context, '/admin/reservations'),
+                    onTap: () => context.go('/admin/reservations'),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.assessment_rounded,
+                    label: 'Rapport de statistiques',
+                    isActive: _isActive(context, '/admin/stats'),
+                    onTap: () => context.go('/admin/stats'),
+                  ),
                   const Spacer(),
                   const Divider(color: AppTheme.textSecondary, height: 1),
                   ListTile(
-                    leading: const Icon(Icons.arrow_back_rounded, color: AppTheme.textSecondary),
-                    title: const Text('Retour à l\'app', style: TextStyle(color: AppTheme.textSecondary)),
+                    leading: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppTheme.textSecondary,
+                    ),
+                    title: const Text(
+                      'Retour à l\'app',
+                      style: TextStyle(color: AppTheme.textSecondary),
+                    ),
                     onTap: () => context.go(AppRouter.home),
                   ),
                 ],
@@ -65,7 +120,12 @@ class AdminScaffold extends StatelessWidget {
 }
 
 class _AdminNavTile extends StatelessWidget {
-  const _AdminNavTile({required this.icon, required this.label, required this.isActive, required this.onTap});
+  const _AdminNavTile({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String label;
@@ -86,7 +146,11 @@ class _AdminNavTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                Icon(icon, size: 22, color: isActive ? Colors.white : AppTheme.textSecondary),
+                Icon(
+                  icon,
+                  size: 22,
+                  color: isActive ? Colors.white : AppTheme.textSecondary,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   label,

@@ -38,12 +38,12 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
   }
 
   static InputDecoration _decoration(String hint) => InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: AppTheme.surfaceDark,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        labelStyle: const TextStyle(color: AppTheme.textSecondary),
-      );
+    hintText: hint,
+    filled: true,
+    fillColor: AppTheme.surfaceDark,
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +62,16 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                 children: [
                   Text(
                     'Ajouter un nouveau film',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -82,7 +87,8 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                           controller: _titleController,
                           decoration: _decoration('Titre du film'),
                           style: const TextStyle(color: AppTheme.textPrimary),
-                          validator: (v) => v?.trim().isEmpty == true ? 'Requis' : null,
+                          validator: (v) =>
+                              v?.trim().isEmpty == true ? 'Requis' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
@@ -103,7 +109,9 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                           keyboardType: TextInputType.number,
                           decoration: _decoration('Durée (min)'),
                           style: const TextStyle(color: AppTheme.textPrimary),
-                          validator: (v) => v == null || int.tryParse(v) == null ? 'Nombre requis' : null,
+                          validator: (v) => v == null || int.tryParse(v) == null
+                              ? 'Nombre requis'
+                              : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
@@ -149,8 +157,15 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                                   );
                                   if (d != null) setState(() => _startDate = d);
                                 },
-                                icon: const Icon(Icons.calendar_today, size: 18),
-                                label: Text(_startDate != null ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}' : 'Date de début'),
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  _startDate != null
+                                      ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
+                                      : 'Date de début',
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -165,8 +180,15 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                                   );
                                   if (d != null) setState(() => _endDate = d);
                                 },
-                                icon: const Icon(Icons.calendar_today, size: 18),
-                                label: Text(_endDate != null ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}' : 'Date de fin'),
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  _endDate != null
+                                      ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
+                                      : 'Date de fin',
+                                ),
                               ),
                             ),
                           ],
@@ -177,14 +199,20 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                             Expanded(
                               child: FilledButton(
                                 onPressed: () {
-                                  if (_formKey.currentState?.validate() == true) {
+                                  if (_formKey.currentState?.validate() ==
+                                      true) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Film enregistré (démo)'), backgroundColor: AppTheme.accentGreen),
+                                      const SnackBar(
+                                        content: Text('Film enregistré (démo)'),
+                                        backgroundColor: AppTheme.accentGreen,
+                                      ),
                                     );
                                     Navigator.of(context).pop();
                                   }
                                 },
-                                style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppTheme.primaryRed,
+                                ),
                                 child: const Text('Enregistrer'),
                               ),
                             ),

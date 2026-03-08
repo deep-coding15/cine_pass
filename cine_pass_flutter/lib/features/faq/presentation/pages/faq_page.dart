@@ -59,11 +59,17 @@ class FaqPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.help_outline_rounded, color: AppTheme.accentGreen, size: 32),
+              Icon(
+                Icons.help_outline_rounded,
+                color: AppTheme.accentGreen,
+                size: 32,
+              ),
               const SizedBox(width: 12),
               Text(
                 'Foire aux questions',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ],
           ),
@@ -95,7 +101,9 @@ class FaqPage extends StatelessWidget {
               children: [
                 Text(
                   'Vous n\'avez pas trouvé votre réponse ?',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -109,7 +117,10 @@ class FaqPage extends StatelessWidget {
                   label: const Text('Contacter le support'),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.primaryRed,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                   ),
                 ),
               ],
@@ -128,7 +139,11 @@ class _FaqItem {
 }
 
 class _FaqTile extends StatefulWidget {
-  const _FaqTile({required this.question, required this.answer, this.initialExpanded = false});
+  const _FaqTile({
+    required this.question,
+    required this.answer,
+    this.initialExpanded = false,
+  });
 
   final String question;
   final String answer;
@@ -177,7 +192,9 @@ class _FaqTileState extends State<_FaqTile> {
                       ),
                     ),
                     Icon(
-                      _expanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                      _expanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
                       color: AppTheme.textSecondary,
                       size: 28,
                     ),
@@ -187,7 +204,11 @@ class _FaqTileState extends State<_FaqTile> {
                   const SizedBox(height: 12),
                   Text(
                     widget.answer,
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 14, height: 1.4),
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ],

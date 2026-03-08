@@ -12,7 +12,9 @@ class ProfilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = AuthState.instance;
     if (!auth.isLoggedIn) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => context.go(AppRouter.home));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => context.go(AppRouter.home),
+      );
       return const SizedBox.shrink();
     }
 
@@ -24,8 +26,8 @@ class ProfilPage extends StatelessWidget {
           Text(
             'Mon profil',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 24),
           Card(
@@ -39,7 +41,11 @@ class ProfilPage extends StatelessWidget {
                     backgroundColor: AppTheme.primaryRed,
                     child: Text(
                       auth.userInitials,
-                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 20),
@@ -73,7 +79,10 @@ class ProfilPage extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.edit_rounded, color: AppTheme.textSecondary),
+                    icon: const Icon(
+                      Icons.edit_rounded,
+                      color: AppTheme.textSecondary,
+                    ),
                     tooltip: 'Modifier',
                   ),
                 ],
@@ -90,13 +99,27 @@ class ProfilPage extends StatelessWidget {
                 children: [
                   Text(
                     'Informations personnelles',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  _infoRow(Icons.person_outline_rounded, 'Nom complet', auth.userName),
+                  _infoRow(
+                    Icons.person_outline_rounded,
+                    'Nom complet',
+                    auth.userName,
+                  ),
                   _infoRow(Icons.email_outlined, 'Email', auth.userEmail),
-                  _infoRow(Icons.phone_outlined, 'Téléphone', '+33 6 12 34 56 78'),
-                  _infoRow(Icons.calendar_today_rounded, 'Date de naissance', '15 mai 1990'),
+                  _infoRow(
+                    Icons.phone_outlined,
+                    'Téléphone',
+                    '+33 6 12 34 56 78',
+                  ),
+                  _infoRow(
+                    Icons.calendar_today_rounded,
+                    'Date de naissance',
+                    '15 mai 1990',
+                  ),
                 ],
               ),
             ),
@@ -111,16 +134,44 @@ class ProfilPage extends StatelessWidget {
                 children: [
                   Text(
                     'Préférences',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  const Text('Genres préférés', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  const Text(
+                    'Genres préférés',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Wrap(spacing: 8, runSpacing: 8, children: [_tag('Action', AppTheme.surfaceDark), _tag('Science-Fiction', AppTheme.surfaceDark)]),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _tag('Action', AppTheme.surfaceDark),
+                      _tag('Science-Fiction', AppTheme.surfaceDark),
+                    ],
+                  ),
                   const SizedBox(height: 12),
-                  const Text('Villes préférées', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  const Text(
+                    'Villes préférées',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Wrap(spacing: 8, runSpacing: 8, children: [_tag('Paris', AppTheme.surfaceDark), _tag('Lyon', AppTheme.surfaceDark)]),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _tag('Paris', AppTheme.surfaceDark),
+                      _tag('Lyon', AppTheme.surfaceDark),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -133,14 +184,29 @@ class ProfilPage extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.edit_rounded, color: AppTheme.textPrimary),
-                    title: const Text('Modifier mon profil', style: TextStyle(color: AppTheme.textPrimary)),
+                    leading: const Icon(
+                      Icons.edit_rounded,
+                      color: AppTheme.textPrimary,
+                    ),
+                    title: const Text(
+                      'Modifier mon profil',
+                      style: TextStyle(color: AppTheme.textPrimary),
+                    ),
                     onTap: () {},
                   ),
                   const Divider(color: AppTheme.textSecondary, height: 1),
                   ListTile(
-                    leading: const Icon(Icons.logout_rounded, color: AppTheme.primaryRed),
-                    title: const Text('Se déconnecter', style: TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.w600)),
+                    leading: const Icon(
+                      Icons.logout_rounded,
+                      color: AppTheme.primaryRed,
+                    ),
+                    title: const Text(
+                      'Se déconnecter',
+                      style: TextStyle(
+                        color: AppTheme.primaryRed,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     onTap: () {
                       auth.logout();
                       if (context.mounted) context.go(AppRouter.home);
@@ -158,8 +224,14 @@ class ProfilPage extends StatelessWidget {
   Widget _tag(String label, Color bg) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-      child: Text(label, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+      ),
     );
   }
 
@@ -170,8 +242,16 @@ class ProfilPage extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: AppTheme.textSecondary),
           const SizedBox(width: 12),
-          Text('$label: ', style: const TextStyle(color: AppTheme.textSecondary)),
-          Expanded(child: Text(value, style: const TextStyle(color: AppTheme.textPrimary))),
+          Text(
+            '$label: ',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: AppTheme.textPrimary),
+            ),
+          ),
         ],
       ),
     );

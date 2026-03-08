@@ -56,14 +56,20 @@ class _EventDetailPageState extends State<EventDetailPage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
     }
     if (_error != null || _event == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_error ?? 'Événement introuvable', style: const TextStyle(color: AppTheme.textPrimary), textAlign: TextAlign.center),
+            Text(
+              _error ?? 'Événement introuvable',
+              style: const TextStyle(color: AppTheme.textPrimary),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             FilledButton(onPressed: _load, child: const Text('Réessayer')),
           ],
@@ -83,17 +89,29 @@ class _EventDetailPageState extends State<EventDetailPage> {
             onTap: () => context.go(AppRouter.events),
             child: Row(
               children: [
-                const Icon(Icons.arrow_back_rounded, color: AppTheme.textSecondary),
+                const Icon(
+                  Icons.arrow_back_rounded,
+                  color: AppTheme.textSecondary,
+                ),
                 const SizedBox(width: 8),
-                const Text('Retour', style: TextStyle(color: AppTheme.textSecondary)),
+                const Text(
+                  'Retour',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
                 const SizedBox(width: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryRed,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(event.category, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                  child: Text(
+                    event.category,
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -111,7 +129,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     end: Alignment.bottomRight,
                     colors: [
                       Color(event.posterColor ?? 0xFF4E1B3D),
-                      Color(event.posterColor ?? 0xFF4E1B3D).withValues(alpha: 0.5),
+                      Color(
+                        event.posterColor ?? 0xFF4E1B3D,
+                      ).withValues(alpha: 0.5),
                     ],
                   ),
                 ),
@@ -160,12 +180,16 @@ class _EventDetailPageState extends State<EventDetailPage> {
                           children: [
                             Text(
                               'Description',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(color: AppTheme.textPrimary),
                             ),
                             const SizedBox(height: 12),
                             Text(
                               event.description ?? '',
-                              style: const TextStyle(color: AppTheme.textSecondary, height: 1.5),
+                              style: const TextStyle(
+                                color: AppTheme.textSecondary,
+                                height: 1.5,
+                              ),
                             ),
                           ],
                         ),
@@ -181,21 +205,44 @@ class _EventDetailPageState extends State<EventDetailPage> {
                           children: [
                             Text(
                               'Informations pratiques',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(color: AppTheme.textPrimary),
                             ),
                             const SizedBox(height: 16),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.location_on_outlined, size: 20, color: AppTheme.textSecondary),
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  size: 20,
+                                  color: AppTheme.textSecondary,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(event.location, style: const TextStyle(color: AppTheme.textPrimary)),
-                                      Text(event.address ?? '', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
-                                      Text(event.city, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                                      Text(
+                                        event.location,
+                                        style: const TextStyle(
+                                          color: AppTheme.textPrimary,
+                                        ),
+                                      ),
+                                      Text(
+                                        event.address ?? '',
+                                        style: const TextStyle(
+                                          color: AppTheme.textSecondary,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      Text(
+                                        event.city,
+                                        style: const TextStyle(
+                                          color: AppTheme.textSecondary,
+                                          fontSize: 13,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -204,31 +251,57 @@ class _EventDetailPageState extends State<EventDetailPage> {
                             const SizedBox(height: 12),
                             Row(
                               children: [
-                                Icon(Icons.calendar_today_rounded, size: 20, color: AppTheme.textSecondary),
+                                Icon(
+                                  Icons.calendar_today_rounded,
+                                  size: 20,
+                                  color: AppTheme.textSecondary,
+                                ),
                                 const SizedBox(width: 8),
-                                Text(event.date, style: const TextStyle(color: AppTheme.textSecondary)),
+                                Text(
+                                  event.date,
+                                  style: const TextStyle(
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.access_time_rounded, size: 20, color: AppTheme.textSecondary),
+                                Icon(
+                                  Icons.access_time_rounded,
+                                  size: 20,
+                                  color: AppTheme.textSecondary,
+                                ),
                                 const SizedBox(width: 8),
-                                Text(event.time, style: const TextStyle(color: AppTheme.textSecondary)),
+                                Text(
+                                  event.time,
+                                  style: const TextStyle(
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.people_outline_rounded, size: 20, color: AppTheme.textSecondary),
+                                Icon(
+                                  Icons.people_outline_rounded,
+                                  size: 20,
+                                  color: AppTheme.textSecondary,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '${event.placesLeft} places disponibles',
-                                  style: const TextStyle(color: AppTheme.textPrimary),
+                                  style: const TextStyle(
+                                    color: AppTheme.textPrimary,
+                                  ),
                                 ),
                                 Text(
                                   ' sur ${event.placesTotal} au total',
-                                  style: const TextStyle(color: AppTheme.textSecondary),
+                                  style: const TextStyle(
+                                    color: AppTheme.textSecondary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -252,7 +325,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       children: [
                         Text(
                           'Prix par billet',
-                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -266,13 +342,18 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         const SizedBox(height: 24),
                         const Text(
                           'Nombre de billets',
-                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
                             IconButton.filled(
-                              onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                              onPressed: _quantity > 1
+                                  ? () => setState(() => _quantity--)
+                                  : null,
                               style: IconButton.styleFrom(
                                 backgroundColor: AppTheme.surfaceDark,
                                 foregroundColor: AppTheme.textPrimary,
@@ -280,14 +361,21 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               icon: const Icon(Icons.remove),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
                               child: Text(
                                 '$_quantity',
-                                style: const TextStyle(color: AppTheme.textPrimary, fontSize: 20),
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontSize: 20,
+                                ),
                               ),
                             ),
                             IconButton.filled(
-                              onPressed: _quantity < maxQty ? () => setState(() => _quantity++) : null,
+                              onPressed: _quantity < maxQty
+                                  ? () => setState(() => _quantity++)
+                                  : null,
                               style: IconButton.styleFrom(
                                 backgroundColor: AppTheme.surfaceDark,
                                 foregroundColor: AppTheme.textPrimary,
@@ -298,25 +386,46 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         ),
                         Text(
                           'Maximum : ${event.placesLeft} billets',
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         const Divider(color: AppTheme.textSecondary),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Sous-total', style: TextStyle(color: AppTheme.textSecondary)),
-                            Text('${total.toStringAsFixed(2)} €', style: const TextStyle(color: AppTheme.textPrimary)),
+                            const Text(
+                              'Sous-total',
+                              style: TextStyle(color: AppTheme.textSecondary),
+                            ),
+                            Text(
+                              '${total.toStringAsFixed(2)} €',
+                              style: const TextStyle(
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Total', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                            const Text(
+                              'Total',
+                              style: TextStyle(
+                                color: AppTheme.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             Text(
                               '${total.toStringAsFixed(2)} €',
-                              style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.bold, fontSize: 18),
+                              style: const TextStyle(
+                                color: AppTheme.accentGreen,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
                           ],
                         ),
@@ -327,22 +436,28 @@ class _EventDetailPageState extends State<EventDetailPage> {
                             onPressed: () {
                               final auth = context.read<AuthState>();
                               if (!auth.isLoggedIn) {
-                                context.read<PendingReservationState>().setPendingEvent(
-                                  eventId: event.id,
-                                  eventTitle: event.title,
-                                  eventLocation: '${event.location}, ${event.city}',
-                                  eventDateTime: '${event.date} à ${event.time}',
-                                  quantity: _quantity,
-                                  pricePerTicket: event.price,
-                                  availableOptions: event.availableOptions ?? [],
-                                );
+                                context
+                                    .read<PendingReservationState>()
+                                    .setPendingEvent(
+                                      eventId: event.id,
+                                      eventTitle: event.title,
+                                      eventLocation:
+                                          '${event.location}, ${event.city}',
+                                      eventDateTime:
+                                          '${event.date} à ${event.time}',
+                                      quantity: _quantity,
+                                      pricePerTicket: event.price,
+                                      availableOptions:
+                                          event.availableOptions ?? [],
+                                    );
                                 context.go(AppRouter.connexion);
                                 return;
                               }
                               ReservationState.instance.setEventReservation(
                                 eventId: event.id,
                                 eventTitle: event.title,
-                                eventLocation: '${event.location}, ${event.city}',
+                                eventLocation:
+                                    '${event.location}, ${event.city}',
                                 eventDateTime: '${event.date} à ${event.time}',
                                 quantity: _quantity,
                                 pricePerTicket: event.price,
@@ -360,7 +475,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         const SizedBox(height: 8),
                         const Text(
                           'Vous pourrez payer lors de l\'étape suivante',
-                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -386,7 +504,11 @@ class _EventFavoriteHeart extends StatelessWidget {
     final isFav = favorites.isEventFavorite(eventId);
     return IconButton(
       onPressed: () => favorites.toggleEvent(eventId),
-      icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: isFav ? AppTheme.primaryRed : Colors.white70, size: 28),
+      icon: Icon(
+        isFav ? Icons.favorite : Icons.favorite_border,
+        color: isFav ? AppTheme.primaryRed : Colors.white70,
+        size: 28,
+      ),
       style: IconButton.styleFrom(backgroundColor: Colors.black38),
     );
   }

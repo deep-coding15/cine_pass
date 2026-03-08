@@ -35,7 +35,12 @@ String audienceForFilmId(String id) {
 }
 
 class MockCinema {
-  MockCinema({required this.id, required this.name, required this.city, required this.rooms});
+  MockCinema({
+    required this.id,
+    required this.name,
+    required this.city,
+    required this.rooms,
+  });
   final String id;
   final String name;
   final String city;
@@ -43,7 +48,11 @@ class MockCinema {
 }
 
 class MockRoom {
-  MockRoom({required this.id, required this.name, required this.availableSlots});
+  MockRoom({
+    required this.id,
+    required this.name,
+    required this.availableSlots,
+  });
   final String id;
   final String name;
   final List<String> availableSlots;

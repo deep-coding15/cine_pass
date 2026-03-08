@@ -13,7 +13,8 @@ class BilletsState extends ChangeNotifier {
   bool isCancelled(String billetId) => _cancelledIds.contains(billetId);
 
   /// Pourcentage de remboursement au moment de l'annulation (0, 50, 80 ou 100).
-  int? getRefundPercentWhenCancelled(String billetId) => _cancelledRefundPercent[billetId];
+  int? getRefundPercentWhenCancelled(String billetId) =>
+      _cancelledRefundPercent[billetId];
 
   void cancel(String billetId, int refundPercent) {
     _cancelledIds.add(billetId);

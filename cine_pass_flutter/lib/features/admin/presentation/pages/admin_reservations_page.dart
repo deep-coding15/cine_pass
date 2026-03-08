@@ -15,7 +15,9 @@ class AdminReservationsPage extends StatelessWidget {
         children: [
           Text(
             'Réservations',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -30,44 +32,189 @@ class AdminReservationsPage extends StatelessWidget {
               child: DataTable(
                 headingRowColor: WidgetStateProperty.all(AppTheme.surfaceDark),
                 columns: const [
-                  DataColumn(label: Text('Résa', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Utilisateur', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Titre', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Lieu / Salle', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Date séance', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Billets', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Montant', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Statut', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
-                  DataColumn(label: Text('Date résa', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))),
+                  DataColumn(
+                    label: Text(
+                      'Résa',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Utilisateur',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Titre',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Lieu / Salle',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Date séance',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Billets',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Montant',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Statut',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Date résa',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ],
                 rows: mockAdminReservations.map((r) {
                   return DataRow(
                     cells: [
-                      DataCell(Text('#${r.id}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13))),
-                      DataCell(Text(r.userEmail, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13))),
-                      DataCell(Text(r.title, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13))),
-                      DataCell(Text(r.room != null ? '${r.location}\n${r.room}' : r.location, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13))),
-                      DataCell(Text(r.dateTime, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13))),
-                      DataCell(Text('${r.ticketCount}', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13))),
-                      DataCell(Text('${r.totalAmount.toStringAsFixed(2)} €', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 13))),
+                      DataCell(
+                        Text(
+                          '#${r.id}',
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          r.userEmail,
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          r.title,
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          r.room != null
+                              ? '${r.location}\n${r.room}'
+                              : r.location,
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          r.dateTime,
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          '${r.ticketCount}',
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          '${r.totalAmount.toStringAsFixed(2)} €',
+                          style: const TextStyle(
+                            color: AppTheme.accentGreen,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
                       DataCell(
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: r.status == 'confirmed' ? AppTheme.accentGreen.withValues(alpha: 0.2) : AppTheme.textSecondary.withValues(alpha: 0.2),
+                            color: r.status == 'confirmed'
+                                ? AppTheme.accentGreen.withValues(alpha: 0.2)
+                                : AppTheme.textSecondary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             r.status == 'confirmed' ? 'Confirmée' : 'Annulée',
                             style: TextStyle(
-                              color: r.status == 'confirmed' ? AppTheme.accentGreen : AppTheme.textSecondary,
+                              color: r.status == 'confirmed'
+                                  ? AppTheme.accentGreen
+                                  : AppTheme.textSecondary,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
-                      DataCell(Text(_formatDate(r.createdAt), style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13))),
+                      DataCell(
+                        Text(
+                          _formatDate(r.createdAt),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
                     ],
                   );
                 }).toList(),

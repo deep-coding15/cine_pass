@@ -78,8 +78,8 @@ class BilletsPage extends StatelessWidget {
           Text(
             'Mes billets',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -103,12 +103,17 @@ class _BilletCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final billetsState = context.watch<BilletsState>();
     final cancelled = billetsState.isCancelled(billet.id);
-    final canCancel = !cancelled && canCancelReservation(billet.sessionDateTime);
+    final canCancel =
+        !cancelled && canCancelReservation(billet.sessionDateTime);
     final refundPercent = getRefundPercent(billet.sessionDateTime);
-    final refundWhenCancelled = billetsState.getRefundPercentWhenCancelled(billet.id);
+    final refundWhenCancelled = billetsState.getRefundPercentWhenCancelled(
+      billet.id,
+    );
 
     return Card(
-      color: cancelled ? AppTheme.cardDark.withValues(alpha: 0.6) : AppTheme.cardDark,
+      color: cancelled
+          ? AppTheme.cardDark.withValues(alpha: 0.6)
+          : AppTheme.cardDark,
       margin: const EdgeInsets.only(bottom: 20),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -125,7 +130,9 @@ class _BilletCard extends StatelessWidget {
                         child: Text(
                           billet.title,
                           style: TextStyle(
-                            color: cancelled ? AppTheme.textSecondary : AppTheme.textPrimary,
+                            color: cancelled
+                                ? AppTheme.textSecondary
+                                : AppTheme.textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -133,29 +140,51 @@ class _BilletCard extends StatelessWidget {
                       ),
                       if (cancelled)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppTheme.textSecondary.withValues(alpha: 0.3),
+                            color: AppTheme.textSecondary.withValues(
+                              alpha: 0.3,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text('Annulée', style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w600, fontSize: 12)),
+                          child: const Text(
+                            'Annulée',
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Réservation #${billet.id}',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           billet.location,
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ],
@@ -163,11 +192,18 @@ class _BilletCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_rounded, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         billet.dateTime,
-                        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -175,36 +211,61 @@ class _BilletCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.meeting_room_outlined, size: 16, color: AppTheme.textSecondary),
+                        Icon(
+                          Icons.meeting_room_outlined,
+                          size: 16,
+                          color: AppTheme.textSecondary,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'Salle : ${billet.room}',
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
                   ],
                   const SizedBox(height: 10),
-                  if (billet.ticketTypes != null && billet.ticketTypes!.isNotEmpty) ...[
+                  if (billet.ticketTypes != null &&
+                      billet.ticketTypes!.isNotEmpty) ...[
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 6,
                       runSpacing: 6,
                       children: [
-                        Icon(Icons.confirmation_number_outlined, size: 16, color: AppTheme.textSecondary),
-                        Text('Type : ', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                        Icon(
+                          Icons.confirmation_number_outlined,
+                          size: 16,
+                          color: AppTheme.textSecondary,
+                        ),
+                        Text(
+                          'Type : ',
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
                         ...billet.ticketTypes!.asMap().entries.map((e) {
                           final isVip = e.value == 'VIP';
                           return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: isVip ? AppTheme.primaryRed.withValues(alpha: 0.2) : AppTheme.surfaceDark,
+                              color: isVip
+                                  ? AppTheme.primaryRed.withValues(alpha: 0.2)
+                                  : AppTheme.surfaceDark,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               'Billet ${e.key + 1} ${e.value}',
                               style: TextStyle(
-                                color: isVip ? AppTheme.primaryRed : AppTheme.textPrimary,
+                                color: isVip
+                                    ? AppTheme.primaryRed
+                                    : AppTheme.textPrimary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -218,18 +279,37 @@ class _BilletCard extends StatelessWidget {
                   if (billet.seats != null && billet.seats!.isNotEmpty) ...[
                     Row(
                       children: [
-                        Icon(Icons.event_seat_rounded, size: 16, color: AppTheme.textSecondary),
+                        Icon(
+                          Icons.event_seat_rounded,
+                          size: 16,
+                          color: AppTheme.textSecondary,
+                        ),
                         const SizedBox(width: 6),
-                        const Text('Sièges : ', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                        const Text(
+                          'Sièges : ',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
                         ...billet.seats!.map(
                           (s) => Container(
                             margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               border: Border.all(color: AppTheme.primaryRed),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: Text(s, style: const TextStyle(color: AppTheme.primaryRed, fontSize: 13)),
+                            child: Text(
+                              s,
+                              style: const TextStyle(
+                                color: AppTheme.primaryRed,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -237,11 +317,18 @@ class _BilletCard extends StatelessWidget {
                   ] else if (billet.ticketCount != null) ...[
                     Row(
                       children: [
-                        Icon(Icons.confirmation_number_outlined, size: 16, color: AppTheme.textSecondary),
+                        Icon(
+                          Icons.confirmation_number_outlined,
+                          size: 16,
+                          color: AppTheme.textSecondary,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           '${billet.ticketCount} billet(s)',
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
@@ -250,7 +337,13 @@ class _BilletCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Montant total', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                      const Text(
+                        'Montant total',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
                       Text(
                         '${billet.totalAmount.toStringAsFixed(2)} €',
                         style: const TextStyle(
@@ -265,43 +358,71 @@ class _BilletCard extends StatelessWidget {
                   if (cancelled && refundWhenCancelled != null) ...[
                     Text(
                       'Remboursement $refundWhenCancelled % (sous 5-10 jours)',
-                      style: TextStyle(color: AppTheme.accentGreen, fontSize: 13),
+                      style: TextStyle(
+                        color: AppTheme.accentGreen,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                   ] else if (canCancel) ...[
                     Text(
                       'Annulable : remboursement $refundPercent % si annulation maintenant',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     OutlinedButton.icon(
                       onPressed: () {
-                        final percent = getRefundPercent(billet.sessionDateTime);
+                        final percent = getRefundPercent(
+                          billet.sessionDateTime,
+                        );
                         billetsState.cancel(billet.id, percent);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Réservation annulée. Remboursement de $percent % sous 5-10 jours.')),
+                          SnackBar(
+                            content: Text(
+                              'Réservation annulée. Remboursement de $percent % sous 5-10 jours.',
+                            ),
+                          ),
                         );
                       },
                       icon: const Icon(Icons.cancel_outlined, size: 18),
                       label: const Text('Annuler la réservation'),
-                      style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primaryRed, side: const BorderSide(color: AppTheme.primaryRed)),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.primaryRed,
+                        side: const BorderSide(color: AppTheme.primaryRed),
+                      ),
                     ),
                     const SizedBox(height: 12),
-                  ] else if (!cancelled && !canCancel && DateTime.now().isBefore(billet.sessionDateTime)) ...[
+                  ] else if (!cancelled &&
+                      !canCancel &&
+                      DateTime.now().isBefore(billet.sessionDateTime)) ...[
                     Text(
                       'Annulation non possible (moins de 2 h avant la séance)',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                     const SizedBox(height: 12),
                   ],
                   if (!cancelled)
                     Row(
                       children: [
-                        Icon(Icons.check_circle_rounded, size: 18, color: AppTheme.accentGreen),
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 18,
+                          color: AppTheme.accentGreen,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'Valide',
-                          style: TextStyle(color: AppTheme.accentGreen, fontSize: 14, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppTheme.accentGreen,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
@@ -310,52 +431,61 @@ class _BilletCard extends StatelessWidget {
             ),
             const SizedBox(width: 20),
             if (!cancelled)
-            InkWell(
-              onTap: () => _showQrFullScreen(context, billet),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    QrImageView(
-                      data: 'CINEPASS-${billet.id}',
-                      version: QrVersions.auto,
-                      size: 100,
-                      backgroundColor: Colors.white,
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Scannez à l\'entrée',
-                          style: TextStyle(color: Colors.black87, fontSize: 11),
+              InkWell(
+                onTap: () => _showQrFullScreen(context, billet),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      QrImageView(
+                        data: 'CINEPASS-${billet.id}',
+                        version: QrVersions.auto,
+                        size: 100,
+                        backgroundColor: Colors.white,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Scannez à l\'entrée',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.touch_app_rounded,
+                            size: 14,
+                            color: Colors.black54,
+                          ),
+                        ],
+                      ),
+                      if ((billet.seats != null && billet.seats!.length > 1) ||
+                          (billet.ticketCount != null &&
+                              billet.ticketCount! > 1)) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '1 QR code pour toute la réservation',
+                          style: TextStyle(color: Colors.black54, fontSize: 10),
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.touch_app_rounded, size: 14, color: Colors.black54),
                       ],
-                    ),
-                    if ((billet.seats != null && billet.seats!.length > 1) || (billet.ticketCount != null && billet.ticketCount! > 1)) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
-                        '1 QR code pour toute la réservation',
-                        style: TextStyle(color: Colors.black54, fontSize: 10),
-                        textAlign: TextAlign.center,
+                        'Appuyez pour agrandir',
+                        style: TextStyle(color: Colors.black38, fontSize: 9),
                       ),
                     ],
-                    const SizedBox(height: 2),
-                    Text(
-                      'Appuyez pour agrandir',
-                      style: TextStyle(color: Colors.black38, fontSize: 9),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            )
+              )
             else
               Container(
                 padding: const EdgeInsets.all(12),
@@ -366,9 +496,19 @@ class _BilletCard extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.cancel_rounded, size: 48, color: AppTheme.textSecondary),
+                    Icon(
+                      Icons.cancel_rounded,
+                      size: 48,
+                      color: AppTheme.textSecondary,
+                    ),
                     const SizedBox(height: 6),
-                    Text('Annulée', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                    Text(
+                      'Annulée',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -44,10 +44,14 @@ class ReservationState extends ChangeNotifier {
   bool _optionParking = false;
   bool _optionPopcorn = false;
   bool _optionBoisson = false; // 1 boisson gazeuse offerte
-  List<EventTicketChoice> _eventTickets = []; // un par place pour les événements
-  List<EventTicketChoice> _filmTickets = []; // un par place pour les films (même logique qu'événements)
-  List<String> _eventAvailableOptions = []; // options définies par l'admin pour l'événement
-  List<String> _seanceAvailableOptions = []; // options définies par l'admin pour la séance (film)
+  List<EventTicketChoice> _eventTickets =
+      []; // un par place pour les événements
+  List<EventTicketChoice> _filmTickets =
+      []; // un par place pour les films (même logique qu'événements)
+  List<String> _eventAvailableOptions =
+      []; // options définies par l'admin pour l'événement
+  List<String> _seanceAvailableOptions =
+      []; // options définies par l'admin pour la séance (film)
   static const double _priceParking = 3.0;
   static const double _pricePopcorn = 5.0;
   static const double _priceBoisson = 2.0;
@@ -75,28 +79,41 @@ class ReservationState extends ChangeNotifier {
   bool get optionParking => _optionParking;
   bool get optionPopcorn => _optionPopcorn;
   bool get optionBoisson => _optionBoisson;
-  double get extrasTotal => (_optionParking ? _priceParking : 0) + (_optionPopcorn ? _pricePopcorn : 0) + (_optionBoisson ? _priceBoisson : 0);
+  double get extrasTotal =>
+      (_optionParking ? _priceParking : 0) +
+      (_optionPopcorn ? _pricePopcorn : 0) +
+      (_optionBoisson ? _priceBoisson : 0);
+
   /// VIP inclut parking, popcorn, siège prioritaire, 1 boisson — pas de suppléments à ajouter.
   double get extrasTotalForDisplay => ticketType == 'vip' ? 0 : extrasTotal;
-  double get basePricePerSeat => _ticketType == 'vip' ? _pricePerSeat * 1.5 : _pricePerSeat;
+  double get basePricePerSeat =>
+      _ticketType == 'vip' ? _pricePerSeat * 1.5 : _pricePerSeat;
 
   List<EventTicketChoice> get eventTickets => List.unmodifiable(_eventTickets);
   List<EventTicketChoice> get filmTickets => List.unmodifiable(_filmTickets);
-  List<String> get eventAvailableOptions => List.unmodifiable(_eventAvailableOptions);
-  List<String> get seanceAvailableOptions => List.unmodifiable(_seanceAvailableOptions);
+  List<String> get eventAvailableOptions =>
+      List.unmodifiable(_eventAvailableOptions);
+  List<String> get seanceAvailableOptions =>
+      List.unmodifiable(_seanceAvailableOptions);
 
   double get totalFilm {
     if (_filmTickets.isNotEmpty) {
       double sum = 0;
       for (final t in _filmTickets) {
         final base = t.isVip ? _pricePerSeat * 1.5 : _pricePerSeat;
-        final opts = t.isVip ? 0.0 : (t.optionParking ? _priceParking : 0) + (t.optionPopcorn ? _pricePopcorn : 0) + (t.optionBoisson ? _priceBoisson : 0);
+        final opts = t.isVip
+            ? 0.0
+            : (t.optionParking ? _priceParking : 0) +
+                  (t.optionPopcorn ? _pricePopcorn : 0) +
+                  (t.optionBoisson ? _priceBoisson : 0);
         sum += base + opts;
       }
       return sum;
     }
     if (_selectedSeats.isEmpty) return 0;
-    final base = (_ticketType == 'vip' ? _pricePerSeat * 1.5 : _pricePerSeat) * _selectedSeats.length;
+    final base =
+        (_ticketType == 'vip' ? _pricePerSeat * 1.5 : _pricePerSeat) *
+        _selectedSeats.length;
     return base + (_ticketType == 'vip' ? 0 : extrasTotal);
   }
 
@@ -104,7 +121,11 @@ class ReservationState extends ChangeNotifier {
     double sum = 0;
     for (final t in _eventTickets) {
       final base = t.isVip ? _eventPricePerTicket * 1.5 : _eventPricePerTicket;
-      final opts = t.isVip ? 0.0 : (t.optionParking ? _priceParking : 0) + (t.optionPopcorn ? _pricePopcorn : 0) + (t.optionBoisson ? _priceBoisson : 0);
+      final opts = t.isVip
+          ? 0.0
+          : (t.optionParking ? _priceParking : 0) +
+                (t.optionPopcorn ? _pricePopcorn : 0) +
+                (t.optionBoisson ? _priceBoisson : 0);
       sum += base + opts;
     }
     return sum;
@@ -135,8 +156,12 @@ class ReservationState extends ChangeNotifier {
     _format = format;
     _type = type;
     _pricePerSeat = pricePerSeat;
-    _seanceAvailableOptions = availableOptions ?? ['parking', 'popcorn', 'boisson'];
-    _filmTickets = List.generate(quantity, (_) => EventTicketChoice(isVip: false));
+    _seanceAvailableOptions =
+        availableOptions ?? ['parking', 'popcorn', 'boisson'];
+    _filmTickets = List.generate(
+      quantity,
+      (_) => EventTicketChoice(isVip: false),
+    );
     _selectedSeats = [];
     _eventId = null;
     _eventTitle = null;
@@ -185,8 +210,12 @@ class ReservationState extends ChangeNotifier {
     _eventDateTime = eventDateTime;
     _eventQuantity = quantity;
     _eventPricePerTicket = pricePerTicket;
-    _eventAvailableOptions = availableOptions ?? ['parking', 'popcorn', 'boisson'];
-    _eventTickets = List.generate(quantity, (_) => EventTicketChoice(isVip: false));
+    _eventAvailableOptions =
+        availableOptions ?? ['parking', 'popcorn', 'boisson'];
+    _eventTickets = List.generate(
+      quantity,
+      (_) => EventTicketChoice(isVip: false),
+    );
     _filmId = null;
     _filmTickets = [];
     _selectedSeats = [];

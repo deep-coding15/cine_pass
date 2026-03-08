@@ -24,7 +24,9 @@ class AuthState extends ChangeNotifier {
     _isLoggedIn = true;
     _isAdmin = false;
     _userName = name?.trim().isNotEmpty == true ? name! : 'Marie Dubois';
-    _userEmail = email?.trim().isNotEmpty == true ? email! : 'marie.dubois@email.com';
+    _userEmail = email?.trim().isNotEmpty == true
+        ? email!
+        : 'marie.dubois@email.com';
     notifyListeners();
   }
 

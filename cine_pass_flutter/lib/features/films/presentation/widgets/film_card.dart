@@ -60,11 +60,18 @@ class FilmCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.schedule_rounded, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${film.durationMinutes} min',
-                        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -72,7 +79,8 @@ class FilmCard extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: () => context.push(AppRouter.filmDetailPath(film.id)),
+                      onPressed: () =>
+                          context.push(AppRouter.filmDetailPath(film.id)),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppTheme.primaryRed,
                         foregroundColor: Colors.white,

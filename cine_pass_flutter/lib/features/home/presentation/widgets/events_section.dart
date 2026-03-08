@@ -47,14 +47,20 @@ class _EventsSectionState extends State<EventsSection> {
               Text(
                 'Événements à venir',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
+                  color: AppTheme.textPrimary,
+                ),
               ),
               TextButton.icon(
                 onPressed: () => context.go(AppRouter.events),
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18, color: AppTheme.textSecondary),
+                icon: const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 18,
+                  color: AppTheme.textSecondary,
+                ),
                 label: const Text('Voir tous les événements'),
-                style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.textSecondary,
+                ),
               ),
             ],
           ),

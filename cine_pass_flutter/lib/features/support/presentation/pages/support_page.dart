@@ -20,7 +20,9 @@ class SupportPage extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 'Support client',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ],
           ),
@@ -38,10 +40,15 @@ class SupportPage extends StatelessWidget {
                   _ContactCard(
                     icon: Icons.email_outlined,
                     title: 'Email',
-                    description: 'Envoyez-nous un email, nous répondons sous 24h',
+                    description:
+                        'Envoyez-nous un email, nous répondons sous 24h',
                     child: SelectableText(
                       'support@cinepass.com',
-                      style: TextStyle(color: AppTheme.accentGreen, fontSize: 15, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: AppTheme.accentGreen,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -51,7 +58,11 @@ class SupportPage extends StatelessWidget {
                     description: 'Du lundi au vendredi, 9h-18h',
                     child: SelectableText(
                       '+33 1 23 45 67 89',
-                      style: TextStyle(color: AppTheme.accentGreen, fontSize: 15, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: AppTheme.accentGreen,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -63,7 +74,9 @@ class SupportPage extends StatelessWidget {
                       onPressed: () {},
                       icon: const Icon(Icons.chat_rounded, size: 18),
                       label: const Text('Démarrer une conversation'),
-                      style: OutlinedButton.styleFrom(foregroundColor: AppTheme.accentGreen),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.accentGreen,
+                      ),
                     ),
                   ),
                 ],
@@ -84,12 +97,16 @@ class SupportPage extends StatelessWidget {
                       children: [
                         Text(
                           'Questions fréquentes',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: AppTheme.textPrimary),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Consultez notre FAQ pour trouver rapidement des réponses aux questions les plus courantes.',
-                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         TextButton.icon(
@@ -112,10 +129,14 @@ class SupportPage extends StatelessWidget {
                       children: [
                         Text(
                           'Horaires d\'ouverture',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: AppTheme.textPrimary),
                         ),
                         const SizedBox(height: 12),
-                        _OpeningRow(day: 'Lundi - Vendredi', hours: '9h00 - 18h00'),
+                        _OpeningRow(
+                          day: 'Lundi - Vendredi',
+                          hours: '9h00 - 18h00',
+                        ),
                         _OpeningRow(day: 'Samedi', hours: '10h00 - 16h00'),
                         _OpeningRow(day: 'Dimanche', hours: 'Fermé'),
                       ],
@@ -177,7 +198,11 @@ class _ContactCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -205,8 +230,14 @@ class _OpeningRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(day, style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
-          Text(hours, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14)),
+          Text(
+            day,
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+          ),
+          Text(
+            hours,
+            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -238,7 +269,9 @@ class _MessageFormState extends State<_MessageForm> {
     if (_formKey.currentState?.validate() == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Message envoyé ! Nous vous répondrons sous 24h.'),
+          content: const Text(
+            'Message envoyé ! Nous vous répondrons sous 24h.',
+          ),
           backgroundColor: AppTheme.accentGreen,
           behavior: SnackBarBehavior.floating,
         ),
@@ -271,7 +304,9 @@ class _MessageFormState extends State<_MessageForm> {
           children: [
             Text(
               'Envoyez-nous un message',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 20),
             TextFormField(
@@ -324,7 +359,10 @@ class _MessageFormState extends State<_MessageForm> {
               onPressed: _submit,
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.primaryRed,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
               ),
               child: const Text('Envoyer le message'),
             ),
