@@ -9,5 +9,15 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+cinePass:
+  - getFilms:
+  - getFilmById:
+  - getSeancesForFilm:
+  - getCinemas:
+  - getEvents:
+  - getEventById:
+  - getCities:
+  - getGenres:
+  - getEventCategories:
 greeting:
   - hello:

@@ -16,16 +16,38 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
-import 'greetings/greeting.dart' as _i5;
-import 'cine_pass/film_response.dart' as _i6;
-import 'cine_pass/seance_response.dart' as _i7;
-import 'cine_pass/event_response.dart' as _i8;
-import 'cine_pass/cinema_response.dart' as _i9;
-export 'greetings/greeting.dart';
+import 'cine_pass/cinema_response.dart' as _i5;
+import 'cine_pass/event_response.dart' as _i6;
+import 'cine_pass/film_response.dart' as _i7;
+import 'cine_pass/seance_response.dart' as _i8;
+import 'cinema.dart' as _i9;
+import 'evenement.dart' as _i10;
+import 'film.dart' as _i11;
+import 'seance.dart' as _i12;
+import 'cine_pass_row.dart' as _i13;
+import 'greetings/greeting.dart' as _i14;
+import 'salle.dart' as _i15;
+import 'siege.dart' as _i16;
+import 'package:cine_pass_server/src/generated/cine_pass/film_response.dart'
+    as _i17;
+import 'package:cine_pass_server/src/generated/cine_pass/seance_response.dart'
+    as _i18;
+import 'package:cine_pass_server/src/generated/cine_pass/cinema_response.dart'
+    as _i19;
+import 'package:cine_pass_server/src/generated/cine_pass/event_response.dart'
+    as _i20;
+export 'cine_pass/cinema_response.dart';
+export 'cine_pass/event_response.dart';
 export 'cine_pass/film_response.dart';
 export 'cine_pass/seance_response.dart';
-export 'cine_pass/event_response.dart';
-export 'cine_pass/cinema_response.dart';
+export 'cinema.dart';
+export 'evenement.dart';
+export 'film.dart';
+export 'seance.dart';
+export 'cine_pass_row.dart';
+export 'greetings/greeting.dart';
+export 'salle.dart';
+export 'siege.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -35,6 +57,487 @@ class Protocol extends _i1.SerializationManagerServer {
   static final Protocol _instance = Protocol._();
 
   static final List<_i2.TableDefinition> targetTableDefinitions = [
+    _i2.TableDefinition(
+      name: 'cine_pass_cinema',
+      dartName: 'Cinema',
+      schema: 'public',
+      module: 'cine_pass',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'gen_random_uuid()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'nom',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'ville',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'adresse',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'codePostal',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_cinema_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'cine_pass_evenement',
+      dartName: 'Evenement',
+      schema: 'public',
+      module: 'cine_pass',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'gen_random_uuid()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'titre',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'categorie',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'description',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lieu',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'adresse',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'ville',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'eventDate',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'eventTime',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'placesTotal',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'prixBase',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _i2.ColumnDefinition(
+          name: 'posterColor',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'posterUrl',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'availableOptions',
+          columnType: _i2.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_evenement_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'cine_pass_film',
+      dartName: 'Film',
+      schema: 'public',
+      module: 'cine_pass',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'gen_random_uuid()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'titre',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'genre',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'dureeMinutes',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'synopsis',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'directeur',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'casting',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'posterColor',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'posterUrl',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'dateSortie',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'dateFin',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'audience',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_film_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'cine_pass_salle',
+      dartName: 'Salle',
+      schema: 'public',
+      module: 'cine_pass',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'gen_random_uuid()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'cinemaId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'nom',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'capacite',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_salle_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'cine_pass_seance',
+      dartName: 'Seance',
+      schema: 'public',
+      module: 'cine_pass',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'gen_random_uuid()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'filmId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'salleId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'debutAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'finAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'format',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'VF\'::text',
+        ),
+        _i2.ColumnDefinition(
+          name: 'type',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'2D\'::text',
+        ),
+        _i2.ColumnDefinition(
+          name: 'prixBase',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _i2.ColumnDefinition(
+          name: 'availableOptions',
+          columnType: _i2.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_seance_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'cine_pass_siege',
+      dartName: 'Siege',
+      schema: 'public',
+      module: 'cine_pass',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'gen_random_uuid()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'salleId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'rangee',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'numero',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_siege_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
     ..._i3.Protocol.targetTableDefinitions,
     ..._i4.Protocol.targetTableDefinitions,
     ..._i2.Protocol.targetTableDefinitions,
@@ -67,11 +570,113 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
 
-    if (t == _i5.Greeting) {
-      return _i5.Greeting.fromJson(data) as T;
+    if (t == _i5.CinemaResponse) {
+      return _i5.CinemaResponse.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i5.Greeting?>()) {
-      return (data != null ? _i5.Greeting.fromJson(data) : null) as T;
+    if (t == _i6.EventResponse) {
+      return _i6.EventResponse.fromJson(data) as T;
+    }
+    if (t == _i7.FilmResponse) {
+      return _i7.FilmResponse.fromJson(data) as T;
+    }
+    if (t == _i8.SeanceResponse) {
+      return _i8.SeanceResponse.fromJson(data) as T;
+    }
+    if (t == _i9.Cinema) {
+      return _i9.Cinema.fromJson(data) as T;
+    }
+    if (t == _i10.Evenement) {
+      return _i10.Evenement.fromJson(data) as T;
+    }
+    if (t == _i11.Film) {
+      return _i11.Film.fromJson(data) as T;
+    }
+    if (t == _i12.Seance) {
+      return _i12.Seance.fromJson(data) as T;
+    }
+    if (t == _i13.CinePassRow) {
+      return _i13.CinePassRow.fromJson(data) as T;
+    }
+    if (t == _i14.Greeting) {
+      return _i14.Greeting.fromJson(data) as T;
+    }
+    if (t == _i15.Salle) {
+      return _i15.Salle.fromJson(data) as T;
+    }
+    if (t == _i16.Siege) {
+      return _i16.Siege.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i5.CinemaResponse?>()) {
+      return (data != null ? _i5.CinemaResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i6.EventResponse?>()) {
+      return (data != null ? _i6.EventResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i7.FilmResponse?>()) {
+      return (data != null ? _i7.FilmResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i8.SeanceResponse?>()) {
+      return (data != null ? _i8.SeanceResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.Cinema?>()) {
+      return (data != null ? _i9.Cinema.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i10.Evenement?>()) {
+      return (data != null ? _i10.Evenement.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i11.Film?>()) {
+      return (data != null ? _i11.Film.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i12.Seance?>()) {
+      return (data != null ? _i12.Seance.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i13.CinePassRow?>()) {
+      return (data != null ? _i13.CinePassRow.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i14.Greeting?>()) {
+      return (data != null ? _i14.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i15.Salle?>()) {
+      return (data != null ? _i15.Salle.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i16.Siege?>()) {
+      return (data != null ? _i16.Siege.fromJson(data) : null) as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == _i1.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
+          as T;
+    }
+    if (t == List<_i17.FilmResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i17.FilmResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i18.SeanceResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i18.SeanceResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i19.CinemaResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i19.CinemaResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i20.EventResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i20.EventResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     try {
       return _i3.Protocol().deserialize<T>(data, t);
@@ -87,11 +692,18 @@ class Protocol extends _i1.SerializationManagerServer {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
-      _i5.Greeting => 'Greeting',
-      _i6.FilmResponse => 'FilmResponse',
-      _i7.SeanceResponse => 'SeanceResponse',
-      _i8.EventResponse => 'EventResponse',
-      _i9.CinemaResponse => 'CinemaResponse',
+      _i5.CinemaResponse => 'CinemaResponse',
+      _i6.EventResponse => 'EventResponse',
+      _i7.FilmResponse => 'FilmResponse',
+      _i8.SeanceResponse => 'SeanceResponse',
+      _i9.Cinema => 'Cinema',
+      _i10.Evenement => 'Evenement',
+      _i11.Film => 'Film',
+      _i12.Seance => 'Seance',
+      _i13.CinePassRow => 'CinePassRow',
+      _i14.Greeting => 'Greeting',
+      _i15.Salle => 'Salle',
+      _i16.Siege => 'Siege',
       _ => null,
     };
   }
@@ -106,8 +718,30 @@ class Protocol extends _i1.SerializationManagerServer {
     }
 
     switch (data) {
-      case _i5.Greeting():
+      case _i5.CinemaResponse():
+        return 'CinemaResponse';
+      case _i6.EventResponse():
+        return 'EventResponse';
+      case _i7.FilmResponse():
+        return 'FilmResponse';
+      case _i8.SeanceResponse():
+        return 'SeanceResponse';
+      case _i9.Cinema():
+        return 'Cinema';
+      case _i10.Evenement():
+        return 'Evenement';
+      case _i11.Film():
+        return 'Film';
+      case _i12.Seance():
+        return 'Seance';
+      case _i13.CinePassRow():
+        return 'CinePassRow';
+      case _i14.Greeting():
         return 'Greeting';
+      case _i15.Salle():
+        return 'Salle';
+      case _i16.Siege():
+        return 'Siege';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -130,20 +764,41 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
-    if (dataClassName == 'Greeting') {
-      return deserialize<_i5.Greeting>(data['data']);
-    }
-    if (dataClassName == 'FilmResponse') {
-      return deserialize<_i6.FilmResponse>(data['data']);
-    }
-    if (dataClassName == 'SeanceResponse') {
-      return deserialize<_i7.SeanceResponse>(data['data']);
+    if (dataClassName == 'CinemaResponse') {
+      return deserialize<_i5.CinemaResponse>(data['data']);
     }
     if (dataClassName == 'EventResponse') {
-      return deserialize<_i8.EventResponse>(data['data']);
+      return deserialize<_i6.EventResponse>(data['data']);
     }
-    if (dataClassName == 'CinemaResponse') {
-      return deserialize<_i9.CinemaResponse>(data['data']);
+    if (dataClassName == 'FilmResponse') {
+      return deserialize<_i7.FilmResponse>(data['data']);
+    }
+    if (dataClassName == 'SeanceResponse') {
+      return deserialize<_i8.SeanceResponse>(data['data']);
+    }
+    if (dataClassName == 'Cinema') {
+      return deserialize<_i9.Cinema>(data['data']);
+    }
+    if (dataClassName == 'Evenement') {
+      return deserialize<_i10.Evenement>(data['data']);
+    }
+    if (dataClassName == 'Film') {
+      return deserialize<_i11.Film>(data['data']);
+    }
+    if (dataClassName == 'Seance') {
+      return deserialize<_i12.Seance>(data['data']);
+    }
+    if (dataClassName == 'CinePassRow') {
+      return deserialize<_i13.CinePassRow>(data['data']);
+    }
+    if (dataClassName == 'Greeting') {
+      return deserialize<_i14.Greeting>(data['data']);
+    }
+    if (dataClassName == 'Salle') {
+      return deserialize<_i15.Salle>(data['data']);
+    }
+    if (dataClassName == 'Siege') {
+      return deserialize<_i16.Siege>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -179,6 +834,20 @@ class Protocol extends _i1.SerializationManagerServer {
       if (table != null) {
         return table;
       }
+    }
+    switch (t) {
+      case _i9.Cinema:
+        return _i9.Cinema.t;
+      case _i10.Evenement:
+        return _i10.Evenement.t;
+      case _i11.Film:
+        return _i11.Film.t;
+      case _i12.Seance:
+        return _i12.Seance.t;
+      case _i15.Salle:
+        return _i15.Salle.t;
+      case _i16.Siege:
+        return _i16.Siege.t;
     }
     return null;
   }
