@@ -8,9 +8,18 @@ Ce dossier contient le **schéma SQL métier** de CinePass pour des **données r
 - Les tables Serverpod (dont `serverpod_auth_core_user`) doivent déjà exister (migrations Serverpod déjà appliquées).
 - Exécuter `cine_pass_schema.sql` sur la base (manuellement ou via un script de déploiement).
 
-Exemple :
+**Si le serveur signale que les tables ne correspondent pas au schéma cible** (colonnes ou index manquants), supprimer les tables métier puis réappliquer le schéma :
 
 ```bash
+# Avec Docker (depuis cine_pass_server)
+Get-Content schema/drop_cine_pass_tables.sql -Raw | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+Get-Content schema/cine_pass_schema.sql -Raw | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+```
+
+Exemple sans Docker :
+
+```bash
+psql -U postgres -d votre_base -f schema/drop_cine_pass_tables.sql
 psql -U postgres -d votre_base -f schema/cine_pass_schema.sql
 ```
 

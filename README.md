@@ -75,20 +75,23 @@ cine_pass_flutter/
 
 ## 🚀 Lancer le projet
 
+**Après un clone**, il faut une fois refaire la config et les migrations (mot de passe non versionné, base vide). → Voir **[cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md)** pour le détail et pourquoi.
+
 ```bash
-# 1. Configurer la base de données
-psql -U postgres -c "CREATE DATABASE cine_pass;"
-
-# 2. Configurer les mots de passe
-cp cine_pass_server/config/passwords.yaml.example cine_pass_server/config/passwords.yaml
-
-# 3. Installer les dépendances
-cd cine_pass_server && dart pub get
-cd ../cine_pass_client && dart pub get
-cd ../cine_pass_flutter && flutter pub get
-
-# 4. Appliquer les migrations
+# 1. Démarrer Postgres (Docker)
 cd cine_pass_server
+docker compose up --build --detach
+
+# 2. Configurer les mots de passe (fichier non versionné)
+cp config/passwords.yaml.example config/passwords.yaml
+# Éditer config/passwords.yaml : development.database = mervy (mot de passe Docker)
+
+# 3. Installer les dépendances (à la racine ou dans chaque package)
+dart pub get
+cd ../cine_pass_flutter && flutter pub get
+cd ../cine_pass_server
+
+# 4. Appliquer les migrations (obligatoire après un clone)
 dart run bin/main.dart --apply-migrations
 
 # 5. Lancer le serveur
@@ -105,7 +108,7 @@ flutter run -d chrome
 
 1. **Ne jamais modifier** les fichiers dans `generated/` et `cine_pass_client/`
 2. **Toujours lancer** `serverpod generate` après modification d'un `.spy.yaml`
-3. **Ne jamais commiter** `passwords.yaml`
+3. **Ne jamais commiter** `passwords.yaml` (après un clone : copier `passwords.yaml.example` en `passwords.yaml`)
 4. **Toujours créer une branche** avant de travailler : `git checkout -b feature/ma-fonctionnalite`
 5. **Tester le serveur** avant de pousser sur `main`
 6. **Ne pas mélanger** les tâches des autres personnes

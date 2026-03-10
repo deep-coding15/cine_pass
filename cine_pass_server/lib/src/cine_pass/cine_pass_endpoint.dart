@@ -10,7 +10,12 @@ class CinePassEndpoint extends Endpoint {
   Future<List<FilmResponse>> getFilms(Session session) async {
     try {
       final result = await session.db.unsafeQuery(
-        r'SELECT id, titre, genre, duree_minutes, synopsis, directeur, casting, poster_color FROM cine_pass_film ORDER BY titre',
+        r'''
+        SELECT "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
+               "casting", "posterColor"
+        FROM "cine_pass_film"
+        ORDER BY "titre"
+        ''',
       );
       return result.map((row) => _rowToFilmResponse(row)).toList();
     } catch (e, st) {
@@ -28,7 +33,12 @@ class CinePassEndpoint extends Endpoint {
   Future<FilmResponse?> getFilmById(Session session, String id) async {
     try {
       final result = await session.db.unsafeQuery(
-        r'SELECT id, titre, genre, duree_minutes, synopsis, directeur, casting, poster_color FROM cine_pass_film WHERE id = @id',
+        r'''
+        SELECT "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
+               "casting", "posterColor"
+        FROM "cine_pass_film"
+        WHERE "id" = @id
+        ''',
         parameters: QueryParameters.named({'id': id}),
       );
       if (result.isEmpty) return null;
@@ -45,14 +55,23 @@ class CinePassEndpoint extends Endpoint {
   ) async {
     try {
       const sql = r"""
-      SELECT s.id, s.debut_at, s.fin_at, s.format, s.type, s.prix_base, s.available_options,
-             c.nom AS cinema_nom, c.ville AS cinema_ville, c.adresse AS cinema_adresse,
-             sal.nom AS salle_nom, sal.capacite AS salle_capacite
-      FROM cine_pass_seance s
-      JOIN cine_pass_salle sal ON sal.id = s.salle_id
-      JOIN cine_pass_cinema c ON c.id = sal.cinema_id
-      WHERE s.film_id = (@filmId)::uuid
-      ORDER BY s.debut_at
+      SELECT s."id",
+             s."debutAt",
+             s."finAt",
+             s."format",
+             s."type",
+             s."prixBase",
+             s."availableOptions",
+             c."nom"   AS cinema_nom,
+             c."ville" AS cinema_ville,
+             c."adresse" AS cinema_adresse,
+             sal."nom" AS salle_nom,
+             sal."capacite" AS salle_capacite
+      FROM "cine_pass_seance" s
+      JOIN "cine_pass_salle" sal ON sal."id" = s."salleId"
+      JOIN "cine_pass_cinema" c ON c."id" = sal."cinemaId"
+      WHERE s."filmId" = (@filmId)::uuid
+      ORDER BY s."debutAt"
       """;
       final result = await session.db.unsafeQuery(
         sql,
@@ -74,7 +93,7 @@ class CinePassEndpoint extends Endpoint {
   Future<List<CinemaResponse>> getCinemas(Session session) async {
     try {
       final result = await session.db.unsafeQuery(
-        r'SELECT id, nom, ville, adresse FROM cine_pass_cinema ORDER BY ville, nom',
+        r'SELECT "id", "nom", "ville", "adresse" FROM "cine_pass_cinema" ORDER BY "ville", "nom"',
       );
       return result.map((row) => _rowToCinemaResponse(row)).toList();
     } catch (_) {
@@ -87,11 +106,11 @@ class CinePassEndpoint extends Endpoint {
     try {
       final result = await session.db.unsafeQuery(
         r'''
-      SELECT id, titre, categorie, description, lieu, adresse, ville,
-             event_date, event_time, places_total, prix_base, poster_color, available_options
-      FROM cine_pass_evenement
-      WHERE event_date >= CURRENT_DATE
-      ORDER BY event_date, event_time
+      SELECT "id", "titre", "categorie", "description", "lieu", "adresse", "ville",
+             "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "availableOptions"
+      FROM "cine_pass_evenement"
+      WHERE "eventDate" >= CURRENT_DATE
+      ORDER BY "eventDate", "eventTime"
       ''',
       );
       return result.map((row) => _rowToEventResponse(row)).toList();
@@ -111,9 +130,9 @@ class CinePassEndpoint extends Endpoint {
     try {
       final result = await session.db.unsafeQuery(
         r"""
-      SELECT id, titre, categorie, description, lieu, adresse, ville,
-             event_date, event_time, places_total, prix_base, poster_color, available_options
-      FROM cine_pass_evenement WHERE id = (@id)::uuid
+      SELECT "id", "titre", "categorie", "description", "lieu", "adresse", "ville",
+             "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "availableOptions"
+      FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid
       """,
         parameters: QueryParameters.named({'id': id}),
       );
