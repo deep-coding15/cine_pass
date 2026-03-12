@@ -33,6 +33,8 @@ import '../../features/responsable/presentation/pages/responsable_dashboard_page
 import '../../features/responsable/presentation/pages/responsable_structures_page.dart';
 import '../../features/responsable/presentation/pages/responsable_events_page.dart';
 import '../../features/responsable/presentation/pages/responsable_reservations_page.dart';
+import '../../features/responsable/presentation/pages/responsable_rapports_page.dart';
+import '../../features/responsable/presentation/pages/responsable_reclamations_page.dart';
 
 class AppRouter {
   static const String home = '/';
@@ -58,6 +60,8 @@ class AppRouter {
   static const String responsableStructures = '/responsable/structures';
   static const String responsableEvents = '/responsable/events';
   static const String responsableReservations = '/responsable/reservations';
+  static const String responsableRapports = '/responsable/rapports';
+  static const String responsableReclamations = '/responsable/reclamations';
 
   static String filmDetailPath(String id) => '/films/$id';
   static String eventDetailPath(String id) => '/events/$id';
@@ -226,6 +230,16 @@ class AppRouter {
             path: '/responsable/reservations',
             pageBuilder: (_, _) => const NoTransitionPage(
                 child: ResponsableReservationsPage()),
+          ),
+          GoRoute(
+            path: '/responsable/rapports',
+            pageBuilder: (_, _) => const NoTransitionPage(
+                child: ResponsableRapportsPage()),
+          ),
+          GoRoute(
+            path: '/responsable/reclamations',
+            pageBuilder: (_, _) => const NoTransitionPage(
+                child: ResponsableReclamationsPage()),
           ),
         ],
       ),

@@ -143,11 +143,12 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   ),
                 ),
               ),
-              Positioned(
-                top: 16,
-                right: 16,
-                child: _EventFavoriteHeart(eventId: event.id),
-              ),
+              if (context.watch<AuthState>().isLoggedIn)
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: _EventFavoriteHeart(eventId: event.id),
+                ),
               Positioned(
                 left: 24,
                 bottom: 24,

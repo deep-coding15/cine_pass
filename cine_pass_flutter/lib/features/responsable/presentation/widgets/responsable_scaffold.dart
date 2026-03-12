@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/widgets/animated_background.dart';
 
 class ResponsableScaffold extends StatelessWidget {
   const ResponsableScaffold({super.key, required this.child});
@@ -62,7 +63,7 @@ class ResponsableScaffold extends StatelessWidget {
                   ),
                   _ResponsableNavTile(
                     icon: Icons.store_rounded,
-                    label: 'Mes structures',
+                    label: 'Ma structure',
                     isActive: _isActive(context, '/responsable/structures'),
                     onTap: () => context.go(AppRouter.responsableStructures),
                   ),
@@ -77,6 +78,18 @@ class ResponsableScaffold extends StatelessWidget {
                     label: 'Réservations',
                     isActive: _isActive(context, '/responsable/reservations'),
                     onTap: () => context.go(AppRouter.responsableReservations),
+                  ),
+                  _ResponsableNavTile(
+                    icon: Icons.bar_chart_rounded,
+                    label: 'Rapports',
+                    isActive: _isActive(context, '/responsable/rapports'),
+                    onTap: () => context.go(AppRouter.responsableRapports),
+                  ),
+                  _ResponsableNavTile(
+                    icon: Icons.report_problem_outlined,
+                    label: 'Réclamations',
+                    isActive: _isActive(context, '/responsable/reclamations'),
+                    onTap: () => context.go(AppRouter.responsableReclamations),
                   ),
                   const Spacer(),
                   const Divider(color: AppTheme.textSecondary, height: 1),
@@ -95,7 +108,12 @@ class ResponsableScaffold extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(child: child),
+          Expanded(
+            child: AnimatedBackground(
+              opacity: 0.06,
+              child: child,
+            ),
+          ),
         ],
       ),
     );

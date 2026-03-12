@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
 import '../../../../core/theme/app_theme.dart';
 
-/// Liste des structures du responsable (cinémas, salles, organisateur).
-/// TODO: brancher sur getMyStructures(session).
+/// Page "Ma structure" : la structure que le responsable représente (celle de sa demande approuvée).
+/// Il ne peut pas en ajouter une autre — affichage type "about us" avec les infos fournies dans la demande.
+/// TODO: brancher sur getMyStructure(session) côté backend.
 class ResponsableStructuresPage extends StatefulWidget {
   const ResponsableStructuresPage({super.key});
 
@@ -15,7 +14,7 @@ class ResponsableStructuresPage extends StatefulWidget {
 
 class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
   bool _loading = true;
-  final List<_MockStructure> _structures = [];
+  _MaStructure? _structure;
 
   @override
   void initState() {
@@ -28,152 +27,18 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
     await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
     setState(() {
-      _structures.addAll([
-        _MockStructure(
-          id: '1',
-          type: 'CINEMA',
-          name: 'Cinéma Le Central',
-          city: 'Lyon',
-          address: '12 rue de la République',
-        ),
-      ]);
+      _structure = _MaStructure(
+        id: '1',
+        type: 'CINEMA',
+        name: 'Cinéma Le Central',
+        city: 'Lyon',
+        address: '12 rue de la République',
+        website: 'https://lecentral-cinema.fr',
+        phone: '04 78 00 00 00',
+        description: 'Cinéma indépendant au cœur de Lyon. Trois salles confortables, programmation art et essai et blockbusters.',
+      );
       _loading = false;
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Mes structures',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
-              ),
-              FilledButton.icon(
-                onPressed: () {
-                  // TODO: dialog ou page Créer une structure
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Création de structure (à brancher).'),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text('Ajouter une structure'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.accentGreen,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Les structures que vous gérez (cinémas, salles, organisateur).',
-            style: TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (_loading)
-            const Center(
-              child: CircularProgressIndicator(color: AppTheme.accentGreen),
-            )
-          else if (_structures.isEmpty)
-            Card(
-              color: AppTheme.cardDark,
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.store_rounded,
-                        size: 64,
-                        color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucune structure pour le moment.',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Votre ou vos structures seront créées après approbation de votre demande.',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 13,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _structures.length,
-              itemBuilder: (context, index) {
-                final s = _structures[index];
-                return Card(
-                  color: AppTheme.cardDark,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    leading: CircleAvatar(
-                      backgroundColor: AppTheme.accentGreen.withValues(alpha: 0.3),
-                      child: Icon(
-                        Icons.store_rounded,
-                        color: AppTheme.accentGreen,
-                      ),
-                    ),
-                    title: Text(
-                      s.name,
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    subtitle: Text(
-                      '${_labelType(s.type)} • ${s.city}\n${s.address ?? ''}',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 13,
-                      ),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit_rounded),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-        ],
-      ),
-    );
   }
 
   String _labelType(String type) {
@@ -188,20 +53,253 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
         return type;
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ma structure',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'La structure que vous représentez (celle de votre demande approuvée). Vous ne pouvez pas en ajouter une autre.',
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (_loading)
+            const Center(
+              child: CircularProgressIndicator(color: AppTheme.accentGreen),
+            )
+          else if (_structure == null)
+            Card(
+              color: AppTheme.cardDark,
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.store_rounded,
+                        size: 64,
+                        color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aucune structure assignée.',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Votre structure sera créée après approbation de votre demande par un admin.',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            _MaStructureCard(structure: _structure!, labelType: _labelType),
+        ],
+      ),
+    );
+  }
 }
 
-class _MockStructure {
+class _MaStructureCard extends StatelessWidget {
+  const _MaStructureCard({
+    required this.structure,
+    required this.labelType,
+  });
+
+  final _MaStructure structure;
+  final String Function(String) labelType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: AppTheme.cardDark,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppTheme.accentGreen.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.store_rounded,
+                    size: 32,
+                    color: AppTheme.accentGreen,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        structure.name,
+                        style: const TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${labelType(structure.type)} • ${structure.city}',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'À propos de ma structure',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.textPrimary,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            if (structure.description != null && structure.description!.isNotEmpty)
+              Text(
+                structure.description!,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  height: 1.5,
+                  fontSize: 14,
+                ),
+              )
+            else
+              Text(
+                'Aucune description renseignée.',
+                style: TextStyle(
+                  color: AppTheme.textSecondary.withValues(alpha: 0.8),
+                  fontSize: 14,
+                ),
+              ),
+            const SizedBox(height: 20),
+            const Divider(color: AppTheme.textSecondary, height: 1),
+            const SizedBox(height: 16),
+            _InfoRow(
+              icon: Icons.location_on_outlined,
+              label: 'Adresse',
+              value: structure.address ?? '—',
+            ),
+            if (structure.website != null && structure.website!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _InfoRow(
+                icon: Icons.language_rounded,
+                label: 'Site web',
+                value: structure.website!,
+              ),
+            ],
+            if (structure.phone != null && structure.phone!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _InfoRow(
+                icon: Icons.phone_outlined,
+                label: 'Téléphone',
+                value: structure.phone!,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: AppTheme.textSecondary),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MaStructure {
   final String id;
   final String type;
   final String name;
   final String city;
   final String? address;
+  final String? website;
+  final String? phone;
+  final String? description;
 
-  _MockStructure({
+  _MaStructure({
     required this.id,
     required this.type,
     required this.name,
     required this.city,
     this.address,
+    this.website,
+    this.phone,
+    this.description,
   });
 }

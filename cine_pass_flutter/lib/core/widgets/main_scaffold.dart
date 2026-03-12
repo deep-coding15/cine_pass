@@ -7,6 +7,7 @@ import '../router/app_router.dart';
 import '../state/auth_state.dart';
 import '../state/pending_reservation_state.dart';
 import 'app_drawer.dart';
+import 'animated_background.dart';
 import 'cinepass_logo.dart';
 
 class MainScaffold extends StatefulWidget {
@@ -146,7 +147,10 @@ class _MainScaffoldState extends State<MainScaffold> {
         elevation: 0,
         child: const AppDrawer(),
       ),
-      body: widget.child,
+      body: AnimatedBackground(
+        opacity: 0.06,
+        child: widget.child,
+      ),
     );
   }
 }

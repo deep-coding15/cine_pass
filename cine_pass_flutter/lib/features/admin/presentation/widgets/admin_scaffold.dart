@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/widgets/animated_background.dart';
 
 class AdminScaffold extends StatelessWidget {
   const AdminScaffold({super.key, required this.child});
@@ -118,7 +119,12 @@ class AdminScaffold extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(child: child),
+          Expanded(
+            child: AnimatedBackground(
+              opacity: 0.06,
+              child: child,
+            ),
+          ),
         ],
       ),
     );
