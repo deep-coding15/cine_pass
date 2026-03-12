@@ -1,14 +1,50 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../events/data/mock_events_data.dart';
+import '../../../../main.dart';
 import '../widgets/admin_add_event_dialog.dart';
 
-class AdminEventsPage extends StatelessWidget {
+class AdminEventsPage extends StatefulWidget {
   const AdminEventsPage({super.key});
 
   @override
+  State<AdminEventsPage> createState() => _AdminEventsPageState();
+}
+
+class _AdminEventsPageState extends State<AdminEventsPage> {
+  List<EventResponse> _events = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final events = await client.cinePass.getEvents();
+      if (!mounted) return;
+      setState(() {
+        _events = events;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _events = [];
+        _loading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -37,10 +73,13 @@ class AdminEventsPage extends StatelessWidget {
                 ],
               ),
               FilledButton.icon(
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (_) => const AdminAddEventDialog(),
-                ),
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (_) => AdminAddEventDialog(onSaved: _load),
+                  );
+                  if (mounted) _load();
+                },
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Nouvel événement'),
                 style: FilledButton.styleFrom(
@@ -72,7 +111,7 @@ class AdminEventsPage extends StatelessWidget {
                   DataColumn(label: Text('Places')),
                   DataColumn(label: Text('Actions')),
                 ],
-                rows: mockEvents.map((e) => _buildRow(e)).toList(),
+                rows: _events.map((e) => _buildRow(e)).toList(),
               ),
             ),
           ),
@@ -81,7 +120,7 @@ class AdminEventsPage extends StatelessWidget {
     );
   }
 
-  DataRow _buildRow(MockEvent e) {
+  DataRow _buildRow(EventResponse e) {
     final sold = e.placesTotal - e.placesLeft;
     return DataRow(
       cells: [
@@ -94,7 +133,7 @@ class AdminEventsPage extends StatelessWidget {
                 child: Container(
                   width: 44,
                   height: 44,
-                  color: Color(e.posterColor),
+                  color: Color(e.posterColor ?? 0xFF4E1B3D),
                   child: Icon(
                     Icons.event_rounded,
                     color: Colors.white.withValues(alpha: 0.6),

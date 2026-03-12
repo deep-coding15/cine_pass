@@ -4,15 +4,15 @@
 -- Les utilisateurs sont serverpod_auth_core_user (uuid).
 --
 -- IMPORTANT: Serverpod attend des colonnes en CAMELCASE (createdAt, codePostal,
--- filmId, etc.). Ne pas utiliser snake_case (created_at, code_postal) pour
--- les tables validées par Serverpod (film, cinema, salle, siege, seance, evenement).
--- Voir docs/POURQUOI_SCHEMA_ET_SERVERPOD.md.
+-- filmId, etc.) pour les tables validées par Serverpod (film, cinema, salle,
+-- siege, seance, evenement). Ne pas revenir en snake_case pour ces colonnes.
 -- =============================================================================
 
 BEGIN;
 
+-- =============================================================================
 -- FILMS (colonnes en camelCase pour correspondre au protocole Serverpod)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_film" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -30,9 +30,9 @@ CREATE TABLE "cine_pass_film" (
     "updatedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- CINÉMAS & SALLES (colonnes en camelCase)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_cinema" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,9 +49,9 @@ CREATE TABLE "cine_pass_salle" (
     "capacite" bigint NOT NULL
 );
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- SIÈGES (plan de salle, pour films)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_siege" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "salleId" uuid NOT NULL,
@@ -59,9 +59,9 @@ CREATE TABLE "cine_pass_siege" (
     "numero" bigint NOT NULL
 );
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- SÉANCES (film + salle + créneau)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_seance" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -75,9 +75,9 @@ CREATE TABLE "cine_pass_seance" (
     "availableOptions" json
 );
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- ÉVÉNEMENTS (concerts, théâtre, etc. — colonnes en camelCase)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_evenement" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -96,9 +96,9 @@ CREATE TABLE "cine_pass_evenement" (
     "availableOptions" json
 );
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- RÉSERVATIONS (film OU événement)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_reservation" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
@@ -117,15 +117,20 @@ CREATE TABLE "cine_pass_reservation" (
         )
 );
 
-CREATE UNIQUE INDEX "cine_pass_reservation_numero_idx" ON "cine_pass_reservation" USING btree ("numero");
-CREATE INDEX "cine_pass_reservation_user_idx" ON "cine_pass_reservation" USING btree ("user_id");
-CREATE INDEX "cine_pass_reservation_seance_idx" ON "cine_pass_reservation" USING btree ("seance_id");
-CREATE INDEX "cine_pass_reservation_evenement_idx" ON "cine_pass_reservation" USING btree ("evenement_id");
-CREATE INDEX "cine_pass_reservation_created_idx" ON "cine_pass_reservation" USING btree ("created_at");
+CREATE UNIQUE INDEX "cine_pass_reservation_numero_idx"
+  ON "cine_pass_reservation" USING btree ("numero");
+CREATE INDEX "cine_pass_reservation_user_idx"
+  ON "cine_pass_reservation" USING btree ("user_id");
+CREATE INDEX "cine_pass_reservation_seance_idx"
+  ON "cine_pass_reservation" USING btree ("seance_id");
+CREATE INDEX "cine_pass_reservation_evenement_idx"
+  ON "cine_pass_reservation" USING btree ("evenement_id");
+CREATE INDEX "cine_pass_reservation_created_idx"
+  ON "cine_pass_reservation" USING btree ("created_at");
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- BILLETS (un par place ; pour événement pas de siège)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_billet" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "reservation_id" uuid NOT NULL REFERENCES "cine_pass_reservation"("id") ON DELETE CASCADE,
@@ -138,12 +143,14 @@ CREATE TABLE "cine_pass_billet" (
     "created_at" timestamp without time zone NOT NULL DEFAULT now()
 );
 
-CREATE INDEX "cine_pass_billet_reservation_idx" ON "cine_pass_billet" USING btree ("reservation_id");
-CREATE INDEX "cine_pass_billet_siege_idx" ON "cine_pass_billet" USING btree ("siege_id");
+CREATE INDEX "cine_pass_billet_reservation_idx"
+  ON "cine_pass_billet" USING btree ("reservation_id");
+CREATE INDEX "cine_pass_billet_siege_idx"
+  ON "cine_pass_billet" USING btree ("siege_id");
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- PAIEMENTS
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_paiement" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "reservation_id" uuid NOT NULL REFERENCES "cine_pass_reservation"("id") ON DELETE CASCADE,
@@ -154,11 +161,12 @@ CREATE TABLE "cine_pass_paiement" (
     "created_at" timestamp without time zone NOT NULL DEFAULT now()
 );
 
-CREATE INDEX "cine_pass_paiement_reservation_idx" ON "cine_pass_paiement" USING btree ("reservation_id");
+CREATE INDEX "cine_pass_paiement_reservation_idx"
+  ON "cine_pass_paiement" USING btree ("reservation_id");
 
--- -----------------------------------------------------------------------------
--- FAVORIS (film ou cinéma selon besoin métier)
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- FAVORIS (film ou cinéma)
+-- =============================================================================
 CREATE TABLE "cine_pass_favori" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
@@ -172,13 +180,16 @@ CREATE TABLE "cine_pass_favori" (
         )
 );
 
-CREATE UNIQUE INDEX "cine_pass_favori_user_film_idx" ON "cine_pass_favori" USING btree ("user_id", "film_id") WHERE "film_id" IS NOT NULL;
-CREATE UNIQUE INDEX "cine_pass_favori_user_cinema_idx" ON "cine_pass_favori" USING btree ("user_id", "cinema_id") WHERE "cinema_id" IS NOT NULL;
-CREATE INDEX "cine_pass_favori_user_idx" ON "cine_pass_favori" USING btree ("user_id");
+CREATE UNIQUE INDEX "cine_pass_favori_user_film_idx"
+  ON "cine_pass_favori" USING btree ("user_id", "film_id") WHERE "film_id" IS NOT NULL;
+CREATE UNIQUE INDEX "cine_pass_favori_user_cinema_idx"
+  ON "cine_pass_favori" USING btree ("user_id", "cinema_id") WHERE "cinema_id" IS NOT NULL;
+CREATE INDEX "cine_pass_favori_user_idx"
+  ON "cine_pass_favori" USING btree ("user_id");
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- FAQ
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_faq" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "question" text NOT NULL,
@@ -187,18 +198,111 @@ CREATE TABLE "cine_pass_faq" (
     "created_at" timestamp without time zone NOT NULL DEFAULT now()
 );
 
-CREATE INDEX "cine_pass_faq_ordre_idx" ON "cine_pass_faq" USING btree ("ordre");
+CREATE INDEX "cine_pass_faq_ordre_idx"
+  ON "cine_pass_faq" USING btree ("ordre");
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- RÔLE ADMIN (optionnel : lien user -> admin)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 CREATE TABLE "cine_pass_user_role" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
-    "role" text NOT NULL DEFAULT 'client',
-    UNIQUE ("user_id")
+    "role" text NOT NULL DEFAULT 'client'   -- client | responsable | admin
 );
 
-CREATE INDEX "cine_pass_user_role_user_idx" ON "cine_pass_user_role" USING btree ("user_id");
+CREATE INDEX "cine_pass_user_role_user_idx"
+  ON "cine_pass_user_role" USING btree ("user_id");
+
+-- =============================================================================
+-- RESPONSABLES / STRUCTURES / DEMANDES
+-- =============================================================================
+
+-- Demandes pour devenir responsable (cinéma, salle, organisateur, etc.)
+CREATE TABLE "cine_pass_responsable_request" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "structure_type" text NOT NULL,      -- 'CINEMA' | 'VENUE' | 'ORGANIZER' | 'OTHER'
+    "structure_name" text NOT NULL,
+    "structure_city" text NOT NULL,
+    "structure_address" text,
+    "structure_website" text,
+    "structure_siret" text,
+    "structure_phone" text,
+    "contact_role" text,
+    "description" text NOT NULL,
+    "social_links" text,
+    "status" text NOT NULL DEFAULT 'PENDING',   -- PENDING | APPROVED | REJECTED
+    "created_at" timestamp without time zone NOT NULL DEFAULT now(),
+    "decided_at" timestamp without time zone,
+    "admin_id" uuid REFERENCES "serverpod_auth_core_user"("id") ON DELETE SET NULL,
+    "rejection_reason" text
+);
+
+CREATE INDEX "cine_pass_responsable_request_user_idx"
+  ON "cine_pass_responsable_request" ("user_id");
+
+CREATE INDEX "cine_pass_responsable_request_status_idx"
+  ON "cine_pass_responsable_request" ("status");
+
+-- Structures gérées par un responsable (cinéma, salle de spectacle, organisateur, etc.)
+-- Colonne cinemaId (camelCase) pour Serverpod.
+CREATE TABLE "cine_pass_structure" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "type" text NOT NULL,      -- 'CINEMA' | 'VENUE' | 'ORGANIZER'
+    "name" text NOT NULL,
+    "city" text NOT NULL,
+    "address" text,
+    "website" text,
+    "phone" text,
+    "cinemaId" uuid
+);
+
+CREATE INDEX "cine_pass_structure_type_city_idx"
+  ON "cine_pass_structure" ("type", "city");
+
+-- Lien entre un utilisateur responsable et une structure
+CREATE TABLE "cine_pass_responsable_assignment" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "structure_id" uuid NOT NULL REFERENCES "cine_pass_structure"("id") ON DELETE CASCADE,
+    "active" boolean NOT NULL DEFAULT true,
+    "created_at" timestamp without time zone NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX "cine_pass_responsable_assignment_uniq"
+  ON "cine_pass_responsable_assignment" ("user_id", "structure_id");
+
+CREATE INDEX "cine_pass_responsable_assignment_struct_idx"
+  ON "cine_pass_responsable_assignment" ("structure_id");
+
+-- Lier les événements à une structure (organisateur / cinéma / salle)
+-- Colonne "structureId" (camelCase) pour Serverpod.
+ALTER TABLE "cine_pass_evenement"
+  ADD COLUMN IF NOT EXISTS "structureId" uuid;
+
+-- FK : noms fk_0/fk_1 + onDelete/onUpdate alignés sur le protocole (relation onDelete dans .spy.yaml).
+ALTER TABLE "cine_pass_salle"
+  ADD CONSTRAINT "cine_pass_salle_fk_0"
+  FOREIGN KEY ("cinemaId") REFERENCES "cine_pass_cinema"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+ALTER TABLE "cine_pass_siege"
+  ADD CONSTRAINT "cine_pass_siege_fk_0"
+  FOREIGN KEY ("salleId") REFERENCES "cine_pass_salle"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+ALTER TABLE "cine_pass_seance"
+  ADD CONSTRAINT "cine_pass_seance_fk_0"
+  FOREIGN KEY ("filmId") REFERENCES "cine_pass_film"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+ALTER TABLE "cine_pass_seance"
+  ADD CONSTRAINT "cine_pass_seance_fk_1"
+  FOREIGN KEY ("salleId") REFERENCES "cine_pass_salle"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+ALTER TABLE "cine_pass_evenement"
+  ADD CONSTRAINT "cine_pass_evenement_fk_0"
+  FOREIGN KEY ("structureId") REFERENCES "cine_pass_structure"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+
+ALTER TABLE "cine_pass_structure"
+  ADD CONSTRAINT "cine_pass_structure_fk_0"
+  FOREIGN KEY ("cinemaId") REFERENCES "cine_pass_cinema"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
 
 COMMIT;

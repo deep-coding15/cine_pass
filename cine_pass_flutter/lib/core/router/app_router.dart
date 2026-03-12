@@ -20,11 +20,19 @@ import '../../features/admin/presentation/pages/admin_events_page.dart';
 import '../../features/admin/presentation/pages/admin_users_page.dart';
 import '../../features/admin/presentation/pages/admin_stats_report_page.dart';
 import '../../features/admin/presentation/pages/admin_reservations_page.dart';
+import '../../features/admin/presentation/pages/admin_demandes_page.dart';
 import '../../features/auth/presentation/pages/connexion_page.dart';
+import '../../features/auth/presentation/pages/connexion_responsable_page.dart';
 import '../../features/auth/presentation/pages/inscription_page.dart';
 import '../../features/preferences/presentation/pages/preferences_page.dart';
 import '../../features/faq/presentation/pages/faq_page.dart';
 import '../../features/support/presentation/pages/support_page.dart';
+import '../../features/devenir_responsable/presentation/pages/devenir_responsable_page.dart';
+import '../../features/responsable/presentation/widgets/responsable_scaffold.dart';
+import '../../features/responsable/presentation/pages/responsable_dashboard_page.dart';
+import '../../features/responsable/presentation/pages/responsable_structures_page.dart';
+import '../../features/responsable/presentation/pages/responsable_events_page.dart';
+import '../../features/responsable/presentation/pages/responsable_reservations_page.dart';
 
 class AppRouter {
   static const String home = '/';
@@ -39,11 +47,17 @@ class AppRouter {
   static const String billets = '/billets';
   static const String profil = '/profil';
   static const String connexion = '/connexion';
+  static const String connexionResponsable = '/connexion-responsable';
   static const String inscription = '/inscription';
   static const String preferences = '/preferences';
   static const String faq = '/faq';
   static const String support = '/support';
   static const String admin = '/admin';
+  static const String devenirResponsable = '/devenir-responsable';
+  static const String responsable = '/responsable';
+  static const String responsableStructures = '/responsable/structures';
+  static const String responsableEvents = '/responsable/events';
+  static const String responsableReservations = '/responsable/reservations';
 
   static String filmDetailPath(String id) => '/films/$id';
   static String eventDetailPath(String id) => '/events/$id';
@@ -132,6 +146,16 @@ class AppRouter {
             path: support,
             pageBuilder: (_, _) => const NoTransitionPage(child: SupportPage()),
           ),
+          GoRoute(
+            path: devenirResponsable,
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: DevenirResponsablePage()),
+          ),
+          GoRoute(
+            path: connexionResponsable,
+            pageBuilder: (_, _) => const NoTransitionPage(
+                child: ConnexionResponsablePage()),
+          ),
         ],
       ),
       ShellRoute(
@@ -171,6 +195,37 @@ class AppRouter {
             path: '/admin/stats',
             pageBuilder: (_, _) =>
                 const NoTransitionPage(child: AdminStatsReportPage()),
+          ),
+          GoRoute(
+            path: '/admin/demandes',
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: AdminDemandesPage()),
+          ),
+        ],
+      ),
+      ShellRoute(
+        builder: (context, state, child) =>
+            ResponsableScaffold(child: child),
+        routes: [
+          GoRoute(
+            path: responsable,
+            pageBuilder: (_, _) => const NoTransitionPage(
+                child: ResponsableDashboardPage()),
+          ),
+          GoRoute(
+            path: '/responsable/structures',
+            pageBuilder: (_, _) => const NoTransitionPage(
+                child: ResponsableStructuresPage()),
+          ),
+          GoRoute(
+            path: '/responsable/events',
+            pageBuilder: (_, _) => const NoTransitionPage(
+                child: ResponsableEventsPage()),
+          ),
+          GoRoute(
+            path: '/responsable/reservations',
+            pageBuilder: (_, _) => const NoTransitionPage(
+                child: ResponsableReservationsPage()),
           ),
         ],
       ),

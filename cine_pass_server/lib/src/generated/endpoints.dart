@@ -315,6 +315,16 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async => (endpoints['cinePass'] as _i4.CinePassEndpoint)
                   .getCinemas(session),
         ),
+        'getSalles': _i1.MethodConnector(
+          name: 'getSalles',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i4.CinePassEndpoint)
+                  .getSalles(session),
+        ),
         'getEvents': _i1.MethodConnector(
           name: 'getEvents',
           params: {},
@@ -373,6 +383,213 @@ class Endpoints extends _i1.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['cinePass'] as _i4.CinePassEndpoint)
                   .getEventCategories(session),
+        ),
+        'createFilm': _i1.MethodConnector(
+          name: 'createFilm',
+          params: {
+            'title': _i1.ParameterDescription(
+              name: 'title',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'genre': _i1.ParameterDescription(
+              name: 'genre',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'durationMinutes': _i1.ParameterDescription(
+              name: 'durationMinutes',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'synopsis': _i1.ParameterDescription(
+              name: 'synopsis',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'director': _i1.ParameterDescription(
+              name: 'director',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'casting': _i1.ParameterDescription(
+              name: 'casting',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'posterColor': _i1.ParameterDescription(
+              name: 'posterColor',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'dateSortie': _i1.ParameterDescription(
+              name: 'dateSortie',
+              type: _i1.getType<Object?>(),
+              nullable: true,
+            ),
+            'dateFin': _i1.ParameterDescription(
+              name: 'dateFin',
+              type: _i1.getType<Object?>(),
+              nullable: true,
+            ),
+            'audience': _i1.ParameterDescription(
+              name: 'audience',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i4.CinePassEndpoint).createFilm(
+                    session,
+                    title: params['title'],
+                    genre: params['genre'],
+                    durationMinutes: params['durationMinutes'],
+                    synopsis: params['synopsis'],
+                    director: params['director'],
+                    casting: params['casting'],
+                    posterColor: params['posterColor'],
+                    dateSortie: params['dateSortie'],
+                    dateFin: params['dateFin'],
+                    audience: params['audience'],
+                  ),
+        ),
+        'createEvent': _i1.MethodConnector(
+          name: 'createEvent',
+          params: {
+            'titre': _i1.ParameterDescription(
+              name: 'titre',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'categorie': _i1.ParameterDescription(
+              name: 'categorie',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'lieu': _i1.ParameterDescription(
+              name: 'lieu',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'adresse': _i1.ParameterDescription(
+              name: 'adresse',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'ville': _i1.ParameterDescription(
+              name: 'ville',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'eventDate': _i1.ParameterDescription(
+              name: 'eventDate',
+              type: _i1.getType<Object>(),
+              nullable: false,
+            ),
+            'eventTimeStr': _i1.ParameterDescription(
+              name: 'eventTimeStr',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'placesTotal': _i1.ParameterDescription(
+              name: 'placesTotal',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'prixBase': _i1.ParameterDescription(
+              name: 'prixBase',
+              type: _i1.getType<double>(),
+              nullable: false,
+            ),
+            'posterColor': _i1.ParameterDescription(
+              name: 'posterColor',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i4.CinePassEndpoint).createEvent(
+                    session,
+                    titre: params['titre'],
+                    categorie: params['categorie'],
+                    description: params['description'],
+                    lieu: params['lieu'],
+                    adresse: params['adresse'],
+                    ville: params['ville'],
+                    eventDate: params['eventDate'],
+                    eventTimeStr: params['eventTimeStr'],
+                    placesTotal: params['placesTotal'],
+                    prixBase: params['prixBase'],
+                    posterColor: params['posterColor'],
+                  ),
+        ),
+        'createSeance': _i1.MethodConnector(
+          name: 'createSeance',
+          params: {
+            'filmId': _i1.ParameterDescription(
+              name: 'filmId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'salleId': _i1.ParameterDescription(
+              name: 'salleId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'debutAt': _i1.ParameterDescription(
+              name: 'debutAt',
+              type: _i1.getType<Object>(),
+              nullable: false,
+            ),
+            'finAt': _i1.ParameterDescription(
+              name: 'finAt',
+              type: _i1.getType<Object?>(),
+              nullable: true,
+            ),
+            'format': _i1.ParameterDescription(
+              name: 'format',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'type': _i1.ParameterDescription(
+              name: 'type',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'prixBase': _i1.ParameterDescription(
+              name: 'prixBase',
+              type: _i1.getType<double>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i4.CinePassEndpoint).createSeance(
+                    session,
+                    filmId: params['filmId'],
+                    salleId: params['salleId'],
+                    debutAt: params['debutAt'],
+                    finAt: params['finAt'],
+                    format: params['format'],
+                    type: params['type'],
+                    prixBase: params['prixBase'],
+                  ),
         ),
       },
     );

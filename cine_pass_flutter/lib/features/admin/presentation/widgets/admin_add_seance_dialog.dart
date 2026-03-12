@@ -1,11 +1,18 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../films/data/mock_films_data.dart';
-import '../../data/mock_admin_data.dart';
+import '../../../../main.dart';
 
 class AdminAddSeanceDialog extends StatefulWidget {
-  const AdminAddSeanceDialog({super.key});
+  const AdminAddSeanceDialog({
+    super.key,
+    required this.films,
+    this.onSaved,
+  });
+
+  final List<FilmResponse> films;
+  final VoidCallback? onSaved;
 
   @override
   State<AdminAddSeanceDialog> createState() => _AdminAddSeanceDialogState();
@@ -14,43 +21,68 @@ class AdminAddSeanceDialog extends StatefulWidget {
 class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
   String? _selectedFilmId;
   String? _selectedCinemaId;
-  String? _selectedRoomId;
+  String? _selectedSalleId;
   String? _selectedSlot;
   DateTime? _date;
   String _langue = 'VF';
   String _type = '2D';
   final _priceController = TextEditingController(text: '12.50');
-  final _placesController = TextEditingController(text: '150');
+
+  List<CinemaResponse> _cinemas = [];
+  List<Salle> _salles = [];
+  bool _loading = true;
+
+  static const List<String> _slots = [
+    '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final cinemas = await client.cinePass.getCinemas();
+      final salles = await client.cinePass.getSalles();
+      if (!mounted) return;
+      setState(() {
+        _cinemas = cinemas;
+        _salles = salles;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+  }
+
+  List<Salle> get _roomsForCinema {
+    if (_selectedCinemaId == null) return [];
+    return _salles
+        .where((s) => s.cinemaId.toString() == _selectedCinemaId)
+        .toList();
+  }
 
   @override
   void dispose() {
     _priceController.dispose();
-    _placesController.dispose();
     super.dispose();
   }
 
-  MockCinema? get _selectedCinema {
-    if (_selectedCinemaId == null) return null;
-    for (final c in mockCinemas) {
-      if (c.id == _selectedCinemaId) return c;
-    }
-    return null;
-  }
-
-  MockRoom? get _selectedRoom {
-    final cinema = _selectedCinema;
-    if (cinema == null || _selectedRoomId == null) return null;
-    for (final r in cinema.rooms) {
-      if (r.id == _selectedRoomId) return r;
-    }
-    return null;
-  }
-
-  List<MockRoom> get _rooms => _selectedCinema?.rooms ?? [];
-  List<String> get _slots => _selectedRoom?.availableSlots ?? [];
-
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(
+            child: CircularProgressIndicator(color: AppTheme.primaryRed),
+          ),
+        ),
+      );
+    }
     return Dialog(
       backgroundColor: AppTheme.cardDark,
       child: ConstrainedBox(
@@ -89,7 +121,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                         label: 'Film',
                         value: _selectedFilmId,
                         hint: 'Sélectionner un film',
-                        items: mockFilms
+                        items: widget.films
                             .map(
                               (f) => DropdownMenuItem(
                                 value: f.id,
@@ -97,16 +129,15 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                               ),
                             )
                             .toList(),
-                        onChanged: (v) => setState(() {
-                          _selectedFilmId = v;
-                        }),
+                        onChanged: (v) =>
+                            setState(() => _selectedFilmId = v),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Cinéma',
                         value: _selectedCinemaId,
                         hint: 'Sélectionner un cinéma',
-                        items: mockCinemas
+                        items: _cinemas
                             .map(
                               (c) => DropdownMenuItem(
                                 value: c.id,
@@ -116,25 +147,25 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                             .toList(),
                         onChanged: (v) => setState(() {
                           _selectedCinemaId = v;
-                          _selectedRoomId = null;
+                          _selectedSalleId = null;
                           _selectedSlot = null;
                         }),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Salle',
-                        value: _selectedRoomId,
+                        value: _selectedSalleId,
                         hint: 'Sélectionner une salle',
-                        items: _rooms
+                        items: _roomsForCinema
                             .map(
                               (r) => DropdownMenuItem(
-                                value: r.id,
-                                child: Text(r.name),
+                                value: r.id.toString(),
+                                child: Text(r.nom),
                               ),
                             )
                             .toList(),
                         onChanged: (v) => setState(() {
-                          _selectedRoomId = v;
+                          _selectedSalleId = v;
                           _selectedSlot = null;
                         }),
                       ),
@@ -153,7 +184,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                         label: Text(
                           _date != null
                               ? '${_date!.day}/${_date!.month}/${_date!.year}'
-                              : 'Date (mm/jj/aaaa)',
+                              : 'Date (jj/mm/aaaa)',
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -163,10 +194,14 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                         hint: '--:--',
                         items: _slots
                             .map(
-                              (s) => DropdownMenuItem(value: s, child: Text(s)),
+                              (s) => DropdownMenuItem(
+                                value: s,
+                                child: Text(s),
+                              ),
                             )
                             .toList(),
-                        onChanged: (v) => setState(() => _selectedSlot = v),
+                        onChanged: (v) =>
+                            setState(() => _selectedSlot = v),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
@@ -177,7 +212,8 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                           DropdownMenuItem(value: 'VF', child: Text('VF')),
                           DropdownMenuItem(value: 'VO', child: Text('VO')),
                         ],
-                        onChanged: (v) => setState(() => _langue = v ?? 'VF'),
+                        onChanged: (v) =>
+                            setState(() => _langue = v ?? 'VF'),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
@@ -202,21 +238,8 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                           filled: true,
                           fillColor: AppTheme.surfaceDark,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
-                        ),
-                        style: const TextStyle(color: AppTheme.textPrimary),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _placesController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Places disponibles',
-                          filled: true,
-                          fillColor: AppTheme.surfaceDark,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(8)),
                           ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
@@ -226,13 +249,14 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                         children: [
                           Expanded(
                             child: FilledButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 if (_selectedFilmId == null ||
                                     _selectedCinemaId == null ||
-                                    _selectedRoomId == null ||
+                                    _selectedSalleId == null ||
                                     _selectedSlot == null ||
                                     _date == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(
                                     const SnackBar(
                                       content: Text(
                                         'Remplissez tous les champs',
@@ -242,13 +266,64 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                                   );
                                   return;
                                 }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Séance enregistrée (démo)'),
-                                    backgroundColor: AppTheme.accentGreen,
-                                  ),
+                                final price = double.tryParse(
+                                      _priceController.text.trim(),
+                                    ) ??
+                                    12.50;
+                                final parts = _selectedSlot!.split(':');
+                                final hour = int.tryParse(parts[0]) ?? 20;
+                                final minute =
+                                    parts.length > 1
+                                        ? int.tryParse(parts[1]) ?? 0
+                                        : 0;
+                                final debutAt = DateTime(
+                                  _date!.year,
+                                  _date!.month,
+                                  _date!.day,
+                                  hour,
+                                  minute,
                                 );
-                                Navigator.of(context).pop();
+                                try {
+                                  final created =
+                                      await client.cinePass.createSeance(
+                                    filmId: _selectedFilmId!,
+                                    salleId: _selectedSalleId!,
+                                    debutAt: debutAt,
+                                    format: _langue,
+                                    type: _type,
+                                    prixBase: price,
+                                  );
+                                  if (!context.mounted) return;
+                                  if (created != null) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Séance enregistrée'),
+                                        backgroundColor: AppTheme.accentGreen,
+                                      ),
+                                    );
+                                    widget.onSaved?.call();
+                                    Navigator.of(context).pop();
+                                  } else {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Erreur lors de l\'enregistrement',
+                                        ),
+                                        backgroundColor: AppTheme.primaryRed,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur: $e'),
+                                      backgroundColor: AppTheme.primaryRed,
+                                    ),
+                                  );
+                                }
                               },
                               style: FilledButton.styleFrom(
                                 backgroundColor: AppTheme.primaryRed,
@@ -284,7 +359,6 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      // ignore: deprecated_member_use
       value: value,
       decoration: InputDecoration(
         labelText: label,
@@ -295,7 +369,10 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
         ),
       ),
       dropdownColor: AppTheme.cardDark,
-      hint: Text(hint, style: const TextStyle(color: AppTheme.textSecondary)),
+      hint: Text(
+        hint,
+        style: const TextStyle(color: AppTheme.textSecondary),
+      ),
       items: items,
       onChanged: onChanged,
     );

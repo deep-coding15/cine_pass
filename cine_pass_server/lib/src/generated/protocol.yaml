@@ -14,10 +14,14 @@ cinePass:
   - getFilmById:
   - getSeancesForFilm:
   - getCinemas:
+  - getSalles:
   - getEvents:
   - getEventById:
   - getCities:
   - getGenres:
   - getEventCategories:
+  - createFilm:
+  - createEvent:
+  - createSeance:
 greeting:
   - hello:

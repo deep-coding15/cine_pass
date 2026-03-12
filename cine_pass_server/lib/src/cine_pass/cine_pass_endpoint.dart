@@ -3,6 +3,7 @@ import '../generated/cine_pass/film_response.dart';
 import '../generated/cine_pass/seance_response.dart';
 import '../generated/cine_pass/event_response.dart';
 import '../generated/cine_pass/cinema_response.dart';
+import '../generated/salle.dart';
 
 /// Endpoint CinePass : films, séances, cinémas, événements (données BDD).
 class CinePassEndpoint extends Endpoint {
@@ -97,6 +98,16 @@ class CinePassEndpoint extends Endpoint {
       );
       return result.map((row) => _rowToCinemaResponse(row)).toList();
     } catch (_) {
+      return [];
+    }
+  }
+
+  /// Liste des salles (pour admin séances).
+  Future<List<Salle>> getSalles(Session session) async {
+    try {
+      return await Salle.db.find(session, orderBy: (t) => t.nom);
+    } catch (e, st) {
+      session.log('CinePass getSalles', level: LogLevel.error, exception: e, stackTrace: st);
       return [];
     }
   }
@@ -196,6 +207,175 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
+  /// Admin: créer un film.
+  Future<FilmResponse?> createFilm(
+    Session session, {
+    required String title,
+    required String genre,
+    required int durationMinutes,
+    String? synopsis,
+    String? director,
+    String? casting,
+    int? posterColor,
+    Object? dateSortie,
+    Object? dateFin,
+    String? audience,
+  }) async {
+    try {
+      final dSortie = _parseDateTime(dateSortie);
+      final dFin = _parseDateTime(dateFin);
+      final id = await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_film" (
+          "titre", "genre", "dureeMinutes", "synopsis", "directeur",
+          "casting", "posterColor", "dateSortie", "dateFin", "audience"
+        )
+        VALUES (
+          @titre, @genre, @dureeMinutes, @synopsis, @directeur,
+          @casting, @posterColor, @dateSortie, @dateFin, @audience
+        )
+        RETURNING "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
+                  "casting", "posterColor"
+        ''',
+        parameters: QueryParameters.named({
+          'titre': title,
+          'genre': genre,
+          'dureeMinutes': durationMinutes,
+          'synopsis': synopsis,
+          'directeur': director,
+          'casting': casting,
+          'posterColor': posterColor,
+          'dateSortie': dSortie,
+          'dateFin': dFin,
+          'audience': audience,
+        }),
+      );
+      if (id.isEmpty) return null;
+      return _rowToFilmResponse(id.first);
+    } catch (e, st) {
+      session.log('CinePass createFilm', level: LogLevel.error, exception: e, stackTrace: st);
+      return null;
+    }
+  }
+
+  /// Admin: créer un événement.
+  Future<EventResponse?> createEvent(
+    Session session, {
+    required String titre,
+    required String categorie,
+    String? description,
+    required String lieu,
+    String? adresse,
+    required String ville,
+    required Object eventDate,
+    required String eventTimeStr,
+    required int placesTotal,
+    required double prixBase,
+    int? posterColor,
+  }) async {
+    try {
+      final eventDateDt = _parseDateTime(eventDate);
+      if (eventDateDt == null) return null;
+      DateTime eventTime = eventDateDt;
+      if (eventTimeStr.length >= 5) {
+        final parts = eventTimeStr.split(':');
+        if (parts.length >= 2) {
+          final h = int.tryParse(parts[0]) ?? 0;
+          final m = int.tryParse(parts[1]) ?? 0;
+          eventTime = DateTime(eventDateDt.year, eventDateDt.month, eventDateDt.day, h, m);
+        }
+      }
+      final result = await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_evenement" (
+          "titre", "categorie", "description", "lieu", "adresse", "ville",
+          "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor"
+        )
+        VALUES (
+          @titre, @categorie, @description, @lieu, @adresse, @ville,
+          @eventDate, @eventTime, @placesTotal, @prixBase, @posterColor
+        )
+        RETURNING "id", "titre", "categorie", "description", "lieu", "adresse", "ville",
+                  "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "availableOptions"
+        ''',
+        parameters: QueryParameters.named({
+          'titre': titre,
+          'categorie': categorie,
+          'description': description,
+          'lieu': lieu,
+          'adresse': adresse,
+          'ville': ville,
+          'eventDate': eventDateDt,
+          'eventTime': eventTime,
+          'placesTotal': placesTotal,
+          'prixBase': prixBase,
+          'posterColor': posterColor,
+        }),
+      );
+      if (result.isEmpty) return null;
+      return _rowToEventResponse(result.first);
+    } catch (e, st) {
+      session.log('CinePass createEvent', level: LogLevel.error, exception: e, stackTrace: st);
+      return null;
+    }
+  }
+
+  /// Admin: créer une séance.
+  Future<SeanceResponse?> createSeance(
+    Session session, {
+    required String filmId,
+    required String salleId,
+    required Object debutAt,
+    Object? finAt,
+    String format = 'VF',
+    String type = '2D',
+    required double prixBase,
+  }) async {
+    try {
+      final debut = _parseDateTime(debutAt);
+      if (debut == null) return null;
+      final endDt = _parseDateTime(finAt);
+      final end = endDt ?? debut.add(const Duration(minutes: 120));
+      await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_seance" (
+          "filmId", "salleId", "debutAt", "finAt", "format", "type", "prixBase"
+        )
+        VALUES (
+          (@filmId)::uuid, (@salleId)::uuid, @debutAt, @finAt, @format, @type, @prixBase
+        )
+        ''',
+        parameters: QueryParameters.named({
+          'filmId': filmId,
+          'salleId': salleId,
+          'debutAt': debut,
+          'finAt': end,
+          'format': format,
+          'type': type,
+          'prixBase': prixBase,
+        }),
+      );
+      final salleResult = await session.db.unsafeQuery(
+        r'''
+        SELECT s."id", s."debutAt", s."finAt", s."format", s."type", s."prixBase", s."availableOptions",
+               c."nom", c."ville", c."adresse", sal."nom", sal."capacite"
+        FROM "cine_pass_seance" s
+        JOIN "cine_pass_salle" sal ON sal."id" = s."salleId"
+        JOIN "cine_pass_cinema" c ON c."id" = sal."cinemaId"
+        WHERE s."filmId" = (@filmId)::uuid
+        ORDER BY s."debutAt" DESC
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'filmId': filmId}),
+      );
+      if (salleResult.isEmpty) return null;
+      return _rowToSeanceResponse(salleResult.first);
+    } catch (e, st) {
+      session.log('CinePass createSeance', level: LogLevel.error, exception: e, stackTrace: st);
+      return null;
+    }
+  }
+
   static int _safeInt(dynamic v) {
     if (v == null) return 0;
     if (v is int) return v;
@@ -210,6 +390,13 @@ class CinePassEndpoint extends Endpoint {
   }
 
   static DateTime? _safeDateTime(dynamic v) {
+    if (v == null) return null;
+    if (v is DateTime) return v;
+    if (v is String) return DateTime.tryParse(v);
+    return null;
+  }
+
+  static DateTime? _parseDateTime(Object? v) {
     if (v == null) return null;
     if (v is DateTime) return v;
     if (v is String) return DateTime.tryParse(v);

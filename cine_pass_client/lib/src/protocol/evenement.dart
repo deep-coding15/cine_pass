@@ -33,6 +33,7 @@ abstract class Evenement extends _i1.CinePassRow
     this.posterColor,
     this.posterUrl,
     this.availableOptions,
+    this.structureId,
   }) : id = id ?? const _i2.Uuid().v4obj();
 
   factory Evenement({
@@ -51,6 +52,7 @@ abstract class Evenement extends _i1.CinePassRow
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    _i2.UuidValue? structureId,
   }) = _EvenementImpl;
 
   factory Evenement.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -81,6 +83,11 @@ abstract class Evenement extends _i1.CinePassRow
           ? null
           : _i3.Protocol().deserialize<List<String>>(
               jsonSerialization['availableOptions'],
+            ),
+      structureId: jsonSerialization['structureId'] == null
+          ? null
+          : _i2.UuidValueJsonExtension.fromJson(
+              jsonSerialization['structureId'],
             ),
     );
   }
@@ -114,6 +121,8 @@ abstract class Evenement extends _i1.CinePassRow
 
   List<String>? availableOptions;
 
+  _i2.UuidValue? structureId;
+
   /// Returns a shallow copy of this [Evenement]
   /// with some or all fields replaced by the given arguments.
   @override
@@ -134,6 +143,7 @@ abstract class Evenement extends _i1.CinePassRow
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    _i2.UuidValue? structureId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -155,6 +165,7 @@ abstract class Evenement extends _i1.CinePassRow
       if (posterUrl != null) 'posterUrl': posterUrl,
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
+      if (structureId != null) 'structureId': structureId?.toJson(),
     };
   }
 
@@ -183,6 +194,7 @@ class _EvenementImpl extends Evenement {
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    _i2.UuidValue? structureId,
   }) : super._(
          id: id,
          createdAt: createdAt,
@@ -199,6 +211,7 @@ class _EvenementImpl extends Evenement {
          posterColor: posterColor,
          posterUrl: posterUrl,
          availableOptions: availableOptions,
+         structureId: structureId,
        );
 
   /// Returns a shallow copy of this [Evenement]
@@ -221,6 +234,7 @@ class _EvenementImpl extends Evenement {
     Object? posterColor = _Undefined,
     Object? posterUrl = _Undefined,
     Object? availableOptions = _Undefined,
+    Object? structureId = _Undefined,
   }) {
     return Evenement(
       id: id ?? this.id,
@@ -240,6 +254,9 @@ class _EvenementImpl extends Evenement {
       availableOptions: availableOptions is List<String>?
           ? availableOptions
           : this.availableOptions?.map((e0) => e0).toList(),
+      structureId: structureId is _i2.UuidValue?
+          ? structureId
+          : this.structureId,
     );
   }
 }

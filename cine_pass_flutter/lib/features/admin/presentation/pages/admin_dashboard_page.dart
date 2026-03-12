@@ -14,6 +14,7 @@ class AdminDashboardPage extends StatefulWidget {
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   List<FilmResponse> _films = [];
   List<EventResponse> _events = [];
+  int _seancesCount = 0;
 
   @override
   void initState() {
@@ -25,16 +26,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     try {
       final films = await client.cinePass.getFilms();
       final events = await client.cinePass.getEvents();
+      int total = 0;
+      for (final film in films) {
+        final seances = await client.cinePass.getSeancesForFilm(film.id);
+        total += seances.length;
+      }
       if (!mounted) return;
       setState(() {
         _films = films;
         _events = events;
+        _seancesCount = total;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _films = [];
         _events = [];
+        _seancesCount = 0;
       });
     }
   }
@@ -81,7 +89,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               Expanded(
                 child: _StatCard(
                   title: 'Séances planifiées',
-                  value: '-',
+                  value: '$_seancesCount',
                   icon: Icons.schedule_rounded,
                   color: Color(0xFF7E57C2),
                 ),

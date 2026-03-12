@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 
 class AdminAddFilmDialog extends StatefulWidget {
-  const AdminAddFilmDialog({super.key});
+  const AdminAddFilmDialog({super.key, this.onSaved});
+
+  final VoidCallback? onSaved;
 
   @override
   State<AdminAddFilmDialog> createState() => _AdminAddFilmDialogState();
@@ -198,16 +201,41 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                           children: [
                             Expanded(
                               child: FilledButton(
-                                onPressed: () {
-                                  if (_formKey.currentState?.validate() ==
-                                      true) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Film enregistré (démo)'),
-                                        backgroundColor: AppTheme.accentGreen,
-                                      ),
+                                onPressed: () async {
+                                  if (_formKey.currentState?.validate() != true) return;
+                                  final title = _titleController.text.trim();
+                                  final genre = _genreController.text.trim();
+                                  final durationMinutes = int.tryParse(_durationController.text.trim()) ?? 120;
+                                  try {
+                                    final created = await client.cinePass.createFilm(
+                                      title: title,
+                                      genre: genre,
+                                      durationMinutes: durationMinutes,
+                                      synopsis: _synopsisController.text.trim().isEmpty ? null : _synopsisController.text.trim(),
+                                      director: _directorController.text.trim().isEmpty ? null : _directorController.text.trim(),
+                                      casting: _castingController.text.trim().isEmpty ? null : _castingController.text.trim(),
+                                      posterColor: null,
+                                      dateSortie: _startDate,
+                                      dateFin: _endDate,
+                                      audience: _classificationController.text.trim().isEmpty ? null : _classificationController.text.trim(),
                                     );
-                                    Navigator.of(context).pop();
+                                    if (!context.mounted) return;
+                                    if (created != null) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Film enregistré'), backgroundColor: AppTheme.accentGreen),
+                                      );
+                                      widget.onSaved?.call();
+                                      Navigator.of(context).pop();
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Erreur lors de l\'enregistrement'), backgroundColor: AppTheme.primaryRed),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.primaryRed),
+                                    );
                                   }
                                 },
                                 style: FilledButton.styleFrom(

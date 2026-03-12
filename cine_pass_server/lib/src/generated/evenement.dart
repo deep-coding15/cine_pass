@@ -33,6 +33,7 @@ abstract class Evenement extends _i1.CinePassRow
     this.posterColor,
     this.posterUrl,
     this.availableOptions,
+    this.structureId,
   }) : id = id ?? const _i2.Uuid().v4obj();
 
   factory Evenement({
@@ -51,6 +52,7 @@ abstract class Evenement extends _i1.CinePassRow
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    _i2.UuidValue? structureId,
   }) = _EvenementImpl;
 
   factory Evenement.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -81,6 +83,11 @@ abstract class Evenement extends _i1.CinePassRow
           ? null
           : _i3.Protocol().deserialize<List<String>>(
               jsonSerialization['availableOptions'],
+            ),
+      structureId: jsonSerialization['structureId'] == null
+          ? null
+          : _i2.UuidValueJsonExtension.fromJson(
+              jsonSerialization['structureId'],
             ),
     );
   }
@@ -118,6 +125,8 @@ abstract class Evenement extends _i1.CinePassRow
 
   List<String>? availableOptions;
 
+  _i2.UuidValue? structureId;
+
   @override
   _i2.Table<_i2.UuidValue> get table => t;
 
@@ -141,6 +150,7 @@ abstract class Evenement extends _i1.CinePassRow
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    _i2.UuidValue? structureId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -162,6 +172,7 @@ abstract class Evenement extends _i1.CinePassRow
       if (posterUrl != null) 'posterUrl': posterUrl,
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
+      if (structureId != null) 'structureId': structureId?.toJson(),
     };
   }
 
@@ -185,6 +196,7 @@ abstract class Evenement extends _i1.CinePassRow
       if (posterUrl != null) 'posterUrl': posterUrl,
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
+      if (structureId != null) 'structureId': structureId?.toJson(),
     };
   }
 
@@ -237,6 +249,7 @@ class _EvenementImpl extends Evenement {
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    _i2.UuidValue? structureId,
   }) : super._(
          id: id,
          createdAt: createdAt,
@@ -253,6 +266,7 @@ class _EvenementImpl extends Evenement {
          posterColor: posterColor,
          posterUrl: posterUrl,
          availableOptions: availableOptions,
+         structureId: structureId,
        );
 
   /// Returns a shallow copy of this [Evenement]
@@ -275,6 +289,7 @@ class _EvenementImpl extends Evenement {
     Object? posterColor = _Undefined,
     Object? posterUrl = _Undefined,
     Object? availableOptions = _Undefined,
+    Object? structureId = _Undefined,
   }) {
     return Evenement(
       id: id ?? this.id,
@@ -294,6 +309,9 @@ class _EvenementImpl extends Evenement {
       availableOptions: availableOptions is List<String>?
           ? availableOptions
           : this.availableOptions?.map((e0) => e0).toList(),
+      structureId: structureId is _i2.UuidValue?
+          ? structureId
+          : this.structureId,
     );
   }
 }
@@ -375,6 +393,13 @@ class EvenementUpdateTable extends _i2.UpdateTable<EvenementTable> {
     table.availableOptions,
     value,
   );
+
+  _i2.ColumnValue<_i2.UuidValue, _i2.UuidValue> structureId(
+    _i2.UuidValue? value,
+  ) => _i2.ColumnValue(
+    table.structureId,
+    value,
+  );
 }
 
 class EvenementTable extends _i2.Table<_i2.UuidValue> {
@@ -438,6 +463,10 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
       'availableOptions',
       this,
     );
+    structureId = _i2.ColumnUuid(
+      'structureId',
+      this,
+    );
   }
 
   late final EvenementUpdateTable updateTable;
@@ -470,6 +499,8 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
 
   late final _i2.ColumnSerializable<List<String>> availableOptions;
 
+  late final _i2.ColumnUuid structureId;
+
   @override
   List<_i2.Column> get columns => [
     id,
@@ -487,6 +518,7 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
     posterColor,
     posterUrl,
     availableOptions,
+    structureId,
   ];
 }
 

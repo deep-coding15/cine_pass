@@ -28,14 +28,16 @@ import 'cine_pass_row.dart' as _i13;
 import 'greetings/greeting.dart' as _i14;
 import 'salle.dart' as _i15;
 import 'siege.dart' as _i16;
+import 'structure.dart' as _i17;
 import 'package:cine_pass_server/src/generated/cine_pass/film_response.dart'
-    as _i17;
-import 'package:cine_pass_server/src/generated/cine_pass/seance_response.dart'
     as _i18;
-import 'package:cine_pass_server/src/generated/cine_pass/cinema_response.dart'
+import 'package:cine_pass_server/src/generated/cine_pass/seance_response.dart'
     as _i19;
-import 'package:cine_pass_server/src/generated/cine_pass/event_response.dart'
+import 'package:cine_pass_server/src/generated/cine_pass/cinema_response.dart'
     as _i20;
+import 'package:cine_pass_server/src/generated/salle.dart' as _i21;
+import 'package:cine_pass_server/src/generated/cine_pass/event_response.dart'
+    as _i22;
 export 'cine_pass/cinema_response.dart';
 export 'cine_pass/event_response.dart';
 export 'cine_pass/film_response.dart';
@@ -48,6 +50,7 @@ export 'cine_pass_row.dart';
 export 'greetings/greeting.dart';
 export 'salle.dart';
 export 'siege.dart';
+export 'structure.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -118,7 +121,7 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: true,
         ),
       ],
-      managed: true,
+      managed: false,
     ),
     _i2.TableDefinition(
       name: 'cine_pass_evenement',
@@ -218,8 +221,25 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: true,
           dartType: 'List<String>?',
         ),
+        _i2.ColumnDefinition(
+          name: 'structureId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'cine_pass_evenement_fk_0',
+          columns: ['structureId'],
+          referenceTable: 'cine_pass_structure',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _i2.IndexDefinition(
           indexName: 'cine_pass_evenement_pkey',
@@ -235,7 +255,7 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: true,
         ),
       ],
-      managed: true,
+      managed: false,
     ),
     _i2.TableDefinition(
       name: 'cine_pass_film',
@@ -347,7 +367,7 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: true,
         ),
       ],
-      managed: true,
+      managed: false,
     ),
     _i2.TableDefinition(
       name: 'cine_pass_salle',
@@ -381,7 +401,18 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'int',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'cine_pass_salle_fk_0',
+          columns: ['cinemaId'],
+          referenceTable: 'cine_pass_cinema',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _i2.IndexDefinition(
           indexName: 'cine_pass_salle_pkey',
@@ -397,7 +428,7 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: true,
         ),
       ],
-      managed: true,
+      managed: false,
     ),
     _i2.TableDefinition(
       name: 'cine_pass_seance',
@@ -470,7 +501,28 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'List<String>?',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'cine_pass_seance_fk_0',
+          columns: ['filmId'],
+          referenceTable: 'cine_pass_film',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _i2.ForeignKeyDefinition(
+          constraintName: 'cine_pass_seance_fk_1',
+          columns: ['salleId'],
+          referenceTable: 'cine_pass_salle',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _i2.IndexDefinition(
           indexName: 'cine_pass_seance_pkey',
@@ -486,7 +538,7 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: true,
         ),
       ],
-      managed: true,
+      managed: false,
     ),
     _i2.TableDefinition(
       name: 'cine_pass_siege',
@@ -520,7 +572,18 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'int',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'cine_pass_siege_fk_0',
+          columns: ['salleId'],
+          referenceTable: 'cine_pass_salle',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _i2.IndexDefinition(
           indexName: 'cine_pass_siege_pkey',
@@ -536,7 +599,109 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: true,
         ),
       ],
-      managed: true,
+      managed: false,
+    ),
+    _i2.TableDefinition(
+      name: 'cine_pass_structure',
+      dartName: 'Structure',
+      schema: 'public',
+      module: 'cine_pass',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'gen_random_uuid()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'type',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'name',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'city',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'address',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'website',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'phone',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'cinemaId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'cine_pass_structure_fk_0',
+          columns: ['cinemaId'],
+          referenceTable: 'cine_pass_cinema',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_structure_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_structure_type_city_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'type',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'city',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: false,
     ),
     ..._i3.Protocol.targetTableDefinitions,
     ..._i4.Protocol.targetTableDefinitions,
@@ -606,6 +771,9 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i16.Siege) {
       return _i16.Siege.fromJson(data) as T;
     }
+    if (t == _i17.Structure) {
+      return _i17.Structure.fromJson(data) as T;
+    }
     if (t == _i1.getType<_i5.CinemaResponse?>()) {
       return (data != null ? _i5.CinemaResponse.fromJson(data) : null) as T;
     }
@@ -642,6 +810,9 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i16.Siege?>()) {
       return (data != null ? _i16.Siege.fromJson(data) : null) as T;
     }
+    if (t == _i1.getType<_i17.Structure?>()) {
+      return (data != null ? _i17.Structure.fromJson(data) : null) as T;
+    }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
@@ -651,27 +822,31 @@ class Protocol extends _i1.SerializationManagerServer {
               : null)
           as T;
     }
-    if (t == List<_i17.FilmResponse>) {
+    if (t == List<_i18.FilmResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i17.FilmResponse>(e))
+              .map((e) => deserialize<_i18.FilmResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i18.SeanceResponse>) {
+    if (t == List<_i19.SeanceResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i18.SeanceResponse>(e))
+              .map((e) => deserialize<_i19.SeanceResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i19.CinemaResponse>) {
+    if (t == List<_i20.CinemaResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i19.CinemaResponse>(e))
+              .map((e) => deserialize<_i20.CinemaResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i20.EventResponse>) {
+    if (t == List<_i21.Salle>) {
+      return (data as List).map((e) => deserialize<_i21.Salle>(e)).toList()
+          as T;
+    }
+    if (t == List<_i22.EventResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i20.EventResponse>(e))
+              .map((e) => deserialize<_i22.EventResponse>(e))
               .toList()
           as T;
     }
@@ -704,6 +879,7 @@ class Protocol extends _i1.SerializationManagerServer {
       _i14.Greeting => 'Greeting',
       _i15.Salle => 'Salle',
       _i16.Siege => 'Siege',
+      _i17.Structure => 'Structure',
       _ => null,
     };
   }
@@ -742,6 +918,8 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'Salle';
       case _i16.Siege():
         return 'Siege';
+      case _i17.Structure():
+        return 'Structure';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -800,6 +978,9 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Siege') {
       return deserialize<_i16.Siege>(data['data']);
     }
+    if (dataClassName == 'Structure') {
+      return deserialize<_i17.Structure>(data['data']);
+    }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
       return _i2.Protocol().deserializeByClassName(data);
@@ -848,6 +1029,8 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i15.Salle.t;
       case _i16.Siege:
         return _i16.Siege.t;
+      case _i17.Structure:
+        return _i17.Structure.t;
     }
     return null;
   }

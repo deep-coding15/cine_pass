@@ -84,6 +84,12 @@ class AdminScaffold extends StatelessWidget {
                     onTap: () => context.go('/admin/users'),
                   ),
                   _AdminNavTile(
+                    icon: Icons.badge_outlined,
+                    label: 'Demandes responsable',
+                    isActive: _isActive(context, '/admin/demandes'),
+                    onTap: () => context.go('/admin/demandes'),
+                  ),
+                  _AdminNavTile(
                     icon: Icons.confirmation_number_rounded,
                     label: 'Réservations',
                     isActive: _isActive(context, '/admin/reservations'),

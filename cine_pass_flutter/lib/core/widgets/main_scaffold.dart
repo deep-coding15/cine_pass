@@ -48,12 +48,16 @@ class _MainScaffoldState extends State<MainScaffold> {
               child: const Text('Accueil'),
             ),
             TextButton(
-              onPressed: () => context.go(AppRouter.films),
-              child: const Text('Films'),
-            ),
-            TextButton(
               onPressed: () => context.go(AppRouter.events),
               child: const Text('Événements'),
+            ),
+            Tooltip(
+              message: 'Devenir responsable',
+              child: TextButton.icon(
+                onPressed: () => context.go(AppRouter.devenirResponsable),
+                icon: const Icon(Icons.badge_outlined, size: 20),
+                label: const Text('Devenir responsable'),
+              ),
             ),
             TextButton(
               onPressed: () => context.go(AppRouter.billets),
@@ -61,6 +65,7 @@ class _MainScaffoldState extends State<MainScaffold> {
             ),
             PopupMenuButton<String>(
               offset: const Offset(0, 48),
+              tooltip: 'Profil · Devenir responsable',
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -75,6 +80,8 @@ class _MainScaffoldState extends State<MainScaffold> {
               onSelected: (value) {
                 if (value == 'profil') {
                   context.go(AppRouter.profil);
+                } else if (value == 'devenir_responsable') {
+                  context.go(AppRouter.devenirResponsable);
                 } else if (value == 'deconnexion') {
                   context.read<PendingReservationState>().clear();
                   auth.logout();
@@ -85,6 +92,16 @@ class _MainScaffoldState extends State<MainScaffold> {
                 const PopupMenuItem(
                   value: 'profil',
                   child: Text('Voir mon profil'),
+                ),
+                const PopupMenuItem(
+                  value: 'devenir_responsable',
+                  child: Row(
+                    children: [
+                      Icon(Icons.badge_outlined, size: 20, color: AppTheme.textSecondary),
+                      SizedBox(width: 12),
+                      Text('Devenir responsable'),
+                    ],
+                  ),
                 ),
                 const PopupMenuItem(
                   value: 'deconnexion',

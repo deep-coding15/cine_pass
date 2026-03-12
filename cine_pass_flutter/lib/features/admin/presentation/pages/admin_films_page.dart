@@ -96,10 +96,13 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
                 ],
               ),
               FilledButton.icon(
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (_) => const AdminAddFilmDialog(),
-                ),
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (_) => AdminAddFilmDialog(onSaved: _load),
+                  );
+                  if (mounted) _load();
+                },
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Nouveau film'),
                 style: FilledButton.styleFrom(

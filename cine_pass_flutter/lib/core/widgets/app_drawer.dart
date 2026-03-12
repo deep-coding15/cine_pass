@@ -22,8 +22,9 @@ class AppDrawer extends StatelessWidget {
     if (location.isEmpty) location = '/';
     bool isActive(String path) {
       if (path == AppRouter.home) return location == '/' || location.isEmpty;
-      return location == path ||
-          (path == AppRouter.admin && location.startsWith('/admin'));
+      if (path == AppRouter.admin) return location.startsWith('/admin');
+      if (path == AppRouter.responsable) return location.startsWith('/responsable');
+      return location == path;
     }
 
     return Container(
@@ -126,15 +127,6 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             _DrawerTile(
-              icon: Icons.movie_rounded,
-              label: 'Films',
-              isActive: isActive(AppRouter.films),
-              onTap: () {
-                Navigator.pop(context);
-                context.go(AppRouter.films);
-              },
-            ),
-            _DrawerTile(
               icon: Icons.calendar_today_rounded,
               label: 'Événements',
               isActive: isActive(AppRouter.events),
@@ -143,6 +135,25 @@ class AppDrawer extends StatelessWidget {
                 context.go(AppRouter.events);
               },
             ),
+            _DrawerTile(
+              icon: Icons.search_rounded,
+              label: 'Rechercher avec filtres',
+              isActive: isActive(AppRouter.events),
+              onTap: () {
+                Navigator.pop(context);
+                context.go(AppRouter.events);
+              },
+            ),
+            if (auth.isLoggedIn)
+              _DrawerTile(
+                icon: Icons.badge_outlined,
+                label: 'Devenir responsable',
+                isActive: isActive(AppRouter.devenirResponsable),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.go(AppRouter.devenirResponsable);
+                },
+              ),
             if (auth.isLoggedIn) ...[
               _DrawerTile(
                 icon: Icons.confirmation_number_rounded,
@@ -170,6 +181,17 @@ class AppDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     context.go(AppRouter.admin);
+                  },
+                  highlight: true,
+                ),
+              if (auth.isResponsable)
+                _DrawerTile(
+                  icon: Icons.store_rounded,
+                  label: 'Espace responsable',
+                  isActive: isActive(AppRouter.responsable),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.go(AppRouter.responsable);
                   },
                   highlight: true,
                 ),

@@ -22,10 +22,11 @@ import 'package:cine_pass_client/src/protocol/cine_pass/seance_response.dart'
     as _i6;
 import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
     as _i7;
+import 'package:cine_pass_client/src/protocol/salle.dart' as _i8;
 import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
-    as _i8;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i9;
-import 'protocol.dart' as _i10;
+    as _i9;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i10;
+import 'protocol.dart' as _i11;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -288,17 +289,25 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
+  /// Liste des salles (pour admin séances).
+  _i3.Future<List<_i8.Salle>> getSalles() =>
+      caller.callServerEndpoint<List<_i8.Salle>>(
+        'cinePass',
+        'getSalles',
+        {},
+      );
+
   /// Liste des événements à venir.
-  _i3.Future<List<_i8.EventResponse>> getEvents() =>
-      caller.callServerEndpoint<List<_i8.EventResponse>>(
+  _i3.Future<List<_i9.EventResponse>> getEvents() =>
+      caller.callServerEndpoint<List<_i9.EventResponse>>(
         'cinePass',
         'getEvents',
         {},
       );
 
   /// Détail d'un événement par id.
-  _i3.Future<_i8.EventResponse?> getEventById(String id) =>
-      caller.callServerEndpoint<_i8.EventResponse?>(
+  _i3.Future<_i9.EventResponse?> getEventById(String id) =>
+      caller.callServerEndpoint<_i9.EventResponse?>(
         'cinePass',
         'getEventById',
         {'id': id},
@@ -327,6 +336,89 @@ class EndpointCinePass extends _i2.EndpointRef {
         'getEventCategories',
         {},
       );
+
+  /// Admin: créer un film.
+  _i3.Future<_i5.FilmResponse?> createFilm({
+    required String title,
+    required String genre,
+    required int durationMinutes,
+    String? synopsis,
+    String? director,
+    String? casting,
+    int? posterColor,
+    Object? dateSortie,
+    Object? dateFin,
+    String? audience,
+  }) => caller.callServerEndpoint<_i5.FilmResponse?>(
+    'cinePass',
+    'createFilm',
+    {
+      'title': title,
+      'genre': genre,
+      'durationMinutes': durationMinutes,
+      'synopsis': synopsis,
+      'director': director,
+      'casting': casting,
+      'posterColor': posterColor,
+      'dateSortie': dateSortie,
+      'dateFin': dateFin,
+      'audience': audience,
+    },
+  );
+
+  /// Admin: créer un événement.
+  _i3.Future<_i9.EventResponse?> createEvent({
+    required String titre,
+    required String categorie,
+    String? description,
+    required String lieu,
+    String? adresse,
+    required String ville,
+    required Object eventDate,
+    required String eventTimeStr,
+    required int placesTotal,
+    required double prixBase,
+    int? posterColor,
+  }) => caller.callServerEndpoint<_i9.EventResponse?>(
+    'cinePass',
+    'createEvent',
+    {
+      'titre': titre,
+      'categorie': categorie,
+      'description': description,
+      'lieu': lieu,
+      'adresse': adresse,
+      'ville': ville,
+      'eventDate': eventDate,
+      'eventTimeStr': eventTimeStr,
+      'placesTotal': placesTotal,
+      'prixBase': prixBase,
+      'posterColor': posterColor,
+    },
+  );
+
+  /// Admin: créer une séance.
+  _i3.Future<_i6.SeanceResponse?> createSeance({
+    required String filmId,
+    required String salleId,
+    required Object debutAt,
+    Object? finAt,
+    required String format,
+    required String type,
+    required double prixBase,
+  }) => caller.callServerEndpoint<_i6.SeanceResponse?>(
+    'cinePass',
+    'createSeance',
+    {
+      'filmId': filmId,
+      'salleId': salleId,
+      'debutAt': debutAt,
+      'finAt': finAt,
+      'format': format,
+      'type': type,
+      'prixBase': prixBase,
+    },
+  );
 }
 
 /// This is an example endpoint that returns a greeting message through
@@ -339,8 +431,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i9.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i9.Greeting>(
+  _i3.Future<_i10.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i10.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -378,7 +470,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i10.Protocol(),
+         _i11.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
