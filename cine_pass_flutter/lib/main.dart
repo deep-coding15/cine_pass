@@ -1,4 +1,5 @@
 import 'package:cine_pass_client/cine_pass_client.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
@@ -13,6 +14,20 @@ import 'features/billets/data/billets_state.dart';
 import 'features/reservation/data/reservation_state.dart';
 
 late final Client client;
+
+const _defaultGoogleWebClientId =
+    '780713404787-qgeac9u7gn7an6kntv5kg24ntp30u2dq.apps.googleusercontent.com';
+const _defaultGoogleAndroidClientId =
+    '780713404787-th1oi0uk8pvtuofjmap99bc1o7num427.apps.googleusercontent.com';
+const _googleClientIdFromDefine = String.fromEnvironment('GOOGLE_CLIENT_ID');
+const _googleServerClientIdFromDefine = String.fromEnvironment(
+  'GOOGLE_SERVER_CLIENT_ID',
+);
+
+String? _normalizedOrNull(String value) {
+  final normalized = value.trim();
+  return normalized.isEmpty ? null : normalized;
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +52,21 @@ void main() async {
 
   // Initialize the auth session manager to load any existing auth session from storage.
   await client.auth.initialize();
+
+  final googleClientId =
+      _normalizedOrNull(_googleClientIdFromDefine) ??
+      _defaultGoogleAndroidClientId;
+  final googleServerClientId =
+      _normalizedOrNull(_googleServerClientIdFromDefine) ??
+      _defaultGoogleWebClientId;
+
+  if (!kIsWeb) {
+    await client.auth.initializeGoogleSignIn(
+      clientId: googleClientId,
+      serverClientId: googleServerClientId,
+    );
+  }
+
   AuthState.instance.bindToClientAuth();
 
   runApp(

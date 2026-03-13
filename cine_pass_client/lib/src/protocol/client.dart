@@ -16,16 +16,16 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i5;
 import 'package:cine_pass_client/src/protocol/cine_pass/film_response.dart'
-    as _i6;
+    as _i5;
 import 'package:cine_pass_client/src/protocol/cine_pass/seance_response.dart'
-    as _i7;
+    as _i6;
 import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
-    as _i8;
+    as _i7;
 import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
-    as _i9;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i10;
+    as _i8;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i9;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i10;
 import 'protocol.dart' as _i11;
 
 /// Exposes Google sign-in methods to the client.
@@ -114,10 +114,10 @@ class EndpointPhoneAuth extends _i2.EndpointRef {
         authenticated: false,
       );
 
-  _i3.Future<_i5.AuthKey?> verifyCode(
+  _i3.Future<_i4.AuthSuccess?> verifyCode(
     String phoneNumber,
     String code,
-  ) => caller.callServerEndpoint<_i5.AuthKey?>(
+  ) => caller.callServerEndpoint<_i4.AuthSuccess?>(
     'phoneAuth',
     'verifyCode',
     {
@@ -137,48 +137,48 @@ class EndpointCinePass extends _i2.EndpointRef {
   String get name => 'cinePass';
 
   /// Liste de tous les films.
-  _i3.Future<List<_i6.FilmResponse>> getFilms() =>
-      caller.callServerEndpoint<List<_i6.FilmResponse>>(
+  _i3.Future<List<_i5.FilmResponse>> getFilms() =>
+      caller.callServerEndpoint<List<_i5.FilmResponse>>(
         'cinePass',
         'getFilms',
         {},
       );
 
   /// Détail d'un film par id.
-  _i3.Future<_i6.FilmResponse?> getFilmById(String id) =>
-      caller.callServerEndpoint<_i6.FilmResponse?>(
+  _i3.Future<_i5.FilmResponse?> getFilmById(String id) =>
+      caller.callServerEndpoint<_i5.FilmResponse?>(
         'cinePass',
         'getFilmById',
         {'id': id},
       );
 
   /// Séances pour un film (avec nom cinéma, salle, ville).
-  _i3.Future<List<_i7.SeanceResponse>> getSeancesForFilm(String filmId) =>
-      caller.callServerEndpoint<List<_i7.SeanceResponse>>(
+  _i3.Future<List<_i6.SeanceResponse>> getSeancesForFilm(String filmId) =>
+      caller.callServerEndpoint<List<_i6.SeanceResponse>>(
         'cinePass',
         'getSeancesForFilm',
         {'filmId': filmId},
       );
 
   /// Liste des cinémas.
-  _i3.Future<List<_i8.CinemaResponse>> getCinemas() =>
-      caller.callServerEndpoint<List<_i8.CinemaResponse>>(
+  _i3.Future<List<_i7.CinemaResponse>> getCinemas() =>
+      caller.callServerEndpoint<List<_i7.CinemaResponse>>(
         'cinePass',
         'getCinemas',
         {},
       );
 
   /// Liste des événements à venir.
-  _i3.Future<List<_i9.EventResponse>> getEvents() =>
-      caller.callServerEndpoint<List<_i9.EventResponse>>(
+  _i3.Future<List<_i8.EventResponse>> getEvents() =>
+      caller.callServerEndpoint<List<_i8.EventResponse>>(
         'cinePass',
         'getEvents',
         {},
       );
 
   /// Détail d'un événement par id.
-  _i3.Future<_i9.EventResponse?> getEventById(String id) =>
-      caller.callServerEndpoint<_i9.EventResponse?>(
+  _i3.Future<_i8.EventResponse?> getEventById(String id) =>
+      caller.callServerEndpoint<_i8.EventResponse?>(
         'cinePass',
         'getEventById',
         {'id': id},
@@ -219,8 +219,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i10.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i10.Greeting>(
+  _i3.Future<_i9.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i9.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -229,12 +229,12 @@ class EndpointGreeting extends _i2.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i5.Caller(client);
+    auth = _i10.Caller(client);
     serverpod_auth_idp = _i1.Caller(client);
     serverpod_auth_core = _i4.Caller(client);
   }
 
-  late final _i5.Caller auth;
+  late final _i10.Caller auth;
 
   late final _i1.Caller serverpod_auth_idp;
 

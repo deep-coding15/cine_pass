@@ -25,7 +25,9 @@
       "name": "cine_pass_server",
       "version": "0.0.0",
       "dependencies": [
+        "crypto",
         "serverpod",
+        "serverpod_auth_core_server",
         "serverpod_auth_idp_server",
         "serverpod_auth_server"
       ],
@@ -375,6 +377,29 @@
       "dependencies": []
     },
     {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
+      "name": "serverpod_auth_core_server",
+      "version": "3.4.0",
+      "dependencies": [
+        "clock",
+        "crypto",
+        "dart_jsonwebtoken",
+        "http",
+        "image",
+        "meta",
+        "pointycastle",
+        "serverpod",
+        "serverpod_shared",
+        "uuid"
+      ]
+    },
+    {
       "name": "serverpod_auth_idp_server",
       "version": "3.4.0",
       "dependencies": [
@@ -688,13 +713,6 @@
       "name": "email_validator",
       "version": "3.0.0",
       "dependencies": []
-    },
-    {
-      "name": "crypto",
-      "version": "3.0.7",
-      "dependencies": [
-        "typed_data"
-      ]
     },
     {
       "name": "animations",
@@ -1114,36 +1132,39 @@
       ]
     },
     {
+      "name": "pointycastle",
+      "version": "4.0.0",
+      "dependencies": [
+        "collection",
+        "convert"
+      ]
+    },
+    {
+      "name": "image",
+      "version": "4.8.0",
+      "dependencies": [
+        "archive",
+        "meta",
+        "xml"
+      ]
+    },
+    {
+      "name": "dart_jsonwebtoken",
+      "version": "3.3.2",
+      "dependencies": [
+        "clock",
+        "convert",
+        "ed25519_edwards",
+        "pointycastle"
+      ]
+    },
+    {
       "name": "sign_in_with_apple_server",
       "version": "1.0.0",
       "dependencies": [
         "dart_jsonwebtoken",
         "http",
         "meta"
-      ]
-    },
-    {
-      "name": "serverpod_auth_core_server",
-      "version": "3.4.0",
-      "dependencies": [
-        "clock",
-        "crypto",
-        "dart_jsonwebtoken",
-        "http",
-        "image",
-        "meta",
-        "pointycastle",
-        "serverpod",
-        "serverpod_shared",
-        "uuid"
-      ]
-    },
-    {
-      "name": "pointycastle",
-      "version": "4.0.0",
-      "dependencies": [
-        "collection",
-        "convert"
       ]
     },
     {
@@ -1178,16 +1199,6 @@
       ]
     },
     {
-      "name": "dart_jsonwebtoken",
-      "version": "3.3.2",
-      "dependencies": [
-        "clock",
-        "convert",
-        "ed25519_edwards",
-        "pointycastle"
-      ]
-    },
-    {
       "name": "openid_client",
       "version": "0.4.9+2",
       "dependencies": [
@@ -1214,15 +1225,6 @@
         "meta",
         "typed_data",
         "x509"
-      ]
-    },
-    {
-      "name": "image",
-      "version": "4.8.0",
-      "dependencies": [
-        "archive",
-        "meta",
-        "xml"
       ]
     },
     {
@@ -1625,6 +1627,25 @@
       ]
     },
     {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "ed25519_edwards",
+      "version": "0.3.1",
+      "dependencies": [
+        "adaptive_number",
+        "collection",
+        "convert",
+        "crypto"
+      ]
+    },
+    {
       "name": "cbor",
       "version": "6.5.1",
       "dependencies": [
@@ -1651,16 +1672,6 @@
       ]
     },
     {
-      "name": "ed25519_edwards",
-      "version": "0.3.1",
-      "dependencies": [
-        "adaptive_number",
-        "collection",
-        "convert",
-        "crypto"
-      ]
-    },
-    {
       "name": "x509",
       "version": "0.2.4+3",
       "dependencies": [
@@ -1677,15 +1688,6 @@
         "meta",
         "pointycastle",
         "quiver"
-      ]
-    },
-    {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
       ]
     },
     {
@@ -1846,9 +1848,12 @@
       "dependencies": []
     },
     {
-      "name": "hex",
-      "version": "0.2.0",
-      "dependencies": []
+      "name": "petitparser",
+      "version": "7.0.2",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
     },
     {
       "name": "adaptive_number",
@@ -1858,18 +1863,15 @@
       ]
     },
     {
+      "name": "hex",
+      "version": "0.2.0",
+      "dependencies": []
+    },
+    {
       "name": "quiver",
       "version": "3.2.2",
       "dependencies": [
         "matcher"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.2",
-      "dependencies": [
-        "collection",
-        "meta"
       ]
     },
     {

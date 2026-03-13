@@ -16,16 +16,15 @@ import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i5;
 import 'package:cine_pass_server/src/generated/cine_pass/film_response.dart'
-    as _i6;
+    as _i5;
 import 'package:cine_pass_server/src/generated/cine_pass/seance_response.dart'
-    as _i7;
+    as _i6;
 import 'package:cine_pass_server/src/generated/cine_pass/cinema_response.dart'
-    as _i8;
+    as _i7;
 import 'package:cine_pass_server/src/generated/cine_pass/event_response.dart'
-    as _i9;
-import 'package:cine_pass_server/src/generated/greetings/greeting.dart' as _i10;
+    as _i8;
+import 'package:cine_pass_server/src/generated/greetings/greeting.dart' as _i9;
 import 'package:cine_pass_server/src/generated/protocol.dart';
 import 'package:cine_pass_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -331,7 +330,7 @@ class _PhoneAuthEndpoint {
     });
   }
 
-  _i3.Future<_i5.AuthKey?> verifyCode(
+  _i3.Future<_i4.AuthSuccess?> verifyCode(
     _i1.TestSessionBuilder sessionBuilder,
     String phoneNumber,
     String code,
@@ -358,7 +357,7 @@ class _PhoneAuthEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i5.AuthKey?>);
+                as _i3.Future<_i4.AuthSuccess?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -377,7 +376,7 @@ class _CinePassEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<List<_i6.FilmResponse>> getFilms(
+  _i3.Future<List<_i5.FilmResponse>> getFilms(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -399,7 +398,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i6.FilmResponse>>);
+                as _i3.Future<List<_i5.FilmResponse>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -407,7 +406,7 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<_i6.FilmResponse?> getFilmById(
+  _i3.Future<_i5.FilmResponse?> getFilmById(
     _i1.TestSessionBuilder sessionBuilder,
     String id,
   ) async {
@@ -430,7 +429,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i6.FilmResponse?>);
+                as _i3.Future<_i5.FilmResponse?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -438,7 +437,7 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<List<_i7.SeanceResponse>> getSeancesForFilm(
+  _i3.Future<List<_i6.SeanceResponse>> getSeancesForFilm(
     _i1.TestSessionBuilder sessionBuilder,
     String filmId,
   ) async {
@@ -461,7 +460,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i7.SeanceResponse>>);
+                as _i3.Future<List<_i6.SeanceResponse>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -469,7 +468,7 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<List<_i8.CinemaResponse>> getCinemas(
+  _i3.Future<List<_i7.CinemaResponse>> getCinemas(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -491,7 +490,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i8.CinemaResponse>>);
+                as _i3.Future<List<_i7.CinemaResponse>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -499,7 +498,7 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<List<_i9.EventResponse>> getEvents(
+  _i3.Future<List<_i8.EventResponse>> getEvents(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -521,7 +520,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i9.EventResponse>>);
+                as _i3.Future<List<_i8.EventResponse>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -529,7 +528,7 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<_i9.EventResponse?> getEventById(
+  _i3.Future<_i8.EventResponse?> getEventById(
     _i1.TestSessionBuilder sessionBuilder,
     String id,
   ) async {
@@ -552,7 +551,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i9.EventResponse?>);
+                as _i3.Future<_i8.EventResponse?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -661,7 +660,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i10.Greeting> hello(
+  _i3.Future<_i9.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -684,7 +683,7 @@ class _GreetingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.Greeting>);
+                as _i3.Future<_i9.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

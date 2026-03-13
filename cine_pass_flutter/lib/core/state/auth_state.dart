@@ -18,6 +18,8 @@ class AuthState extends ChangeNotifier {
   String _userName = '';
   String _userEmail = '';
 
+  Future<void>? _pendingProfileRefresh;
+
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin => _isAdmin;
   String get userName => _userName;
@@ -64,6 +66,10 @@ class AuthState extends ChangeNotifier {
       if (_userName.isEmpty) {
         _userName = 'Utilisateur';
       }
+
+      _pendingProfileRefresh ??= _refreshProfileFromServer().whenComplete(() {
+        _pendingProfileRefresh = null;
+      });
     }
 
     final hasChanged = previousLoggedIn != _isLoggedIn ||
@@ -73,6 +79,29 @@ class AuthState extends ChangeNotifier {
 
     if (hasChanged) {
       notifyListeners();
+    }
+  }
+
+  Future<void> _refreshProfileFromServer() async {
+    if (!_isLoggedIn) return;
+
+    try {
+      final profile = await client.modules.serverpod_auth_core.userProfileInfo.get();
+      final nextName =
+          (profile.fullName?.trim().isNotEmpty ?? false)
+              ? profile.fullName!.trim()
+              : (profile.userName?.trim().isNotEmpty ?? false)
+                  ? profile.userName!.trim()
+                  : _userName;
+      final nextEmail = profile.email?.trim() ?? _userEmail;
+
+      if (nextName != _userName || nextEmail != _userEmail) {
+        _userName = nextName;
+        _userEmail = nextEmail;
+        notifyListeners();
+      }
+    } catch (_) {
+      // Ignore profile enrichment failures and keep authInfo fallback values.
     }
   }
 
