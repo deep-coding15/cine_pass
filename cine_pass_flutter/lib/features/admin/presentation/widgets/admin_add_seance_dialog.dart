@@ -33,7 +33,13 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
   bool _loading = true;
 
   static const List<String> _slots = [
-    '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00',
+    '10:00',
+    '12:00',
+    '14:00',
+    '16:00',
+    '18:00',
+    '20:00',
+    '22:00',
   ];
 
   @override
@@ -119,7 +125,6 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                     children: [
                       _dropdown<String>(
                         label: 'Film',
-                        value: _selectedFilmId,
                         hint: 'Sélectionner un film',
                         items: widget.films
                             .map(
@@ -129,13 +134,11 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                               ),
                             )
                             .toList(),
-                        onChanged: (v) =>
-                            setState(() => _selectedFilmId = v),
+                        onChanged: (v) => setState(() => _selectedFilmId = v),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Cinéma',
-                        value: _selectedCinemaId,
                         hint: 'Sélectionner un cinéma',
                         items: _cinemas
                             .map(
@@ -154,7 +157,6 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Salle',
-                        value: _selectedSalleId,
                         hint: 'Sélectionner une salle',
                         items: _roomsForCinema
                             .map(
@@ -190,7 +192,6 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Heure',
-                        value: _selectedSlot,
                         hint: '--:--',
                         items: _slots
                             .map(
@@ -200,25 +201,21 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                               ),
                             )
                             .toList(),
-                        onChanged: (v) =>
-                            setState(() => _selectedSlot = v),
+                        onChanged: (v) => setState(() => _selectedSlot = v),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Langue',
-                        value: _langue,
                         hint: 'Langue',
                         items: const [
                           DropdownMenuItem(value: 'VF', child: Text('VF')),
                           DropdownMenuItem(value: 'VO', child: Text('VO')),
                         ],
-                        onChanged: (v) =>
-                            setState(() => _langue = v ?? 'VF'),
+                        onChanged: (v) => setState(() => _langue = v ?? 'VF'),
                       ),
                       const SizedBox(height: 12),
                       _dropdown<String>(
                         label: 'Type de projection',
-                        value: _type,
                         hint: 'Type',
                         items: const [
                           DropdownMenuItem(value: '2D', child: Text('2D')),
@@ -238,8 +235,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                           filled: true,
                           fillColor: AppTheme.surfaceDark,
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8)),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
                           ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
@@ -255,8 +251,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                                     _selectedSalleId == null ||
                                     _selectedSlot == null ||
                                     _date == null) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(
+                                  ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
                                         'Remplissez tous les champs',
@@ -266,16 +261,16 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                                   );
                                   return;
                                 }
-                                final price = double.tryParse(
+                                final price =
+                                    double.tryParse(
                                       _priceController.text.trim(),
                                     ) ??
                                     12.50;
                                 final parts = _selectedSlot!.split(':');
                                 final hour = int.tryParse(parts[0]) ?? 20;
-                                final minute =
-                                    parts.length > 1
-                                        ? int.tryParse(parts[1]) ?? 0
-                                        : 0;
+                                final minute = parts.length > 1
+                                    ? int.tryParse(parts[1]) ?? 0
+                                    : 0;
                                 final debutAt = DateTime(
                                   _date!.year,
                                   _date!.month,
@@ -284,19 +279,18 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                                   minute,
                                 );
                                 try {
-                                  final created =
-                                      await client.cinePass.createSeance(
-                                    filmId: _selectedFilmId!,
-                                    salleId: _selectedSalleId!,
-                                    debutAt: debutAt,
-                                    format: _langue,
-                                    type: _type,
-                                    prixBase: price,
-                                  );
+                                  final created = await client.cinePass
+                                      .createSeance(
+                                        filmId: _selectedFilmId!,
+                                        salleId: _selectedSalleId!,
+                                        debutAt: debutAt,
+                                        format: _langue,
+                                        type: _type,
+                                        prixBase: price,
+                                      );
                                   if (!context.mounted) return;
                                   if (created != null) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text('Séance enregistrée'),
                                         backgroundColor: AppTheme.accentGreen,
@@ -305,8 +299,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                                     widget.onSaved?.call();
                                     Navigator.of(context).pop();
                                   } else {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
                                           'Erreur lors de l\'enregistrement',
@@ -353,13 +346,11 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
 
   Widget _dropdown<T>({
     required String label,
-    required T? value,
     required String hint,
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         filled: true,

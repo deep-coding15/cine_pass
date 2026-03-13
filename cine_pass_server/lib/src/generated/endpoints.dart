@@ -785,9 +785,8 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async =>
-                  (endpoints['cinePass'] as _i4.CinePassEndpoint)
-                      .createDemandeResponsable(
+              ) async => (endpoints['cinePass'] as _i4.CinePassEndpoint)
+                  .createDemandeResponsable(
                     session,
                     structureType: params['structureType'],
                     structureName: params['structureName'],

@@ -86,14 +86,14 @@ class _DemandeResponsableResponseImpl extends DemandeResponsableResponse {
     required String createdAt,
     String? userName,
   }) : super._(
-          id: id,
-          userId: userId,
-          structureType: structureType,
-          structureName: structureName,
-          structureCity: structureCity,
-          structureAddress: structureAddress,
-          status: status,
-          createdAt: createdAt,
-          userName: userName,
-        );
+         id: id,
+         userId: userId,
+         structureType: structureType,
+         structureName: structureName,
+         structureCity: structureCity,
+         structureAddress: structureAddress,
+         status: status,
+         createdAt: createdAt,
+         userName: userName,
+       );
 }
