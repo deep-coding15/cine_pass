@@ -235,6 +235,16 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
                   .getCinemas(session),
         ),
+        'getSalles': _i1.MethodConnector(
+          name: 'getSalles',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getSalles(session),
+        ),
         'getEvents': _i1.MethodConnector(
           name: 'getEvents',
           params: {},
@@ -293,6 +303,520 @@ class Endpoints extends _i1.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
                   .getEventCategories(session),
+        ),
+        'createFilm': _i1.MethodConnector(
+          name: 'createFilm',
+          params: {
+            'title': _i1.ParameterDescription(
+              name: 'title',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'genre': _i1.ParameterDescription(
+              name: 'genre',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'durationMinutes': _i1.ParameterDescription(
+              name: 'durationMinutes',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'synopsis': _i1.ParameterDescription(
+              name: 'synopsis',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'director': _i1.ParameterDescription(
+              name: 'director',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'casting': _i1.ParameterDescription(
+              name: 'casting',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'posterColor': _i1.ParameterDescription(
+              name: 'posterColor',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'dateSortie': _i1.ParameterDescription(
+              name: 'dateSortie',
+              type: _i1.getType<Object?>(),
+              nullable: true,
+            ),
+            'dateFin': _i1.ParameterDescription(
+              name: 'dateFin',
+              type: _i1.getType<Object?>(),
+              nullable: true,
+            ),
+            'audience': _i1.ParameterDescription(
+              name: 'audience',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i5.CinePassEndpoint).createFilm(
+                    session,
+                    title: params['title'],
+                    genre: params['genre'],
+                    durationMinutes: params['durationMinutes'],
+                    synopsis: params['synopsis'],
+                    director: params['director'],
+                    casting: params['casting'],
+                    posterColor: params['posterColor'],
+                    dateSortie: params['dateSortie'],
+                    dateFin: params['dateFin'],
+                    audience: params['audience'],
+                  ),
+        ),
+        'createEvent': _i1.MethodConnector(
+          name: 'createEvent',
+          params: {
+            'titre': _i1.ParameterDescription(
+              name: 'titre',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'categorie': _i1.ParameterDescription(
+              name: 'categorie',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'lieu': _i1.ParameterDescription(
+              name: 'lieu',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'adresse': _i1.ParameterDescription(
+              name: 'adresse',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'ville': _i1.ParameterDescription(
+              name: 'ville',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'eventDate': _i1.ParameterDescription(
+              name: 'eventDate',
+              type: _i1.getType<Object>(),
+              nullable: false,
+            ),
+            'eventTimeStr': _i1.ParameterDescription(
+              name: 'eventTimeStr',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'placesTotal': _i1.ParameterDescription(
+              name: 'placesTotal',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'prixBase': _i1.ParameterDescription(
+              name: 'prixBase',
+              type: _i1.getType<double>(),
+              nullable: false,
+            ),
+            'posterColor': _i1.ParameterDescription(
+              name: 'posterColor',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'structureId': _i1.ParameterDescription(
+              name: 'structureId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i5.CinePassEndpoint).createEvent(
+                    session,
+                    titre: params['titre'],
+                    categorie: params['categorie'],
+                    description: params['description'],
+                    lieu: params['lieu'],
+                    adresse: params['adresse'],
+                    ville: params['ville'],
+                    eventDate: params['eventDate'],
+                    eventTimeStr: params['eventTimeStr'],
+                    placesTotal: params['placesTotal'],
+                    prixBase: params['prixBase'],
+                    posterColor: params['posterColor'],
+                    structureId: params['structureId'],
+                  ),
+        ),
+        'getStructures': _i1.MethodConnector(
+          name: 'getStructures',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getStructures(session),
+        ),
+        'getStructureById': _i1.MethodConnector(
+          name: 'getStructureById',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getStructureById(
+                    session,
+                    params['id'],
+                  ),
+        ),
+        'updateEvent': _i1.MethodConnector(
+          name: 'updateEvent',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'titre': _i1.ParameterDescription(
+              name: 'titre',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'categorie': _i1.ParameterDescription(
+              name: 'categorie',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'lieu': _i1.ParameterDescription(
+              name: 'lieu',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'adresse': _i1.ParameterDescription(
+              name: 'adresse',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'ville': _i1.ParameterDescription(
+              name: 'ville',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'eventDate': _i1.ParameterDescription(
+              name: 'eventDate',
+              type: _i1.getType<Object?>(),
+              nullable: true,
+            ),
+            'eventTimeStr': _i1.ParameterDescription(
+              name: 'eventTimeStr',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'placesTotal': _i1.ParameterDescription(
+              name: 'placesTotal',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'prixBase': _i1.ParameterDescription(
+              name: 'prixBase',
+              type: _i1.getType<double?>(),
+              nullable: true,
+            ),
+            'posterColor': _i1.ParameterDescription(
+              name: 'posterColor',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i5.CinePassEndpoint).updateEvent(
+                    session,
+                    id: params['id'],
+                    titre: params['titre'],
+                    categorie: params['categorie'],
+                    description: params['description'],
+                    lieu: params['lieu'],
+                    adresse: params['adresse'],
+                    ville: params['ville'],
+                    eventDate: params['eventDate'],
+                    eventTimeStr: params['eventTimeStr'],
+                    placesTotal: params['placesTotal'],
+                    prixBase: params['prixBase'],
+                    posterColor: params['posterColor'],
+                  ),
+        ),
+        'deleteEvent': _i1.MethodConnector(
+          name: 'deleteEvent',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i5.CinePassEndpoint).deleteEvent(
+                    session,
+                    params['id'],
+                  ),
+        ),
+        'getMyStructure': _i1.MethodConnector(
+          name: 'getMyStructure',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getMyStructure(session),
+        ),
+        'getMyEvents': _i1.MethodConnector(
+          name: 'getMyEvents',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getMyEvents(session),
+        ),
+        'getDemandesEnAttente': _i1.MethodConnector(
+          name: 'getDemandesEnAttente',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getDemandesEnAttente(session),
+        ),
+        'approuverDemande': _i1.MethodConnector(
+          name: 'approuverDemande',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .approuverDemande(
+                    session,
+                    params['id'],
+                  ),
+        ),
+        'rejeterDemande': _i1.MethodConnector(
+          name: 'rejeterDemande',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'reason': _i1.ParameterDescription(
+              name: 'reason',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .rejeterDemande(
+                    session,
+                    params['id'],
+                    params['reason'],
+                  ),
+        ),
+        'createDemandeResponsable': _i1.MethodConnector(
+          name: 'createDemandeResponsable',
+          params: {
+            'structureType': _i1.ParameterDescription(
+              name: 'structureType',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'structureName': _i1.ParameterDescription(
+              name: 'structureName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'structureCity': _i1.ParameterDescription(
+              name: 'structureCity',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'structureAddress': _i1.ParameterDescription(
+              name: 'structureAddress',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'structureWebsite': _i1.ParameterDescription(
+              name: 'structureWebsite',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'structurePhone': _i1.ParameterDescription(
+              name: 'structurePhone',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .createDemandeResponsable(
+                    session,
+                    structureType: params['structureType'],
+                    structureName: params['structureName'],
+                    structureCity: params['structureCity'],
+                    structureAddress: params['structureAddress'],
+                    structureWebsite: params['structureWebsite'],
+                    structurePhone: params['structurePhone'],
+                    description: params['description'],
+                  ),
+        ),
+        'getReservations': _i1.MethodConnector(
+          name: 'getReservations',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getReservations(session),
+        ),
+        'getReservationsForMyStructures': _i1.MethodConnector(
+          name: 'getReservationsForMyStructures',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getReservationsForMyStructures(session),
+        ),
+        'getRapportCA': _i1.MethodConnector(
+          name: 'getRapportCA',
+          params: {
+            'periode': _i1.ParameterDescription(
+              name: 'periode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i5.CinePassEndpoint).getRapportCA(
+                    session,
+                    params['periode'],
+                  ),
+        ),
+        'createSeance': _i1.MethodConnector(
+          name: 'createSeance',
+          params: {
+            'filmId': _i1.ParameterDescription(
+              name: 'filmId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'salleId': _i1.ParameterDescription(
+              name: 'salleId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'debutAt': _i1.ParameterDescription(
+              name: 'debutAt',
+              type: _i1.getType<Object>(),
+              nullable: false,
+            ),
+            'finAt': _i1.ParameterDescription(
+              name: 'finAt',
+              type: _i1.getType<Object?>(),
+              nullable: true,
+            ),
+            'format': _i1.ParameterDescription(
+              name: 'format',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'type': _i1.ParameterDescription(
+              name: 'type',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'prixBase': _i1.ParameterDescription(
+              name: 'prixBase',
+              type: _i1.getType<double>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i5.CinePassEndpoint).createSeance(
+                    session,
+                    filmId: params['filmId'],
+                    salleId: params['salleId'],
+                    debutAt: params['debutAt'],
+                    finAt: params['finAt'],
+                    format: params['format'],
+                    type: params['type'],
+                    prixBase: params['prixBase'],
+                  ),
         ),
       },
     );

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/widgets/animated_background.dart';
 
 class AdminScaffold extends StatelessWidget {
   const AdminScaffold({super.key, required this.child});
@@ -60,28 +61,28 @@ class AdminScaffold extends StatelessWidget {
                     onTap: () => context.go(AppRouter.admin),
                   ),
                   _AdminNavTile(
-                    icon: Icons.movie_rounded,
-                    label: 'Films',
-                    isActive: _isActive(context, '/admin/films'),
-                    onTap: () => context.go('/admin/films'),
-                  ),
-                  _AdminNavTile(
-                    icon: Icons.schedule_rounded,
-                    label: 'Séances',
-                    isActive: _isActive(context, '/admin/seances'),
-                    onTap: () => context.go('/admin/seances'),
-                  ),
-                  _AdminNavTile(
                     icon: Icons.calendar_today_rounded,
                     label: 'Événements',
                     isActive: _isActive(context, '/admin/events'),
                     onTap: () => context.go('/admin/events'),
                   ),
                   _AdminNavTile(
+                    icon: Icons.store_rounded,
+                    label: 'Structures',
+                    isActive: _isActive(context, '/admin/structures'),
+                    onTap: () => context.go('/admin/structures'),
+                  ),
+                  _AdminNavTile(
                     icon: Icons.people_rounded,
                     label: 'Utilisateurs',
                     isActive: _isActive(context, '/admin/users'),
                     onTap: () => context.go('/admin/users'),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.badge_outlined,
+                    label: 'Demandes responsable',
+                    isActive: _isActive(context, '/admin/demandes'),
+                    onTap: () => context.go('/admin/demandes'),
                   ),
                   _AdminNavTile(
                     icon: Icons.confirmation_number_rounded,
@@ -106,13 +107,23 @@ class AdminScaffold extends StatelessWidget {
                       'Retour à l\'app',
                       style: TextStyle(color: AppTheme.textSecondary),
                     ),
-                    onTap: () => context.go(AppRouter.home),
+                    onTap: () {
+                      final router = GoRouter.of(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        router.go(AppRouter.home);
+                      });
+                    },
                   ),
                 ],
               ),
             ),
           ),
-          Expanded(child: child),
+          Expanded(
+            child: AnimatedBackground(
+              opacity: 0.06,
+              child: child,
+            ),
+          ),
         ],
       ),
     );

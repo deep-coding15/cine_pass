@@ -2,6 +2,7 @@
 class: Film
 extends: CinePassRow
 table: cine_pass_film
+managedMigration: false
 fields:
   titre: String
   genre: String

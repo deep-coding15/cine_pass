@@ -15,6 +15,7 @@ class AuthState extends ChangeNotifier {
   bool _isBoundToClientAuth = false;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
+  bool _isResponsable = false;
   String _userName = '';
   String _userEmail = '';
 
@@ -22,131 +23,39 @@ class AuthState extends ChangeNotifier {
 
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin => _isAdmin;
+  bool get isResponsable => _isResponsable;
   String get userName => _userName;
   String get userEmail => _userEmail;
 
-  /// Connecte cet état au gestionnaire d'auth Serverpod.
-  void bindToClientAuth() {
-    if (_isBoundToClientAuth) {
-      _syncFromClientAuth();
-      return;
-    }
-
-    client.auth.authInfoListenable.addListener(_onAuthChanged);
-    _isBoundToClientAuth = true;
-    _syncFromClientAuth();
-  }
-
-  void _onAuthChanged() {
-    _syncFromClientAuth();
-  }
-
-  void _syncFromClientAuth() {
-    final previousLoggedIn = _isLoggedIn;
-    final previousAdmin = _isAdmin;
-    final previousName = _userName;
-    final previousEmail = _userEmail;
-
-    _isLoggedIn = client.auth.isAuthenticated;
-    _isAdmin = false;
-
-    if (!_isLoggedIn) {
-      _userName = '';
-      _userEmail = '';
-    } else {
-      final authInfo = client.auth.authInfo;
-      final json = _toJsonMap(authInfo);
-
-      _userName = _readString(json, ['fullName', 'userName', 'name']);
-      _userEmail = _readString(json, ['email']);
-
-      if (_userName.isEmpty && _userEmail.isNotEmpty) {
-        _userName = _userEmail;
-      }
-      if (_userName.isEmpty) {
-        _userName = 'Utilisateur';
-      }
-
-      _pendingProfileRefresh ??= _refreshProfileFromServer().whenComplete(() {
-        _pendingProfileRefresh = null;
-      });
-    }
-
-    final hasChanged = previousLoggedIn != _isLoggedIn ||
-        previousAdmin != _isAdmin ||
-        previousName != _userName ||
-        previousEmail != _userEmail;
-
-    if (hasChanged) {
-      notifyListeners();
-    }
-  }
-
-  Future<void> _refreshProfileFromServer() async {
-    if (!_isLoggedIn) return;
-
-    try {
-      final profile = await client.modules.serverpod_auth_core.userProfileInfo.get();
-      final nextName =
-          (profile.fullName?.trim().isNotEmpty ?? false)
-              ? profile.fullName!.trim()
-              : (profile.userName?.trim().isNotEmpty ?? false)
-                  ? profile.userName!.trim()
-                  : _userName;
-      final nextEmail = profile.email?.trim() ?? _userEmail;
-
-      if (nextName != _userName || nextEmail != _userEmail) {
-        _userName = nextName;
-        _userEmail = nextEmail;
-        notifyListeners();
-      }
-    } catch (_) {
-      // Ignore profile enrichment failures and keep authInfo fallback values.
-    }
-  }
-
-  Map<String, dynamic> _toJsonMap(dynamic authInfo) {
-    try {
-      final value = (authInfo as dynamic).toJson();
-      if (value is Map<String, dynamic>) return value;
-      if (value is Map) {
-        return value.map(
-          (key, val) => MapEntry(key.toString(), val),
-        );
-      }
-    } catch (_) {
-      // Intentionally ignored; fall back to empty map.
-    }
-    return const <String, dynamic>{};
-  }
-
-  String _readString(Map<String, dynamic> json, List<String> keys) {
-    for (final key in keys) {
-      final value = json[key];
-      if (value is String && value.trim().isNotEmpty) {
-        return value.trim();
-      }
-    }
-    return '';
-  }
-
-  @Deprecated('Use Google / SMS endpoints and client.auth session updates.')
+  /// Simule une connexion en tant qu'utilisateur.
+  /// Pour le frontend de test : [email] et [name] optionnels (ex. formulaire Connexion/Inscription).
   void loginAsUser({String? email, String? name}) {
-    debugPrint('loginAsUser is deprecated. Use provider-based authentication.');
+    _isLoggedIn = true;
+    _isAdmin = false;
+    _userName = name?.trim().isNotEmpty == true ? name! : 'Marie Dubois';
+    _userEmail = email?.trim().isNotEmpty == true
+        ? email!
+        : 'marie.dubois@email.com';
+    notifyListeners();
   }
 
-  @Deprecated('Use Google / SMS endpoints and client.auth session updates.')
+  /// Simule une connexion en tant qu'admin (Jean Admin).
   void loginAsAdmin() {
-    debugPrint('loginAsAdmin is deprecated. Use provider-based authentication.');
+    _isLoggedIn = true;
+    _isAdmin = true;
+    _isResponsable = false;
+    _userName = 'Jean Admin';
+    _userEmail = 'admin@cinepass.com';
+    notifyListeners();
   }
 
   void logout() {
-    unawaited(_logoutInternal());
-  }
-
-  Future<void> _logoutInternal() async {
-    await client.auth.signOutDevice();
-    _syncFromClientAuth();
+    _isLoggedIn = false;
+    _isAdmin = false;
+    _isResponsable = false;
+    _userName = '';
+    _userEmail = '';
+    notifyListeners();
   }
 
   String get userInitials {

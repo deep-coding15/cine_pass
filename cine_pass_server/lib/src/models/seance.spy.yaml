@@ -2,9 +2,10 @@
 class: Seance
 extends: CinePassRow
 table: cine_pass_seance
+managedMigration: false
 fields:
-  filmId: UuidValue
-  salleId: UuidValue
+  filmId: UuidValue, relation(parent=cine_pass_film, onDelete=Cascade)
+  salleId: UuidValue, relation(parent=cine_pass_salle, onDelete=Cascade)
   debutAt: DateTime
   finAt: DateTime?
   format: String, default="VF"

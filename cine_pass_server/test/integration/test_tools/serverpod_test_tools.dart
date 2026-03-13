@@ -22,9 +22,17 @@ import 'package:cine_pass_server/src/generated/cine_pass/seance_response.dart'
     as _i6;
 import 'package:cine_pass_server/src/generated/cine_pass/cinema_response.dart'
     as _i7;
+import 'package:cine_pass_server/src/generated/salle.dart' as _i8;
 import 'package:cine_pass_server/src/generated/cine_pass/event_response.dart'
-    as _i8;
-import 'package:cine_pass_server/src/generated/greetings/greeting.dart' as _i9;
+    as _i9;
+import 'package:cine_pass_server/src/generated/structure.dart' as _i10;
+import 'package:cine_pass_server/src/generated/cine_pass/demande_responsable_response.dart'
+    as _i11;
+import 'package:cine_pass_server/src/generated/cine_pass/reservation_response.dart'
+    as _i12;
+import 'package:cine_pass_server/src/generated/cine_pass/rapport_ca_response.dart'
+    as _i13;
+import 'package:cine_pass_server/src/generated/greetings/greeting.dart' as _i14;
 import 'package:cine_pass_server/src/generated/protocol.dart';
 import 'package:cine_pass_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -498,7 +506,37 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<List<_i8.EventResponse>> getEvents(
+  _i3.Future<List<_i8.Salle>> getSalles(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getSalles',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getSalles',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i8.Salle>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i9.EventResponse>> getEvents(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -520,7 +558,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i8.EventResponse>>);
+                as _i3.Future<List<_i9.EventResponse>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -528,7 +566,7 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<_i8.EventResponse?> getEventById(
+  _i3.Future<_i9.EventResponse?> getEventById(
     _i1.TestSessionBuilder sessionBuilder,
     String id,
   ) async {
@@ -551,7 +589,7 @@ class _CinePassEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.EventResponse?>);
+                as _i3.Future<_i9.EventResponse?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -648,6 +686,596 @@ class _CinePassEndpoint {
       }
     });
   }
+
+  _i3.Future<_i5.FilmResponse?> createFilm(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String title,
+    required String genre,
+    required int durationMinutes,
+    String? synopsis,
+    String? director,
+    String? casting,
+    int? posterColor,
+    Object? dateSortie,
+    Object? dateFin,
+    String? audience,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'createFilm',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'createFilm',
+          parameters: _i1.testObjectToJson({
+            'title': title,
+            'genre': genre,
+            'durationMinutes': durationMinutes,
+            'synopsis': synopsis,
+            'director': director,
+            'casting': casting,
+            'posterColor': posterColor,
+            'dateSortie': dateSortie,
+            'dateFin': dateFin,
+            'audience': audience,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i5.FilmResponse?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i9.EventResponse?> createEvent(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String titre,
+    required String categorie,
+    String? description,
+    required String lieu,
+    String? adresse,
+    required String ville,
+    required Object eventDate,
+    required String eventTimeStr,
+    required int placesTotal,
+    required double prixBase,
+    int? posterColor,
+    String? structureId,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'createEvent',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'createEvent',
+          parameters: _i1.testObjectToJson({
+            'titre': titre,
+            'categorie': categorie,
+            'description': description,
+            'lieu': lieu,
+            'adresse': adresse,
+            'ville': ville,
+            'eventDate': eventDate,
+            'eventTimeStr': eventTimeStr,
+            'placesTotal': placesTotal,
+            'prixBase': prixBase,
+            'posterColor': posterColor,
+            'structureId': structureId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i9.EventResponse?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i10.Structure>> getStructures(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getStructures',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getStructures',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i10.Structure>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.Structure?> getStructureById(
+    _i1.TestSessionBuilder sessionBuilder,
+    String id,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getStructureById',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getStructureById',
+          parameters: _i1.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.Structure?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i9.EventResponse?> updateEvent(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String id,
+    String? titre,
+    String? categorie,
+    String? description,
+    String? lieu,
+    String? adresse,
+    String? ville,
+    Object? eventDate,
+    String? eventTimeStr,
+    int? placesTotal,
+    double? prixBase,
+    int? posterColor,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'updateEvent',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'updateEvent',
+          parameters: _i1.testObjectToJson({
+            'id': id,
+            'titre': titre,
+            'categorie': categorie,
+            'description': description,
+            'lieu': lieu,
+            'adresse': adresse,
+            'ville': ville,
+            'eventDate': eventDate,
+            'eventTimeStr': eventTimeStr,
+            'placesTotal': placesTotal,
+            'prixBase': prixBase,
+            'posterColor': posterColor,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i9.EventResponse?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> deleteEvent(
+    _i1.TestSessionBuilder sessionBuilder,
+    String id,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'deleteEvent',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'deleteEvent',
+          parameters: _i1.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.Structure?> getMyStructure(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getMyStructure',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getMyStructure',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.Structure?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i9.EventResponse>> getMyEvents(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getMyEvents',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getMyEvents',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i9.EventResponse>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i11.DemandeResponsableResponse>> getDemandesEnAttente(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getDemandesEnAttente',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getDemandesEnAttente',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i11.DemandeResponsableResponse>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> approuverDemande(
+    _i1.TestSessionBuilder sessionBuilder,
+    String id,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'approuverDemande',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'approuverDemande',
+          parameters: _i1.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> rejeterDemande(
+    _i1.TestSessionBuilder sessionBuilder,
+    String id,
+    String reason,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'rejeterDemande',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'rejeterDemande',
+          parameters: _i1.testObjectToJson({
+            'id': id,
+            'reason': reason,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i11.DemandeResponsableResponse?> createDemandeResponsable(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String structureType,
+    required String structureName,
+    required String structureCity,
+    String? structureAddress,
+    String? structureWebsite,
+    String? structurePhone,
+    required String description,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'createDemandeResponsable',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'createDemandeResponsable',
+          parameters: _i1.testObjectToJson({
+            'structureType': structureType,
+            'structureName': structureName,
+            'structureCity': structureCity,
+            'structureAddress': structureAddress,
+            'structureWebsite': structureWebsite,
+            'structurePhone': structurePhone,
+            'description': description,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i11.DemandeResponsableResponse?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i12.ReservationResponse>> getReservations(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getReservations',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getReservations',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i12.ReservationResponse>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i12.ReservationResponse>> getReservationsForMyStructures(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getReservationsForMyStructures',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getReservationsForMyStructures',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i12.ReservationResponse>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i13.RapportCAResponse> getRapportCA(
+    _i1.TestSessionBuilder sessionBuilder,
+    String periode,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getRapportCA',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getRapportCA',
+          parameters: _i1.testObjectToJson({'periode': periode}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i13.RapportCAResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i6.SeanceResponse?> createSeance(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String filmId,
+    required String salleId,
+    required Object debutAt,
+    Object? finAt,
+    required String format,
+    required String type,
+    required double prixBase,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'createSeance',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'createSeance',
+          parameters: _i1.testObjectToJson({
+            'filmId': filmId,
+            'salleId': salleId,
+            'debutAt': debutAt,
+            'finAt': finAt,
+            'format': format,
+            'type': type,
+            'prixBase': prixBase,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i6.SeanceResponse?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _GreetingEndpoint {
@@ -660,7 +1288,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i9.Greeting> hello(
+  _i3.Future<_i14.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -683,7 +1311,7 @@ class _GreetingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i9.Greeting>);
+                as _i3.Future<_i14.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

@@ -1,0 +1,12 @@
+# Réponse API pour une demande responsable (liste admin).
+class: DemandeResponsableResponse
+fields:
+  id: String
+  userId: String
+  structureType: String
+  structureName: String
+  structureCity: String
+  structureAddress: String?
+  status: String
+  createdAt: String
+  userName: String?

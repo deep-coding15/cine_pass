@@ -1,6 +1,7 @@
 -- Supprime toutes les tables métier CinePass pour pouvoir réappliquer le schéma.
 -- À utiliser quand la structure en base ne correspond plus aux modèles (.spy.yaml).
 -- N'affecte pas les tables serverpod_* ni serverpod_auth_*.
+-- Ordre : dépendances d'abord (réservation, billets, etc.), puis tables référencées.
 
 BEGIN;
 
@@ -14,7 +15,10 @@ DROP TABLE IF EXISTS "cine_pass_evenement" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_seance" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_siege" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_salle" CASCADE;
+DROP TABLE IF EXISTS "cine_pass_responsable_assignment" CASCADE;
+DROP TABLE IF EXISTS "cine_pass_structure" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_cinema" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_film" CASCADE;
+DROP TABLE IF EXISTS "cine_pass_responsable_request" CASCADE;
 
 COMMIT;

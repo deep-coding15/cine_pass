@@ -14,6 +14,7 @@ class AdminDashboardPage extends StatefulWidget {
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   List<FilmResponse> _films = [];
   List<EventResponse> _events = [];
+  int _seancesCount = 0;
 
   @override
   void initState() {
@@ -25,16 +26,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     try {
       final films = await client.cinePass.getFilms();
       final events = await client.cinePass.getEvents();
+      int total = 0;
+      for (final film in films) {
+        final seances = await client.cinePass.getSeancesForFilm(film.id);
+        total += seances.length;
+      }
       if (!mounted) return;
       setState(() {
         _films = films;
         _events = events;
+        _seancesCount = total;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _films = [];
         _events = [];
+        _seancesCount = 0;
       });
     }
   }
@@ -62,28 +70,28 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             children: [
               Expanded(
                 child: _StatCard(
-                  title: 'Films actifs',
-                  value: '${_films.length}',
-                  icon: Icons.movie_rounded,
+                  title: 'Événements',
+                  value: '${_films.length + _events.length}',
+                  icon: Icons.calendar_today_rounded,
                   color: AppTheme.primaryRed,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _StatCard(
-                  title: 'Événements à venir',
-                  value: '${_events.length}',
-                  icon: Icons.calendar_today_rounded,
-                  color: Color(0xFF26A69A),
+                  title: 'Séances planifiées',
+                  value: '$_seancesCount',
+                  icon: Icons.schedule_rounded,
+                  color: Color(0xFF7E57C2),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _StatCard(
-                  title: 'Séances planifiées',
+                  title: 'Structures',
                   value: '-',
-                  icon: Icons.schedule_rounded,
-                  color: Color(0xFF7E57C2),
+                  icon: Icons.store_rounded,
+                  color: Color(0xFF26A69A),
                 ),
               ),
               const SizedBox(width: 16),
@@ -98,152 +106,173 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             ],
           ),
           const SizedBox(height: 40),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Card(
-                  color: AppTheme.cardDark,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Films récents',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(color: AppTheme.textPrimary),
-                        ),
-                        const SizedBox(height: 16),
-                        ..._films
-                            .take(2)
-                            .map(
-                              (f) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 48,
-                                      height: 64,
-                                      decoration: BoxDecoration(
-                                        color: Color(
-                                          f.posterColor ?? 0xFF2D1B4E,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: const Icon(
-                                        Icons.movie_rounded,
-                                        color: Colors.white24,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            f.title,
-                                            style: const TextStyle(
-                                              color: AppTheme.textPrimary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            f.genre,
-                                            style: const TextStyle(
-                                              color: AppTheme.textSecondary,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                      ],
+          Card(
+            color: AppTheme.cardDark,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Événements à l\'affiche',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textPrimary,
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: Card(
-                  color: AppTheme.cardDark,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Événements à venir',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(color: AppTheme.textPrimary),
-                        ),
-                        const SizedBox(height: 16),
-                        ..._events
-                            .take(2)
-                            .map(
-                              (e) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 48,
-                                      height: 64,
-                                      decoration: BoxDecoration(
-                                        color: Color(
-                                          e.posterColor ?? 0xFF4E1B3D,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: const Icon(
-                                        Icons.event_rounded,
-                                        color: Colors.white24,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            e.title,
-                                            style: const TextStyle(
-                                              color: AppTheme.textPrimary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            e.city,
-                                            style: const TextStyle(
-                                              color: AppTheme.textSecondary,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Text(
-                                      'Prix ${e.price.toInt()}€',
-                                      style: const TextStyle(
-                                        color: AppTheme.accentGreen,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
+                  const SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_films.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Text(
+                                  'Films',
+                                  style: TextStyle(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                      ],
-                    ),
+                            ..._films
+                                .take(2)
+                                .map(
+                                  (f) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 48,
+                                          height: 64,
+                                          decoration: BoxDecoration(
+                                            color: Color(
+                                              f.posterColor ?? 0xFF2D1B4E,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.movie_rounded,
+                                            color: Colors.white24,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                f.title,
+                                                style: const TextStyle(
+                                                  color: AppTheme.textPrimary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              Text(
+                                                f.genre,
+                                                style: const TextStyle(
+                                                  color: AppTheme.textSecondary,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_events.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Text(
+                                  'Spectacles & événements',
+                                  style: TextStyle(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ..._events
+                                .take(2)
+                                .map(
+                                  (e) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 48,
+                                          height: 64,
+                                          decoration: BoxDecoration(
+                                            color: Color(
+                                              e.posterColor ?? 0xFF4E1B3D,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.event_rounded,
+                                            color: Colors.white24,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                e.title,
+                                                style: const TextStyle(
+                                                  color: AppTheme.textPrimary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              Text(
+                                                e.city,
+                                                style: const TextStyle(
+                                                  color: AppTheme.textSecondary,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          '${e.price.toInt()}€',
+                                          style: const TextStyle(
+                                            color: AppTheme.accentGreen,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),

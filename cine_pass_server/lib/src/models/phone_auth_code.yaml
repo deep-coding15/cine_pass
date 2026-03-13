@@ -1,0 +1,9 @@
+class: PhoneAuthCode
+table: phone_auth_code
+fields:
+  phone: String
+  code: String
+  createdAt: DateTime
+  expiresAt: DateTime
+  attemptCount: int, default=0
+  consumedAt: DateTime?

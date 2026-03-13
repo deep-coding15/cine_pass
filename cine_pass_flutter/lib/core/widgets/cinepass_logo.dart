@@ -71,7 +71,7 @@ class _LogoIcon extends StatelessWidget {
   }
 }
 
-/// Icône type billet de cinéma (deux C entrelacés / forme ticket).
+/// Icône type billet de cinéma (forme ticket).
 class _TicketLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -83,7 +83,6 @@ class _TicketLogoPainter extends CustomPainter {
     final h = size.height;
     final r = w * 0.22;
 
-    // Forme ticket : rectangle avec encoches circulaires sur les côtés
     final path = Path();
     path.moveTo(r, 0);
     path.lineTo(w - r, 0);
@@ -117,7 +116,6 @@ class _TicketLogoPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paint);
 
-    // Ligne centrale (perforation ticket)
     final linePaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.4)
       ..strokeWidth = size.width * 0.06

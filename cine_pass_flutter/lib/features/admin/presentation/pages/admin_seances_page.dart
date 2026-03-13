@@ -1,39 +1,68 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../films/data/mock_films_data.dart';
+import '../../../../main.dart';
 import '../widgets/admin_add_seance_dialog.dart';
 
-class AdminSeancesPage extends StatelessWidget {
+class AdminSeancesPage extends StatefulWidget {
   const AdminSeancesPage({super.key});
 
-  static List<({MockSeance seance, String filmTitle})> _allSeances() {
-    final list = <({MockSeance seance, String filmTitle})>[];
-    for (final entry in mockSeancesByFilm.entries) {
-      final film = getFilmById(entry.key);
-      final title = film?.title ?? 'Film inconnu';
-      for (final s in entry.value) {
-        list.add((seance: s, filmTitle: title));
-      }
-    }
-    return list;
+  @override
+  State<AdminSeancesPage> createState() => _AdminSeancesPageState();
+}
+
+class _AdminSeancesPageState extends State<AdminSeancesPage> {
+  List<FilmResponse> _films = [];
+  List<({SeanceResponse seance, String filmTitle})> _seances = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
-  /// Format court pour affichage tableau (ex. "07/03 à 14:00").
-  static String _shortDate(String dateTime) {
-    final match = RegExp(
-      r'(\d{1,2})\s+\w+\s+\d{4}\s+à\s+(\d{2}:\d{2})',
-    ).firstMatch(dateTime);
-    if (match != null) {
-      final day = match.group(1)!.padLeft(2, '0');
-      return '$day/03 à ${match.group(2)}';
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final films = await client.cinePass.getFilms();
+      final list = <({SeanceResponse seance, String filmTitle})>[];
+      for (final film in films) {
+        final seances = await client.cinePass.getSeancesForFilm(film.id);
+        for (final s in seances) {
+          list.add((seance: s, filmTitle: film.title));
+        }
+      }
+      list.sort((a, b) => a.seance.dateTime.compareTo(b.seance.dateTime));
+      if (!mounted) return;
+      setState(() {
+        _films = films;
+        _seances = list;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _films = [];
+        _seances = [];
+        _loading = false;
+      });
     }
-    return dateTime.length > 16 ? dateTime.substring(0, 16) : dateTime;
+  }
+
+  static String _shortDate(String dateTime) {
+    if (dateTime.length >= 16) return dateTime.substring(0, 16);
+    return dateTime;
   }
 
   @override
   Widget build(BuildContext context) {
-    final seances = _allSeances();
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -62,10 +91,16 @@ class AdminSeancesPage extends StatelessWidget {
                 ],
               ),
               FilledButton.icon(
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (_) => const AdminAddSeanceDialog(),
-                ),
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (_) => AdminAddSeanceDialog(
+                      films: _films,
+                      onSaved: _load,
+                    ),
+                  );
+                  if (mounted) _load();
+                },
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Nouvelle séance'),
                 style: FilledButton.styleFrom(
@@ -99,7 +134,7 @@ class AdminSeancesPage extends StatelessWidget {
                   DataColumn(label: Text('Places')),
                   DataColumn(label: Text('Actions')),
                 ],
-                rows: seances.map((e) {
+                rows: _seances.map((e) {
                   final s = e.seance;
                   return DataRow(
                     cells: [
@@ -107,7 +142,7 @@ class AdminSeancesPage extends StatelessWidget {
                       DataCell(Text(s.cinemaName)),
                       DataCell(Text(s.room)),
                       DataCell(Text(_shortDate(s.dateTime))),
-                      DataCell(Text(s.format)),
+                      DataCell(Text(s.format ?? 'VF')),
                       DataCell(
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -119,7 +154,7 @@ class AdminSeancesPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            s.type,
+                            s.type ?? '2D',
                             style: const TextStyle(
                               color: AppTheme.primaryRed,
                               fontSize: 12,

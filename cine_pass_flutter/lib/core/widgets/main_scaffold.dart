@@ -7,6 +7,7 @@ import '../router/app_router.dart';
 import '../state/auth_state.dart';
 import '../state/pending_reservation_state.dart';
 import 'app_drawer.dart';
+import 'animated_background.dart';
 import 'cinepass_logo.dart';
 
 class MainScaffold extends StatefulWidget {
@@ -33,7 +34,10 @@ class _MainScaffoldState extends State<MainScaffold> {
           icon: const Icon(Icons.menu_rounded),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        title: const CinePassLogo(size: LogoSize.small),
+        title: GestureDetector(
+          onTap: () => context.go(AppRouter.home),
+          child: const CinePassLogo(size: LogoSize.small),
+        ),
         centerTitle: true,
         actions: [
           if (auth.isLoggedIn) ...[
@@ -48,10 +52,6 @@ class _MainScaffoldState extends State<MainScaffold> {
               child: const Text('Accueil'),
             ),
             TextButton(
-              onPressed: () => context.go(AppRouter.films),
-              child: const Text('Films'),
-            ),
-            TextButton(
               onPressed: () => context.go(AppRouter.events),
               child: const Text('Événements'),
             ),
@@ -61,6 +61,7 @@ class _MainScaffoldState extends State<MainScaffold> {
             ),
             PopupMenuButton<String>(
               offset: const Offset(0, 48),
+              tooltip: 'Profil · Devenir responsable · Déconnexion',
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -75,6 +76,8 @@ class _MainScaffoldState extends State<MainScaffold> {
               onSelected: (value) {
                 if (value == 'profil') {
                   context.go(AppRouter.profil);
+                } else if (value == 'devenir_responsable') {
+                  context.go(AppRouter.devenirResponsable);
                 } else if (value == 'deconnexion') {
                   context.read<PendingReservationState>().clear();
                   auth.logout();
@@ -85,6 +88,20 @@ class _MainScaffoldState extends State<MainScaffold> {
                 const PopupMenuItem(
                   value: 'profil',
                   child: Text('Voir mon profil'),
+                ),
+                const PopupMenuItem(
+                  value: 'devenir_responsable',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.badge_outlined,
+                        size: 20,
+                        color: AppTheme.textSecondary,
+                      ),
+                      SizedBox(width: 12),
+                      Text('Devenir responsable'),
+                    ],
+                  ),
                 ),
                 const PopupMenuItem(
                   value: 'deconnexion',
@@ -129,7 +146,10 @@ class _MainScaffoldState extends State<MainScaffold> {
         elevation: 0,
         child: const AppDrawer(),
       ),
-      body: widget.child,
+      body: AnimatedBackground(
+        opacity: 0.06,
+        child: widget.child,
+      ),
     );
   }
 }

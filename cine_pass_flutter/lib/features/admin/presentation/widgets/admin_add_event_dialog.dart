@@ -1,9 +1,13 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 
 class AdminAddEventDialog extends StatefulWidget {
-  const AdminAddEventDialog({super.key});
+  const AdminAddEventDialog({super.key, this.onSaved});
+
+  final VoidCallback? onSaved;
 
   @override
   State<AdminAddEventDialog> createState() => _AdminAddEventDialogState();
@@ -20,10 +24,9 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
   final _priceController = TextEditingController(text: '35.00');
   final _placesController = TextEditingController(text: '300');
   final _posterUrlController = TextEditingController();
-  String _venueType = 'other'; // 'cinema' | 'other'
+  String _venueType = 'other';
   DateTime? _date;
-  // ignore: unused_field - utilisé pour envoi futur
-  String _time = '';
+  final _timeController = TextEditingController(text: '20:00');
 
   @override
   void dispose() {
@@ -196,8 +199,8 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: TextFormField(
-                                onChanged: (v) => setState(() => _time = v),
-                                decoration: _decoration('--:--'),
+                                controller: _timeController,
+                                decoration: _decoration('HH:mm'),
                                 style: const TextStyle(
                                   color: AppTheme.textPrimary,
                                 ),
@@ -257,18 +260,100 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                           children: [
                             Expanded(
                               child: FilledButton(
-                                onPressed: () {
-                                  if (_formKey.currentState?.validate() ==
-                                      true) {
+                                onPressed: () async {
+                                  if (_formKey.currentState?.validate() !=
+                                          true ||
+                                      _date == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                          'Événement enregistré (démo)',
+                                          'Remplissez tous les champs requis',
                                         ),
-                                        backgroundColor: AppTheme.accentGreen,
+                                        backgroundColor: AppTheme.primaryRed,
                                       ),
                                     );
-                                    Navigator.of(context).pop();
+                                    return;
+                                  }
+                                  try {
+                                    final created = await client.cinePass
+                                        .createEvent(
+                                          titre: _titleController.text.trim(),
+                                          categorie: _categoryController.text
+                                              .trim(),
+                                          description:
+                                              _descriptionController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _descriptionController.text
+                                                    .trim(),
+                                          lieu:
+                                              _venueNameController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? 'Lieu'
+                                              : _venueNameController.text
+                                                    .trim(),
+                                          adresse:
+                                              _addressController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _addressController.text.trim(),
+                                          ville: _cityController.text.trim(),
+                                          eventDate: _date!,
+                                          eventTimeStr:
+                                              _timeController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? '20:00'
+                                              : _timeController.text.trim(),
+                                          placesTotal:
+                                              int.tryParse(
+                                                _placesController.text.trim(),
+                                              ) ??
+                                              300,
+                                          prixBase:
+                                              double.tryParse(
+                                                _priceController.text
+                                                    .trim()
+                                                    .replaceAll(',', '.'),
+                                              ) ??
+                                              35.0,
+                                          posterColor: null,
+                                        );
+                                    if (!context.mounted) return;
+                                    if (created != null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Événement enregistré'),
+                                          backgroundColor: AppTheme.accentGreen,
+                                        ),
+                                      );
+                                      widget.onSaved?.call();
+                                      Navigator.of(context).pop();
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Erreur lors de l\'enregistrement',
+                                          ),
+                                          backgroundColor: AppTheme.primaryRed,
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erreur: $e'),
+                                        backgroundColor: AppTheme.primaryRed,
+                                      ),
+                                    );
                                   }
                                 },
                                 style: FilledButton.styleFrom(

@@ -1,0 +1,9 @@
+class: ReservationResponse
+fields:
+  id: String
+  numero: String
+  eventTitle: String?
+  totalAmount: double
+  createdAtStr: String
+  statut: String
+  nbBillets: int

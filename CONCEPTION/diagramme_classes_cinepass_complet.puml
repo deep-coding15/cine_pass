@@ -1,0 +1,480 @@
+@startuml Diagramme_de_classes_CinePass_Complet
+title Diagramme de classes CinePass — Rôles, QRCode, RapportAnalytique, Programmation, Seance, Tarif, Options
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+
+' =============================================================================
+' RÔLES — Une classe par rôle (héritage depuis Utilisateur)
+' =============================================================================
+abstract class Utilisateur {
+  +id: String
+  +nom: String
+  +email: String
+  +telephone: String
+  -motDePasseHash: String
+  +preferences: List<String>
+  +statut: String
+  +dateCreation: DateTime
+  --
+  +seConnecter(email: String, motDePasse: String): Boolean
+  +seDeconnecter(): void
+  +creerCompte(nom: String, email: String, motDePasse: String): void
+  +reinitialiserMotDePasse(email: String): void
+  +modifierProfil(nom: String, email: String, telephone: String): void
+}
+
+class Visiteur {
+  +consulterProgrammation(critere: String): List<Programmation>
+  +filtrerProgrammation(date: Date, genre: String, ville: String): List<Programmation>
+  +consulterDetailEvenement(id: String): Evenement
+  +consulterFAQ(): List<FAQ>
+  +contacterSupport(message: String): void
+}
+
+class Client {
+  +rechercherProgrammation(critere: String): List<Programmation>
+  +effectuerReservation(seance: Seance, sieges: List<Siege>, options: List<OptionSupplementaire>): Reservation
+  +consulterHistoriqueAchat(): List<Billet>
+  +ajouterCinemaFavori(cinema: Cinema): void
+  +ajouterFilmFavori(film: Film): void
+  +demanderDevenirResponsable(demande: DemandeResponsable): void
+  +consulterStatutDemandeResponsable(): DemandeResponsable
+}
+
+class ResponsableEvenement {
+  +creerEvenement(evenement: Evenement): void
+  +modifierEvenement(evenement: Evenement): void
+  +supprimerEvenement(id: String): void
+  +creerSeance(seance: Seance): void
+  +modifierSeance(seance: Seance): void
+  +definirOptionsSupplementaires(evenement: Evenement, options: List<OptionSupplementaire>): void
+  +definirTarifs(seance: Seance, tarifs: List<Tarif>): void
+  +consulterReservationsStructure(): List<Reservation>
+  +gererMaStructure(structure: Structure): void
+}
+
+class Administrateur {
+  +voirUtilisateurs(): List<Utilisateur>
+  +suspendreUtilisateur(id: String): void
+  +supprimerUtilisateur(id: String): void
+  +voirEvenements(): List<Evenement>
+  +gererRemboursementReservation(reservation: Reservation): Boolean
+  +consulterDemandesResponsable(): List<DemandeResponsable>
+  +approuverDemandeResponsable(demande: DemandeResponsable): void
+  +rejeterDemandeResponsable(demande: DemandeResponsable, motif: String): void
+  +genererRapportAnalytique(periode: String): RapportAnalytique
+  +exporterRapport(rapport: RapportAnalytique, format: String): void
+  +repondreFAQ(faq: FAQ): void
+}
+
+Utilisateur <|-- Visiteur
+Utilisateur <|-- Client
+Utilisateur <|-- ResponsableEvenement
+Utilisateur <|-- Administrateur
+
+' =============================================================================
+' AUTHENTIFICATION / SESSION
+' =============================================================================
+class Session {
+  +id: String
+  +utilisateur: Utilisateur
+  +dateDebut: DateTime
+  +dateExpiration: DateTime
+  --
+  +estValide(): Boolean
+}
+
+Utilisateur "1" -- "0..*" Session
+
+' =============================================================================
+' DEMANDE RESPONSABLE / STRUCTURE
+' =============================================================================
+enum StatutDemande {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TypeStructure {
+  CINEMA
+  VENUE
+  ORGANIZER
+}
+
+class DemandeResponsable {
+  +id: String
+  +demandeur: Utilisateur
+  +structureType: TypeStructure
+  +structureName: String
+  +structureCity: String
+  +structureAddress: String
+  +structureWebsite: String
+  +structureSiret: String
+  +structurePhone: String
+  +contactRole: String
+  +description: String
+  +socialLinks: String
+  +statut: StatutDemande
+  +createdAt: DateTime
+  +decidedAt: DateTime
+  +adminId: String
+  +rejectionReason: String
+  --
+  +valider(admin: Administrateur): void
+  +rejeter(admin: Administrateur, motif: String): void
+}
+
+class Structure {
+  +id: String
+  +type: TypeStructure
+  +name: String
+  +city: String
+  +address: String
+  +website: String
+  +phone: String
+  +cinemaId: String
+  --
+  +modifierInfos(nom: String, ville: String, adresse: String): void
+}
+
+class AffectationResponsable {
+  +id: String
+  +userId: String
+  +structureId: String
+  +active: Boolean
+  +createdAt: DateTime
+  --
+  +desactiver(): void
+}
+
+Client "1" -- "0..*" DemandeResponsable : soumet >
+Administrateur "1" -- "0..*" DemandeResponsable : décide >
+Utilisateur "1" -- "0..*" AffectationResponsable : responsableDe >
+Structure "1" -- "0..*" AffectationResponsable : aPourResponsable >
+
+' =============================================================================
+' CINÉMA / SALLE / SIÈGE / CATÉGORIE SIÈGE (VIP, normal)
+' =============================================================================
+class Cinema {
+  +id: String
+  +nom: String
+  +ville: String
+  +adresse: String
+  +codePostal: String
+  +createdAt: DateTime
+  --
+  +ajouterSalle(salle: Salle): void
+  +trouverProches(lat: Double, lon: Double): List<Cinema>
+  +afficherSeances(): List<Seance>
+}
+
+class Salle {
+  +id: String
+  +cinemaId: String
+  +nom: String
+  +capacite: int
+  --
+  +ajouterSiege(siege: Siege): void
+  +afficherDetails(): String
+}
+
+class CategorieSiege {
+  +type: String
+  +description: String
+  +tarif: Double
+  --
+  +getTarif(): Double
+}
+
+class Siege {
+  +id: String
+  +salleId: String
+  +rangee: String
+  +numero: int
+  +type: String
+  +statut: String
+  --
+  +estDisponible(): Boolean
+  +appartientCategorie(): CategorieSiege
+}
+
+Cinema "1" -- "1..*" Salle
+Salle "1" -- "1..*" Siege
+Siege "1" -- "1" CategorieSiege : appartient à
+CategorieSiege "1" -- "0..*" Salle : définit
+Cinema "0..1" -- "0..*" Structure : correspond à
+
+' =============================================================================
+' FILM / ÉVÉNEMENT / PROGRAMMATION (film = type d'événement)
+' =============================================================================
+class Film {
+  +id: String
+  +titre: String
+  +genre: String
+  +dureeMinutes: int
+  +synopsis: String
+  +directeur: String
+  +casting: String
+  +posterColor: int
+  +posterUrl: String
+  +dateSortie: DateTime
+  +dateFin: DateTime
+  +audience: String
+  +createdAt: DateTime
+  +updatedAt: DateTime
+  --
+  +afficher(): String
+  +afficherDetails(): String
+  +getFilms(): List<Film>
+}
+
+class Evenement {
+  +id: String
+  +structureId: String
+  +titre: String
+  +categorie: String
+  +description: String
+  +lieu: String
+  +adresse: String
+  +ville: String
+  +eventDate: DateTime
+  +eventTime: DateTime
+  +placesTotal: int
+  +prixBase: Double
+  +posterColor: int
+  +posterUrl: String
+  +availableOptions: String
+  +createdAt: DateTime
+  --
+  +afficherDetails(): String
+  +placesDisponibles(): int
+}
+
+class Programmation {
+  +id: String
+  +titre: String
+  +synopsis: String
+  +description: String
+  +affiche: String
+  +noteMoyenne: Double
+  +dateDebut: DateTime
+  +dateFin: DateTime
+  --
+  +afficherDetails(): String
+  +getSeances(): List<Seance>
+}
+
+Cinema "1" -- "0..*" Programmation : diffuse
+Film "1" -- "0..*" Programmation : est contenu dans
+Programmation "1" -- "0..*" Seance : concerne
+Structure "1" -- "0..*" Evenement : organise
+
+' =============================================================================
+' SÉANCE / TARIF (options déterminées par le responsable)
+' =============================================================================
+class Seance {
+  +id: String
+  +filmId: String
+  +salleId: String
+  +dateHeure: DateTime
+  +debutAt: DateTime
+  +finAt: DateTime
+  +langue: String
+  +typeProjection: String
+  +typeSeance: String
+  +placesDisponibles: int
+  +duree: Double
+  +prixBase: Double
+  +createdAt: DateTime
+  --
+  +estDisponible(): Boolean
+  +afficherPlanSieges(): List<Siege>
+  +getTauxRemplissage(): Double
+  +afficherTarif(siege: Siege): List<Tarif>
+}
+
+class Tarif {
+  +id: String
+  +type: String
+  +montant: Double
+  +description: String
+  --
+  +getMontant(): Double
+}
+
+class OptionSupplementaire {
+  +id: String
+  +nom: String
+  +prix: Double
+  +categorie: String
+  +evenementId: String
+  +seanceId: String
+  --
+  +getPrix(): Double
+}
+
+Seance "1" -- "1" Salle : est localisée à
+Seance "1" -- "1" Tarif : applique
+Tarif "0..1" -- "0..*" Siege : comprend
+ResponsableEvenement "1" -- "0..*" OptionSupplementaire : définit pour
+Evenement "1" -- "0..*" OptionSupplementaire : propose
+Seance "1" -- "0..*" OptionSupplementaire : propose
+
+' =============================================================================
+' RÉSERVATION (avec statut) / BILLET / PAIEMENT
+' =============================================================================
+enum StatutReservation {
+  confirmed
+  cancelled
+}
+
+enum StatutPaiement {
+  pending
+  paid
+  failed
+}
+
+class Reservation {
+  +id: String
+  +userId: String
+  +seanceId: String
+  +evenementId: String
+  +numero: String
+  +statut: StatutReservation
+  +totalAmount: Double
+  +sessionAt: DateTime
+  +createdAt: DateTime
+  +updatedAt: DateTime
+  --
+  +ajouterSiege(sieges: List<Siege>): void
+  +ajouterOption(options: List<OptionSupplementaire>): void
+  +confirmerReservation(): Boolean
+  +annulerReservation(): Boolean
+  +modifierReservation(): Boolean
+  +calculerTotal(): Double
+}
+
+class Billet {
+  +id: String
+  +reservationId: String
+  +siegeId: String
+  +ticketType: String
+  +dateEmission: DateTime
+  +estValide: Boolean
+  +optionParking: Boolean
+  +optionPopcorn: Boolean
+  +optionBoisson: Boolean
+  +prix: Double
+  +createdAt: DateTime
+  --
+  +telecharger(): void
+  +afficherEnLigne(): void
+  +envoyerParEmail(): void
+  +genererQRCode(): QRCode
+}
+
+class QRCode {
+  +code: String
+  +dateCreation: DateTime
+  +dateExpiration: DateTime
+  +valide: Boolean
+  --
+  +valider(): Boolean
+  +generer(): String
+}
+
+class Paiement {
+  +id: String
+  +reservationId: String
+  +montant: Double
+  +methode: String
+  +statut: StatutPaiement
+  +externalId: String
+  +infoPaiementSauvegardee: Boolean
+  +createdAt: DateTime
+  --
+  +effectuerPaiement(montant: Double, methode: String): Boolean
+  +appliquerReduction(montant: Double): Double
+  +appliquerCoupon(code: String): Double
+  +annulerPaiement(): void
+  +rembourser(): void
+  +comptabiliserPaiement(): void
+  +sauvegarderInfoPaiement(): void
+}
+
+Utilisateur "1" -- "0..*" Reservation : effectue
+Reservation "1" -- "0..*" Billet : génère
+Reservation "1" -- "0..1" Paiement : génère
+Reservation "0..*" -- "0..*" Seance : concerne
+Reservation "0..*" -- "0..*" OptionSupplementaire : inclut
+Reservation "0..*" -- "0..*" Siege : réserve
+Billet "1" -- "1" QRCode : intègre
+Billet "0..1" -- "1" Siege : est émis pour
+Paiement "1" -- "1" Reservation : concerne
+
+' =============================================================================
+' RAPPORT ANALYTIQUE
+' =============================================================================
+class RapportAnalytique {
+  +id: String
+  +periode: String
+  +ventesTotal: Double
+  +tauxRemplissage: Double
+  +revenuParCinema: Map<String, Double>
+  +cinemasPopulaires: List<String>
+  +filmsPopulaires: List<String>
+  +creneauxRentables: List<String>
+  --
+  +genererRapport(periode: String): String
+  +genererRapportJournalier(): String
+  +genererRapportHebdo(): String
+  +genererRapportMensuel(): String
+  +genererRapportAnnuel(): String
+  +exporterCSV(): void
+  +exporterPDF(): void
+  +exporterExcel(): void
+  +exporterJSON(): void
+  +analyserProgrammation(): List<Programmation>
+  +analyserPopularite(): void
+}
+
+Administrateur "1" -- "0..*" RapportAnalytique : génère
+
+' =============================================================================
+' FAQ / FAVORIS / GÉOLOCALISATION
+' =============================================================================
+class FAQ {
+  +id: String
+  +question: String
+  +reponse: String
+  +categorie: String
+  +ordre: int
+  +createdAt: DateTime
+  --
+  +afficher(): String
+}
+
+class Favori {
+  +id: String
+  +userId: String
+  +filmId: String
+  +cinemaId: String
+  +createdAt: DateTime
+}
+
+class GeoCoordonnees {
+  +latitude: Double
+  +longitude: Double
+  --
+  +afficherPosition(): String
+}
+
+Utilisateur "1" -- "0..*" FAQ : consulte
+Administrateur "1" -- "0..*" FAQ : répond
+Client "1" -- "0..*" Favori : ajoute
+Film "0..1" -- "0..*" Favori
+Cinema "0..1" -- "0..*" Favori
+Cinema "1" -- "1" GeoCoordonnees : est localisé à
+
+@enduml

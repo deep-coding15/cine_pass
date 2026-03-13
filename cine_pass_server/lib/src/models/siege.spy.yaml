@@ -1,8 +1,9 @@
 ### Siège dans une salle (plan de salle).
 class: Siege
 table: cine_pass_siege
+managedMigration: false
 fields:
   id: UuidValue, defaultModel=random
-  salleId: UuidValue
+  salleId: UuidValue, relation(parent=cine_pass_salle, onDelete=Cascade)
   rangee: String
   numero: int

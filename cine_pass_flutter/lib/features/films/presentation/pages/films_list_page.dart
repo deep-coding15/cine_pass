@@ -172,7 +172,8 @@ class _FilmsListPageState extends State<FilmsListPage> {
           LayoutBuilder(
             builder: (context, constraints) {
               const crossAxisCount = 4;
-              const childAspectRatio = 0.55;
+              // Carte légèrement plus haute pour éviter l'overflow visuel.
+              const childAspectRatio = 0.7;
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

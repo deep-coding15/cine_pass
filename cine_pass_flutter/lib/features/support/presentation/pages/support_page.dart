@@ -142,6 +142,7 @@ class SupportPage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 24),
                 ],
               );
               if (useRow) {

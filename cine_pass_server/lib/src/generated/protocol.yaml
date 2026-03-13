@@ -11,10 +11,27 @@ cinePass:
   - getFilmById:
   - getSeancesForFilm:
   - getCinemas:
+  - getSalles:
   - getEvents:
   - getEventById:
   - getCities:
   - getGenres:
   - getEventCategories:
+  - createFilm:
+  - createEvent:
+  - getStructures:
+  - getStructureById:
+  - updateEvent:
+  - deleteEvent:
+  - getMyStructure:
+  - getMyEvents:
+  - getDemandesEnAttente:
+  - approuverDemande:
+  - rejeterDemande:
+  - createDemandeResponsable:
+  - getReservations:
+  - getReservationsForMyStructures:
+  - getRapportCA:
+  - createSeance:
 greeting:
   - hello:
