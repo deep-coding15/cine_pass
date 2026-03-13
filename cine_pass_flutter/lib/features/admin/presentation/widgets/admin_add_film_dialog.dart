@@ -202,8 +202,10 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                             Expanded(
                               child: FilledButton(
                                 onPressed: () async {
-                                  if (_formKey.currentState?.validate() != true)
+                                  if (_formKey.currentState?.validate() !=
+                                      true) {
                                     return;
+                                  }
                                   final title = _titleController.text.trim();
                                   final genre = _genreController.text.trim();
                                   final durationMinutes =

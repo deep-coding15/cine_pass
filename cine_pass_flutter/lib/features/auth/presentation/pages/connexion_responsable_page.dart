@@ -88,9 +88,12 @@ class _ConnexionResponsablePageState extends State<ConnexionResponsablePage> {
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
               validator: (v) {
-                if (v == null || v.trim().isEmpty)
+                if (v == null || v.trim().isEmpty) {
                   return 'Entrez votre email professionnel';
-                if (!v.contains('@')) return 'Email invalide';
+                }
+                if (!v.contains('@')) {
+                  return 'Email invalide';
+                }
                 return null;
               },
             ),
