@@ -70,12 +70,12 @@ class _ReservationResponseImpl extends ReservationResponse {
     required String statut,
     required int nbBillets,
   }) : super._(
-          id: id,
-          numero: numero,
-          eventTitle: eventTitle,
-          totalAmount: totalAmount,
-          createdAtStr: createdAtStr,
-          statut: statut,
-          nbBillets: nbBillets,
-        );
+         id: id,
+         numero: numero,
+         eventTitle: eventTitle,
+         totalAmount: totalAmount,
+         createdAtStr: createdAtStr,
+         statut: statut,
+         nbBillets: nbBillets,
+       );
 }

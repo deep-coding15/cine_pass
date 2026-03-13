@@ -156,16 +156,11 @@ class Protocol extends _i1.SerializationManager {
           as T;
     }
     if (t == _i1.getType<_i25.ReservationResponse?>()) {
-      return (data != null
-              ? _i25.ReservationResponse.fromJson(data)
-              : null)
+      return (data != null ? _i25.ReservationResponse.fromJson(data) : null)
           as T;
     }
     if (t == _i1.getType<_i26.RapportCAResponse?>()) {
-      return (data != null
-              ? _i26.RapportCAResponse.fromJson(data)
-              : null)
-          as T;
+      return (data != null ? _i26.RapportCAResponse.fromJson(data) : null) as T;
     }
     if (t == _i1.getType<_i4.EventResponse?>()) {
       return (data != null ? _i4.EventResponse.fromJson(data) : null) as T;
