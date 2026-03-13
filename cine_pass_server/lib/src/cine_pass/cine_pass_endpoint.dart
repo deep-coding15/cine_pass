@@ -1,5 +1,4 @@
 import 'package:serverpod/serverpod.dart';
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'; // for session.authenticated
 import '../generated/cine_pass/film_response.dart';
 import '../generated/cine_pass/seance_response.dart';
 import '../generated/cine_pass/event_response.dart';
@@ -117,7 +116,12 @@ class CinePassEndpoint extends Endpoint {
     try {
       return await Salle.db.find(session, orderBy: (t) => t.nom);
     } catch (e, st) {
-      session.log('CinePass getSalles', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getSalles',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -263,7 +267,12 @@ class CinePassEndpoint extends Endpoint {
       if (id.isEmpty) return null;
       return _rowToFilmResponse(id.first);
     } catch (e, st) {
-      session.log('CinePass createFilm', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass createFilm',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -286,14 +295,22 @@ class CinePassEndpoint extends Endpoint {
   }) async {
     try {
       final eventDateDt = _parseDateTime(eventDate);
-      if (eventDateDt == null) return null;
+      if (eventDateDt == null) {
+        return null;
+      }
       DateTime eventTime = eventDateDt;
       if (eventTimeStr.length >= 5) {
         final parts = eventTimeStr.split(':');
         if (parts.length >= 2) {
           final h = int.tryParse(parts[0]) ?? 0;
           final m = int.tryParse(parts[1]) ?? 0;
-          eventTime = DateTime(eventDateDt.year, eventDateDt.month, eventDateDt.day, h, m);
+          eventTime = DateTime(
+            eventDateDt.year,
+            eventDateDt.month,
+            eventDateDt.day,
+            h,
+            m,
+          );
         }
       }
       final result = await session.db.unsafeQuery(
@@ -328,7 +345,12 @@ class CinePassEndpoint extends Endpoint {
       if (result.isEmpty) return null;
       return _rowToEventResponse(result.first);
     } catch (e, st) {
-      session.log('CinePass createEvent', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass createEvent',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -338,7 +360,12 @@ class CinePassEndpoint extends Endpoint {
     try {
       return await Structure.db.find(session, orderBy: (t) => t.name);
     } catch (e, st) {
-      session.log('CinePass getStructures', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getStructures',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -352,7 +379,12 @@ class CinePassEndpoint extends Endpoint {
       }
       return null;
     } catch (e, st) {
-      session.log('CinePass getStructureById', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getStructureById',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -376,12 +408,20 @@ class CinePassEndpoint extends Endpoint {
     try {
       final eventDateDt = eventDate != null ? _parseDateTime(eventDate) : null;
       DateTime? eventTimeDt;
-      if (eventDateDt != null && eventTimeStr != null && eventTimeStr.length >= 5) {
+      if (eventDateDt != null &&
+          eventTimeStr != null &&
+          eventTimeStr.length >= 5) {
         final parts = eventTimeStr.split(':');
         if (parts.length >= 2) {
           final h = int.tryParse(parts[0]) ?? 0;
           final m = int.tryParse(parts[1]) ?? 0;
-          eventTimeDt = DateTime(eventDateDt.year, eventDateDt.month, eventDateDt.day, h, m);
+          eventTimeDt = DateTime(
+            eventDateDt.year,
+            eventDateDt.month,
+            eventDateDt.day,
+            h,
+            m,
+          );
         }
       }
       final result = await session.db.unsafeQuery(
@@ -421,7 +461,12 @@ class CinePassEndpoint extends Endpoint {
       if (result.isEmpty) return null;
       return _rowToEventResponse(result.first);
     } catch (e, st) {
-      session.log('CinePass updateEvent', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass updateEvent',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -435,7 +480,12 @@ class CinePassEndpoint extends Endpoint {
       );
       return true;
     } catch (e, st) {
-      session.log('CinePass deleteEvent', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass deleteEvent',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return false;
     }
   }
@@ -444,7 +494,9 @@ class CinePassEndpoint extends Endpoint {
   Future<Structure?> getMyStructure(Session session) async {
     try {
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) return null;
+      if (userId == null) {
+        return null;
+      }
       final rows = await session.db.unsafeQuery(
         r'SELECT "structure_id" FROM "cine_pass_responsable_assignment" WHERE "user_id" = (@uid)::uuid AND "active" = true LIMIT 1',
         parameters: QueryParameters.named({'uid': userId}),
@@ -453,11 +505,18 @@ class CinePassEndpoint extends Endpoint {
       final structureId = rows.first[0].toString();
       final all = await Structure.db.find(session);
       for (final s in all) {
-        if (s.id.toString() == structureId) return s;
+        if (s.id.toString() == structureId) {
+          return s;
+        }
       }
       return null;
     } catch (e, st) {
-      session.log('CinePass getMyStructure', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getMyStructure',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -466,7 +525,9 @@ class CinePassEndpoint extends Endpoint {
   Future<List<EventResponse>> getMyEvents(Session session) async {
     try {
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) return [];
+      if (userId == null) {
+        return [];
+      }
       final result = await session.db.unsafeQuery(
         r'''
         SELECT e."id", e."titre", e."categorie", e."description", e."lieu", e."adresse", e."ville",
@@ -482,13 +543,20 @@ class CinePassEndpoint extends Endpoint {
       );
       return result.map((row) => _rowToEventResponse(row)).toList();
     } catch (e, st) {
-      session.log('CinePass getMyEvents', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getMyEvents',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
 
   /// Admin: demandes en attente (devenir responsable).
-  Future<List<DemandeResponsableResponse>> getDemandesEnAttente(Session session) async {
+  Future<List<DemandeResponsableResponse>> getDemandesEnAttente(
+    Session session,
+  ) async {
     try {
       final result = await session.db.unsafeQuery(
         r'''
@@ -500,9 +568,16 @@ class CinePassEndpoint extends Endpoint {
         ORDER BY r."created_at" ASC
         ''',
       );
-      return result.map((row) => _rowToDemandeResponsableResponse(row)).toList();
+      return result
+          .map((row) => _rowToDemandeResponsableResponse(row))
+          .toList();
     } catch (e, st) {
-      session.log('CinePass getDemandesEnAttente', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getDemandesEnAttente',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -511,7 +586,9 @@ class CinePassEndpoint extends Endpoint {
   Future<bool> approuverDemande(Session session, String id) async {
     try {
       final adminId = session.authenticated?.userIdentifier;
-      if (adminId == null) return false;
+      if (adminId == null) {
+        return false;
+      }
       final rows = await session.db.unsafeQuery(
         r'''
         SELECT "user_id", "structure_type", "structure_name", "structure_city", "structure_address",
@@ -521,7 +598,9 @@ class CinePassEndpoint extends Endpoint {
         ''',
         parameters: QueryParameters.named({'id': id}),
       );
-      if (rows.isEmpty) return false;
+      if (rows.isEmpty) {
+        return false;
+      }
       final r = rows.first;
       final userId = r[0].toString();
       final type = (r[1] as String?) ?? 'ORGANIZER';
@@ -545,7 +624,9 @@ class CinePassEndpoint extends Endpoint {
           'phone': phone,
         }),
       );
-      if (structureResult.isEmpty) return false;
+      if (structureResult.isEmpty) {
+        return false;
+      }
       final structureId = structureResult.first[0].toString();
       await session.db.unsafeQuery(
         r'''
@@ -565,7 +646,12 @@ class CinePassEndpoint extends Endpoint {
       );
       return true;
     } catch (e, st) {
-      session.log('CinePass approuverDemande', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass approuverDemande',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return false;
     }
   }
@@ -574,18 +660,29 @@ class CinePassEndpoint extends Endpoint {
   Future<bool> rejeterDemande(Session session, String id, String reason) async {
     try {
       final adminId = session.authenticated?.userIdentifier;
-      if (adminId == null) return false;
+      if (adminId == null) {
+        return false;
+      }
       await session.db.unsafeQuery(
         r'''
         UPDATE "cine_pass_responsable_request"
         SET "status" = 'REJECTED', "decided_at" = now(), "admin_id" = (@adminId)::uuid, "rejection_reason" = @reason
         WHERE "id" = (@id)::uuid
         ''',
-        parameters: QueryParameters.named({'id': id, 'adminId': adminId, 'reason': reason}),
+        parameters: QueryParameters.named({
+          'id': id,
+          'adminId': adminId,
+          'reason': reason,
+        }),
       );
       return true;
     } catch (e, st) {
-      session.log('CinePass rejeterDemande', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass rejeterDemande',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return false;
     }
   }
@@ -603,7 +700,9 @@ class CinePassEndpoint extends Endpoint {
   }) async {
     try {
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) return null;
+      if (userId == null) {
+        return null;
+      }
       final result = await session.db.unsafeQuery(
         r'''
         INSERT INTO "cine_pass_responsable_request" (
@@ -634,8 +733,11 @@ class CinePassEndpoint extends Endpoint {
       String createdAtStr = '';
       if (createdAt != null) {
         final dt = _safeDateTime(createdAt);
-        if (dt != null) createdAtStr = dt.toIso8601String();
-        else createdAtStr = createdAt.toString();
+        if (dt != null) {
+          createdAtStr = dt.toIso8601String();
+        } else {
+          createdAtStr = createdAt.toString();
+        }
       }
       return DemandeResponsableResponse(
         id: row[0].toString(),
@@ -649,7 +751,12 @@ class CinePassEndpoint extends Endpoint {
         userName: null,
       );
     } catch (e, st) {
-      session.log('CinePass createDemandeResponsable', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass createDemandeResponsable',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -669,16 +776,25 @@ class CinePassEndpoint extends Endpoint {
       );
       return result.map((row) => _rowToReservationResponse(row)).toList();
     } catch (e, st) {
-      session.log('CinePass getReservations', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getReservations',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
 
   /// Responsable: réservations pour les événements de ses structures.
-  Future<List<ReservationResponse>> getReservationsForMyStructures(Session session) async {
+  Future<List<ReservationResponse>> getReservationsForMyStructures(
+    Session session,
+  ) async {
     try {
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) return [];
+      if (userId == null) {
+        return [];
+      }
       final result = await session.db.unsafeQuery(
         r'''
         SELECT r."id", r."numero", r."total_amount", r."created_at", r."statut",
@@ -696,20 +812,34 @@ class CinePassEndpoint extends Endpoint {
       );
       return result.map((row) => _rowToReservationResponse(row)).toList();
     } catch (e, st) {
-      session.log('CinePass getReservationsForMyStructures', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getReservationsForMyStructures',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
 
   /// Responsable: rapport CA sur une période (7j, 30j, 3m, 1an).
-  Future<RapportCAResponse> getRapportCA(Session session, String periode) async {
+  Future<RapportCAResponse> getRapportCA(
+    Session session,
+    String periode,
+  ) async {
     try {
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) return RapportCAResponse(totalCA: 0, nbReservations: 0);
+      if (userId == null) {
+        return RapportCAResponse(totalCA: 0, nbReservations: 0);
+      }
       String intervalExpr = "interval '30 days'";
-      if (periode == '7j') intervalExpr = "interval '7 days'";
-      else if (periode == '3m') intervalExpr = "interval '3 months'";
-      else if (periode == '1an') intervalExpr = "interval '1 year'";
+      if (periode == '7j') {
+        intervalExpr = "interval '7 days'";
+      } else if (periode == '3m') {
+        intervalExpr = "interval '3 months'";
+      } else if (periode == '1an') {
+        intervalExpr = "interval '1 year'";
+      }
       final result = await session.db.unsafeQuery(
         '''
         SELECT COALESCE(SUM(r."total_amount"), 0)::double AS total, COUNT(r."id")::int AS nb
@@ -720,16 +850,24 @@ class CinePassEndpoint extends Endpoint {
           WHERE a."user_id" = (@uid)::uuid AND a."active" = true
         )
         AND r."created_at" >= now() - $intervalExpr
-        '''.replaceAll(r'$intervalExpr', intervalExpr),
+        '''
+            .replaceAll(r'$intervalExpr', intervalExpr),
         parameters: QueryParameters.named({'uid': userId}),
       );
-      if (result.isEmpty) return RapportCAResponse(totalCA: 0, nbReservations: 0);
+      if (result.isEmpty) {
+        return RapportCAResponse(totalCA: 0, nbReservations: 0);
+      }
       final row = result.first;
       final total = row[0] is num ? (row[0] as num).toDouble() : 0.0;
       final nb = row.length > 1 ? _safeInt(row[1]) : 0;
       return RapportCAResponse(totalCA: total, nbReservations: nb);
     } catch (e, st) {
-      session.log('CinePass getRapportCA', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass getRapportCA',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return RapportCAResponse(totalCA: 0, nbReservations: 0);
     }
   }
@@ -785,7 +923,12 @@ class CinePassEndpoint extends Endpoint {
       if (salleResult.isEmpty) return null;
       return _rowToSeanceResponse(salleResult.first);
     } catch (e, st) {
-      session.log('CinePass createSeance', level: LogLevel.error, exception: e, stackTrace: st);
+      session.log(
+        'CinePass createSeance',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -887,7 +1030,9 @@ class CinePassEndpoint extends Endpoint {
     if (time != null) {
       final s = time.toString();
       // "21:00:00" or "21:00" or Duration
-      if (s.length >= 5) timeStr = s.substring(0, 5);
+      if (s.length >= 5) {
+        timeStr = s.substring(0, 5);
+      }
     }
     final price = row.length > 10 ? _safeDouble(row[10]) : 0.0;
     final posterColor = row.length > 11 && row[11] != null
@@ -920,13 +1065,17 @@ class CinePassEndpoint extends Endpoint {
     );
   }
 
-  static DemandeResponsableResponse _rowToDemandeResponsableResponse(List<dynamic> row) {
+  static DemandeResponsableResponse _rowToDemandeResponsableResponse(
+    List<dynamic> row,
+  ) {
     final createdAt = row.length > 7 ? row[7] : null;
     String createdAtStr = '';
     if (createdAt != null) {
       final dt = _safeDateTime(createdAt);
-      if (dt != null) createdAtStr = dt.toIso8601String();
-      else createdAtStr = createdAt.toString();
+      if (dt != null)
+        createdAtStr = dt.toIso8601String();
+      else
+        createdAtStr = createdAt.toString();
     }
     return DemandeResponsableResponse(
       id: row[0].toString(),
@@ -946,11 +1095,15 @@ class CinePassEndpoint extends Endpoint {
     String createdAtStr = '';
     if (createdAt != null) {
       final dt = _safeDateTime(createdAt);
-      if (dt != null) createdAtStr = dt.toIso8601String();
-      else createdAtStr = createdAt.toString();
+      if (dt != null)
+        createdAtStr = dt.toIso8601String();
+      else
+        createdAtStr = createdAt.toString();
     }
     final totalAmount = row.length > 2 ? _safeDouble(row[2]) : 0.0;
-    final statut = row.length > 4 ? (row[4] as String?) ?? 'pending' : 'pending';
+    final statut = row.length > 4
+        ? (row[4] as String?) ?? 'pending'
+        : 'pending';
     final eventTitle = row.length > 5 ? row[5] as String? : null;
     final nbBillets = row.length > 6 ? _safeInt(row[6]) : 0;
     return ReservationResponse(
