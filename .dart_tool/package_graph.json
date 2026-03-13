@@ -44,6 +44,7 @@
       "dependencies": [
         "cine_pass_client",
         "cupertino_icons",
+        "fl_chart",
         "flutter",
         "go_router",
         "provider",
@@ -226,6 +227,14 @@
       "version": "6.0.0",
       "dependencies": [
         "lints"
+      ]
+    },
+    {
+      "name": "fl_chart",
+      "version": "0.69.2",
+      "dependencies": [
+        "equatable",
+        "flutter"
       ]
     },
     {
@@ -585,6 +594,14 @@
         "stack_trace",
         "term_glyph",
         "test_api"
+      ]
+    },
+    {
+      "name": "equatable",
+      "version": "2.0.8",
+      "dependencies": [
+        "collection",
+        "meta"
       ]
     },
     {

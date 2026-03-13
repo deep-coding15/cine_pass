@@ -258,18 +258,22 @@ class _ConnexionPageState extends State<ConnexionPage> {
           Row(
             children: [
               Expanded(
-                  child: Divider(
-                color: AppTheme.textSecondary.withValues(alpha: 0.35),
-              )),
+                child: Divider(
+                  color: AppTheme.textSecondary.withValues(alpha: 0.35),
+                ),
+              ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Text('OU',
-                    style: TextStyle(color: AppTheme.textSecondary)),
+                child: Text(
+                  'OU',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
               ),
               Expanded(
-                  child: Divider(
-                color: AppTheme.textSecondary.withValues(alpha: 0.35),
-              )),
+                child: Divider(
+                  color: AppTheme.textSecondary.withValues(alpha: 0.35),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -296,7 +300,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
               backgroundColor: AppTheme.primaryRed,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text(_isSendingCode ? 'Envoi...' : 'Envoyer le code SMS'),
           ),
@@ -345,7 +350,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
             const SizedBox(height: 10),
             Text(
               _infoMessage!,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 13,
+              ),
             ),
           ],
           const SizedBox(height: 20),
@@ -354,7 +362,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
             children: [
               Text(
                 'Pas encore de compte ? ',
-                style: TextStyle(color: AppTheme.textSecondary),
+                style: const TextStyle(color: AppTheme.textSecondary),
               ),
               TextButton(
                 onPressed: () => context.go(AppRouter.inscription),
@@ -362,40 +370,27 @@ class _ConnexionPageState extends State<ConnexionPage> {
               ),
             ],
           ),
-        ],
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Pas encore de compte ? ',
-                  style: TextStyle(color: AppTheme.textSecondary),
-                ),
-                TextButton(
-                  onPressed: () => context.go(AppRouter.inscription),
-                  child: const Text('S\'inscrire'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: TextButton.icon(
-                onPressed: () => context.go(AppRouter.connexionResponsable),
-                icon: const Icon(Icons.store_rounded, size: 18),
-                label: const Text('Connexion espace responsable'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppTheme.accentGreen,
-                ),
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton.icon(
+              onPressed: () => context.go(AppRouter.connexionResponsable),
+              icon: const Icon(Icons.store_rounded, size: 18),
+              label: const Text('Connexion espace responsable'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.accentGreen,
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              'Pour tester en admin : connectez-vous avec admin@cinepass.com (mot de passe au choix).',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Pour tester en admin : connectez-vous avec admin@cinepass.com (mot de passe au choix).',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 12,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

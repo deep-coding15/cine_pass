@@ -24,14 +24,17 @@ import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
     as _i7;
 import 'package:cine_pass_client/src/protocol/salle.dart' as _i8;
 import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
-    as _i8;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i9;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i10;
-import 'protocol.dart' as _i11;
     as _i9;
 import 'package:cine_pass_client/src/protocol/structure.dart' as _i10;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i11;
-import 'protocol.dart' as _i12;
+import 'package:cine_pass_client/src/protocol/cine_pass/demande_responsable_response.dart'
+    as _i11;
+import 'package:cine_pass_client/src/protocol/cine_pass/reservation_response.dart'
+    as _i12;
+import 'package:cine_pass_client/src/protocol/cine_pass/rapport_ca_response.dart'
+    as _i13;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i14;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i15;
+import 'protocol.dart' as _i16;
 
 /// Exposes Google sign-in methods to the client.
 /// {@category Endpoint}
@@ -356,14 +359,14 @@ class EndpointCinePass extends _i2.EndpointRef {
       );
 
   /// Admin: demandes en attente (devenir responsable).
-  _i3.Future<List<_i12.DemandeResponsableResponse>> getDemandesEnAttente() =>
-      caller.callServerEndpoint<List<_i12.DemandeResponsableResponse>>(
+  _i3.Future<List<_i11.DemandeResponsableResponse>> getDemandesEnAttente() =>
+      caller.callServerEndpoint<List<_i11.DemandeResponsableResponse>>(
         'cinePass',
         'getDemandesEnAttente',
         {},
       );
 
-  /// Admin: approuver une demande responsable.
+  /// Admin: approuver une demande responsable → crée la structure et l'assignment.
   _i3.Future<bool> approuverDemande(String id) =>
       caller.callServerEndpoint<bool>(
         'cinePass',
@@ -372,15 +375,20 @@ class EndpointCinePass extends _i2.EndpointRef {
       );
 
   /// Admin: rejeter une demande responsable.
-  _i3.Future<bool> rejeterDemande(String id, String reason) =>
-      caller.callServerEndpoint<bool>(
-        'cinePass',
-        'rejeterDemande',
-        {'id': id, 'reason': reason},
-      );
+  _i3.Future<bool> rejeterDemande(
+    String id,
+    String reason,
+  ) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'rejeterDemande',
+    {
+      'id': id,
+      'reason': reason,
+    },
+  );
 
-  /// Créer une demande pour devenir responsable.
-  _i3.Future<_i12.DemandeResponsableResponse?> createDemandeResponsable({
+  /// Créer une demande pour devenir responsable (utilisateur connecté).
+  _i3.Future<_i11.DemandeResponsableResponse?> createDemandeResponsable({
     required String structureType,
     required String structureName,
     required String structureCity,
@@ -388,7 +396,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     String? structureWebsite,
     String? structurePhone,
     required String description,
-  }) => caller.callServerEndpoint<_i12.DemandeResponsableResponse?>(
+  }) => caller.callServerEndpoint<_i11.DemandeResponsableResponse?>(
     'cinePass',
     'createDemandeResponsable',
     {
@@ -402,7 +410,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     },
   );
 
-  /// Admin: toutes les réservations.
+  /// Admin: toutes les réservations (événements et séances).
   _i3.Future<List<_i12.ReservationResponse>> getReservations() =>
       caller.callServerEndpoint<List<_i12.ReservationResponse>>(
         'cinePass',
@@ -410,7 +418,7 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
-  /// Responsable: réservations pour ses structures.
+  /// Responsable: réservations pour les événements de ses structures.
   _i3.Future<List<_i12.ReservationResponse>> getReservationsForMyStructures() =>
       caller.callServerEndpoint<List<_i12.ReservationResponse>>(
         'cinePass',
@@ -418,9 +426,9 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
-  /// Responsable: rapport CA (7j, 30j, 3m, 1an).
-  _i3.Future<_i12.RapportCAResponse> getRapportCA(String periode) =>
-      caller.callServerEndpoint<_i12.RapportCAResponse>(
+  /// Responsable: rapport CA sur une période (7j, 30j, 3m, 1an).
+  _i3.Future<_i13.RapportCAResponse> getRapportCA(String periode) =>
+      caller.callServerEndpoint<_i13.RapportCAResponse>(
         'cinePass',
         'getRapportCA',
         {'periode': periode},
@@ -460,8 +468,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i9.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i9.Greeting>(
+  _i3.Future<_i14.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i14.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -470,12 +478,12 @@ class EndpointGreeting extends _i2.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i10.Caller(client);
+    auth = _i15.Caller(client);
     serverpod_auth_idp = _i1.Caller(client);
     serverpod_auth_core = _i4.Caller(client);
   }
 
-  late final _i10.Caller auth;
+  late final _i15.Caller auth;
 
   late final _i1.Caller serverpod_auth_idp;
 
@@ -502,7 +510,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i11.Protocol(),
+         _i16.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
