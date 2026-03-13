@@ -17,10 +17,12 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState() {
     super.initState();
+    // Listen to authentication state changes
     client.auth.authInfoListenable.addListener(_updateSignedInState);
     _isSignedIn = client.auth.isAuthenticated;
   }
 
+// Don't forget to remove the listener when the widget is disposed.
   @override
   void dispose() {
     client.auth.authInfoListenable.removeListener(_updateSignedInState);
@@ -31,6 +33,23 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() {
       _isSignedIn = client.auth.isAuthenticated;
     });
+  }
+
+  Future<bool> signOutDevice() async {
+    return await client.auth.signOutDevice();
+  }
+  
+  Future<bool> signOutAllDevices() async {
+    return await client.auth.signOutAllDevices();
+  }
+
+  AuthSuccess getAuthInfo() {
+    final authInfo = client.auth.authInfo;
+    if (authInfo is AuthSuccess) {
+      return authInfo;
+    } else {
+      throw Exception('User is not authenticated');
+    }
   }
 
   @override

@@ -16,7 +16,7 @@
       "name": "cine_pass_client",
       "version": "0.0.0",
       "dependencies": [
-        "serverpod_auth_idp_client",
+        "serverpod_auth_client",
         "serverpod_client"
       ],
       "devDependencies": []
@@ -26,7 +26,8 @@
       "version": "0.0.0",
       "dependencies": [
         "serverpod",
-        "serverpod_auth_idp_server"
+        "serverpod_auth_idp_server",
+        "serverpod_auth_server"
       ],
       "devDependencies": [
         "lints",
@@ -54,6 +55,21 @@
       ]
     },
     {
+      "name": "test_api",
+      "version": "0.7.10",
+      "dependencies": [
+        "async",
+        "boolean_selector",
+        "collection",
+        "meta",
+        "source_span",
+        "stack_trace",
+        "stream_channel",
+        "string_scanner",
+        "term_glyph"
+      ]
+    },
+    {
       "name": "flutter_secure_storage",
       "version": "10.0.0",
       "dependencies": [
@@ -67,9 +83,65 @@
       ]
     },
     {
+      "name": "term_glyph",
+      "version": "1.2.2",
+      "dependencies": []
+    },
+    {
+      "name": "string_scanner",
+      "version": "1.4.1",
+      "dependencies": [
+        "source_span"
+      ]
+    },
+    {
+      "name": "stream_channel",
+      "version": "2.1.4",
+      "dependencies": [
+        "async"
+      ]
+    },
+    {
+      "name": "stack_trace",
+      "version": "1.12.1",
+      "dependencies": [
+        "path"
+      ]
+    },
+    {
+      "name": "source_span",
+      "version": "1.10.2",
+      "dependencies": [
+        "collection",
+        "path",
+        "term_glyph"
+      ]
+    },
+    {
       "name": "meta",
       "version": "1.17.0",
       "dependencies": []
+    },
+    {
+      "name": "collection",
+      "version": "1.19.1",
+      "dependencies": []
+    },
+    {
+      "name": "boolean_selector",
+      "version": "2.1.2",
+      "dependencies": [
+        "source_span",
+        "string_scanner"
+      ]
+    },
+    {
+      "name": "async",
+      "version": "2.13.0",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
     },
     {
       "name": "flutter_secure_storage_windows",
@@ -322,6 +394,25 @@
       ]
     },
     {
+      "name": "serverpod_auth_server",
+      "version": "3.4.0",
+      "dependencies": [
+        "crypto",
+        "email_validator",
+        "googleapis",
+        "googleapis_auth",
+        "http",
+        "image",
+        "jose",
+        "meta",
+        "openid_client",
+        "pointycastle",
+        "serverpod",
+        "serverpod_serialization",
+        "serverpod_shared"
+      ]
+    },
+    {
       "name": "serverpod",
       "version": "3.4.0",
       "dependencies": [
@@ -359,12 +450,17 @@
       ]
     },
     {
-      "name": "serverpod_auth_idp_client",
+      "name": "serverpod_auth_client",
       "version": "3.4.0",
       "dependencies": [
-        "serverpod_auth_core_client",
+        "lints",
         "serverpod_client"
       ]
+    },
+    {
+      "name": "path",
+      "version": "1.9.1",
+      "dependencies": []
     },
     {
       "name": "win32",
@@ -384,11 +480,6 @@
         "path_provider_platform_interface",
         "path_provider_windows"
       ]
-    },
-    {
-      "name": "path",
-      "version": "1.9.1",
-      "dependencies": []
     },
     {
       "name": "ffi",
@@ -432,21 +523,9 @@
       ]
     },
     {
-      "name": "collection",
-      "version": "1.19.1",
-      "dependencies": []
-    },
-    {
       "name": "characters",
       "version": "1.4.1",
       "dependencies": []
-    },
-    {
-      "name": "stream_channel",
-      "version": "2.1.4",
-      "dependencies": [
-        "async"
-      ]
     },
     {
       "name": "leak_tracker_flutter_testing",
@@ -457,13 +536,6 @@
         "leak_tracker_testing",
         "matcher",
         "meta"
-      ]
-    },
-    {
-      "name": "stack_trace",
-      "version": "1.12.1",
-      "dependencies": [
-        "path"
       ]
     },
     {
@@ -488,21 +560,6 @@
         "stack_trace",
         "term_glyph",
         "test_api"
-      ]
-    },
-    {
-      "name": "test_api",
-      "version": "0.7.9",
-      "dependencies": [
-        "async",
-        "boolean_selector",
-        "collection",
-        "meta",
-        "source_span",
-        "stack_trace",
-        "stream_channel",
-        "string_scanner",
-        "term_glyph"
       ]
     },
     {
@@ -532,6 +589,14 @@
         "meta",
         "sign_in_with_apple_platform_interface",
         "sign_in_with_apple_web"
+      ]
+    },
+    {
+      "name": "serverpod_auth_idp_client",
+      "version": "3.4.0",
+      "dependencies": [
+        "serverpod_auth_core_client",
+        "serverpod_client"
       ]
     },
     {
@@ -713,15 +778,6 @@
       ]
     },
     {
-      "name": "source_span",
-      "version": "1.10.2",
-      "dependencies": [
-        "collection",
-        "path",
-        "term_glyph"
-      ]
-    },
-    {
       "name": "shelf_web_socket",
       "version": "3.0.0",
       "dependencies": [
@@ -813,22 +869,6 @@
         "stack_trace",
         "vm_service",
         "yaml"
-      ]
-    },
-    {
-      "name": "boolean_selector",
-      "version": "2.1.2",
-      "dependencies": [
-        "source_span",
-        "string_scanner"
-      ]
-    },
-    {
-      "name": "async",
-      "version": "2.13.0",
-      "dependencies": [
-        "collection",
-        "meta"
       ]
     },
     {
@@ -1148,6 +1188,44 @@
       ]
     },
     {
+      "name": "openid_client",
+      "version": "0.4.9+2",
+      "dependencies": [
+        "args",
+        "clock",
+        "http",
+        "jose",
+        "logging",
+        "meta",
+        "pointycastle",
+        "web"
+      ]
+    },
+    {
+      "name": "jose",
+      "version": "0.3.5",
+      "dependencies": [
+        "archive",
+        "asn1lib",
+        "collection",
+        "crypto_keys",
+        "http",
+        "http_parser",
+        "meta",
+        "typed_data",
+        "x509"
+      ]
+    },
+    {
+      "name": "image",
+      "version": "4.8.0",
+      "dependencies": [
+        "archive",
+        "meta",
+        "xml"
+      ]
+    },
+    {
       "name": "web_socket",
       "version": "1.0.1",
       "dependencies": [
@@ -1203,14 +1281,6 @@
       "name": "mustache_template",
       "version": "2.0.3",
       "dependencies": []
-    },
-    {
-      "name": "serverpod_auth_core_client",
-      "version": "3.4.0",
-      "dependencies": [
-        "clock",
-        "serverpod_client"
-      ]
     },
     {
       "name": "path_provider_windows",
@@ -1281,18 +1351,6 @@
       ]
     },
     {
-      "name": "term_glyph",
-      "version": "1.2.2",
-      "dependencies": []
-    },
-    {
-      "name": "string_scanner",
-      "version": "1.4.1",
-      "dependencies": [
-        "source_span"
-      ]
-    },
-    {
       "name": "sign_in_with_apple_web",
       "version": "3.0.0",
       "dependencies": [
@@ -1308,6 +1366,14 @@
         "flutter",
         "meta",
         "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "serverpod_auth_core_client",
+      "version": "3.4.0",
+      "dependencies": [
+        "clock",
+        "serverpod_client"
       ]
     },
     {
@@ -1559,15 +1625,6 @@
       ]
     },
     {
-      "name": "image",
-      "version": "4.8.0",
-      "dependencies": [
-        "archive",
-        "meta",
-        "xml"
-      ]
-    },
-    {
       "name": "cbor",
       "version": "6.5.1",
       "dependencies": [
@@ -1601,6 +1658,34 @@
         "collection",
         "convert",
         "crypto"
+      ]
+    },
+    {
+      "name": "x509",
+      "version": "0.2.4+3",
+      "dependencies": [
+        "asn1lib",
+        "crypto_keys",
+        "quiver"
+      ]
+    },
+    {
+      "name": "crypto_keys",
+      "version": "0.3.0+2",
+      "dependencies": [
+        "collection",
+        "meta",
+        "pointycastle",
+        "quiver"
+      ]
+    },
+    {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
       ]
     },
     {
@@ -1730,15 +1815,6 @@
       ]
     },
     {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
       "name": "path_parsing",
       "version": "1.1.0",
       "dependencies": [
@@ -1782,6 +1858,21 @@
       ]
     },
     {
+      "name": "quiver",
+      "version": "3.2.2",
+      "dependencies": [
+        "matcher"
+      ]
+    },
+    {
+      "name": "petitparser",
+      "version": "7.0.2",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
+    },
+    {
       "name": "native_toolchain_c",
       "version": "0.17.5",
       "dependencies": [
@@ -1811,14 +1902,6 @@
       "dependencies": [
         "collection",
         "hooks"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.2",
-      "dependencies": [
-        "collection",
-        "meta"
       ]
     }
   ],

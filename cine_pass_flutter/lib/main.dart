@@ -18,11 +18,26 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final serverUrl = await getServerUrl();
+
+  // Create the client with the auth session manager
   client = Client(serverUrl)
+    /// Use the FlutterConnectivityMonitor to monitor network connectivity changes in the app.
+    /// It helps the client to:
+    /// Automatically retry failed requests when the network is restored.
+    /// Provide real-time connectivity status to the app, allowing it to adapt its behavior based on network availability.
+    /// This ensures a smoother user experience by handling connectivity issues gracefully and keeping the app responsive even in offline scenarios.
     ..connectivityMonitor = FlutterConnectivityMonitor()
+    /// Use the FlutterAuthSessionManager to manage authentication sessions in the app.
+    /// It helps:
+    /// - Store the current authentication session securely on the device.
+    /// - Automatically refresh authentication sessions when they expire.
+    /// - Provide the current authentication session to the client for authenticated requests.
+    /// This allows the app to maintain user authentication state across app restarts and handle token refresh seamlessly.
     ..authSessionManager = FlutterAuthSessionManager();
 
-  client.auth.initialize();
+  // Initialize the auth session manager to load any existing auth session from storage.
+  await client.auth.initialize();
+  AuthState.instance.bindToClientAuth();
 
   runApp(
     MultiProvider(

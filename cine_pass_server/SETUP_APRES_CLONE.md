@@ -53,3 +53,8 @@ Ensuite tu peux lancer le serveur et le frontend comme d’habitude.
 - **Port 8090** : nécessaire si tu utilises le `docker-compose` du projet (Postgres exposé en 8090).
 
 Si tu suis cet ordre à chaque clone, les “problèmes de migrations et plusieurs choses” disparaissent, car tout est refait de façon cohérente.
+
+
+type schema\drop_cine_pass_tables.sql | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+type schema\cine_pass_schema.sql | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+type schema\seed_data.sql | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
