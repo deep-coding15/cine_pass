@@ -157,8 +157,8 @@ class AppRouter {
           ),
           GoRoute(
             path: connexionResponsable,
-            pageBuilder: (_, _) => const NoTransitionPage(
-                child: ConnexionResponsablePage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ConnexionResponsablePage()),
           ),
         ],
       ),
@@ -172,7 +172,7 @@ class AppRouter {
           ),
           GoRoute(
             path: '/admin/films',
-            redirect: (_, __) => '/admin/events',
+            redirect: (context, state) => '/admin/events',
           ),
           GoRoute(
             path: '/admin/structures',
@@ -181,7 +181,7 @@ class AppRouter {
           ),
           GoRoute(
             path: '/admin/seances',
-            redirect: (_, __) => '/admin/events',
+            redirect: (context, state) => '/admin/events',
           ),
           GoRoute(
             path: '/admin/events',
@@ -192,8 +192,7 @@ class AppRouter {
             path: '/admin/events/:id',
             pageBuilder: (context, state) {
               final id = state.pathParameters['id'] ?? '';
-              return NoTransitionPage(
-                  child: AdminEventDetailPage(eventId: id));
+              return NoTransitionPage(child: AdminEventDetailPage(eventId: id));
             },
           ),
           GoRoute(
@@ -201,7 +200,8 @@ class AppRouter {
             pageBuilder: (context, state) {
               final id = state.pathParameters['id'] ?? '';
               return NoTransitionPage(
-                  child: AdminStructureDetailPage(structureId: id));
+                child: AdminStructureDetailPage(structureId: id),
+              );
             },
           ),
           GoRoute(
@@ -227,41 +227,41 @@ class AppRouter {
         ],
       ),
       ShellRoute(
-        builder: (context, state, child) =>
-            ResponsableScaffold(child: child),
+        builder: (context, state, child) => ResponsableScaffold(child: child),
         routes: [
           GoRoute(
             path: responsable,
-            pageBuilder: (_, _) => const NoTransitionPage(
-                child: ResponsableDashboardPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ResponsableDashboardPage()),
           ),
           GoRoute(
             path: '/responsable/structures',
-            pageBuilder: (_, _) => const NoTransitionPage(
-                child: ResponsableStructuresPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ResponsableStructuresPage()),
           ),
           GoRoute(
             path: '/responsable/events',
-            pageBuilder: (_, _) => const NoTransitionPage(
-                child: ResponsableEventsPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ResponsableEventsPage()),
           ),
           GoRoute(
             path: '/responsable/events/:id',
             pageBuilder: (context, state) {
               final id = state.pathParameters['id'] ?? '';
               return NoTransitionPage(
-                  child: ResponsableEventDetailPage(eventId: id));
+                child: ResponsableEventDetailPage(eventId: id),
+              );
             },
           ),
           GoRoute(
             path: '/responsable/reservations',
-            pageBuilder: (_, _) => const NoTransitionPage(
-                child: ResponsableReservationsPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ResponsableReservationsPage()),
           ),
           GoRoute(
             path: '/responsable/rapports',
-            pageBuilder: (_, _) => const NoTransitionPage(
-                child: ResponsableRapportsPage()),
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ResponsableRapportsPage()),
           ),
         ],
       ),

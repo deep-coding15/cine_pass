@@ -15,7 +15,6 @@ class ResponsableReservationsPage extends StatefulWidget {
 
 class _ResponsableReservationsPageState extends State<ResponsableReservationsPage> {
   bool _loading = true;
-  String _filterStatut = 'Toutes';
   List<ReservationResponse> _reservations = [];
 
   @override

@@ -1,8 +1,6 @@
-import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../../main.dart';
 
 /// Rapports et exports : CA, réservations, statistiques.
 class ResponsableRapportsPage extends StatefulWidget {
@@ -14,8 +12,7 @@ class ResponsableRapportsPage extends StatefulWidget {
 
 class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
   String _selectedPeriode = '30j';
-  bool _loading = false;
-  RapportCAResponse? _rapportCA;
+  // TODO: brancher sur getRapportCA quand le backend sera figé.
 
   @override
   Widget build(BuildContext context) {

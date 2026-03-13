@@ -1072,10 +1072,11 @@ class CinePassEndpoint extends Endpoint {
     String createdAtStr = '';
     if (createdAt != null) {
       final dt = _safeDateTime(createdAt);
-      if (dt != null)
+      if (dt != null) {
         createdAtStr = dt.toIso8601String();
-      else
+      } else {
         createdAtStr = createdAt.toString();
+      }
     }
     return DemandeResponsableResponse(
       id: row[0].toString(),
@@ -1095,10 +1096,11 @@ class CinePassEndpoint extends Endpoint {
     String createdAtStr = '';
     if (createdAt != null) {
       final dt = _safeDateTime(createdAt);
-      if (dt != null)
+      if (dt != null) {
         createdAtStr = dt.toIso8601String();
-      else
+      } else {
         createdAtStr = createdAt.toString();
+      }
     }
     final totalAmount = row.length > 2 ? _safeDouble(row[2]) : 0.0;
     final statut = row.length > 4

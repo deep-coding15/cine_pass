@@ -1,4 +1,3 @@
-import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -57,7 +56,8 @@ class ResponsableEventDetailPage extends StatefulWidget {
       _ResponsableEventDetailPageState();
 }
 
-class _ResponsableEventDetailPageState extends State<ResponsableEventDetailPage> {
+class _ResponsableEventDetailPageState
+    extends State<ResponsableEventDetailPage> {
   bool _loading = true;
   ResponsableEventDetailData? _event;
 
@@ -79,7 +79,9 @@ class _ResponsableEventDetailPageState extends State<ResponsableEventDetailPage>
         });
         return;
       }
-      final structureName = await client.cinePass.getMyStructure().then((s) => s?.name ?? '');
+      final structureName = await client.cinePass.getMyStructure().then(
+        (s) => s?.name ?? '',
+      );
       if (!mounted) return;
       setState(() {
         _event = ResponsableEventDetailData(
@@ -124,7 +126,11 @@ class _ResponsableEventDetailPageState extends State<ResponsableEventDetailPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.8)),
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppTheme.textSecondary.withValues(alpha: 0.8),
+            ),
             const SizedBox(height: 16),
             Text(
               'Événement introuvable',
@@ -201,7 +207,9 @@ class _ResponsableEventDetailPageState extends State<ResponsableEventDetailPage>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentGreen.withValues(alpha: 0.2),
+                                color: AppTheme.accentGreen.withValues(
+                                  alpha: 0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -271,15 +279,18 @@ class _ResponsableEventDetailPageState extends State<ResponsableEventDetailPage>
                     children: [
                       Text(
                         'Séances',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppTheme.textPrimary,
+                            ),
                       ),
                       FilledButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Ajout de séance à brancher sur l\'API'),
+                              content: Text(
+                                'Ajout de séance à brancher sur l\'API',
+                              ),
                               backgroundColor: AppTheme.accentGreen,
                             ),
                           );
@@ -293,69 +304,71 @@ class _ResponsableEventDetailPageState extends State<ResponsableEventDetailPage>
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ...e.seances.map((s) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surfaceDark,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.schedule_rounded,
-                                color: AppTheme.accentGreen,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${s.dateStr} ${s.timeStr}',
-                                      style: const TextStyle(
-                                        color: AppTheme.textPrimary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Text(
-                                      s.lieu,
-                                      style: const TextStyle(
-                                        color: AppTheme.textSecondary,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  size: 20,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                tooltip: 'Modifier la séance',
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  size: 20,
-                                  color: AppTheme.primaryRed,
-                                ),
-                                tooltip: 'Supprimer la séance',
-                              ),
-                            ],
-                          ),
+                  ...e.seances.map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
-                      )),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceDark,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.schedule_rounded,
+                              color: AppTheme.accentGreen,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${s.dateStr} ${s.timeStr}',
+                                    style: const TextStyle(
+                                      color: AppTheme.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    s.lieu,
+                                    style: const TextStyle(
+                                      color: AppTheme.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                              tooltip: 'Modifier la séance',
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                size: 20,
+                                color: AppTheme.primaryRed,
+                              ),
+                              tooltip: 'Supprimer la séance',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -431,7 +444,9 @@ class _ResponsableEventDetailPageState extends State<ResponsableEventDetailPage>
                         context.go('/responsable/events');
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Échec de la suppression.')),
+                          const SnackBar(
+                            content: Text('Échec de la suppression.'),
+                          ),
                         );
                       }
                     } catch (_) {
