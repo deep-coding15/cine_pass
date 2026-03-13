@@ -61,22 +61,16 @@ class AdminScaffold extends StatelessWidget {
                     onTap: () => context.go(AppRouter.admin),
                   ),
                   _AdminNavTile(
-                    icon: Icons.movie_rounded,
-                    label: 'Films',
-                    isActive: _isActive(context, '/admin/films'),
-                    onTap: () => context.go('/admin/films'),
-                  ),
-                  _AdminNavTile(
-                    icon: Icons.schedule_rounded,
-                    label: 'Séances',
-                    isActive: _isActive(context, '/admin/seances'),
-                    onTap: () => context.go('/admin/seances'),
-                  ),
-                  _AdminNavTile(
                     icon: Icons.calendar_today_rounded,
                     label: 'Événements',
                     isActive: _isActive(context, '/admin/events'),
                     onTap: () => context.go('/admin/events'),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.store_rounded,
+                    label: 'Structures',
+                    isActive: _isActive(context, '/admin/structures'),
+                    onTap: () => context.go('/admin/structures'),
                   ),
                   _AdminNavTile(
                     icon: Icons.people_rounded,
@@ -113,7 +107,12 @@ class AdminScaffold extends StatelessWidget {
                       'Retour à l\'app',
                       style: TextStyle(color: AppTheme.textSecondary),
                     ),
-                    onTap: () => context.go(AppRouter.home),
+                    onTap: () {
+                      final router = GoRouter.of(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        router.go(AppRouter.home);
+                      });
+                    },
                   ),
                 ],
               ),

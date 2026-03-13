@@ -25,8 +25,9 @@ import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
 import 'package:cine_pass_client/src/protocol/salle.dart' as _i8;
 import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
     as _i9;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i10;
-import 'protocol.dart' as _i11;
+import 'package:cine_pass_client/src/protocol/structure.dart' as _i10;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i11;
+import 'protocol.dart' as _i12;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -366,7 +367,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     },
   );
 
-  /// Admin: créer un événement.
+  /// Admin / Responsable: créer un événement (optionnellement lié à une structure).
   _i3.Future<_i9.EventResponse?> createEvent({
     required String titre,
     required String categorie,
@@ -379,6 +380,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     required int placesTotal,
     required double prixBase,
     int? posterColor,
+    String? structureId,
   }) => caller.callServerEndpoint<_i9.EventResponse?>(
     'cinePass',
     'createEvent',
@@ -394,8 +396,152 @@ class EndpointCinePass extends _i2.EndpointRef {
       'placesTotal': placesTotal,
       'prixBase': prixBase,
       'posterColor': posterColor,
+      'structureId': structureId,
     },
   );
+
+  /// Liste de toutes les structures (admin).
+  _i3.Future<List<_i10.Structure>> getStructures() =>
+      caller.callServerEndpoint<List<_i10.Structure>>(
+        'cinePass',
+        'getStructures',
+        {},
+      );
+
+  /// Détail d'une structure par id (admin).
+  _i3.Future<_i10.Structure?> getStructureById(String id) =>
+      caller.callServerEndpoint<_i10.Structure?>(
+        'cinePass',
+        'getStructureById',
+        {'id': id},
+      );
+
+  /// Mettre à jour un événement (admin ou responsable de la structure).
+  _i3.Future<_i9.EventResponse?> updateEvent({
+    required String id,
+    String? titre,
+    String? categorie,
+    String? description,
+    String? lieu,
+    String? adresse,
+    String? ville,
+    Object? eventDate,
+    String? eventTimeStr,
+    int? placesTotal,
+    double? prixBase,
+    int? posterColor,
+  }) => caller.callServerEndpoint<_i9.EventResponse?>(
+    'cinePass',
+    'updateEvent',
+    {
+      'id': id,
+      'titre': titre,
+      'categorie': categorie,
+      'description': description,
+      'lieu': lieu,
+      'adresse': adresse,
+      'ville': ville,
+      'eventDate': eventDate,
+      'eventTimeStr': eventTimeStr,
+      'placesTotal': placesTotal,
+      'prixBase': prixBase,
+      'posterColor': posterColor,
+    },
+  );
+
+  /// Supprimer un événement (admin ou responsable de la structure).
+  _i3.Future<bool> deleteEvent(String id) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'deleteEvent',
+    {'id': id},
+  );
+
+  /// Structure(s) assignée(s) au responsable connecté.
+  _i3.Future<_i10.Structure?> getMyStructure() =>
+      caller.callServerEndpoint<_i10.Structure?>(
+        'cinePass',
+        'getMyStructure',
+        {},
+      );
+
+  /// Événements des structures du responsable connecté.
+  _i3.Future<List<_i9.EventResponse>> getMyEvents() =>
+      caller.callServerEndpoint<List<_i9.EventResponse>>(
+        'cinePass',
+        'getMyEvents',
+        {},
+      );
+
+  /// Admin: demandes en attente (devenir responsable).
+  _i3.Future<List<_i12.DemandeResponsableResponse>> getDemandesEnAttente() =>
+      caller.callServerEndpoint<List<_i12.DemandeResponsableResponse>>(
+        'cinePass',
+        'getDemandesEnAttente',
+        {},
+      );
+
+  /// Admin: approuver une demande responsable.
+  _i3.Future<bool> approuverDemande(String id) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'approuverDemande',
+        {'id': id},
+      );
+
+  /// Admin: rejeter une demande responsable.
+  _i3.Future<bool> rejeterDemande(String id, String reason) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'rejeterDemande',
+        {'id': id, 'reason': reason},
+      );
+
+  /// Créer une demande pour devenir responsable.
+  _i3.Future<_i12.DemandeResponsableResponse?> createDemandeResponsable({
+    required String structureType,
+    required String structureName,
+    required String structureCity,
+    String? structureAddress,
+    String? structureWebsite,
+    String? structurePhone,
+    required String description,
+  }) => caller.callServerEndpoint<_i12.DemandeResponsableResponse?>(
+    'cinePass',
+    'createDemandeResponsable',
+    {
+      'structureType': structureType,
+      'structureName': structureName,
+      'structureCity': structureCity,
+      'structureAddress': structureAddress,
+      'structureWebsite': structureWebsite,
+      'structurePhone': structurePhone,
+      'description': description,
+    },
+  );
+
+  /// Admin: toutes les réservations.
+  _i3.Future<List<_i12.ReservationResponse>> getReservations() =>
+      caller.callServerEndpoint<List<_i12.ReservationResponse>>(
+        'cinePass',
+        'getReservations',
+        {},
+      );
+
+  /// Responsable: réservations pour ses structures.
+  _i3.Future<List<_i12.ReservationResponse>> getReservationsForMyStructures() =>
+      caller.callServerEndpoint<List<_i12.ReservationResponse>>(
+        'cinePass',
+        'getReservationsForMyStructures',
+        {},
+      );
+
+  /// Responsable: rapport CA (7j, 30j, 3m, 1an).
+  _i3.Future<_i12.RapportCAResponse> getRapportCA(String periode) =>
+      caller.callServerEndpoint<_i12.RapportCAResponse>(
+        'cinePass',
+        'getRapportCA',
+        {'periode': periode},
+      );
 
   /// Admin: créer une séance.
   _i3.Future<_i6.SeanceResponse?> createSeance({
@@ -431,8 +577,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i10.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i10.Greeting>(
+  _i3.Future<_i11.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i11.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -470,7 +616,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i11.Protocol(),
+         _i12.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

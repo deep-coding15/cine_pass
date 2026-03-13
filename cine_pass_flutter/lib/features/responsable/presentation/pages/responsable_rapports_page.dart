@@ -1,8 +1,10 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_theme.dart';
 
-/// Rapports et exports : CA, réservations, statistiques détaillées, export PDF/Excel.
-/// TODO: brancher sur endpoints getRapportCA, getRapportReservations, exportPDF, exportExcel.
+import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
+
+/// Rapports et exports : CA, réservations, statistiques.
 class ResponsableRapportsPage extends StatefulWidget {
   const ResponsableRapportsPage({super.key});
 
@@ -13,6 +15,7 @@ class ResponsableRapportsPage extends StatefulWidget {
 class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
   String _selectedPeriode = '30j';
   bool _loading = false;
+  RapportCAResponse? _rapportCA;
 
   @override
   Widget build(BuildContext context) {
@@ -156,17 +159,12 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
   }
 
   void _export(String type) {
-    setState(() => _loading = true);
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Export $type (période: $_selectedPeriode) — à brancher backend'),
-          backgroundColor: AppTheme.accentGreen,
-        ),
-      );
-    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Export $type (période: $_selectedPeriode) — à venir'),
+        backgroundColor: AppTheme.accentGreen,
+      ),
+    );
   }
 }
 

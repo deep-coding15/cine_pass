@@ -1,9 +1,11 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 
 /// Page "Ma structure" : la structure que le responsable représente (celle de sa demande approuvée).
 /// Il ne peut pas en ajouter une autre — affichage type "about us" avec les infos fournies dans la demande.
-/// TODO: brancher sur getMyStructure(session) côté backend.
 class ResponsableStructuresPage extends StatefulWidget {
   const ResponsableStructuresPage({super.key});
 
@@ -14,7 +16,7 @@ class ResponsableStructuresPage extends StatefulWidget {
 
 class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
   bool _loading = true;
-  _MaStructure? _structure;
+  Structure? _structure;
 
   @override
   void initState() {
@@ -24,21 +26,20 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _structure = _MaStructure(
-        id: '1',
-        type: 'CINEMA',
-        name: 'Cinéma Le Central',
-        city: 'Lyon',
-        address: '12 rue de la République',
-        website: 'https://lecentral-cinema.fr',
-        phone: '04 78 00 00 00',
-        description: 'Cinéma indépendant au cœur de Lyon. Trois salles confortables, programmation art et essai et blockbusters.',
-      );
-      _loading = false;
-    });
+    try {
+      final s = await client.cinePass.getMyStructure();
+      if (!mounted) return;
+      setState(() {
+        _structure = s;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _structure = null;
+        _loading = false;
+      });
+    }
   }
 
   String _labelType(String type) {
@@ -129,7 +130,7 @@ class _MaStructureCard extends StatelessWidget {
     required this.labelType,
   });
 
-  final _MaStructure structure;
+  final Structure structure;
   final String Function(String) labelType;
 
   @override
@@ -189,23 +190,13 @@ class _MaStructureCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 12),
-            if (structure.description != null && structure.description!.isNotEmpty)
-              Text(
-                structure.description!,
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  height: 1.5,
-                  fontSize: 14,
-                ),
-              )
-            else
-              Text(
-                'Aucune description renseignée.',
-                style: TextStyle(
-                  color: AppTheme.textSecondary.withValues(alpha: 0.8),
-                  fontSize: 14,
-                ),
+            Text(
+              'Aucune description renseignée.',
+              style: TextStyle(
+                color: AppTheme.textSecondary.withValues(alpha: 0.8),
+                fontSize: 14,
               ),
+            ),
             const SizedBox(height: 20),
             const Divider(color: AppTheme.textSecondary, height: 1),
             const SizedBox(height: 16),
@@ -282,24 +273,3 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _MaStructure {
-  final String id;
-  final String type;
-  final String name;
-  final String city;
-  final String? address;
-  final String? website;
-  final String? phone;
-  final String? description;
-
-  _MaStructure({
-    required this.id,
-    required this.type,
-    required this.name,
-    required this.city,
-    this.address,
-    this.website,
-    this.phone,
-    this.description,
-  });
-}

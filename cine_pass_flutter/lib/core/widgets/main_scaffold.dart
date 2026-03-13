@@ -34,7 +34,10 @@ class _MainScaffoldState extends State<MainScaffold> {
           icon: const Icon(Icons.menu_rounded),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        title: const CinePassLogo(size: LogoSize.small),
+        title: GestureDetector(
+          onTap: () => context.go(AppRouter.home),
+          child: const CinePassLogo(size: LogoSize.small),
+        ),
         centerTitle: true,
         actions: [
           if (auth.isLoggedIn) ...[
@@ -52,21 +55,13 @@ class _MainScaffoldState extends State<MainScaffold> {
               onPressed: () => context.go(AppRouter.events),
               child: const Text('Événements'),
             ),
-            Tooltip(
-              message: 'Devenir responsable',
-              child: TextButton.icon(
-                onPressed: () => context.go(AppRouter.devenirResponsable),
-                icon: const Icon(Icons.badge_outlined, size: 20),
-                label: const Text('Devenir responsable'),
-              ),
-            ),
             TextButton(
               onPressed: () => context.go(AppRouter.billets),
               child: const Text('Billets'),
             ),
             PopupMenuButton<String>(
               offset: const Offset(0, 48),
-              tooltip: 'Profil · Devenir responsable',
+              tooltip: 'Profil · Devenir responsable · Déconnexion',
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -98,7 +93,8 @@ class _MainScaffoldState extends State<MainScaffold> {
                   value: 'devenir_responsable',
                   child: Row(
                     children: [
-                      Icon(Icons.badge_outlined, size: 20, color: AppTheme.textSecondary),
+                      Icon(Icons.badge_outlined,
+                          size: 20, color: AppTheme.textSecondary),
                       SizedBox(width: 12),
                       Text('Devenir responsable'),
                     ],

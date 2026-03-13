@@ -1,9 +1,10 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 
 /// Page admin : liste des demandes "Devenir responsable" (PENDING) avec actions Approuver / Rejeter.
-/// TODO: brancher sur les endpoints backend getDemandesEnAttente, approuverDemande, rejeterDemande.
 class AdminDemandesPage extends StatefulWidget {
   const AdminDemandesPage({super.key});
 
@@ -13,7 +14,7 @@ class AdminDemandesPage extends StatefulWidget {
 
 class _AdminDemandesPageState extends State<AdminDemandesPage> {
   bool _loading = true;
-  final List<_MockDemande> _demandes = [];
+  List<DemandeResponsableResponse> _demandes = [];
 
   @override
   void initState() {
@@ -23,40 +24,45 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _demandes.addAll([
-        _MockDemande(
-          id: '1',
-          structureType: 'CINEMA',
-          structureName: 'Cinéma Le Central',
-          structureCity: 'Lyon',
-          demandeurEmail: 'contact@lecentral.fr',
-          createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        ),
-        _MockDemande(
-          id: '2',
-          structureType: 'VENUE',
-          structureName: 'Salle des Fêtes',
-          structureCity: 'Paris',
-          demandeurEmail: 'salle@fetes.fr',
-          createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        ),
-      ]);
-      _loading = false;
-    });
+    try {
+      final list = await client.cinePass.getDemandesEnAttente();
+      if (!mounted) return;
+      setState(() {
+        _demandes = list;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _demandes = [];
+        _loading = false;
+      });
+    }
   }
 
-  void _approuver(String id) {
-    // TODO: appeler backend approuverDemande(session, id)
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Demande $id approuvée (mock).'),
-        backgroundColor: AppTheme.accentGreen,
-      ),
-    );
-    setState(() => _demandes.removeWhere((d) => d.id == id));
+  Future<void> _approuver(String id) async {
+    try {
+      final ok = await client.cinePass.approuverDemande(id);
+      if (!mounted) return;
+      if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Demande approuvée.'),
+            backgroundColor: AppTheme.accentGreen,
+          ),
+        );
+        setState(() => _demandes.removeWhere((d) => d.id == id));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Échec de l\'approbation.')),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erreur réseau.')),
+      );
+    }
   }
 
   void _rejeter(String id) {
@@ -81,16 +87,29 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
               child: const Text('Annuler'),
             ),
             FilledButton(
-              onPressed: () {
-                // TODO: appeler backend rejeterDemande(session, id, controller.text)
+              onPressed: () async {
+                final reason = controller.text.trim().isEmpty
+                    ? 'Non précisé'
+                    : controller.text.trim();
                 Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Demande rejetée (mock).'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-                setState(() => _demandes.removeWhere((d) => d.id == id));
+                try {
+                  final ok = await client.cinePass.rejeterDemande(id, reason);
+                  if (!mounted) return;
+                  if (ok) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Demande rejetée.'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                    setState(() => _demandes.removeWhere((d) => d.id == id));
+                  }
+                } catch (_) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Erreur réseau.')),
+                  );
+                }
               },
               style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
               child: const Text('Rejeter'),
@@ -190,13 +209,14 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
                               fontSize: 13,
                             ),
                           ),
-                          Text(
-                            d.demandeurEmail,
-                            style: TextStyle(
-                              color: AppTheme.textSecondary,
-                              fontSize: 12,
+                          if ((d.userName ?? '').isNotEmpty)
+                            Text(
+                              d.userName!,
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       trailing: Row(
@@ -238,22 +258,4 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
         return type;
     }
   }
-}
-
-class _MockDemande {
-  final String id;
-  final String structureType;
-  final String structureName;
-  final String structureCity;
-  final String demandeurEmail;
-  final DateTime createdAt;
-
-  _MockDemande({
-    required this.id,
-    required this.structureType,
-    required this.structureName,
-    required this.structureCity,
-    required this.demandeurEmail,
-    required this.createdAt,
-  });
 }

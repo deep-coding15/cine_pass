@@ -22,6 +22,12 @@ cinePass:
   - getEventCategories:
   - createFilm:
   - createEvent:
+  - getStructures:
+  - getStructureById:
+  - updateEvent:
+  - deleteEvent:
+  - getMyStructure:
+  - getMyEvents:
   - createSeance:
 greeting:
   - hello:

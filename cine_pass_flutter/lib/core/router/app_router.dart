@@ -2,7 +2,6 @@ import 'package:go_router/go_router.dart';
 
 import '../widgets/main_scaffold.dart';
 import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/films/presentation/pages/films_list_page.dart';
 import '../../features/films/presentation/pages/film_detail_page.dart';
 import '../../features/reservation/presentation/pages/seat_selection_page.dart';
 import '../../features/reservation/presentation/pages/ticket_type_page.dart';
@@ -14,9 +13,10 @@ import '../../features/billets/presentation/pages/billets_page.dart';
 import '../../features/profil/presentation/pages/profil_page.dart';
 import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
-import '../../features/admin/presentation/pages/admin_films_page.dart';
-import '../../features/admin/presentation/pages/admin_seances_page.dart';
 import '../../features/admin/presentation/pages/admin_events_page.dart';
+import '../../features/admin/presentation/pages/admin_event_detail_page.dart';
+import '../../features/admin/presentation/pages/admin_structures_page.dart';
+import '../../features/admin/presentation/pages/admin_structure_detail_page.dart';
 import '../../features/admin/presentation/pages/admin_users_page.dart';
 import '../../features/admin/presentation/pages/admin_stats_report_page.dart';
 import '../../features/admin/presentation/pages/admin_reservations_page.dart';
@@ -32,9 +32,9 @@ import '../../features/responsable/presentation/widgets/responsable_scaffold.dar
 import '../../features/responsable/presentation/pages/responsable_dashboard_page.dart';
 import '../../features/responsable/presentation/pages/responsable_structures_page.dart';
 import '../../features/responsable/presentation/pages/responsable_events_page.dart';
+import '../../features/responsable/presentation/pages/responsable_event_detail_page.dart';
 import '../../features/responsable/presentation/pages/responsable_reservations_page.dart';
 import '../../features/responsable/presentation/pages/responsable_rapports_page.dart';
-import '../../features/responsable/presentation/pages/responsable_reclamations_page.dart';
 
 class AppRouter {
   static const String home = '/';
@@ -61,7 +61,6 @@ class AppRouter {
   static const String responsableEvents = '/responsable/events';
   static const String responsableReservations = '/responsable/reservations';
   static const String responsableRapports = '/responsable/rapports';
-  static const String responsableReclamations = '/responsable/reclamations';
 
   static String filmDetailPath(String id) => '/films/$id';
   static String eventDetailPath(String id) => '/events/$id';
@@ -76,10 +75,11 @@ class AppRouter {
             path: home,
             pageBuilder: (_, _) => const NoTransitionPage(child: HomePage()),
           ),
+          // Une seule page de recherche (films + événements)
           GoRoute(
             path: films,
             pageBuilder: (_, _) =>
-                const NoTransitionPage(child: FilmsListPage()),
+                const NoTransitionPage(child: EventsListPage()),
           ),
           GoRoute(
             path: '/films/:id',
@@ -172,18 +172,37 @@ class AppRouter {
           ),
           GoRoute(
             path: '/admin/films',
+            redirect: (_, __) => '/admin/events',
+          ),
+          GoRoute(
+            path: '/admin/structures',
             pageBuilder: (_, _) =>
-                const NoTransitionPage(child: AdminFilmsPage()),
+                const NoTransitionPage(child: AdminStructuresPage()),
           ),
           GoRoute(
             path: '/admin/seances',
-            pageBuilder: (_, _) =>
-                const NoTransitionPage(child: AdminSeancesPage()),
+            redirect: (_, __) => '/admin/events',
           ),
           GoRoute(
             path: '/admin/events',
             pageBuilder: (_, _) =>
                 const NoTransitionPage(child: AdminEventsPage()),
+          ),
+          GoRoute(
+            path: '/admin/events/:id',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return NoTransitionPage(
+                  child: AdminEventDetailPage(eventId: id));
+            },
+          ),
+          GoRoute(
+            path: '/admin/structures/:id',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return NoTransitionPage(
+                  child: AdminStructureDetailPage(structureId: id));
+            },
           ),
           GoRoute(
             path: '/admin/users',
@@ -227,6 +246,14 @@ class AppRouter {
                 child: ResponsableEventsPage()),
           ),
           GoRoute(
+            path: '/responsable/events/:id',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return NoTransitionPage(
+                  child: ResponsableEventDetailPage(eventId: id));
+            },
+          ),
+          GoRoute(
             path: '/responsable/reservations',
             pageBuilder: (_, _) => const NoTransitionPage(
                 child: ResponsableReservationsPage()),
@@ -235,11 +262,6 @@ class AppRouter {
             path: '/responsable/rapports',
             pageBuilder: (_, _) => const NoTransitionPage(
                 child: ResponsableRapportsPage()),
-          ),
-          GoRoute(
-            path: '/responsable/reclamations',
-            pageBuilder: (_, _) => const NoTransitionPage(
-                child: ResponsableReclamationsPage()),
           ),
         ],
       ),

@@ -1,9 +1,10 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 
 /// Réservations liées aux structures du responsable.
-/// Actions : Voir détails, Exporter (PDF à venir).
-/// TODO: brancher sur getReservationsForMyStructures(session).
 class ResponsableReservationsPage extends StatefulWidget {
   const ResponsableReservationsPage({super.key});
 
@@ -15,7 +16,7 @@ class ResponsableReservationsPage extends StatefulWidget {
 class _ResponsableReservationsPageState extends State<ResponsableReservationsPage> {
   bool _loading = true;
   String _filterStatut = 'Toutes';
-  final List<_MockResa> _reservations = [];
+  List<ReservationResponse> _reservations = [];
 
   @override
   void initState() {
@@ -25,36 +26,23 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _reservations.addAll([
-        _MockResa(
-          id: '1',
-          numero: 'RES-2026-001',
-          eventTitle: 'Concert Jazz',
-          clientEmail: 'client@email.com',
-          total: 45.0,
-          date: '10/03/2026',
-          statut: 'confirmée',
-          nbBillets: 2,
-        ),
-        _MockResa(
-          id: '2',
-          numero: 'RES-2026-002',
-          eventTitle: 'Théâtre',
-          clientEmail: 'autre@email.com',
-          total: 32.0,
-          date: '11/03/2026',
-          statut: 'en_attente',
-          nbBillets: 1,
-        ),
-      ]);
-      _loading = false;
-    });
+    try {
+      final list = await client.cinePass.getReservationsForMyStructures();
+      if (!mounted) return;
+      setState(() {
+        _reservations = list;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _reservations = [];
+        _loading = false;
+      });
+    }
   }
 
-  void _showDetail(_MockResa r) {
+  void _showDetail(ReservationResponse r) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppTheme.cardDark,
@@ -85,9 +73,9 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      r.statut == 'confirmée'
+                      r.statut == 'confirmed' || r.statut == 'confirmée'
                           ? 'Confirmée'
-                          : r.statut == 'en_attente'
+                          : r.statut == 'pending' || r.statut == 'en_attente'
                               ? 'En attente'
                               : r.statut,
                       style: const TextStyle(
@@ -107,11 +95,10 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
               ),
               const SizedBox(height: 16),
               _DetailRow(label: 'N° réservation', value: r.numero, highlight: true),
-              _DetailRow(label: 'Événement', value: r.eventTitle),
-              _DetailRow(label: 'Client', value: r.clientEmail),
-              _DetailRow(label: 'Date', value: r.date),
+              _DetailRow(label: 'Événement', value: r.eventTitle ?? '—'),
+              _DetailRow(label: 'Date', value: r.createdAtStr),
               _DetailRow(label: 'Billets', value: '${r.nbBillets}'),
-              _DetailRow(label: 'Total', value: '${r.total.toStringAsFixed(2)} €'),
+              _DetailRow(label: 'Total', value: '${r.totalAmount.toStringAsFixed(2)} €'),
               _DetailRow(label: 'Statut', value: r.statut),
               const SizedBox(height: 24),
               Row(
@@ -273,7 +260,7 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${r.eventTitle}\n${r.clientEmail} • ${r.total.toStringAsFixed(2)} € • ${r.date}',
+                                  '${r.eventTitle ?? '—'}\n${r.totalAmount.toStringAsFixed(2)} € • ${r.createdAtStr}',
                                   style: TextStyle(
                                     color: AppTheme.textSecondary,
                                     fontSize: 13,
@@ -351,24 +338,3 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-class _MockResa {
-  final String id;
-  final String numero;
-  final String eventTitle;
-  final String clientEmail;
-  final double total;
-  final String date;
-  final String statut;
-  final int nbBillets;
-
-  _MockResa({
-    required this.id,
-    required this.numero,
-    required this.eventTitle,
-    required this.clientEmail,
-    required this.total,
-    required this.date,
-    this.statut = 'confirmée',
-    this.nbBillets = 1,
-  });
-}

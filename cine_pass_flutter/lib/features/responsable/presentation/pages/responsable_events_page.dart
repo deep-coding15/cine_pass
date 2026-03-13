@@ -1,10 +1,12 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 import '../widgets/responsable_add_event_dialog.dart';
 
 /// Événements créés par le responsable pour ses structures.
-/// TODO: brancher sur getMyEvents(session), createEvent, updateEvent, deleteEvent.
 class ResponsableEventsPage extends StatefulWidget {
   const ResponsableEventsPage({super.key});
 
@@ -14,9 +16,9 @@ class ResponsableEventsPage extends StatefulWidget {
 
 class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
   bool _loading = true;
-  final List<_MockEvent> _events = [];
+  List<EventResponse> _events = [];
   /// Structures pour le dropdown "Créer un événement" (même source que Mes structures, mock pour l’instant).
-  final List<ResponsableStructureItem> _structuresForDialog = [];
+  List<ResponsableStructureItem> _structuresForDialog = [];
 
   @override
   void initState() {
@@ -26,24 +28,25 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _events.clear();
-      _events.addAll([
-        _MockEvent(
-          id: '1',
-          title: 'Concert Jazz',
-          category: 'Concert',
-          structureName: 'Cinéma Le Central',
-          date: '15/04/2026',
-          placesTotal: 200,
-        ),
-      ]);
-      _structuresForDialog.clear();
-      _structuresForDialog.add(const ResponsableStructureItem(id: '1', name: 'Cinéma Le Central'));
-      _loading = false;
-    });
+    try {
+      final events = await client.cinePass.getMyEvents();
+      final myStructure = await client.cinePass.getMyStructure();
+      if (!mounted) return;
+      setState(() {
+        _events = events;
+        _structuresForDialog = myStructure != null
+            ? [ResponsableStructureItem(id: myStructure.id.toString(), name: myStructure.name)]
+            : [];
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _events = [];
+        _structuresForDialog = [];
+        _loading = false;
+      });
+    }
   }
 
   void _openCreateEventDialog() {
@@ -141,6 +144,7 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
                   color: AppTheme.cardDark,
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
+                    onTap: () => context.go('/responsable/events/${e.id}'),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
@@ -165,7 +169,7 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
                       ),
                     ),
                     subtitle: Text(
-                      '${e.category} • ${e.structureName}\n${e.date} • ${e.placesTotal} places',
+                      '${e.category} • ${e.location}\n${e.date} ${e.time} • ${e.placesTotal} places',
                       style: TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 13,
@@ -192,22 +196,4 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
       ),
     );
   }
-}
-
-class _MockEvent {
-  final String id;
-  final String title;
-  final String category;
-  final String structureName;
-  final String date;
-  final int placesTotal;
-
-  _MockEvent({
-    required this.id,
-    required this.title,
-    required this.category,
-    required this.structureName,
-    required this.date,
-    required this.placesTotal,
-  });
 }

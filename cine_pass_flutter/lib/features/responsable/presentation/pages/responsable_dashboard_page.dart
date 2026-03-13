@@ -358,21 +358,6 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _DashboardCard(
-                  icon: Icons.report_problem_outlined,
-                  title: 'Réclamations',
-                  subtitle: 'Suivi des réclamations',
-                  onTap: () => context.go(AppRouter.responsableReclamations),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(child: Container()),
-            ],
-          ),
         ],
       ),
     );

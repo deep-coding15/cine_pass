@@ -85,12 +85,6 @@ class ResponsableScaffold extends StatelessWidget {
                     isActive: _isActive(context, '/responsable/rapports'),
                     onTap: () => context.go(AppRouter.responsableRapports),
                   ),
-                  _ResponsableNavTile(
-                    icon: Icons.report_problem_outlined,
-                    label: 'Réclamations',
-                    isActive: _isActive(context, '/responsable/reclamations'),
-                    onTap: () => context.go(AppRouter.responsableReclamations),
-                  ),
                   const Spacer(),
                   const Divider(color: AppTheme.textSecondary, height: 1),
                   ListTile(
@@ -102,7 +96,12 @@ class ResponsableScaffold extends StatelessWidget {
                       'Retour à l\'app',
                       style: TextStyle(color: AppTheme.textSecondary),
                     ),
-                    onTap: () => context.go(AppRouter.home),
+                    onTap: () {
+                      final router = GoRouter.of(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        router.go(AppRouter.home);
+                      });
+                    },
                   ),
                 ],
               ),

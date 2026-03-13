@@ -1,5 +1,6 @@
 import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
@@ -104,6 +105,7 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
                 dataTextStyle: const TextStyle(color: AppTheme.textPrimary),
                 columns: const [
                   DataColumn(label: Text('Événement')),
+                  DataColumn(label: Text('Structure / Lieu')),
                   DataColumn(label: Text('Catégorie')),
                   DataColumn(label: Text('Ville')),
                   DataColumn(label: Text('Date/Heure')),
@@ -111,7 +113,7 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
                   DataColumn(label: Text('Places')),
                   DataColumn(label: Text('Actions')),
                 ],
-                rows: _events.map((e) => _buildRow(e)).toList(),
+                rows: _events.map((e) => _buildRow(context, e)).toList(),
               ),
             ),
           ),
@@ -120,9 +122,10 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
     );
   }
 
-  DataRow _buildRow(EventResponse e) {
+  DataRow _buildRow(BuildContext context, EventResponse e) {
     final sold = e.placesTotal - e.placesLeft;
     return DataRow(
+      onSelectChanged: (_) => context.go('/admin/events/${e.id}'),
       cells: [
         DataCell(
           Row(
@@ -163,6 +166,7 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
             ],
           ),
         ),
+        DataCell(Text(e.location)),
         DataCell(
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

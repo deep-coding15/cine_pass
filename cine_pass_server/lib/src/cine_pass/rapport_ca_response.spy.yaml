@@ -1,0 +1,4 @@
+class: RapportCAResponse
+fields:
+  totalCA: double
+  nbReservations: int
