@@ -69,7 +69,11 @@ class _EventsListPageState extends State<EventsListPage> {
       final genres = results[3] as List<String>;
       final categories = results[4] as List<String>;
 
-      final typeOpts = ['Tous', 'Film', ...categories.where((c) => c != 'Toutes')];
+      final typeOpts = [
+        'Tous',
+        'Film',
+        ...categories.where((c) => c != 'Toutes'),
+      ];
 
       setState(() {
         _films = films;
@@ -104,9 +108,13 @@ class _EventsListPageState extends State<EventsListPage> {
         films = films.where((f) => f.genre == _selectedGenre).toList();
       }
       if (query.isNotEmpty) {
-        films = films.where((f) =>
-            f.title.toLowerCase().contains(query) ||
-            (f.genre.toLowerCase().contains(query))).toList();
+        films = films
+            .where(
+              (f) =>
+                  f.title.toLowerCase().contains(query) ||
+                  (f.genre.toLowerCase().contains(query)),
+            )
+            .toList();
       }
     } else if (_selectedType == 'Tous') {
       if (_selectedGenre != 'Tous') {
@@ -119,14 +127,22 @@ class _EventsListPageState extends State<EventsListPage> {
         events = events.where((e) => e.city == _selectedCity).toList();
       }
       if (query.isNotEmpty) {
-        films = films.where((f) =>
-            f.title.toLowerCase().contains(query) ||
-            f.genre.toLowerCase().contains(query)).toList();
-        events = events.where((e) =>
-            e.title.toLowerCase().contains(query) ||
-            e.category.toLowerCase().contains(query) ||
-            e.location.toLowerCase().contains(query) ||
-            e.city.toLowerCase().contains(query)).toList();
+        films = films
+            .where(
+              (f) =>
+                  f.title.toLowerCase().contains(query) ||
+                  f.genre.toLowerCase().contains(query),
+            )
+            .toList();
+        events = events
+            .where(
+              (e) =>
+                  e.title.toLowerCase().contains(query) ||
+                  e.category.toLowerCase().contains(query) ||
+                  e.location.toLowerCase().contains(query) ||
+                  e.city.toLowerCase().contains(query),
+            )
+            .toList();
       }
     } else {
       films = [];
@@ -135,10 +151,14 @@ class _EventsListPageState extends State<EventsListPage> {
         events = events.where((e) => e.city == _selectedCity).toList();
       }
       if (query.isNotEmpty) {
-        events = events.where((e) =>
-            e.title.toLowerCase().contains(query) ||
-            e.location.toLowerCase().contains(query) ||
-            e.city.toLowerCase().contains(query)).toList();
+        events = events
+            .where(
+              (e) =>
+                  e.title.toLowerCase().contains(query) ||
+                  e.location.toLowerCase().contains(query) ||
+                  e.city.toLowerCase().contains(query),
+            )
+            .toList();
       }
     }
 
@@ -195,8 +215,8 @@ class _EventsListPageState extends State<EventsListPage> {
           Text(
             'À l\'affiche',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -217,8 +237,8 @@ class _EventsListPageState extends State<EventsListPage> {
                   Text(
                     'Rechercher avec filtres',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -230,8 +250,13 @@ class _EventsListPageState extends State<EventsListPage> {
                           onChanged: (_) => _applyFilters(),
                           decoration: InputDecoration(
                             hintText: 'Titre, lieu...',
-                            hintStyle: const TextStyle(color: AppTheme.textSecondary),
-                            prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary),
+                            hintStyle: const TextStyle(
+                              color: AppTheme.textSecondary,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: AppTheme.textSecondary,
+                            ),
                             filled: true,
                             fillColor: AppTheme.surfaceDark,
                             border: OutlineInputBorder(
@@ -334,7 +359,9 @@ class _EventsListPageState extends State<EventsListPage> {
           else
             LayoutBuilder(
               builder: (context, constraints) {
-                final crossCount = constraints.maxWidth > 800 ? 4 : (constraints.maxWidth > 500 ? 3 : 2);
+                final crossCount = constraints.maxWidth > 800
+                    ? 4
+                    : (constraints.maxWidth > 500 ? 3 : 2);
                 final list = <Widget>[
                   ..._filteredFilms.map(
                     (film) => Column(
@@ -343,10 +370,17 @@ class _EventsListPageState extends State<EventsListPage> {
                       children: [
                         Chip(
                           label: const Text('Film'),
-                          backgroundColor: AppTheme.primaryRed.withValues(alpha: 0.3),
-                          labelStyle: const TextStyle(color: AppTheme.primaryRed, fontSize: 11, fontWeight: FontWeight.w600),
+                          backgroundColor: AppTheme.primaryRed.withValues(
+                            alpha: 0.3,
+                          ),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.primaryRed,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                           padding: EdgeInsets.zero,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                         ),
                         const SizedBox(height: 6),
                         FilmCard(film: film),
@@ -360,10 +394,17 @@ class _EventsListPageState extends State<EventsListPage> {
                       children: [
                         Chip(
                           label: Text(event.category),
-                          backgroundColor: AppTheme.accentGreen.withValues(alpha: 0.3),
-                          labelStyle: const TextStyle(color: AppTheme.accentGreen, fontSize: 11, fontWeight: FontWeight.w600),
+                          backgroundColor: AppTheme.accentGreen.withValues(
+                            alpha: 0.3,
+                          ),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.accentGreen,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                           padding: EdgeInsets.zero,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                         ),
                         const SizedBox(height: 6),
                         EventCard(event: event),

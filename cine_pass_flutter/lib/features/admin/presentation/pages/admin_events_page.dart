@@ -44,7 +44,9 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryRed),
+      );
     }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),

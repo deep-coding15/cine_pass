@@ -38,15 +38,16 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
         curve: const Interval(0, 0.4, curve: Curves.easeOut),
       ),
     );
-    _titleSlide = Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0, 0.4, curve: Curves.easeOutCubic),
-      ),
-    );
+    _titleSlide =
+        Tween<Offset>(
+          begin: const Offset(0, 0.15),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0, 0.4, curve: Curves.easeOutCubic),
+          ),
+        );
     _subtitleFade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _animController,
@@ -181,19 +182,19 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
                               height: 1.2,
                             ),
                             children: [
-                              const TextSpan(
-                                  text: 'Réservez l\'expérience. '),
+                              const TextSpan(text: 'Réservez l\'expérience. '),
                               TextSpan(
                                 text: 'Pas seulement le billet.',
                                 style: TextStyle(
-                                  color: AppTheme.accentGreen
-                                      .withValues(alpha: _glowPulse.value),
+                                  color: AppTheme.accentGreen.withValues(
+                                    alpha: _glowPulse.value,
+                                  ),
                                   fontWeight: FontWeight.bold,
                                   shadows: [
                                     Shadow(
-                                      color: AppTheme.accentGreen
-                                          .withValues(
-                                              alpha: 0.3 * _glowPulse.value),
+                                      color: AppTheme.accentGreen.withValues(
+                                        alpha: 0.3 * _glowPulse.value,
+                                      ),
                                       blurRadius: 12,
                                     ),
                                   ],
@@ -242,4 +243,3 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
     );
   }
 }
-

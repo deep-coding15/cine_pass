@@ -114,14 +114,14 @@ class _AdminStructuresPageState extends State<AdminStructuresPage> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _structures.length,
-              separatorBuilder: (context, index) =>
-                  const SizedBox(height: 12),
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final s = _structures[index];
                 return Card(
                   color: AppTheme.cardDark,
                   child: InkWell(
-                    onTap: () => context.go('/admin/structures/${s.id.toString()}'),
+                    onTap: () =>
+                        context.go('/admin/structures/${s.id.toString()}'),
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
@@ -162,8 +162,9 @@ class _AdminStructuresPageState extends State<AdminStructuresPage> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.primaryRed
-                                            .withValues(alpha: 0.2),
+                                        color: AppTheme.primaryRed.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -184,7 +185,8 @@ class _AdminStructuresPageState extends State<AdminStructuresPage> {
                                     ),
                                   ],
                                 ),
-                                if (s.address != null && s.address!.isNotEmpty) ...[
+                                if (s.address != null &&
+                                    s.address!.isNotEmpty) ...[
                                   const SizedBox(height: 4),
                                   Text(
                                     s.address!,

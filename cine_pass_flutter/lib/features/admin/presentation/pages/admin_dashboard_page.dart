@@ -115,8 +115,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 children: [
                   Text(
                     'Événements à l\'affiche',
-                    style: Theme.of(context).textTheme.titleLarge
-                        ?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -138,7 +139,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                   ),
                                 ),
                               ),
-                            ..._films.take(2).map(
+                            ..._films
+                                .take(2)
+                                .map(
                                   (f) => Padding(
                                     padding: const EdgeInsets.only(bottom: 12),
                                     child: Row(
@@ -148,9 +151,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                           height: 64,
                                           decoration: BoxDecoration(
                                             color: Color(
-                                                f.posterColor ?? 0xFF2D1B4E),
-                                            borderRadius:
-                                                BorderRadius.circular(6),
+                                              f.posterColor ?? 0xFF2D1B4E,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.movie_rounded,
@@ -203,7 +208,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                   ),
                                 ),
                               ),
-                            ..._events.take(2).map(
+                            ..._events
+                                .take(2)
+                                .map(
                                   (e) => Padding(
                                     padding: const EdgeInsets.only(bottom: 12),
                                     child: Row(
@@ -213,9 +220,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                           height: 64,
                                           decoration: BoxDecoration(
                                             color: Color(
-                                                e.posterColor ?? 0xFF4E1B3D),
-                                            borderRadius:
-                                                BorderRadius.circular(6),
+                                              e.posterColor ?? 0xFF4E1B3D,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.event_rounded,

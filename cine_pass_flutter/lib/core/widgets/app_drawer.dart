@@ -23,7 +23,8 @@ class AppDrawer extends StatelessWidget {
     bool isActive(String path) {
       if (path == AppRouter.home) return location == '/' || location.isEmpty;
       if (path == AppRouter.admin) return location.startsWith('/admin');
-      if (path == AppRouter.responsable) return location.startsWith('/responsable');
+      if (path == AppRouter.responsable)
+        return location.startsWith('/responsable');
       return location == path;
     }
 

@@ -261,42 +261,98 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                             Expanded(
                               child: FilledButton(
                                 onPressed: () async {
-                                  if (_formKey.currentState?.validate() != true || _date == null) {
+                                  if (_formKey.currentState?.validate() !=
+                                          true ||
+                                      _date == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Remplissez tous les champs requis'), backgroundColor: AppTheme.primaryRed),
+                                      const SnackBar(
+                                        content: Text(
+                                          'Remplissez tous les champs requis',
+                                        ),
+                                        backgroundColor: AppTheme.primaryRed,
+                                      ),
                                     );
                                     return;
                                   }
                                   try {
-                                    final created = await client.cinePass.createEvent(
-                                      titre: _titleController.text.trim(),
-                                      categorie: _categoryController.text.trim(),
-                                      description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-                                      lieu: _venueNameController.text.trim().isEmpty ? 'Lieu' : _venueNameController.text.trim(),
-                                      adresse: _addressController.text.trim().isEmpty ? null : _addressController.text.trim(),
-                                      ville: _cityController.text.trim(),
-                                      eventDate: _date!,
-                                      eventTimeStr: _timeController.text.trim().isEmpty ? '20:00' : _timeController.text.trim(),
-                                      placesTotal: int.tryParse(_placesController.text.trim()) ?? 300,
-                                      prixBase: double.tryParse(_priceController.text.trim().replaceAll(',', '.')) ?? 35.0,
-                                      posterColor: null,
-                                    );
+                                    final created = await client.cinePass
+                                        .createEvent(
+                                          titre: _titleController.text.trim(),
+                                          categorie: _categoryController.text
+                                              .trim(),
+                                          description:
+                                              _descriptionController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _descriptionController.text
+                                                    .trim(),
+                                          lieu:
+                                              _venueNameController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? 'Lieu'
+                                              : _venueNameController.text
+                                                    .trim(),
+                                          adresse:
+                                              _addressController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _addressController.text.trim(),
+                                          ville: _cityController.text.trim(),
+                                          eventDate: _date!,
+                                          eventTimeStr:
+                                              _timeController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? '20:00'
+                                              : _timeController.text.trim(),
+                                          placesTotal:
+                                              int.tryParse(
+                                                _placesController.text.trim(),
+                                              ) ??
+                                              300,
+                                          prixBase:
+                                              double.tryParse(
+                                                _priceController.text
+                                                    .trim()
+                                                    .replaceAll(',', '.'),
+                                              ) ??
+                                              35.0,
+                                          posterColor: null,
+                                        );
                                     if (!context.mounted) return;
                                     if (created != null) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Événement enregistré'), backgroundColor: AppTheme.accentGreen),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Événement enregistré'),
+                                          backgroundColor: AppTheme.accentGreen,
+                                        ),
                                       );
                                       widget.onSaved?.call();
                                       Navigator.of(context).pop();
                                     } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Erreur lors de l\'enregistrement'), backgroundColor: AppTheme.primaryRed),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Erreur lors de l\'enregistrement',
+                                          ),
+                                          backgroundColor: AppTheme.primaryRed,
+                                        ),
                                       );
                                     }
                                   } catch (e) {
                                     if (!context.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.primaryRed),
+                                      SnackBar(
+                                        content: Text('Erreur: $e'),
+                                        backgroundColor: AppTheme.primaryRed,
+                                      ),
                                     );
                                   }
                                 },

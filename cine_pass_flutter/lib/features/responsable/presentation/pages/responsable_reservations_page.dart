@@ -13,7 +13,8 @@ class ResponsableReservationsPage extends StatefulWidget {
       _ResponsableReservationsPageState();
 }
 
-class _ResponsableReservationsPageState extends State<ResponsableReservationsPage> {
+class _ResponsableReservationsPageState
+    extends State<ResponsableReservationsPage> {
   bool _loading = true;
   List<ReservationResponse> _reservations = [];
 
@@ -60,13 +61,15 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
                   Text(
                     'Détail réservation',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const Spacer(),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.accentGreen.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
@@ -75,8 +78,8 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
                       r.statut == 'confirmed' || r.statut == 'confirmée'
                           ? 'Confirmée'
                           : r.statut == 'pending' || r.statut == 'en_attente'
-                              ? 'En attente'
-                              : r.statut,
+                          ? 'En attente'
+                          : r.statut,
                       style: const TextStyle(
                         color: AppTheme.accentGreen,
                         fontSize: 12,
@@ -93,11 +96,18 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
                 ],
               ),
               const SizedBox(height: 16),
-              _DetailRow(label: 'N° réservation', value: r.numero, highlight: true),
+              _DetailRow(
+                label: 'N° réservation',
+                value: r.numero,
+                highlight: true,
+              ),
               _DetailRow(label: 'Événement', value: r.eventTitle ?? '—'),
               _DetailRow(label: 'Date', value: r.createdAtStr),
               _DetailRow(label: 'Billets', value: '${r.nbBillets}'),
-              _DetailRow(label: 'Total', value: '${r.totalAmount.toStringAsFixed(2)} €'),
+              _DetailRow(
+                label: 'Total',
+                value: '${r.totalAmount.toStringAsFixed(2)} €',
+              ),
               _DetailRow(label: 'Statut', value: r.statut),
               const SizedBox(height: 24),
               Row(
@@ -183,8 +193,8 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
           Text(
             'Réservations',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -270,7 +280,10 @@ class _ResponsableReservationsPageState extends State<ResponsableReservationsPag
                           ),
                           TextButton.icon(
                             onPressed: () => _showDetail(r),
-                            icon: const Icon(Icons.visibility_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.visibility_rounded,
+                              size: 18,
+                            ),
                             label: const Text('Voir détails'),
                             style: TextButton.styleFrom(
                               foregroundColor: AppTheme.accentGreen,
@@ -336,4 +349,3 @@ class _DetailRow extends StatelessWidget {
     );
   }
 }
-

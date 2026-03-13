@@ -65,8 +65,8 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
           Text(
             'Ma structure',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -186,8 +186,8 @@ class _MaStructureCard extends StatelessWidget {
             Text(
               'À propos de ma structure',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.textPrimary,
-                  ),
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -272,4 +272,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-

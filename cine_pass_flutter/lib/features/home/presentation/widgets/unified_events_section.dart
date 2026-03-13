@@ -66,8 +66,8 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
               Text(
                 'À l\'affiche',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
+                  color: AppTheme.textPrimary,
+                ),
               ),
               TextButton.icon(
                 onPressed: () => context.go(AppRouter.events),
@@ -120,14 +120,17 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
                         children: [
                           Chip(
                             label: const Text('Film'),
-                            backgroundColor: AppTheme.primaryRed.withValues(alpha: 0.3),
+                            backgroundColor: AppTheme.primaryRed.withValues(
+                              alpha: 0.3,
+                            ),
                             labelStyle: const TextStyle(
                               color: AppTheme.primaryRed,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
                             padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                           ),
                           const SizedBox(height: 6),
                           SizedBox(height: 265, child: FilmCard(film: film)),
@@ -147,14 +150,17 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
                         children: [
                           Chip(
                             label: Text(event.category),
-                            backgroundColor: AppTheme.accentGreen.withValues(alpha: 0.3),
+                            backgroundColor: AppTheme.accentGreen.withValues(
+                              alpha: 0.3,
+                            ),
                             labelStyle: const TextStyle(
                               color: AppTheme.accentGreen,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
                             padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                           ),
                           const SizedBox(height: 6),
                           SizedBox(height: 265, child: EventCard(event: event)),

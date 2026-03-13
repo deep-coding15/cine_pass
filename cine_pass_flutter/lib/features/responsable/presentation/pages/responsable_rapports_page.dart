@@ -7,7 +7,8 @@ class ResponsableRapportsPage extends StatefulWidget {
   const ResponsableRapportsPage({super.key});
 
   @override
-  State<ResponsableRapportsPage> createState() => _ResponsableRapportsPageState();
+  State<ResponsableRapportsPage> createState() =>
+      _ResponsableRapportsPageState();
 }
 
 class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
@@ -24,8 +25,8 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
           Text(
             'Rapports',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -46,8 +47,8 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
                   Text(
                     'Période',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -89,8 +90,8 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
           Text(
             'Exporter',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 12),
           _ReportActionTile(
@@ -132,8 +133,8 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
                       Text(
                         'Rapports disponibles',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: AppTheme.textPrimary,
-                            ),
+                          color: AppTheme.textPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -234,7 +235,10 @@ class _ReportActionTile extends StatelessWidget {
             fontSize: 13,
           ),
         ),
-        trailing: const Icon(Icons.download_rounded, color: AppTheme.accentGreen),
+        trailing: const Icon(
+          Icons.download_rounded,
+          color: AppTheme.accentGreen,
+        ),
         onTap: onTap,
       ),
     );

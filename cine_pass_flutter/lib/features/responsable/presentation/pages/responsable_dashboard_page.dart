@@ -70,8 +70,8 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
           Text(
             'Tableau de bord',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -137,8 +137,8 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
           Text(
             'Chiffre d\'affaires par mois',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -197,9 +197,11 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
                         ),
                       ),
                       topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false)),
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                       rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false)),
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                     ),
                     gridData: FlGridData(
                       show: true,
@@ -223,7 +225,8 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
                                 color: AppTheme.accentGreen,
                                 width: 24,
                                 borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(6)),
+                                  top: Radius.circular(6),
+                                ),
                               ),
                             ],
                             showingTooltipIndicators: [0],
@@ -242,8 +245,8 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
           Text(
             'Réservations et CA par événement',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 16),
           Card(
@@ -292,7 +295,8 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
                             minHeight: 8,
                             backgroundColor: AppTheme.surfaceDark,
                             valueColor: const AlwaysStoppedAnimation<Color>(
-                                AppTheme.primaryRed),
+                              AppTheme.primaryRed,
+                            ),
                           ),
                         ),
                       ],
@@ -308,8 +312,8 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
           Text(
             'Accès rapides',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 12),
           Row(

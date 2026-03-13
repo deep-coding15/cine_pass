@@ -53,13 +53,17 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   center: Alignment(
-                    0.3 + 0.4 * math.sin(_gradientAnimation.value * 2 * math.pi),
-                    0.4 + 0.3 * math.cos(_gradientAnimation.value * 2 * math.pi),
+                    0.3 +
+                        0.4 * math.sin(_gradientAnimation.value * 2 * math.pi),
+                    0.4 +
+                        0.3 * math.cos(_gradientAnimation.value * 2 * math.pi),
                   ),
                   radius: 1.2,
                   colors: [
                     AppTheme.primaryRed.withValues(alpha: widget.opacity),
-                    AppTheme.accentGreen.withValues(alpha: widget.opacity * 0.5),
+                    AppTheme.accentGreen.withValues(
+                      alpha: widget.opacity * 0.5,
+                    ),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 0.5, 1.0],
@@ -95,8 +99,14 @@ class _ParticlesPainter extends CustomPainter {
     const count = 40;
     final rng = math.Random(42);
     for (var i = 0; i < count; i++) {
-      final x = (rng.nextDouble() * size.width + animation.value * 50) % (size.width + 50) - 25;
-      final y = (rng.nextDouble() * size.height + animation.value * 30 * (i % 3)) % (size.height + 30) - 15;
+      final x =
+          (rng.nextDouble() * size.width + animation.value * 50) %
+              (size.width + 50) -
+          25;
+      final y =
+          (rng.nextDouble() * size.height + animation.value * 30 * (i % 3)) %
+              (size.height + 30) -
+          15;
       canvas.drawCircle(Offset(x, y), 1.2, paint);
     }
   }

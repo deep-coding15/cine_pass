@@ -69,7 +69,11 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(height: 16),
             Text(
               'Structure introuvable',
@@ -146,7 +150,9 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryRed.withValues(alpha: 0.2),
+                                color: AppTheme.primaryRed.withValues(
+                                  alpha: 0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -188,13 +194,17 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
                             ],
                             if (s.website != null && s.website!.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              const Divider(color: AppTheme.textSecondary, height: 1),
+                              const Divider(
+                                color: AppTheme.textSecondary,
+                                height: 1,
+                              ),
                               const SizedBox(height: 12),
                               Text(
                                 'Site web',
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: AppTheme.textSecondary,
-                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(
+                                      color: AppTheme.textSecondary,
+                                    ),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -288,7 +298,9 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
                   if (confirm == true && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Fonction supprimer à brancher sur l\'API'),
+                        content: Text(
+                          'Fonction supprimer à brancher sur l\'API',
+                        ),
                         backgroundColor: AppTheme.primaryRed,
                       ),
                     );

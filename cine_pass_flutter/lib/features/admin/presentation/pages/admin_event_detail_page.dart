@@ -55,7 +55,11 @@ class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(height: 16),
             Text(
               'Événement introuvable',

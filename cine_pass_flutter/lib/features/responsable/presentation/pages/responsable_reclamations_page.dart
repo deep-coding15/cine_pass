@@ -12,7 +12,8 @@ class ResponsableReclamationsPage extends StatefulWidget {
       _ResponsableReclamationsPageState();
 }
 
-class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPage> {
+class _ResponsableReclamationsPageState
+    extends State<ResponsableReclamationsPage> {
   bool _loading = true;
   String _filterStatut = 'Toutes';
   final List<_MockRecla> _reclamations = [];
@@ -76,8 +77,8 @@ class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPag
                     Text(
                       'Détail réclamation',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: AppTheme.textPrimary,
-                          ),
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
                     const Spacer(),
                     _StatutChip(statut: r.statut),
@@ -103,7 +104,8 @@ class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPag
                         const SizedBox(height: 12),
                         Text(
                           'Message',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
                                 color: AppTheme.textPrimary,
                               ),
                         ),
@@ -128,7 +130,8 @@ class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPag
                         if (r.statut != 'resolue') ...[
                           Text(
                             'Répondre',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
                                   color: AppTheme.textPrimary,
                                 ),
                           ),
@@ -137,7 +140,9 @@ class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPag
                             maxLines: 3,
                             decoration: InputDecoration(
                               hintText: 'Votre réponse au client...',
-                              hintStyle: TextStyle(color: AppTheme.textSecondary),
+                              hintStyle: TextStyle(
+                                color: AppTheme.textSecondary,
+                              ),
                               filled: true,
                               fillColor: AppTheme.surfaceDark,
                               border: OutlineInputBorder(
@@ -164,14 +169,22 @@ class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPag
                                   Navigator.of(context).pop();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content: Text('Marquer comme résolue — à brancher')),
+                                      content: Text(
+                                        'Marquer comme résolue — à brancher',
+                                      ),
+                                    ),
                                   );
                                 },
-                                icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                                icon: const Icon(
+                                  Icons.check_circle_outline_rounded,
+                                  size: 18,
+                                ),
                                 label: const Text('Marquer résolue'),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppTheme.accentGreen,
-                                  side: const BorderSide(color: AppTheme.accentGreen),
+                                  side: const BorderSide(
+                                    color: AppTheme.accentGreen,
+                                  ),
                                 ),
                               ),
                             ],
@@ -204,8 +217,8 @@ class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPag
           Text(
             'Réclamations',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.textPrimary,
-                ),
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -322,7 +335,9 @@ class _ResponsableReclamationsPageState extends State<ResponsableReclamationsPag
                       vertical: 12,
                     ),
                     leading: CircleAvatar(
-                      backgroundColor: AppTheme.primaryRed.withValues(alpha: 0.2),
+                      backgroundColor: AppTheme.primaryRed.withValues(
+                        alpha: 0.2,
+                      ),
                       child: Icon(
                         Icons.report_problem_outlined,
                         color: AppTheme.primaryRed,

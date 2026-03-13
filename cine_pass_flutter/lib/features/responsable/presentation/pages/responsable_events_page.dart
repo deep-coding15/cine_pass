@@ -17,6 +17,7 @@ class ResponsableEventsPage extends StatefulWidget {
 class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
   bool _loading = true;
   List<EventResponse> _events = [];
+
   /// Structures pour le dropdown "Créer un événement" (même source que Mes structures, mock pour l’instant).
   List<ResponsableStructureItem> _structuresForDialog = [];
 
@@ -35,7 +36,12 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
       setState(() {
         _events = events;
         _structuresForDialog = myStructure != null
-            ? [ResponsableStructureItem(id: myStructure.id.toString(), name: myStructure.name)]
+            ? [
+                ResponsableStructureItem(
+                  id: myStructure.id.toString(),
+                  name: myStructure.name,
+                ),
+              ]
             : [];
         _loading = false;
       });
@@ -72,8 +78,8 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
               Text(
                 'Mes événements',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
+                  color: AppTheme.textPrimary,
+                ),
               ),
               FilledButton.icon(
                 onPressed: _openCreateEventDialog,

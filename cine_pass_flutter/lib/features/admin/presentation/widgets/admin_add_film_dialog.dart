@@ -202,39 +202,81 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                             Expanded(
                               child: FilledButton(
                                 onPressed: () async {
-                                  if (_formKey.currentState?.validate() != true) return;
+                                  if (_formKey.currentState?.validate() != true)
+                                    return;
                                   final title = _titleController.text.trim();
                                   final genre = _genreController.text.trim();
-                                  final durationMinutes = int.tryParse(_durationController.text.trim()) ?? 120;
+                                  final durationMinutes =
+                                      int.tryParse(
+                                        _durationController.text.trim(),
+                                      ) ??
+                                      120;
                                   try {
-                                    final created = await client.cinePass.createFilm(
-                                      title: title,
-                                      genre: genre,
-                                      durationMinutes: durationMinutes,
-                                      synopsis: _synopsisController.text.trim().isEmpty ? null : _synopsisController.text.trim(),
-                                      director: _directorController.text.trim().isEmpty ? null : _directorController.text.trim(),
-                                      casting: _castingController.text.trim().isEmpty ? null : _castingController.text.trim(),
-                                      posterColor: null,
-                                      dateSortie: _startDate,
-                                      dateFin: _endDate,
-                                      audience: _classificationController.text.trim().isEmpty ? null : _classificationController.text.trim(),
-                                    );
+                                    final created = await client.cinePass
+                                        .createFilm(
+                                          title: title,
+                                          genre: genre,
+                                          durationMinutes: durationMinutes,
+                                          synopsis:
+                                              _synopsisController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _synopsisController.text.trim(),
+                                          director:
+                                              _directorController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _directorController.text.trim(),
+                                          casting:
+                                              _castingController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _castingController.text.trim(),
+                                          posterColor: null,
+                                          dateSortie: _startDate,
+                                          dateFin: _endDate,
+                                          audience:
+                                              _classificationController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _classificationController.text
+                                                    .trim(),
+                                        );
                                     if (!context.mounted) return;
                                     if (created != null) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Film enregistré'), backgroundColor: AppTheme.accentGreen),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Film enregistré'),
+                                          backgroundColor: AppTheme.accentGreen,
+                                        ),
                                       );
                                       widget.onSaved?.call();
                                       Navigator.of(context).pop();
                                     } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Erreur lors de l\'enregistrement'), backgroundColor: AppTheme.primaryRed),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Erreur lors de l\'enregistrement',
+                                          ),
+                                          backgroundColor: AppTheme.primaryRed,
+                                        ),
                                       );
                                     }
                                   } catch (e) {
                                     if (!context.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.primaryRed),
+                                      SnackBar(
+                                        content: Text('Erreur: $e'),
+                                        backgroundColor: AppTheme.primaryRed,
+                                      ),
                                     );
                                   }
                                 },

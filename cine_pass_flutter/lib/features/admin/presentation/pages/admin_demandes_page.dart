@@ -111,7 +111,9 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
                   );
                 }
               },
-              style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.primaryRed,
+              ),
               child: const Text('Rejeter'),
             ),
           ],
@@ -131,8 +133,8 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
             Text(
               'Demandes responsable',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.textPrimary,
-                  ),
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(

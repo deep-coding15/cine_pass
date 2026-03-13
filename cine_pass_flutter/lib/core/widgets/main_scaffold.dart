@@ -93,8 +93,11 @@ class _MainScaffoldState extends State<MainScaffold> {
                   value: 'devenir_responsable',
                   child: Row(
                     children: [
-                      Icon(Icons.badge_outlined,
-                          size: 20, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.badge_outlined,
+                        size: 20,
+                        color: AppTheme.textSecondary,
+                      ),
                       SizedBox(width: 12),
                       Text('Devenir responsable'),
                     ],

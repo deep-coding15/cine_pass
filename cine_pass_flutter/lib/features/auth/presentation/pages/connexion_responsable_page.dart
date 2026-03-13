@@ -60,8 +60,8 @@ class _ConnexionResponsablePageState extends State<ConnexionResponsablePage> {
             Text(
               'Espace responsable',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.textPrimary,
-                  ),
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -88,7 +88,8 @@ class _ConnexionResponsablePageState extends State<ConnexionResponsablePage> {
               ),
               style: const TextStyle(color: AppTheme.textPrimary),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Entrez votre email professionnel';
+                if (v == null || v.trim().isEmpty)
+                  return 'Entrez votre email professionnel';
                 if (!v.contains('@')) return 'Email invalide';
                 return null;
               },
