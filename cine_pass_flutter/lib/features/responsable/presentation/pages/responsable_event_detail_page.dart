@@ -430,28 +430,28 @@ class _ResponsableEventDetailPageState
                       ],
                     ),
                   );
-                  if (confirm == true && mounted) {
+                  if (confirm == true && context.mounted) {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final router = GoRouter.of(context);
                     try {
                       final ok = await client.cinePass.deleteEvent(e.id);
-                      if (!mounted) return;
                       if (ok) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        messenger.showSnackBar(
                           const SnackBar(
                             content: Text('Événement supprimé.'),
                             backgroundColor: AppTheme.accentGreen,
                           ),
                         );
-                        context.go('/responsable/events');
+                        router.go('/responsable/events');
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        messenger.showSnackBar(
                           const SnackBar(
                             content: Text('Échec de la suppression.'),
                           ),
                         );
                       }
                     } catch (_) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         const SnackBar(content: Text('Erreur réseau.')),
                       );
                     }

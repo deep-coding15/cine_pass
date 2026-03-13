@@ -310,10 +310,10 @@ class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
                       ],
                     ),
                   );
-                  if (confirm == true && mounted) {
+                  if (confirm == true && context.mounted) {
                     try {
                       final ok = await client.cinePass.deleteEvent(e.id);
-                      if (!mounted) return;
+                      if (!context.mounted) return;
                       if (ok) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -331,14 +331,13 @@ class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
                         );
                       }
                     } catch (_) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Erreur lors de la suppression'),
-                            backgroundColor: AppTheme.primaryRed,
-                          ),
-                        );
-                      }
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Erreur lors de la suppression'),
+                          backgroundColor: AppTheme.primaryRed,
+                        ),
+                      );
                     }
                   }
                 },

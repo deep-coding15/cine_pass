@@ -244,7 +244,7 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
                       ],
                     ),
                   );
-                  if (confirm == true && mounted) {
+                  if (confirm == true && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Fonction bannir à brancher sur l\'API'),
@@ -285,7 +285,7 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
                       ],
                     ),
                   );
-                  if (confirm == true && mounted) {
+                  if (confirm == true && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Fonction supprimer à brancher sur l\'API'),

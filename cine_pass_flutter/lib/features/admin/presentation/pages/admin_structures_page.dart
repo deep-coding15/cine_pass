@@ -114,7 +114,8 @@ class _AdminStructuresPageState extends State<AdminStructuresPage> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _structures.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (context, index) =>
+                  const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final s = _structures[index];
                 return Card(

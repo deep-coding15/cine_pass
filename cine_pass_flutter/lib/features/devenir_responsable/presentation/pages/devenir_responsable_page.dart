@@ -245,7 +245,7 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
               _sectionTitle('Votre structure'),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _selectedStructureType,
+                initialValue: _selectedStructureType,
                 decoration: InputDecoration(
                   labelText: 'Type de structure *',
                   filled: true,

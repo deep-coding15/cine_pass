@@ -255,8 +255,11 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
     final active = _currentStep == step;
     return GestureDetector(
       onTap: () {
-        if (step == 0) setState(() => _currentStep = 0);
-        else if (_formKey.currentState?.validate() == true && _date != null) _goToStepSeances();
+        if (step == 0) {
+          setState(() => _currentStep = 0);
+        } else if (_formKey.currentState?.validate() == true && _date != null) {
+          _goToStepSeances();
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -295,7 +298,7 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
             )
           else
             DropdownButtonFormField<String>(
-              value: _selectedStructureId,
+              initialValue: _selectedStructureId,
               decoration: _decoration('Structure'),
               dropdownColor: AppTheme.cardDark,
               items: widget.structures

@@ -34,15 +34,15 @@ class _ConnexionResponsablePageState extends State<ConnexionResponsablePage> {
   Future<void> _submit() async {
     if (_formKey.currentState?.validate() != true) return;
     setState(() => _isLoading = true);
-    final auth = context.read<AuthState>();
     final email = _emailController.text.trim().toLowerCase();
+    final router = GoRouter.of(context);
+    final auth = context.read<AuthState>();
     // TODO: appeler l'API backend login responsable (email pro + password)
     // Pour l'instant simulation : connexion acceptée
     await Future.delayed(const Duration(milliseconds: 400));
     auth.loginAsResponsable(email: email, name: null);
-    if (!context.mounted) return;
     setState(() => _isLoading = false);
-    context.go(AppRouter.responsable);
+    router.go(AppRouter.responsable);
   }
 
   @override

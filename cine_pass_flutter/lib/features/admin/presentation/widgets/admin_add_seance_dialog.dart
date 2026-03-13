@@ -359,7 +359,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
