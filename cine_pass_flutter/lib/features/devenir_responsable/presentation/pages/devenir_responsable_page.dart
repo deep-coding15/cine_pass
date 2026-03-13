@@ -109,8 +109,8 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
                 Text(
                   'Votre demande a bien été envoyée.',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.textPrimary,
-                      ),
+                    color: AppTheme.textPrimary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
@@ -202,7 +202,9 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                     ),
                     onPressed: () =>
                         setState(() => _obscurePassword = !_obscurePassword),
@@ -235,7 +237,9 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
                   ),
                 ),
                 validator: (v) {
-                  if (v != _passwordController.text) return 'Les mots de passe ne correspondent pas';
+                  if (v != _passwordController.text) {
+                    return 'Les mots de passe ne correspondent pas';
+                  }
                   return null;
                 },
               ),
@@ -245,7 +249,8 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
               _sectionTitle('Votre structure'),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: _selectedStructureType,
+                // ignore: deprecated_member_use
+                value: _selectedStructureType,
                 decoration: InputDecoration(
                   labelText: 'Type de structure *',
                   filled: true,
@@ -258,10 +263,12 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
                 onChanged: (v) =>
                     setState(() => _selectedStructureType = v ?? 'CINEMA'),
                 items: _structureTypes
-                    .map((e) => DropdownMenuItem(
-                          value: e['value'],
-                          child: Text(e['label']!),
-                        ))
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e['value'],
+                        child: Text(e['label']!),
+                      ),
+                    )
                     .toList(),
               ),
               const SizedBox(height: 16),
@@ -381,7 +388,8 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Présentez votre structure et votre projet *',
-                  hintText: 'Décrivez votre activité, votre public, vos objectifs...',
+                  hintText:
+                      'Décrivez votre activité, votre public, vos objectifs...',
                   filled: true,
                   fillColor: AppTheme.cardDark,
                   border: OutlineInputBorder(
@@ -413,7 +421,9 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
               Row(
                 children: [
                   TextButton(
-                    onPressed: _isSubmitting ? null : () => Navigator.of(context).maybePop(),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => Navigator.of(context).maybePop(),
                     child: const Text('Annuler'),
                   ),
                   const SizedBox(width: 16),
@@ -446,9 +456,9 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppTheme.primaryRed,
-            fontWeight: FontWeight.bold,
-          ),
+        color: AppTheme.primaryRed,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }

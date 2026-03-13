@@ -80,12 +80,12 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
   }
 
   static InputDecoration _decoration(String hint) => InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: AppTheme.surfaceDark,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        labelStyle: const TextStyle(color: AppTheme.textSecondary),
-      );
+    hintText: hint,
+    filled: true,
+    fillColor: AppTheme.surfaceDark,
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+  );
 
   void _goToStepSeances() {
     if (_formKey.currentState?.validate() != true) return;
@@ -103,7 +103,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-              'Aucune structure. Vos structures seront disponibles après approbation.'),
+            'Aucune structure. Vos structures seront disponibles après approbation.',
+          ),
           backgroundColor: AppTheme.primaryRed,
         ),
       );
@@ -111,22 +112,34 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
     }
     setState(() {
       _seances.clear();
-      _seances.add(_SeanceItem(
-        date: _date!,
-        timeStr: _timeController.text.trim().isEmpty ? '20:00' : _timeController.text.trim(),
-        lieu: _venueNameController.text.trim().isEmpty ? 'Lieu' : _venueNameController.text.trim(),
-      ));
+      _seances.add(
+        _SeanceItem(
+          date: _date!,
+          timeStr: _timeController.text.trim().isEmpty
+              ? '20:00'
+              : _timeController.text.trim(),
+          lieu: _venueNameController.text.trim().isEmpty
+              ? 'Lieu'
+              : _venueNameController.text.trim(),
+        ),
+      );
       _currentStep = 1;
     });
   }
 
   void _addSeance() {
     setState(() {
-      _seances.add(_SeanceItem(
-        date: _date ?? DateTime.now(),
-        timeStr: _timeController.text.trim().isEmpty ? '20:00' : _timeController.text.trim(),
-        lieu: _venueNameController.text.trim().isEmpty ? 'Lieu' : _venueNameController.text.trim(),
-      ));
+      _seances.add(
+        _SeanceItem(
+          date: _date ?? DateTime.now(),
+          timeStr: _timeController.text.trim().isEmpty
+              ? '20:00'
+              : _timeController.text.trim(),
+          lieu: _venueNameController.text.trim().isEmpty
+              ? 'Lieu'
+              : _venueNameController.text.trim(),
+        ),
+      );
     });
   }
 
@@ -162,7 +175,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
         eventDate: first.date,
         eventTimeStr: first.timeStr,
         placesTotal: int.tryParse(_placesController.text.trim()) ?? 300,
-        prixBase: double.tryParse(
+        prixBase:
+            double.tryParse(
               _priceController.text.trim().replaceAll(',', '.'),
             ) ??
             35.0,
@@ -218,8 +232,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
                   Text(
                     'Créer un événement',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
@@ -241,7 +255,9 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               const SizedBox(height: 20),
               Flexible(
                 child: SingleChildScrollView(
-                  child: _currentStep == 0 ? _buildStepForm() : _buildStepSeances(),
+                  child: _currentStep == 0
+                      ? _buildStepForm()
+                      : _buildStepSeances(),
                 ),
               ),
             ],
@@ -298,7 +314,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
             )
           else
             DropdownButtonFormField<String>(
-              initialValue: _selectedStructureId,
+              // ignore: deprecated_member_use
+              value: _selectedStructureId,
               decoration: _decoration('Structure'),
               dropdownColor: AppTheme.cardDark,
               items: widget.structures
@@ -396,11 +413,13 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               Expanded(
                 child: TextFormField(
                   controller: _priceController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: _decoration('Prix (€)'),
                   style: const TextStyle(color: AppTheme.textPrimary),
-                  validator: (v) => v == null ||
+                  validator: (v) =>
+                      v == null ||
                           double.tryParse(v.replaceAll(',', '.')) == null
                       ? 'Nombre requis'
                       : null,
@@ -413,8 +432,9 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
                   keyboardType: TextInputType.number,
                   decoration: _decoration('Places'),
                   style: const TextStyle(color: AppTheme.textPrimary),
-                  validator: (v) =>
-                      v == null || int.tryParse(v) == null ? 'Nombre requis' : null,
+                  validator: (v) => v == null || int.tryParse(v) == null
+                      ? 'Nombre requis'
+                      : null,
                 ),
               ),
             ],
@@ -458,8 +478,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
         Text(
           'Programmation des séances (au moins une)',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppTheme.textPrimary,
-              ),
+            color: AppTheme.textPrimary,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -479,7 +499,11 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  Icon(Icons.schedule_rounded, color: AppTheme.accentGreen, size: 20),
+                  Icon(
+                    Icons.schedule_rounded,
+                    color: AppTheme.accentGreen,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -506,7 +530,10 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
                   if (_seances.length > 1)
                     IconButton(
                       onPressed: () => _removeSeance(index),
-                      icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primaryRed),
+                      icon: const Icon(
+                        Icons.remove_circle_outline,
+                        color: AppTheme.primaryRed,
+                      ),
                     ),
                 ],
               ),
