@@ -214,6 +214,16 @@ CREATE INDEX "cine_pass_user_role_user_idx"
   ON "cine_pass_user_role" USING btree ("user_id");
 
 -- =============================================================================
+-- PROFIL UTILISATEUR (nom affiché, téléphone, date de naissance)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS "cine_pass_user_profile" (
+    "user_id" uuid PRIMARY KEY REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "display_name" text,
+    "phone" text,
+    "birth_date" date
+);
+
+-- =============================================================================
 -- RESPONSABLES / STRUCTURES / DEMANDES
 -- =============================================================================
 

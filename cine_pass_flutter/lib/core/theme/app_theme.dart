@@ -11,6 +11,10 @@ class AppTheme {
   static const Color textSecondary = Color(0xFFB3B3B3);
   static const Color sidebarActiveBg = Color(0xFF252525);
   static const Color sidebarActiveLine = Color(0xFFFF6B35);
+  /// Néon cyan pour bordures / glow des cartes
+  static const Color neonCyan = Color(0xFF00F5FF);
+  /// Néon magenta pour accent
+  static const Color neonMagenta = Color(0xFFFF00E5);
 
   static ThemeData get darkTheme {
     return ThemeData(

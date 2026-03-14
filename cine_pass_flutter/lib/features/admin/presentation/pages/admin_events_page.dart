@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
-import '../widgets/admin_add_event_dialog.dart';
 
 class AdminEventsPage extends StatefulWidget {
   const AdminEventsPage({super.key});
@@ -53,40 +52,21 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gestion des événements',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Gérez les événements et spectacles',
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+              Text(
+                'Gestion des événements',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
               ),
-              FilledButton.icon(
-                onPressed: () async {
-                  await showDialog(
-                    context: context,
-                    builder: (_) => AdminAddEventDialog(onSaved: _load),
-                  );
-                  if (mounted) _load();
-                },
-                icon: const Icon(Icons.add, size: 20),
-                label: const Text('Nouvel événement'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.primaryRed,
+              const SizedBox(height: 4),
+              Text(
+                'Gérez les événements et spectacles',
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 14,
                 ),
               ),
             ],

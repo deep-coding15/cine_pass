@@ -143,7 +143,7 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
         title: const Text('Devenir responsable'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () => context.go(AppRouter.home),
         ),
       ),
       body: SingleChildScrollView(
@@ -423,7 +423,7 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
                   TextButton(
                     onPressed: _isSubmitting
                         ? null
-                        : () => Navigator.of(context).maybePop(),
+                        : () => context.go(AppRouter.home),
                     child: const Text('Annuler'),
                   ),
                   const SizedBox(width: 16),

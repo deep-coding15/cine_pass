@@ -13,46 +13,72 @@ class EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final posterColor = event.posterColor ?? 0xFF4E1B3D;
-    return Card(
+    final posterUrl = event.posterUrl;
+    final card = Card(
       color: AppTheme.cardDark,
       clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: InkWell(
         onTap: () => context.push(AppRouter.eventDetailPath(event.id)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               children: [
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Container(
-                    color: Color(posterColor),
-                    child: Center(
-                      child: Icon(
-                        Icons.event_rounded,
-                        size: 48,
-                        color: Colors.white.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ),
+                  child: posterUrl == null || posterUrl.isEmpty
+                      ? Container(
+                          color: Color(posterColor),
+                          child: Center(
+                            child: Icon(
+                              Icons.event_rounded,
+                              size: 28,
+                              color: Colors.white.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        )
+                      : ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(10),
+                          ),
+                          child: Image.network(
+                            posterUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, _, __) => Container(
+                              color: Color(posterColor),
+                              child: Center(
+                                child: Icon(
+                                  Icons.event_rounded,
+                                  size: 28,
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                 ),
                 Positioned(
-                  top: 10,
-                  right: 10,
+                  top: 6,
+                  right: 6,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                      horizontal: 6,
+                      vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryRed,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       event.category,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -61,26 +87,27 @@ class EventCard extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     event.title,
                     style: const TextStyle(
                       color: AppTheme.textPrimary,
-                      fontSize: 18,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(
                         Icons.location_on_outlined,
-                        size: 16,
+                        size: 12,
                         color: AppTheme.textSecondary,
                       ),
                       const SizedBox(width: 4),
@@ -89,7 +116,7 @@ class EventCard extends StatelessWidget {
                           '${event.location} - ${event.city}',
                           style: const TextStyle(
                             color: AppTheme.textSecondary,
-                            fontSize: 13,
+                            fontSize: 11,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -97,12 +124,12 @@ class EventCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Icon(
                         Icons.calendar_today_rounded,
-                        size: 16,
+                        size: 12,
                         color: AppTheme.textSecondary,
                       ),
                       const SizedBox(width: 4),
@@ -110,12 +137,12 @@ class EventCard extends StatelessWidget {
                         event.date,
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
-                          fontSize: 13,
+                          fontSize: 11,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -124,7 +151,7 @@ class EventCard extends StatelessWidget {
                         style: const TextStyle(
                           color: AppTheme.accentGreen,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 13,
                         ),
                       ),
                       FilledButton(
@@ -132,17 +159,22 @@ class EventCard extends StatelessWidget {
                             context.push(AppRouter.eventDetailPath(event.id)),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppTheme.primaryRed,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text('Réserver'),
+                        child: const Text('Réserver', style: TextStyle(fontSize: 11)),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
                   Text(
-                    '${event.placesLeft} places restantes',
+                    '${event.placesLeft} places',
                     style: const TextStyle(
                       color: AppTheme.textSecondary,
-                      fontSize: 12,
+                      fontSize: 10,
                     ),
                   ),
                 ],
@@ -150,6 +182,26 @@ class EventCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.neonMagenta,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.neonMagenta.withValues(alpha: 0.35),
+            blurRadius: 10,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: card,
       ),
     );
   }

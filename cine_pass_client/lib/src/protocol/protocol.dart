@@ -42,10 +42,12 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i24;
 import 'cine_pass/reservation_response.dart' as _i25;
 import 'cine_pass/rapport_ca_response.dart' as _i26;
+import 'cine_pass/profile_response.dart' as _i27;
 export 'cine_pass/cinema_response.dart';
 export 'cine_pass/demande_responsable_response.dart';
 export 'cine_pass/reservation_response.dart';
 export 'cine_pass/rapport_ca_response.dart';
+export 'cine_pass/profile_response.dart';
 export 'cine_pass/event_response.dart';
 export 'cine_pass/film_response.dart';
 export 'cine_pass/seance_response.dart';
@@ -161,6 +163,9 @@ class Protocol extends _i1.SerializationManager {
     }
     if (t == _i1.getType<_i26.RapportCAResponse?>()) {
       return (data != null ? _i26.RapportCAResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i27.ProfileResponse?>()) {
+      return (data != null ? _i27.ProfileResponse.fromJson(data) : null) as T;
     }
     if (t == _i1.getType<_i4.EventResponse?>()) {
       return (data != null ? _i4.EventResponse.fromJson(data) : null) as T;
@@ -305,6 +310,8 @@ class Protocol extends _i1.SerializationManager {
         return 'ReservationResponse';
       case _i26.RapportCAResponse():
         return 'RapportCAResponse';
+      case _i27.ProfileResponse():
+        return 'ProfileResponse';
       case _i4.EventResponse():
         return 'EventResponse';
       case _i5.FilmResponse():
@@ -360,6 +367,9 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName == 'RapportCAResponse') {
       return deserialize<_i26.RapportCAResponse>(data['data']);
+    }
+    if (dataClassName == 'ProfileResponse') {
+      return deserialize<_i27.ProfileResponse>(data['data']);
     }
     if (dataClassName == 'EventResponse') {
       return deserialize<_i4.EventResponse>(data['data']);

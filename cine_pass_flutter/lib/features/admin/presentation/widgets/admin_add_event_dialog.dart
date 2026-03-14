@@ -321,6 +321,11 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                                               ) ??
                                               35.0,
                                           posterColor: null,
+                                          posterUrl:
+                                              _posterUrlController.text.trim().isEmpty
+                                                  ? null
+                                                  : _posterUrlController.text
+                                                      .trim(),
                                         );
                                     if (!context.mounted) return;
                                     if (created != null) {

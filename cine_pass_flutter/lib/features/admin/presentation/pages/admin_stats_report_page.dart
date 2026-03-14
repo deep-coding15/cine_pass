@@ -1,6 +1,11 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 
 class AdminStatsReportPage extends StatefulWidget {
   const AdminStatsReportPage({super.key});
@@ -12,6 +17,91 @@ class AdminStatsReportPage extends StatefulWidget {
 class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
   DateTime? _dateStart;
   DateTime? _dateEnd;
+  bool _loading = false;
+  String? _error;
+  int _nbReservations = 0;
+  double _totalCA = 0;
+  int _nbFilms = 0;
+  int _nbEvents = 0;
+
+  Future<void> _loadReport() async {
+    if (_dateStart == null || _dateEnd == null) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final reservations = await client.cinePass.getReservations();
+      final films = await client.cinePass.getFilms();
+      final events = await client.cinePass.getEvents();
+
+      final start = DateTime(_dateStart!.year, _dateStart!.month, _dateStart!.day);
+      final end = DateTime(_dateEnd!.year, _dateEnd!.month, _dateEnd!.day, 23, 59, 59);
+
+      int nb = 0;
+      double ca = 0;
+      for (final r in reservations) {
+        final createdAt = DateTime.tryParse(r.createdAtStr);
+        if (createdAt != null && !createdAt.isBefore(start) && !createdAt.isAfter(end)) {
+          nb++;
+          ca += r.totalAmount;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _nbReservations = nb;
+        _totalCA = ca;
+        _nbFilms = films.length;
+        _nbEvents = events.length;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  Future<void> _exportPdf() async {
+    if (_dateStart == null || _dateEnd == null) return;
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Rapport de statistiques CinePass',
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 8),
+              pw.Text(
+                'Période: ${_dateStart!.day}/${_dateStart!.month}/${_dateStart!.year} - ${_dateEnd!.day}/${_dateEnd!.month}/${_dateEnd!.year}',
+                style: const pw.TextStyle(fontSize: 12),
+              ),
+              pw.SizedBox(height: 24),
+              pw.Text('Réservations: $_nbReservations', style: const pw.TextStyle(fontSize: 14)),
+              pw.SizedBox(height: 4),
+              pw.Text('Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} €', style: const pw.TextStyle(fontSize: 14)),
+              pw.SizedBox(height: 4),
+              pw.Text('Films au catalogue: $_nbFilms', style: const pw.TextStyle(fontSize: 14)),
+              pw.SizedBox(height: 4),
+              pw.Text('Événements: $_nbEvents', style: const pw.TextStyle(fontSize: 14)),
+            ],
+          );
+        },
+      ),
+    );
+    await Printing.sharePdf(bytes: await pdf.save(), filename: 'cinepass-rapport-admin.pdf');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +112,7 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
         children: [
           Text(
             'Rapport de statistiques',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -41,24 +129,24 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                 children: [
                   Text(
                     'Période',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final d = await showDatePicker(
-                              context: context,
-                              initialDate: _dateStart ?? DateTime.now(),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime(2030),
-                            );
-                            if (d != null) setState(() => _dateStart = d);
-                          },
+                          onPressed: _loading
+                              ? null
+                              : () async {
+                                  final d = await showDatePicker(
+                                    context: context,
+                                    initialDate: _dateStart ?? DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2030),
+                                  );
+                                  if (d != null) setState(() => _dateStart = d);
+                                },
                           icon: const Icon(Icons.calendar_today, size: 18),
                           label: Text(
                             _dateStart != null
@@ -71,16 +159,17 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final d = await showDatePicker(
-                              context: context,
-                              initialDate:
-                                  _dateEnd ?? _dateStart ?? DateTime.now(),
-                              firstDate: _dateStart ?? DateTime(2020),
-                              lastDate: DateTime(2030),
-                            );
-                            if (d != null) setState(() => _dateEnd = d);
-                          },
+                          onPressed: _loading
+                              ? null
+                              : () async {
+                                  final d = await showDatePicker(
+                                    context: context,
+                                    initialDate: _dateEnd ?? _dateStart ?? DateTime.now(),
+                                    firstDate: _dateStart ?? DateTime(2020),
+                                    lastDate: DateTime(2030),
+                                  );
+                                  if (d != null) setState(() => _dateEnd = d);
+                                },
                           icon: const Icon(Icons.calendar_today, size: 18),
                           label: Text(
                             _dateEnd != null
@@ -93,45 +182,44 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  FilledButton.icon(
-                    onPressed: () {
-                      if (_dateStart == null || _dateEnd == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Choisissez une date de début et de fin',
-                            ),
-                            backgroundColor: AppTheme.primaryRed,
-                          ),
-                        );
-                        return;
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Rapport généré du ${_dateStart!.day}/${_dateStart!.month}/${_dateStart!.year} au ${_dateEnd!.day}/${_dateEnd!.month}/${_dateEnd!.year}',
-                          ),
-                          backgroundColor: AppTheme.accentGreen,
+                  Row(
+                    children: [
+                      FilledButton.icon(
+                        onPressed: _loading || _dateStart == null || _dateEnd == null
+                            ? null
+                            : _loadReport,
+                        icon: _loading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Icon(Icons.assessment),
+                        label: Text(_loading ? 'Chargement...' : 'Générer le rapport'),
+                        style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                      ),
+                      const SizedBox(width: 12),
+                      if (_nbReservations > 0 || _totalCA > 0 || _nbFilms > 0 || _nbEvents > 0)
+                        OutlinedButton.icon(
+                          onPressed: _exportPdf,
+                          icon: const Icon(Icons.picture_as_pdf),
+                          label: const Text('Exporter PDF'),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.assessment),
-                    label: const Text('Générer le rapport'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.primaryRed,
-                    ),
+                    ],
                   ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 16),
+                    Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                  ],
                 ],
               ),
             ),
           ),
-          if (_dateStart != null && _dateEnd != null) ...[
+          if (_nbReservations > 0 || _totalCA > 0 || _nbFilms > 0 || _nbEvents > 0) ...[
             const SizedBox(height: 32),
             Text(
-              'Résumé (démo)',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              'Résumé',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 16),
             Row(
@@ -139,7 +227,7 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                 Expanded(
                   child: _StatCard(
                     title: 'Réservations',
-                    value: '42',
+                    value: '$_nbReservations',
                     icon: Icons.confirmation_number_rounded,
                   ),
                 ),
@@ -147,15 +235,15 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                 Expanded(
                   child: _StatCard(
                     title: 'Chiffre d\'affaires',
-                    value: '1 240 €',
+                    value: '${_totalCA.toStringAsFixed(0)} €',
                     icon: Icons.euro_rounded,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: _StatCard(
-                    title: 'Films projetés',
-                    value: '12',
+                    title: 'Films',
+                    value: '$_nbFilms',
                     icon: Icons.movie_rounded,
                   ),
                 ),
@@ -163,7 +251,7 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                 Expanded(
                   child: _StatCard(
                     title: 'Événements',
-                    value: '3',
+                    value: '$_nbEvents',
                     icon: Icons.event_rounded,
                   ),
                 ),

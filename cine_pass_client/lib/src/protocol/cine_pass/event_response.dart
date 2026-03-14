@@ -29,6 +29,7 @@ abstract class EventResponse implements _i1.SerializableModel {
     required this.price,
     this.posterColor,
     this.availableOptions,
+    this.posterUrl,
   });
 
   factory EventResponse({
@@ -46,6 +47,7 @@ abstract class EventResponse implements _i1.SerializableModel {
     required double price,
     int? posterColor,
     List<String>? availableOptions,
+    String? posterUrl,
   }) = _EventResponseImpl;
 
   factory EventResponse.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -68,6 +70,7 @@ abstract class EventResponse implements _i1.SerializableModel {
           : _i2.Protocol().deserialize<List<String>>(
               jsonSerialization['availableOptions'],
             ),
+      posterUrl: jsonSerialization['posterUrl'] as String?,
     );
   }
 
@@ -99,6 +102,8 @@ abstract class EventResponse implements _i1.SerializableModel {
 
   List<String>? availableOptions;
 
+  String? posterUrl;
+
   /// Returns a shallow copy of this [EventResponse]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -117,6 +122,7 @@ abstract class EventResponse implements _i1.SerializableModel {
     double? price,
     int? posterColor,
     List<String>? availableOptions,
+    String? posterUrl,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -137,6 +143,7 @@ abstract class EventResponse implements _i1.SerializableModel {
       if (posterColor != null) 'posterColor': posterColor,
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
+      if (posterUrl != null) 'posterUrl': posterUrl,
     };
   }
 
@@ -164,6 +171,7 @@ class _EventResponseImpl extends EventResponse {
     required double price,
     int? posterColor,
     List<String>? availableOptions,
+    String? posterUrl,
   }) : super._(
          id: id,
          title: title,
@@ -179,6 +187,7 @@ class _EventResponseImpl extends EventResponse {
          price: price,
          posterColor: posterColor,
          availableOptions: availableOptions,
+         posterUrl: posterUrl,
        );
 
   /// Returns a shallow copy of this [EventResponse]
@@ -200,6 +209,7 @@ class _EventResponseImpl extends EventResponse {
     double? price,
     Object? posterColor = _Undefined,
     Object? availableOptions = _Undefined,
+    Object? posterUrl = _Undefined,
   }) {
     return EventResponse(
       id: id ?? this.id,
@@ -218,6 +228,7 @@ class _EventResponseImpl extends EventResponse {
       availableOptions: availableOptions is List<String>?
           ? availableOptions
           : this.availableOptions?.map((e0) => e0).toList(),
+      posterUrl: posterUrl is String? ? posterUrl : this.posterUrl,
     );
   }
 }

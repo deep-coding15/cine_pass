@@ -72,6 +72,8 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _colorController.stop();
+    _colorController.dispose();
     _animController.dispose();
     super.dispose();
   }

@@ -6,6 +6,7 @@ import '../generated/cine_pass/cinema_response.dart';
 import '../generated/cine_pass/demande_responsable_response.dart';
 import '../generated/cine_pass/reservation_response.dart';
 import '../generated/cine_pass/rapport_ca_response.dart';
+import '../generated/cine_pass/profile_response.dart';
 import '../generated/salle.dart';
 import '../generated/structure.dart';
 
@@ -22,7 +23,7 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r'''
         SELECT "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-               "casting", "posterColor"
+               "casting", "posterColor", "posterUrl"
         FROM "cine_pass_film"
         ORDER BY "titre"
         ''',
@@ -45,7 +46,7 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r'''
         SELECT "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-               "casting", "posterColor"
+               "casting", "posterColor", "posterUrl"
         FROM "cine_pass_film"
         WHERE "id" = @id
         ''',
@@ -132,7 +133,7 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r'''
       SELECT "id", "titre", "categorie", "description", "lieu", "adresse", "ville",
-             "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "availableOptions"
+             "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "posterUrl", "availableOptions"
       FROM "cine_pass_evenement"
       WHERE "eventDate" >= CURRENT_DATE
       ORDER BY "eventDate", "eventTime"
@@ -156,7 +157,7 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r"""
       SELECT "id", "titre", "categorie", "description", "lieu", "adresse", "ville",
-             "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "availableOptions"
+             "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "posterUrl", "availableOptions"
       FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid
       """,
         parameters: QueryParameters.named({'id': id}),
@@ -231,6 +232,7 @@ class CinePassEndpoint extends Endpoint {
     String? director,
     String? casting,
     int? posterColor,
+      String? posterUrl,
     Object? dateSortie,
     Object? dateFin,
     String? audience,
@@ -242,14 +244,14 @@ class CinePassEndpoint extends Endpoint {
         r'''
         INSERT INTO "cine_pass_film" (
           "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-          "casting", "posterColor", "dateSortie", "dateFin", "audience"
+          "casting", "posterColor", "posterUrl", "dateSortie", "dateFin", "audience"
         )
         VALUES (
           @titre, @genre, @dureeMinutes, @synopsis, @directeur,
-          @casting, @posterColor, @dateSortie, @dateFin, @audience
+          @casting, @posterColor, @posterUrl, @dateSortie, @dateFin, @audience
         )
         RETURNING "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-                  "casting", "posterColor"
+                  "casting", "posterColor", "posterUrl"
         ''',
         parameters: QueryParameters.named({
           'titre': title,
@@ -259,6 +261,7 @@ class CinePassEndpoint extends Endpoint {
           'directeur': director,
           'casting': casting,
           'posterColor': posterColor,
+          'posterUrl': posterUrl,
           'dateSortie': dSortie,
           'dateFin': dFin,
           'audience': audience,
@@ -291,6 +294,7 @@ class CinePassEndpoint extends Endpoint {
     required int placesTotal,
     required double prixBase,
     int? posterColor,
+      String? posterUrl,
     String? structureId,
   }) async {
     try {
@@ -317,15 +321,18 @@ class CinePassEndpoint extends Endpoint {
         r'''
         INSERT INTO "cine_pass_evenement" (
           "titre", "categorie", "description", "lieu", "adresse", "ville",
-          "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "structureId"
+          "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor",
+          "posterUrl", "structureId"
         )
         VALUES (
           @titre, @categorie, @description, @lieu, @adresse, @ville,
           @eventDate, @eventTime, @placesTotal, @prixBase, @posterColor,
+          @posterUrl,
           CASE WHEN @structureId::text = '' OR @structureId IS NULL THEN NULL ELSE (@structureId)::uuid END
         )
         RETURNING "id", "titre", "categorie", "description", "lieu", "adresse", "ville",
-                  "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "availableOptions"
+                  "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor",
+                  "posterUrl", "availableOptions"
         ''',
         parameters: QueryParameters.named({
           'titre': titre,
@@ -339,6 +346,7 @@ class CinePassEndpoint extends Endpoint {
           'placesTotal': placesTotal,
           'prixBase': prixBase,
           'posterColor': posterColor,
+          'posterUrl': posterUrl,
           'structureId': structureId ?? '',
         }),
       );
@@ -404,6 +412,7 @@ class CinePassEndpoint extends Endpoint {
     int? placesTotal,
     double? prixBase,
     int? posterColor,
+      String? posterUrl,
   }) async {
     try {
       final eventDateDt = eventDate != null ? _parseDateTime(eventDate) : null;
@@ -438,10 +447,12 @@ class CinePassEndpoint extends Endpoint {
           "eventTime" = CASE WHEN @eventTime IS NOT NULL THEN @eventTime ELSE "eventTime" END,
           "placesTotal" = CASE WHEN @placesTotal IS NOT NULL THEN @placesTotal ELSE "placesTotal" END,
           "prixBase" = CASE WHEN @prixBase IS NOT NULL THEN @prixBase ELSE "prixBase" END,
-          "posterColor" = CASE WHEN @posterColor IS NOT NULL THEN @posterColor ELSE "posterColor" END
+          "posterColor" = CASE WHEN @posterColor IS NOT NULL THEN @posterColor ELSE "posterColor" END,
+          "posterUrl" = CASE WHEN @posterUrl IS NOT NULL THEN @posterUrl ELSE "posterUrl" END
         WHERE "id" = (@id)::uuid
         RETURNING "id", "titre", "categorie", "description", "lieu", "adresse", "ville",
-                  "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "availableOptions"
+                  "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor",
+                  "posterUrl", "availableOptions"
         ''',
         parameters: QueryParameters.named({
           'id': id,
@@ -456,6 +467,7 @@ class CinePassEndpoint extends Endpoint {
           'placesTotal': placesTotal,
           'prixBase': prixBase,
           'posterColor': posterColor,
+          'posterUrl': posterUrl,
         }),
       );
       if (result.isEmpty) return null;
@@ -531,7 +543,8 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r'''
         SELECT e."id", e."titre", e."categorie", e."description", e."lieu", e."adresse", e."ville",
-               e."eventDate", e."eventTime", e."placesTotal", e."prixBase", e."posterColor", e."availableOptions"
+               e."eventDate", e."eventTime", e."placesTotal", e."prixBase", e."posterColor",
+               e."posterUrl", e."availableOptions"
         FROM "cine_pass_evenement" e
         WHERE e."structureId" IN (
           SELECT a."structure_id" FROM "cine_pass_responsable_assignment" a
@@ -970,6 +983,7 @@ class CinePassEndpoint extends Endpoint {
       director: row.length > 5 ? row[5] as String? : null,
       casting: row.length > 6 ? row[6] as String? : null,
       posterColor: row.length > 7 ? _safeInt(row[7]) : null,
+      posterUrl: row.length > 8 ? row[8] as String? : null,
     );
   }
 
@@ -1010,7 +1024,8 @@ class CinePassEndpoint extends Endpoint {
     final date = row.length > 7 ? row[7] : null;
     final time = row.length > 8 ? row[8] : null;
     final placesTotal = row.length > 9 ? _safeInt(row[9]) : 0;
-    final optionsJson = row.length > 12 ? row[12] : null;
+    final posterUrl = row.length > 12 ? row[12] as String? : null;
+    final optionsJson = row.length > 13 ? row[13] : null;
     List<String> options = const ['parking', 'popcorn', 'boisson'];
     if (optionsJson != null && optionsJson is List) {
       options = optionsJson.map((e) => e.toString()).toList();
@@ -1053,6 +1068,7 @@ class CinePassEndpoint extends Endpoint {
       price: price,
       posterColor: posterColor,
       availableOptions: options,
+      posterUrl: posterUrl,
     );
   }
 
@@ -1117,5 +1133,118 @@ class CinePassEndpoint extends Endpoint {
       statut: statut,
       nbBillets: nbBillets,
     );
+  }
+
+  /// Profil de l'utilisateur connecté (displayName, phone, birthDate).
+  /// Retourne null si non authentifié.
+  Future<ProfileResponse?> getProfile(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return null;
+    try {
+      final profileRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "display_name", "phone", "birth_date"
+        FROM "cine_pass_user_profile"
+        WHERE "user_id" = (@uid)::uuid
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      String? email;
+      try {
+        final userRows = await session.db.unsafeQuery(
+          r'SELECT "email" FROM "serverpod_auth_core_user" WHERE "id" = (@uid)::uuid',
+          parameters: QueryParameters.named({'uid': userId}),
+        );
+        if (userRows.isNotEmpty && userRows.first.isNotEmpty) {
+          email = userRows.first[0] as String?;
+        }
+      } catch (_) {}
+      if (profileRows.isEmpty) {
+        return ProfileResponse(
+          displayName: null,
+          email: email,
+          phone: null,
+          birthDate: null,
+        );
+      }
+      final row = profileRows.first;
+      final birthDate = row.length > 2 && row[2] != null
+          ? (row[2] is DateTime
+              ? (row[2] as DateTime).toIso8601String().substring(0, 10)
+              : row[2].toString().length >= 10
+                  ? row[2].toString().substring(0, 10)
+                  : row[2].toString())
+          : null;
+      return ProfileResponse(
+        displayName: row.isNotEmpty ? row[0] as String? : null,
+        email: email,
+        phone: row.length > 1 ? row[1] as String? : null,
+        birthDate: birthDate,
+      );
+    } catch (e, st) {
+      session.log(
+        'CinePass getProfile',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return null;
+    }
+  }
+
+  /// Met à jour le profil de l'utilisateur connecté.
+  /// Seuls les champs non null sont mis à jour.
+  Future<bool> updateProfile(
+    Session session, {
+    String? displayName,
+    String? phone,
+    String? birthDate,
+  }) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return false;
+    try {
+      final existing = await session.db.unsafeQuery(
+        r'SELECT "display_name", "phone", "birth_date" FROM "cine_pass_user_profile" WHERE "user_id" = (@uid)::uuid',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      String? d = displayName;
+      String? p = phone;
+      String? b = birthDate;
+      if (existing.isNotEmpty) {
+        final row = existing.first;
+        if (d == null && row.isNotEmpty) d = row[0] as String?;
+        if (p == null && row.length > 1) p = row[1] as String?;
+        if (b == null && row.length > 2 && row[2] != null) {
+          final v = row[2];
+          b = v is DateTime ? v.toIso8601String().substring(0, 10) : v.toString();
+        }
+      }
+      final birthDateParsed = b != null && b.isNotEmpty ? DateTime.tryParse(b) : null;
+      await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_user_profile" ("user_id", "display_name", "phone", "birth_date")
+        VALUES ((@uid)::uuid, @displayName, @phone, @birthDate)
+        ON CONFLICT ("user_id") DO UPDATE SET
+          "display_name" = EXCLUDED."display_name",
+          "phone" = EXCLUDED."phone",
+          "birth_date" = EXCLUDED."birth_date"
+        ''',
+        parameters: QueryParameters.named({
+          'uid': userId,
+          'displayName': d,
+          'phone': p,
+          'birthDate': birthDateParsed,
+        }),
+      );
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass updateProfile',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
   }
 }
