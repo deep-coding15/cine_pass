@@ -28,6 +28,10 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     final isAdmin = widget.location.startsWith('/admin');
     final auth = context.watch<AuthState>();
+    final isAuthPage =
+        widget.location == AppRouter.connexion ||
+        widget.location == AppRouter.inscription ||
+        widget.location == AppRouter.connexionResponsable;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -39,10 +43,12 @@ class _MainScaffoldState extends State<MainScaffold> {
           icon: const Icon(Icons.menu_rounded),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        title: GestureDetector(
-          onTap: () => context.go(AppRouter.home),
-          child: const CinePassLogo(size: LogoSize.small),
-        ),
+        title: isAuthPage
+            ? null
+            : GestureDetector(
+                onTap: () => context.go(AppRouter.home),
+                child: const CinePassLogo(size: LogoSize.small),
+              ),
         centerTitle: true,
         actions: [
           if (auth.isLoggedIn) ...[
@@ -127,20 +133,16 @@ class _MainScaffoldState extends State<MainScaffold> {
                 ),
               ),
             ],
-          ] else ...[
-            TextButton(
-              onPressed: () => context.go(AppRouter.connexion),
-              child: const Text('Connexion'),
-            ),
-            const SizedBox(width: 8),
+          ] else if (!isAuthPage) ...[
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: FilledButton(
-                onPressed: () => context.go(AppRouter.inscription),
+              child: FilledButton.icon(
+                onPressed: () => context.go(AppRouter.connexion),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.primaryRed,
                 ),
-                child: const Text('Inscription'),
+                icon: const Icon(Icons.login_rounded, size: 18),
+                label: const Text('S\'authentifier'),
               ),
             ),
           ],

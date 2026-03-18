@@ -11,52 +11,270 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import '../auth/google_idp_endpoint.dart' as _i2;
-import '../auth/jwt_refresh_endpoint.dart' as _i3;
-import '../auth/phone_auth_endpoint.dart' as _i4;
-import '../cine_pass/cine_pass_endpoint.dart' as _i5;
-import '../greetings/greeting_endpoint.dart' as _i6;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i7;
+import '../auth/email_idp_endpoint.dart' as _i2;
+import '../auth/google_idp_endpoint.dart' as _i3;
+import '../auth/jwt_refresh_endpoint.dart' as _i4;
+import '../auth/phone_auth_endpoint.dart' as _i5;
+import '../cine_pass/cine_pass_endpoint.dart' as _i6;
+import '../greetings/greeting_endpoint.dart' as _i7;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i8;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i8;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i9;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i10;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
   void initializeEndpoints(_i1.Server server) {
     var endpoints = <String, _i1.Endpoint>{
-      'googleIdp': _i2.GoogleIdpEndpoint()
+      'emailAuth': _i2.EmailAuthEndpoint()
+        ..initialize(
+          server,
+          'emailAuth',
+          null,
+        ),
+      'googleIdp': _i3.GoogleIdpEndpoint()
         ..initialize(
           server,
           'googleIdp',
           null,
         ),
-      'jwtRefresh': _i3.JwtRefreshEndpoint()
+      'jwtRefresh': _i4.JwtRefreshEndpoint()
         ..initialize(
           server,
           'jwtRefresh',
           null,
         ),
-      'phoneAuth': _i4.PhoneAuthEndpoint()
+      'phoneAuth': _i5.PhoneAuthEndpoint()
         ..initialize(
           server,
           'phoneAuth',
           null,
         ),
-      'cinePass': _i5.CinePassEndpoint()
+      'cinePass': _i6.CinePassEndpoint()
         ..initialize(
           server,
           'cinePass',
           null,
         ),
-      'greeting': _i6.GreetingEndpoint()
+      'greeting': _i7.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
           null,
         ),
     };
+    connectors['emailAuth'] = _i1.EndpointConnector(
+      name: 'emailAuth',
+      endpoint: endpoints['emailAuth']!,
+      methodConnectors: {
+        'register': _i1.MethodConnector(
+          name: 'register',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'password': _i1.ParameterDescription(
+              name: 'password',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'fullName': _i1.ParameterDescription(
+              name: 'fullName',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['emailAuth'] as _i2.EmailAuthEndpoint).register(
+                    session,
+                    email: params['email'],
+                    password: params['password'],
+                    fullName: params['fullName'],
+                  ),
+        ),
+        'login': _i1.MethodConnector(
+          name: 'login',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'password': _i1.ParameterDescription(
+              name: 'password',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['emailAuth'] as _i2.EmailAuthEndpoint).login(
+                    session,
+                    email: params['email'],
+                    password: params['password'],
+                  ),
+        ),
+        'startRegistration': _i1.MethodConnector(
+          name: 'startRegistration',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .startRegistration(
+                    session,
+                    email: params['email'],
+                  ),
+        ),
+        'verifyRegistrationCode': _i1.MethodConnector(
+          name: 'verifyRegistrationCode',
+          params: {
+            'accountRequestId': _i1.ParameterDescription(
+              name: 'accountRequestId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'verificationCode': _i1.ParameterDescription(
+              name: 'verificationCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .verifyRegistrationCode(
+                    session,
+                    accountRequestId: params['accountRequestId'],
+                    verificationCode: params['verificationCode'],
+                  ),
+        ),
+        'finishRegistration': _i1.MethodConnector(
+          name: 'finishRegistration',
+          params: {
+            'registrationToken': _i1.ParameterDescription(
+              name: 'registrationToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'password': _i1.ParameterDescription(
+              name: 'password',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .finishRegistration(
+                    session,
+                    registrationToken: params['registrationToken'],
+                    password: params['password'],
+                  ),
+        ),
+        'startPasswordReset': _i1.MethodConnector(
+          name: 'startPasswordReset',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .startPasswordReset(
+                    session,
+                    email: params['email'],
+                  ),
+        ),
+        'verifyPasswordResetCode': _i1.MethodConnector(
+          name: 'verifyPasswordResetCode',
+          params: {
+            'passwordResetRequestId': _i1.ParameterDescription(
+              name: 'passwordResetRequestId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'verificationCode': _i1.ParameterDescription(
+              name: 'verificationCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .verifyPasswordResetCode(
+                    session,
+                    passwordResetRequestId: params['passwordResetRequestId'],
+                    verificationCode: params['verificationCode'],
+                  ),
+        ),
+        'finishPasswordReset': _i1.MethodConnector(
+          name: 'finishPasswordReset',
+          params: {
+            'finishPasswordResetToken': _i1.ParameterDescription(
+              name: 'finishPasswordResetToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'newPassword': _i1.ParameterDescription(
+              name: 'newPassword',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .finishPasswordReset(
+                    session,
+                    finishPasswordResetToken:
+                        params['finishPasswordResetToken'],
+                    newPassword: params['newPassword'],
+                  ),
+        ),
+        'hasAccount': _i1.MethodConnector(
+          name: 'hasAccount',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .hasAccount(session),
+        ),
+      },
+    );
     connectors['googleIdp'] = _i1.EndpointConnector(
       name: 'googleIdp',
       endpoint: endpoints['googleIdp']!,
@@ -80,7 +298,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['googleIdp'] as _i2.GoogleIdpEndpoint).login(
+                  (endpoints['googleIdp'] as _i3.GoogleIdpEndpoint).login(
                     session,
                     idToken: params['idToken'],
                     accessToken: params['accessToken'],
@@ -93,7 +311,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['googleIdp'] as _i2.GoogleIdpEndpoint)
+              ) async => (endpoints['googleIdp'] as _i3.GoogleIdpEndpoint)
                   .hasAccount(session),
         ),
       },
@@ -115,7 +333,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['jwtRefresh'] as _i3.JwtRefreshEndpoint)
+              ) async => (endpoints['jwtRefresh'] as _i4.JwtRefreshEndpoint)
                   .refreshAccessToken(
                     session,
                     refreshToken: params['refreshToken'],
@@ -140,7 +358,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['phoneAuth'] as _i4.PhoneAuthEndpoint)
+              ) async => (endpoints['phoneAuth'] as _i5.PhoneAuthEndpoint)
                   .sendVerificationCode(
                     session,
                     params['phoneNumber'],
@@ -165,7 +383,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['phoneAuth'] as _i4.PhoneAuthEndpoint).verifyCode(
+                  (endpoints['phoneAuth'] as _i5.PhoneAuthEndpoint).verifyCode(
                     session,
                     params['phoneNumber'],
                     params['code'],
@@ -184,7 +402,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getFilms(session),
         ),
         'getFilmById': _i1.MethodConnector(
@@ -201,7 +419,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).getFilmById(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).getFilmById(
                     session,
                     params['id'],
                   ),
@@ -219,7 +437,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getSeancesForFilm(
                     session,
                     params['filmId'],
@@ -232,7 +450,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getCinemas(session),
         ),
         'getSalles': _i1.MethodConnector(
@@ -242,7 +460,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getSalles(session),
         ),
         'getEvents': _i1.MethodConnector(
@@ -252,7 +470,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getEvents(session),
         ),
         'getEventById': _i1.MethodConnector(
@@ -269,7 +487,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).getEventById(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).getEventById(
                     session,
                     params['id'],
                   ),
@@ -281,7 +499,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getCities(session),
         ),
         'getGenres': _i1.MethodConnector(
@@ -291,7 +509,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getGenres(session),
         ),
         'getEventCategories': _i1.MethodConnector(
@@ -301,7 +519,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getEventCategories(session),
         ),
         'createFilm': _i1.MethodConnector(
@@ -368,7 +586,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).createFilm(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).createFilm(
                     session,
                     title: params['title'],
                     genre: params['genre'],
@@ -457,7 +675,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).createEvent(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).createEvent(
                     session,
                     titre: params['titre'],
                     categorie: params['categorie'],
@@ -481,7 +699,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getStructures(session),
         ),
         'getStructureById': _i1.MethodConnector(
@@ -497,7 +715,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getStructureById(
                     session,
                     params['id'],
@@ -577,7 +795,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).updateEvent(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).updateEvent(
                     session,
                     id: params['id'],
                     titre: params['titre'],
@@ -608,7 +826,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).deleteEvent(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).deleteEvent(
                     session,
                     params['id'],
                   ),
@@ -620,7 +838,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getMyStructure(session),
         ),
         'getMyEvents': _i1.MethodConnector(
@@ -630,7 +848,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getMyEvents(session),
         ),
         'getDemandesEnAttente': _i1.MethodConnector(
@@ -640,7 +858,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getDemandesEnAttente(session),
         ),
         'approuverDemande': _i1.MethodConnector(
@@ -656,7 +874,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .approuverDemande(
                     session,
                     params['id'],
@@ -680,7 +898,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .rejeterDemande(
                     session,
                     params['id'],
@@ -730,7 +948,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .createDemandeResponsable(
                     session,
                     structureType: params['structureType'],
@@ -749,7 +967,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getReservations(session),
         ),
         'getReservationsForMyStructures': _i1.MethodConnector(
@@ -759,7 +977,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getReservationsForMyStructures(session),
         ),
         'getRapportCA': _i1.MethodConnector(
@@ -776,7 +994,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).getRapportCA(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).getRapportCA(
                     session,
                     params['periode'],
                   ),
@@ -825,7 +1043,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).createSeance(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).createSeance(
                     session,
                     filmId: params['filmId'],
                     salleId: params['salleId'],
@@ -843,7 +1061,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getProfile(session),
         ),
         'updateProfile': _i1.MethodConnector(
@@ -870,7 +1088,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['cinePass'] as _i5.CinePassEndpoint).updateProfile(
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).updateProfile(
                     session,
                     displayName: params['displayName'],
                     phone: params['phone'],
@@ -896,17 +1114,17 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i6.GreetingEndpoint).hello(
+              ) async => (endpoints['greeting'] as _i7.GreetingEndpoint).hello(
                 session,
                 params['name'],
               ),
         ),
       },
     );
-    modules['serverpod_auth'] = _i7.Endpoints()..initializeEndpoints(server);
-    modules['serverpod_auth_idp'] = _i8.Endpoints()
+    modules['serverpod_auth'] = _i8.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth_idp'] = _i9.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i9.Endpoints()
+    modules['serverpod_auth_core'] = _i10.Endpoints()
       ..initializeEndpoints(server);
   }
 }

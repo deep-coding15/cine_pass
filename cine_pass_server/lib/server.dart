@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
+import 'package:serverpod_auth_idp_server/providers/email.dart';
 import 'package:serverpod_auth_idp_server/providers/google.dart';
 
 import 'src/generated/endpoints.dart';
@@ -34,6 +35,7 @@ void run(List<String> args) async {
       ),
     ],
     identityProviderBuilders: [
+      EmailIdpConfigFromPasswords(),
       // Expects `googleClientSecret` in passwords.yaml with the Google web
       // client secret JSON payload.
       GoogleIdpConfigFromPasswords(),

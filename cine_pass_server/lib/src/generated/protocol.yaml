@@ -1,3 +1,13 @@
+emailAuth:
+  - register:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
 googleIdp:
   - login:
   - hasAccount:
