@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
+import 'core/config/app_config.dart' as app_config;
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/state/auth_state.dart';
@@ -32,7 +33,7 @@ String? _normalizedOrNull(String value) {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final serverUrl = await getServerUrl();
+  final serverUrl = await app_config.getServerUrl();
 
   // Create the client with the auth session manager
   client = Client(serverUrl)

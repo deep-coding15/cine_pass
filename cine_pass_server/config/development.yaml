@@ -27,6 +27,13 @@ webServer:
   publicPort: 9082
   publicScheme: http
 
+# Configuration for the server
+server:
+  port: 9083
+  publicHost: 0.0.0.0
+  publicPort: 9083
+  publicScheme: http
+
 # This is the database setup for your server.
 database:
   host: localhost

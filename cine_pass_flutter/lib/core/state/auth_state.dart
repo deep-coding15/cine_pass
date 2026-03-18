@@ -40,6 +40,13 @@ class AuthState extends ChangeNotifier {
     _syncFromClientAuth();
   }
 
+  void unbindFromClientAuth() {
+    if (_isBoundToClientAuth) {
+      client.auth.authInfoListenable.removeListener(_onAuthChanged);
+      _isBoundToClientAuth = false;
+    }
+  }
+
   void _syncFromClientAuth({bool notify = true}) {
     final authInfo = client.auth.authInfo;
 
@@ -192,10 +199,7 @@ class AuthState extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (_isBoundToClientAuth) {
-      client.auth.authInfoListenable.removeListener(_onAuthChanged);
-      _isBoundToClientAuth = false;
-    }
+    unbindFromClientAuth();
     super.dispose();
   }
 }
