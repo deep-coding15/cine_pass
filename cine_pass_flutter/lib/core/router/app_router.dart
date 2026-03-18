@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../widgets/main_scaffold.dart';
@@ -35,8 +36,12 @@ import '../../features/responsable/presentation/pages/responsable_events_page.da
 import '../../features/responsable/presentation/pages/responsable_event_detail_page.dart';
 import '../../features/responsable/presentation/pages/responsable_reservations_page.dart';
 import '../../features/responsable/presentation/pages/responsable_rapports_page.dart';
+import '../../features/splash/presentation/pages/splash_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 
 class AppRouter {
+  static const String splash = '/splash';
+  static const String onboarding = '/onboarding';
   static const String home = '/';
   static const String films = '/films';
   static const String filmDetail = '/films/:id';
@@ -65,11 +70,40 @@ class AppRouter {
   static String filmDetailPath(String id) => '/films/$id';
   static String eventDetailPath(String id) => '/events/$id';
 
+  /// Après un passage par la splash, on ne redirige plus "/" vers "/splash".
+  static bool _splashDone = false;
+  static void markSplashDone() {
+    _splashDone = true;
+  }
+
   static final GoRouter router = GoRouter(
-    initialLocation: home,
+    initialLocation: splash,
+    redirect: (context, state) {
+      final path = state.uri.path;
+      // Toujours afficher la splash en premier si pas encore vue (évite de ne pas la voir au démarrage)
+      if (!_splashDone && path != splash && path != onboarding) {
+        return splash;
+      }
+      return null;
+    },
     routes: [
+      GoRoute(
+        path: splash,
+        pageBuilder: (_, _) => const NoTransitionPage(child: SplashPage()),
+      ),
+      GoRoute(
+        path: onboarding,
+        pageBuilder: (_, _) =>
+            const NoTransitionPage(child: OnboardingPage()),
+      ),
       ShellRoute(
-        builder: (context, state, child) => MainScaffold(child: child),
+        builder: (context, state, child) => MainScaffold(
+          location: state.uri.path,
+          child: KeyedSubtree(
+            key: ValueKey<String>(state.uri.path),
+            child: child,
+          ),
+        ),
         routes: [
           GoRoute(
             path: home,
@@ -160,11 +194,7 @@ class AppRouter {
             pageBuilder: (_, _) =>
                 const NoTransitionPage(child: ConnexionResponsablePage()),
           ),
-        ],
-      ),
-      ShellRoute(
-        builder: (context, state, child) => AdminScaffold(child: child),
-        routes: [
+          // Admin : dans le même shell que l'app pour éviter les crashes au retour
           GoRoute(
             path: '/admin',
             pageBuilder: (_, _) =>

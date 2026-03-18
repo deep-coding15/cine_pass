@@ -24,6 +24,8 @@ class _EventsListPageState extends State<EventsListPage> {
   String _selectedCity = 'Toutes';
   String _selectedGenre = 'Tous';
   String _selectedCategory = 'Toutes';
+  DateTime? _dateFrom;
+  DateTime? _dateTo;
 
   List<FilmResponse> _films = [];
   List<EventResponse> _events = [];
@@ -126,6 +128,8 @@ class _EventsListPageState extends State<EventsListPage> {
       if (_selectedCity != 'Toutes') {
         events = events.where((e) => e.city == _selectedCity).toList();
       }
+      // Filtre par date (événements)
+      events = _filterEventsByDate(events);
       if (query.isNotEmpty) {
         films = films
             .where(
@@ -150,6 +154,7 @@ class _EventsListPageState extends State<EventsListPage> {
       if (_selectedCity != 'Toutes') {
         events = events.where((e) => e.city == _selectedCity).toList();
       }
+      events = _filterEventsByDate(events);
       if (query.isNotEmpty) {
         events = events
             .where(
@@ -168,15 +173,65 @@ class _EventsListPageState extends State<EventsListPage> {
     });
   }
 
+  List<EventResponse> _filterEventsByDate(List<EventResponse> list) {
+    if (_dateFrom == null && _dateTo == null) return list;
+    return list.where((e) {
+      final d = DateTime.tryParse(e.date);
+      if (d == null) return true;
+      final day = DateTime(d.year, d.month, d.day);
+      if (_dateFrom != null && day.isBefore(DateTime(_dateFrom!.year, _dateFrom!.month, _dateFrom!.day))) {
+        return false;
+      }
+      if (_dateTo != null && day.isAfter(DateTime(_dateTo!.year, _dateTo!.month, _dateTo!.day))) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
   void _resetFilters() {
     setState(() {
       _selectedType = 'Tous';
       _selectedCity = 'Toutes';
       _selectedGenre = 'Tous';
       _selectedCategory = 'Toutes';
+      _dateFrom = null;
+      _dateTo = null;
       _searchController.clear();
     });
     _applyFilters();
+  }
+
+  Future<void> _pickDateFrom() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dateFrom ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _dateFrom = picked;
+        if (_dateTo != null && picked.isAfter(_dateTo!)) _dateTo = null;
+        _applyFilters();
+      });
+    }
+  }
+
+  Future<void> _pickDateTo() async {
+    final initial = _dateTo ?? _dateFrom ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: _dateFrom ?? DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _dateTo = picked;
+        _applyFilters();
+      });
+    }
   }
 
   @override
@@ -333,6 +388,32 @@ class _EventsListPageState extends State<EventsListPage> {
                           ),
                         ),
                       ],
+                      if (_selectedType != 'Film') ...[
+                        const SizedBox(width: 12),
+                        _DateFilterChip(
+                          label: 'Du',
+                          date: _dateFrom,
+                          onTap: _pickDateFrom,
+                          onClear: () {
+                            setState(() {
+                              _dateFrom = null;
+                              _applyFilters();
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        _DateFilterChip(
+                          label: 'Au',
+                          date: _dateTo,
+                          onTap: _pickDateTo,
+                          onClear: () {
+                            setState(() {
+                              _dateTo = null;
+                              _applyFilters();
+                            });
+                          },
+                        ),
+                      ],
                       const SizedBox(width: 12),
                       TextButton.icon(
                         onPressed: _resetFilters,
@@ -359,66 +440,76 @@ class _EventsListPageState extends State<EventsListPage> {
           else
             LayoutBuilder(
               builder: (context, constraints) {
-                final crossCount = constraints.maxWidth > 800
-                    ? 4
-                    : (constraints.maxWidth > 500 ? 3 : 2);
+                final w = constraints.maxWidth;
+                final crossCount = w > 1200
+                    ? 6
+                    : (w > 900 ? 5 : (w > 600 ? 4 : (w > 400 ? 3 : 2)));
                 final list = <Widget>[
                   ..._filteredFilms.map(
-                    (film) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Chip(
-                          label: const Text('Film'),
-                          backgroundColor: AppTheme.primaryRed.withValues(
-                            alpha: 0.3,
+                    (film) => ClipRect(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Chip(
+                            label: const Text('Film'),
+                            backgroundColor: AppTheme.primaryRed.withValues(
+                              alpha: 0.3,
+                            ),
+                            labelStyle: const TextStyle(
+                              color: AppTheme.primaryRed,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            padding: EdgeInsets.zero,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
                           ),
-                          labelStyle: const TextStyle(
-                            color: AppTheme.primaryRed,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          padding: EdgeInsets.zero,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        const SizedBox(height: 6),
-                        FilmCard(film: film),
-                      ],
+                          const SizedBox(height: 4),
+                          FilmCard(film: film),
+                        ],
+                      ),
                     ),
                   ),
                   ..._filteredEvents.map(
-                    (event) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Chip(
-                          label: Text(event.category),
-                          backgroundColor: AppTheme.accentGreen.withValues(
-                            alpha: 0.3,
+                    (event) => ClipRect(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Chip(
+                            label: Text(event.category),
+                            backgroundColor: AppTheme.accentGreen.withValues(
+                              alpha: 0.3,
+                            ),
+                            labelStyle: const TextStyle(
+                              color: AppTheme.accentGreen,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            padding: EdgeInsets.zero,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
                           ),
-                          labelStyle: const TextStyle(
-                            color: AppTheme.accentGreen,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          padding: EdgeInsets.zero,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        const SizedBox(height: 6),
-                        EventCard(event: event),
-                      ],
+                          const SizedBox(height: 4),
+                          EventCard(event: event),
+                        ],
+                      ),
                     ),
                   ),
                 ];
+                // Cartes compactes : ratio pour éviter overflow
+                final childAspectRatio = w > 900 ? 0.48 : 0.44;
                 return GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: crossCount,
-                  mainAxisSpacing: 24,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.72,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 14,
+                  childAspectRatio: childAspectRatio,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   children: list,
                 );
               },
@@ -461,6 +552,60 @@ class _DropdownFilter<T extends String> extends StatelessWidget {
               .map((e) => DropdownMenuItem<T>(value: e, child: Text(e)))
               .toList(),
           onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class _DateFilterChip extends StatelessWidget {
+  const _DateFilterChip({
+    required this.label,
+    required this.date,
+    required this.onTap,
+    required this.onClear,
+  });
+
+  final String label;
+  final DateTime? date;
+  final VoidCallback onTap;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = date == null
+        ? label
+        : '${date!.day.toString().padLeft(2, '0')}/${date!.month.toString().padLeft(2, '0')}/${date!.year}';
+    return Material(
+      color: AppTheme.surfaceDark,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.calendar_today_rounded,
+                  size: 16, color: AppTheme.textSecondary),
+              const SizedBox(width: 6),
+              Text(
+                text,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 13,
+                ),
+              ),
+              if (date != null) ...[
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: onClear,
+                  child: Icon(Icons.close, size: 16, color: AppTheme.textSecondary),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

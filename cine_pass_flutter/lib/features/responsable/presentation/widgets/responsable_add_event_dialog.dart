@@ -181,6 +181,9 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
             ) ??
             35.0,
         posterColor: null,
+        posterUrl: _posterUrlController.text.trim().isEmpty
+            ? null
+            : _posterUrlController.text.trim(),
         structureId: _selectedStructureId,
       );
       if (!mounted) return;

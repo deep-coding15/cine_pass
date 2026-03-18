@@ -1,0 +1,6 @@
+class: ProfileResponse
+fields:
+  displayName: String?
+  email: String?
+  phone: String?
+  birthDate: String?

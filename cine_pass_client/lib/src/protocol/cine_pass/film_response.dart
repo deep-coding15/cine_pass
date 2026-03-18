@@ -22,6 +22,7 @@ abstract class FilmResponse implements _i1.SerializableModel {
     this.director,
     this.casting,
     this.posterColor,
+    this.posterUrl,
   });
 
   factory FilmResponse({
@@ -33,6 +34,7 @@ abstract class FilmResponse implements _i1.SerializableModel {
     String? director,
     String? casting,
     int? posterColor,
+    String? posterUrl,
   }) = _FilmResponseImpl;
 
   factory FilmResponse.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -45,6 +47,7 @@ abstract class FilmResponse implements _i1.SerializableModel {
       director: jsonSerialization['director'] as String?,
       casting: jsonSerialization['casting'] as String?,
       posterColor: jsonSerialization['posterColor'] as int?,
+      posterUrl: jsonSerialization['posterUrl'] as String?,
     );
   }
 
@@ -64,6 +67,8 @@ abstract class FilmResponse implements _i1.SerializableModel {
 
   int? posterColor;
 
+  String? posterUrl;
+
   /// Returns a shallow copy of this [FilmResponse]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -76,6 +81,7 @@ abstract class FilmResponse implements _i1.SerializableModel {
     String? director,
     String? casting,
     int? posterColor,
+    String? posterUrl,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -89,6 +95,7 @@ abstract class FilmResponse implements _i1.SerializableModel {
       if (director != null) 'director': director,
       if (casting != null) 'casting': casting,
       if (posterColor != null) 'posterColor': posterColor,
+      if (posterUrl != null) 'posterUrl': posterUrl,
     };
   }
 
@@ -110,6 +117,7 @@ class _FilmResponseImpl extends FilmResponse {
     String? director,
     String? casting,
     int? posterColor,
+    String? posterUrl,
   }) : super._(
          id: id,
          title: title,
@@ -119,6 +127,7 @@ class _FilmResponseImpl extends FilmResponse {
          director: director,
          casting: casting,
          posterColor: posterColor,
+         posterUrl: posterUrl,
        );
 
   /// Returns a shallow copy of this [FilmResponse]
@@ -134,6 +143,7 @@ class _FilmResponseImpl extends FilmResponse {
     Object? director = _Undefined,
     Object? casting = _Undefined,
     Object? posterColor = _Undefined,
+    Object? posterUrl = _Undefined,
   }) {
     return FilmResponse(
       id: id ?? this.id,
@@ -144,6 +154,7 @@ class _FilmResponseImpl extends FilmResponse {
       director: director is String? ? director : this.director,
       casting: casting is String? ? casting : this.casting,
       posterColor: posterColor is int? ? posterColor : this.posterColor,
+      posterUrl: posterUrl is String? ? posterUrl : this.posterUrl,
     );
   }
 }

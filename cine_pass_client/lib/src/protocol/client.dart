@@ -233,6 +233,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     String? director,
     String? casting,
     int? posterColor,
+    String? posterUrl,
     Object? dateSortie,
     Object? dateFin,
     String? audience,
@@ -247,6 +248,7 @@ class EndpointCinePass extends _i2.EndpointRef {
       'director': director,
       'casting': casting,
       'posterColor': posterColor,
+      'posterUrl': posterUrl,
       'dateSortie': dateSortie,
       'dateFin': dateFin,
       'audience': audience,
@@ -266,6 +268,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     required int placesTotal,
     required double prixBase,
     int? posterColor,
+    String? posterUrl,
     String? structureId,
   }) => caller.callServerEndpoint<_i9.EventResponse?>(
     'cinePass',
@@ -282,6 +285,7 @@ class EndpointCinePass extends _i2.EndpointRef {
       'placesTotal': placesTotal,
       'prixBase': prixBase,
       'posterColor': posterColor,
+      'posterUrl': posterUrl,
       'structureId': structureId,
     },
   );
@@ -316,6 +320,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     int? placesTotal,
     double? prixBase,
     int? posterColor,
+    String? posterUrl,
   }) => caller.callServerEndpoint<_i9.EventResponse?>(
     'cinePass',
     'updateEvent',
@@ -332,6 +337,7 @@ class EndpointCinePass extends _i2.EndpointRef {
       'placesTotal': placesTotal,
       'prixBase': prixBase,
       'posterColor': posterColor,
+      'posterUrl': posterUrl,
     },
   );
 
@@ -432,6 +438,30 @@ class EndpointCinePass extends _i2.EndpointRef {
         'cinePass',
         'getRapportCA',
         {'periode': periode},
+      );
+
+  /// Profil de l'utilisateur connecté.
+  _i3.Future<_i12.ProfileResponse?> getProfile() =>
+      caller.callServerEndpoint<_i12.ProfileResponse?>(
+        'cinePass',
+        'getProfile',
+        {},
+      );
+
+  /// Met à jour le profil (displayName, phone, birthDate).
+  _i3.Future<bool> updateProfile({
+    String? displayName,
+    String? phone,
+    String? birthDate,
+  }) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'updateProfile',
+        {
+          if (displayName != null) 'displayName': displayName,
+          if (phone != null) 'phone': phone,
+          if (birthDate != null) 'birthDate': birthDate,
+        },
       );
 
   /// Admin: créer une séance.

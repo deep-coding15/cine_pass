@@ -9,10 +9,12 @@ import '../state/pending_reservation_state.dart';
 import 'app_drawer.dart';
 import 'animated_background.dart';
 import 'cinepass_logo.dart';
+import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 
 class MainScaffold extends StatefulWidget {
-  const MainScaffold({super.key, required this.child});
+  const MainScaffold({super.key, required this.location, required this.child});
 
+  final String location;
   final Widget child;
 
   @override
@@ -24,12 +26,15 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = widget.location.startsWith('/admin');
     final auth = context.watch<AuthState>();
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppTheme.backgroundDark,
-      appBar: AppBar(
+      appBar: isAdmin
+          ? null
+          : AppBar(
         leading: IconButton(
           icon: const Icon(Icons.menu_rounded),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -141,14 +146,44 @@ class _MainScaffoldState extends State<MainScaffold> {
           ],
         ],
       ),
-      drawer: Drawer(
-        backgroundColor: AppTheme.sidebarDark,
-        elevation: 0,
-        child: const AppDrawer(),
-      ),
-      body: AnimatedBackground(
-        opacity: 0.06,
-        child: widget.child,
+      drawer: isAdmin
+          ? null
+          : Drawer(
+              backgroundColor: AppTheme.sidebarDark,
+              elevation: 0,
+              child: const AppDrawer(),
+            ),
+      body: KeyedSubtree(
+        key: ValueKey<bool>(isAdmin),
+        child: isAdmin
+            ? Row(
+                children: [
+                  const AdminSidebar(),
+                  Expanded(child: widget.child),
+                ],
+              )
+            : Stack(
+                fit: StackFit.expand,
+                children: [
+                  AnimatedBackground(
+                    opacity: 0.06,
+                    child: widget.child,
+                  ),
+                  // Bande gauche : survol pour ouvrir le drawer (sidebar)
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 24,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) =>
+                          _scaffoldKey.currentState?.openDrawer(),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

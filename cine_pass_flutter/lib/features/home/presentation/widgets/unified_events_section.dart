@@ -51,6 +51,9 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
     }
   }
 
+  static const double _cardWidth = 180;
+  static const double _rowHeight = 400;
+
   @override
   Widget build(BuildContext context) {
     final allCount = _films.length + _events.length;
@@ -84,7 +87,7 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         if (_loading)
           const Padding(
             padding: EdgeInsets.all(32),
@@ -103,74 +106,95 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
             ),
           )
         else
-          SizedBox(
-            height: 310,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: [
-                ..._films.map(
-                  (film) => Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: SizedBox(
-                      width: 160,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Chip(
-                            label: const Text('Film'),
-                            backgroundColor: AppTheme.primaryRed.withValues(
-                              alpha: 0.3,
-                            ),
-                            labelStyle: const TextStyle(
-                              color: AppTheme.primaryRed,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          const SizedBox(height: 6),
-                          SizedBox(height: 265, child: FilmCard(film: film)),
-                        ],
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_films.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.movie_rounded,
+                        size: 18,
+                        color: AppTheme.primaryRed,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Films',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppTheme.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                ..._events.map(
-                  (event) => Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: SizedBox(
-                      width: 200,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Chip(
-                            label: Text(event.category),
-                            backgroundColor: AppTheme.accentGreen.withValues(
-                              alpha: 0.3,
-                            ),
-                            labelStyle: const TextStyle(
-                              color: AppTheme.accentGreen,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: _rowHeight,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    clipBehavior: Clip.hardEdge,
+                    children: _films.map((film) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: SizedBox(
+                          width: _cardWidth,
+                          child: ClipRect(
+                            child: FilmCard(film: film),
                           ),
-                          const SizedBox(height: 6),
-                          SizedBox(height: 265, child: EventCard(event: event)),
-                        ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 28),
+              ],
+              if (_events.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 18,
+                        color: AppTheme.accentGreen,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Événements',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppTheme.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: _rowHeight,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    clipBehavior: Clip.hardEdge,
+                    children: _events.map((event) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: SizedBox(
+                          width: _cardWidth,
+                          child: ClipRect(
+                            child: EventCard(event: event),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
       ],
     );

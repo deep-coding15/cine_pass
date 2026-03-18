@@ -14,4 +14,5 @@ fields:
   placesTotal: int
   price: double
   posterColor: int?
+  posterUrl: String?
   availableOptions: List<String>?

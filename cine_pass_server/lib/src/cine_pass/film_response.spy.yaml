@@ -9,3 +9,4 @@ fields:
   director: String?
   casting: String?
   posterColor: int?
+  posterUrl: String?
