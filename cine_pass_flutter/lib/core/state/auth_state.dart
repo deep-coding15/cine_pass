@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
@@ -18,6 +19,7 @@ class AuthState extends ChangeNotifier {
   bool _isResponsable = false;
   String _userName = '';
   String _userEmail = '';
+  bool _isRefreshingProfile = false;
 
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin => _isAdmin;
@@ -73,6 +75,10 @@ class AuthState extends ChangeNotifier {
       if (notify && changed) {
         notifyListeners();
       }
+
+      // After we know we're authenticated, pull real user data from backend.
+      // We intentionally do this asynchronously so auth state updates immediately.
+      unawaited(refreshProfileFromServer(notify: true));
       return;
     }
 
@@ -91,6 +97,39 @@ class AuthState extends ChangeNotifier {
 
     if (notify && changed) {
       notifyListeners();
+    }
+  }
+
+  /// Charge les infos "réelles" depuis l'API (profil) et met à jour `userName` / `userEmail`.
+  /// Si le serveur ne renvoie rien (ou si non authentifié), on garde les valeurs existantes.
+  Future<void> refreshProfileFromServer({bool notify = true}) async {
+    if (!client.auth.isAuthenticated) return;
+    if (_isRefreshingProfile) return;
+    _isRefreshingProfile = true;
+    try {
+      final ProfileResponse? profile = await client.cinePass.getProfile();
+      if (profile == null) return;
+
+      final nextName = (profile.displayName ?? '').trim();
+      final nextEmail = (profile.email ?? '').trim();
+
+      var changed = false;
+      if (nextName.isNotEmpty && nextName != _userName) {
+        _userName = nextName;
+        changed = true;
+      }
+      if (nextEmail.isNotEmpty && nextEmail != _userEmail) {
+        _userEmail = nextEmail;
+        changed = true;
+      }
+
+      if (notify && changed) {
+        notifyListeners();
+      }
+    } catch (_) {
+      // Intentionally swallow: auth state remains usable even if profile endpoint fails.
+    } finally {
+      _isRefreshingProfile = false;
     }
   }
 

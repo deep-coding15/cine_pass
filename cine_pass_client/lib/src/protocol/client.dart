@@ -32,9 +32,11 @@ import 'package:cine_pass_client/src/protocol/cine_pass/reservation_response.dar
     as _i12;
 import 'package:cine_pass_client/src/protocol/cine_pass/rapport_ca_response.dart'
     as _i13;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i14;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i15;
-import 'protocol.dart' as _i16;
+import 'package:cine_pass_client/src/protocol/cine_pass/profile_response.dart'
+    as _i14;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i15;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i16;
+import 'protocol.dart' as _i17;
 
 /// Exposes Google sign-in methods to the client.
 /// {@category Endpoint}
@@ -440,30 +442,6 @@ class EndpointCinePass extends _i2.EndpointRef {
         {'periode': periode},
       );
 
-  /// Profil de l'utilisateur connecté.
-  _i3.Future<_i12.ProfileResponse?> getProfile() =>
-      caller.callServerEndpoint<_i12.ProfileResponse?>(
-        'cinePass',
-        'getProfile',
-        {},
-      );
-
-  /// Met à jour le profil (displayName, phone, birthDate).
-  _i3.Future<bool> updateProfile({
-    String? displayName,
-    String? phone,
-    String? birthDate,
-  }) =>
-      caller.callServerEndpoint<bool>(
-        'cinePass',
-        'updateProfile',
-        {
-          if (displayName != null) 'displayName': displayName,
-          if (phone != null) 'phone': phone,
-          if (birthDate != null) 'birthDate': birthDate,
-        },
-      );
-
   /// Admin: créer une séance.
   _i3.Future<_i6.SeanceResponse?> createSeance({
     required String filmId,
@@ -486,6 +464,31 @@ class EndpointCinePass extends _i2.EndpointRef {
       'prixBase': prixBase,
     },
   );
+
+  /// Profil de l'utilisateur connecté (displayName, phone, birthDate).
+  /// Retourne null si non authentifié.
+  _i3.Future<_i14.ProfileResponse?> getProfile() =>
+      caller.callServerEndpoint<_i14.ProfileResponse?>(
+        'cinePass',
+        'getProfile',
+        {},
+      );
+
+  /// Met à jour le profil de l'utilisateur connecté.
+  /// Seuls les champs non null sont mis à jour.
+  _i3.Future<bool> updateProfile({
+    String? displayName,
+    String? phone,
+    String? birthDate,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'updateProfile',
+    {
+      'displayName': displayName,
+      'phone': phone,
+      'birthDate': birthDate,
+    },
+  );
 }
 
 /// This is an example endpoint that returns a greeting message through
@@ -498,8 +501,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i14.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i14.Greeting>(
+  _i3.Future<_i15.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i15.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -508,12 +511,12 @@ class EndpointGreeting extends _i2.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i15.Caller(client);
+    auth = _i16.Caller(client);
     serverpod_auth_idp = _i1.Caller(client);
     serverpod_auth_core = _i4.Caller(client);
   }
 
-  late final _i15.Caller auth;
+  late final _i16.Caller auth;
 
   late final _i1.Caller serverpod_auth_idp;
 
@@ -540,7 +543,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i16.Protocol(),
+         _i17.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

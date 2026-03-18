@@ -342,6 +342,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int?>(),
               nullable: true,
             ),
+            'posterUrl': _i1.ParameterDescription(
+              name: 'posterUrl',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
             'dateSortie': _i1.ParameterDescription(
               name: 'dateSortie',
               type: _i1.getType<Object?>(),
@@ -372,6 +377,7 @@ class Endpoints extends _i1.EndpointDispatch {
                     director: params['director'],
                     casting: params['casting'],
                     posterColor: params['posterColor'],
+                    posterUrl: params['posterUrl'],
                     dateSortie: params['dateSortie'],
                     dateFin: params['dateFin'],
                     audience: params['audience'],
@@ -435,6 +441,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int?>(),
               nullable: true,
             ),
+            'posterUrl': _i1.ParameterDescription(
+              name: 'posterUrl',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
             'structureId': _i1.ParameterDescription(
               name: 'structureId',
               type: _i1.getType<String?>(),
@@ -459,6 +470,7 @@ class Endpoints extends _i1.EndpointDispatch {
                     placesTotal: params['placesTotal'],
                     prixBase: params['prixBase'],
                     posterColor: params['posterColor'],
+                    posterUrl: params['posterUrl'],
                     structureId: params['structureId'],
                   ),
         ),
@@ -554,6 +566,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int?>(),
               nullable: true,
             ),
+            'posterUrl': _i1.ParameterDescription(
+              name: 'posterUrl',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -574,6 +591,7 @@ class Endpoints extends _i1.EndpointDispatch {
                     placesTotal: params['placesTotal'],
                     prixBase: params['prixBase'],
                     posterColor: params['posterColor'],
+                    posterUrl: params['posterUrl'],
                   ),
         ),
         'deleteEvent': _i1.MethodConnector(
@@ -816,6 +834,47 @@ class Endpoints extends _i1.EndpointDispatch {
                     format: params['format'],
                     type: params['type'],
                     prixBase: params['prixBase'],
+                  ),
+        ),
+        'getProfile': _i1.MethodConnector(
+          name: 'getProfile',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i5.CinePassEndpoint)
+                  .getProfile(session),
+        ),
+        'updateProfile': _i1.MethodConnector(
+          name: 'updateProfile',
+          params: {
+            'displayName': _i1.ParameterDescription(
+              name: 'displayName',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'phone': _i1.ParameterDescription(
+              name: 'phone',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'birthDate': _i1.ParameterDescription(
+              name: 'birthDate',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i5.CinePassEndpoint).updateProfile(
+                    session,
+                    displayName: params['displayName'],
+                    phone: params['phone'],
+                    birthDate: params['birthDate'],
                   ),
         ),
       },

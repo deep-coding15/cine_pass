@@ -33,5 +33,7 @@ cinePass:
   - getReservationsForMyStructures:
   - getRapportCA:
   - createSeance:
+  - getProfile:
+  - updateProfile:
 greeting:
   - hello:

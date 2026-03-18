@@ -1150,18 +1150,28 @@ class CinePassEndpoint extends Endpoint {
         parameters: QueryParameters.named({'uid': userId}),
       );
       String? email;
+      String? fullName;
       try {
-        final userRows = await session.db.unsafeQuery(
-          r'SELECT "email" FROM "serverpod_auth_core_user" WHERE "id" = (@uid)::uuid',
+        // NOTE: `serverpod_auth_core_user` doesn't store email. It's on `serverpod_auth_core_profile`.
+        final authProfileRows = await session.db.unsafeQuery(
+          r'''
+          SELECT "fullName", "userName", "email"
+          FROM "serverpod_auth_core_profile"
+          WHERE "authUserId" = (@uid)::uuid
+          ''',
           parameters: QueryParameters.named({'uid': userId}),
         );
-        if (userRows.isNotEmpty && userRows.first.isNotEmpty) {
-          email = userRows.first[0] as String?;
+        if (authProfileRows.isNotEmpty && authProfileRows.first.isNotEmpty) {
+          final row = authProfileRows.first;
+          fullName = row.isNotEmpty ? row[0] as String? : null;
+          final userName = row.length > 1 ? row[1] as String? : null;
+          email = row.length > 2 ? row[2] as String? : null;
+          fullName ??= userName;
         }
       } catch (_) {}
       if (profileRows.isEmpty) {
         return ProfileResponse(
-          displayName: null,
+          displayName: fullName,
           email: email,
           phone: null,
           birthDate: null,
@@ -1176,7 +1186,7 @@ class CinePassEndpoint extends Endpoint {
                   : row[2].toString())
           : null;
       return ProfileResponse(
-        displayName: row.isNotEmpty ? row[0] as String? : null,
+        displayName: (row.isNotEmpty ? row[0] as String? : null) ?? fullName,
         email: email,
         phone: row.length > 1 ? row[1] as String? : null,
         birthDate: birthDate,

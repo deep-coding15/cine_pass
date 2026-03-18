@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
+import '../../../../core/state/auth_state.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/state/pending_reservation_state.dart';
@@ -36,6 +37,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
 
   Future<void> _onGoogleAuthenticated() async {
     if (!mounted) return;
+    // Pull real user info from backend after login.
+    await context.read<AuthState>().refreshProfileFromServer();
     await _handlePostAuthRedirect();
   }
 
@@ -113,6 +116,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
       }
 
       await client.auth.updateSignedInUser(authSuccess);
+      if (!mounted) return;
+
+      // Pull real user info from backend after login.
+      await context.read<AuthState>().refreshProfileFromServer();
       if (!mounted) return;
 
       setState(() {
