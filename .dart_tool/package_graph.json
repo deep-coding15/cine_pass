@@ -16,7 +16,7 @@
       "name": "cine_pass_client",
       "version": "0.0.0",
       "dependencies": [
-        "serverpod_auth_idp_client",
+        "serverpod_auth_client",
         "serverpod_client"
       ],
       "devDependencies": []
@@ -25,8 +25,11 @@
       "name": "cine_pass_server",
       "version": "0.0.0",
       "dependencies": [
+        "crypto",
         "serverpod",
-        "serverpod_auth_idp_server"
+        "serverpod_auth_core_server",
+        "serverpod_auth_idp_server",
+        "serverpod_auth_server"
       ],
       "devDependencies": [
         "lints",
@@ -44,13 +47,10 @@
         "fl_chart",
         "flutter",
         "go_router",
-        "pdf",
-        "printing",
         "provider",
         "qr_flutter",
         "serverpod_auth_idp_flutter",
-        "serverpod_flutter",
-        "shared_preferences"
+        "serverpod_flutter"
       ],
       "devDependencies": [
         "flutter_lints",
@@ -230,50 +230,6 @@
       ]
     },
     {
-      "name": "shared_preferences",
-      "version": "2.5.4",
-      "dependencies": [
-        "flutter",
-        "shared_preferences_android",
-        "shared_preferences_foundation",
-        "shared_preferences_linux",
-        "shared_preferences_platform_interface",
-        "shared_preferences_web",
-        "shared_preferences_windows"
-      ]
-    },
-    {
-      "name": "printing",
-      "version": "5.14.2",
-      "dependencies": [
-        "ffi",
-        "flutter",
-        "flutter_web_plugins",
-        "http",
-        "image",
-        "meta",
-        "pdf",
-        "pdf_widget_wrapper",
-        "plugin_platform_interface",
-        "web"
-      ]
-    },
-    {
-      "name": "pdf",
-      "version": "3.11.3",
-      "dependencies": [
-        "archive",
-        "barcode",
-        "bidi",
-        "crypto",
-        "image",
-        "meta",
-        "path_parsing",
-        "vector_math",
-        "xml"
-      ]
-    },
-    {
       "name": "fl_chart",
       "version": "0.69.2",
       "dependencies": [
@@ -430,6 +386,29 @@
       "dependencies": []
     },
     {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
+      "name": "serverpod_auth_core_server",
+      "version": "3.4.0",
+      "dependencies": [
+        "clock",
+        "crypto",
+        "dart_jsonwebtoken",
+        "http",
+        "image",
+        "meta",
+        "pointycastle",
+        "serverpod",
+        "serverpod_shared",
+        "uuid"
+      ]
+    },
+    {
       "name": "serverpod_auth_idp_server",
       "version": "3.4.0",
       "dependencies": [
@@ -446,6 +425,25 @@
         "serverpod_auth_core_server",
         "serverpod_shared",
         "sign_in_with_apple_server"
+      ]
+    },
+    {
+      "name": "serverpod_auth_server",
+      "version": "3.4.0",
+      "dependencies": [
+        "crypto",
+        "email_validator",
+        "googleapis",
+        "googleapis_auth",
+        "http",
+        "image",
+        "jose",
+        "meta",
+        "openid_client",
+        "pointycastle",
+        "serverpod",
+        "serverpod_serialization",
+        "serverpod_shared"
       ]
     },
     {
@@ -486,10 +484,10 @@
       ]
     },
     {
-      "name": "serverpod_auth_idp_client",
+      "name": "serverpod_auth_client",
       "version": "3.4.0",
       "dependencies": [
-        "serverpod_auth_core_client",
+        "lints",
         "serverpod_client"
       ]
     },
@@ -599,136 +597,6 @@
       ]
     },
     {
-      "name": "shared_preferences_windows",
-      "version": "2.4.1",
-      "dependencies": [
-        "file",
-        "flutter",
-        "path",
-        "path_provider_platform_interface",
-        "path_provider_windows",
-        "shared_preferences_platform_interface"
-      ]
-    },
-    {
-      "name": "shared_preferences_web",
-      "version": "2.4.3",
-      "dependencies": [
-        "flutter",
-        "flutter_web_plugins",
-        "shared_preferences_platform_interface",
-        "web"
-      ]
-    },
-    {
-      "name": "shared_preferences_platform_interface",
-      "version": "2.4.1",
-      "dependencies": [
-        "flutter",
-        "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "shared_preferences_linux",
-      "version": "2.4.1",
-      "dependencies": [
-        "file",
-        "flutter",
-        "path",
-        "path_provider_linux",
-        "path_provider_platform_interface",
-        "shared_preferences_platform_interface"
-      ]
-    },
-    {
-      "name": "shared_preferences_foundation",
-      "version": "2.5.6",
-      "dependencies": [
-        "flutter",
-        "shared_preferences_platform_interface"
-      ]
-    },
-    {
-      "name": "shared_preferences_android",
-      "version": "2.4.21",
-      "dependencies": [
-        "flutter",
-        "shared_preferences_platform_interface"
-      ]
-    },
-    {
-      "name": "pdf_widget_wrapper",
-      "version": "1.0.4",
-      "dependencies": [
-        "flutter",
-        "pdf"
-      ]
-    },
-    {
-      "name": "image",
-      "version": "4.5.4",
-      "dependencies": [
-        "archive",
-        "meta",
-        "xml"
-      ]
-    },
-    {
-      "name": "http",
-      "version": "1.6.0",
-      "dependencies": [
-        "async",
-        "http_parser",
-        "meta",
-        "web"
-      ]
-    },
-    {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
-      "name": "path_parsing",
-      "version": "1.1.0",
-      "dependencies": [
-        "meta",
-        "vector_math"
-      ]
-    },
-    {
-      "name": "crypto",
-      "version": "3.0.7",
-      "dependencies": [
-        "typed_data"
-      ]
-    },
-    {
-      "name": "bidi",
-      "version": "2.0.13",
-      "dependencies": []
-    },
-    {
-      "name": "barcode",
-      "version": "2.2.9",
-      "dependencies": [
-        "meta",
-        "qr"
-      ]
-    },
-    {
-      "name": "archive",
-      "version": "4.0.9",
-      "dependencies": [
-        "path",
-        "posix"
-      ]
-    },
-    {
       "name": "equatable",
       "version": "2.0.8",
       "dependencies": [
@@ -763,6 +631,14 @@
         "meta",
         "sign_in_with_apple_platform_interface",
         "sign_in_with_apple_web"
+      ]
+    },
+    {
+      "name": "serverpod_auth_idp_client",
+      "version": "3.4.0",
+      "dependencies": [
+        "serverpod_auth_core_client",
+        "serverpod_client"
       ]
     },
     {
@@ -1188,6 +1064,16 @@
       ]
     },
     {
+      "name": "http",
+      "version": "1.6.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
+      ]
+    },
+    {
       "name": "dart_style",
       "version": "3.1.7",
       "dependencies": [
@@ -1255,28 +1141,11 @@
       "dependencies": []
     },
     {
-      "name": "sign_in_with_apple_server",
-      "version": "1.0.0",
+      "name": "archive",
+      "version": "4.0.9",
       "dependencies": [
-        "dart_jsonwebtoken",
-        "http",
-        "meta"
-      ]
-    },
-    {
-      "name": "serverpod_auth_core_server",
-      "version": "3.4.0",
-      "dependencies": [
-        "clock",
-        "crypto",
-        "dart_jsonwebtoken",
-        "http",
-        "image",
-        "meta",
-        "pointycastle",
-        "serverpod",
-        "serverpod_shared",
-        "uuid"
+        "path",
+        "posix"
       ]
     },
     {
@@ -1285,6 +1154,34 @@
       "dependencies": [
         "collection",
         "convert"
+      ]
+    },
+    {
+      "name": "image",
+      "version": "4.8.0",
+      "dependencies": [
+        "archive",
+        "meta",
+        "xml"
+      ]
+    },
+    {
+      "name": "dart_jsonwebtoken",
+      "version": "3.3.2",
+      "dependencies": [
+        "clock",
+        "convert",
+        "ed25519_edwards",
+        "pointycastle"
+      ]
+    },
+    {
+      "name": "sign_in_with_apple_server",
+      "version": "1.0.0",
+      "dependencies": [
+        "dart_jsonwebtoken",
+        "http",
+        "meta"
       ]
     },
     {
@@ -1319,13 +1216,32 @@
       ]
     },
     {
-      "name": "dart_jsonwebtoken",
-      "version": "3.3.2",
+      "name": "openid_client",
+      "version": "0.4.9+2",
       "dependencies": [
+        "args",
         "clock",
-        "convert",
-        "ed25519_edwards",
-        "pointycastle"
+        "http",
+        "jose",
+        "logging",
+        "meta",
+        "pointycastle",
+        "web"
+      ]
+    },
+    {
+      "name": "jose",
+      "version": "0.3.5",
+      "dependencies": [
+        "archive",
+        "asn1lib",
+        "collection",
+        "crypto_keys",
+        "http",
+        "http_parser",
+        "meta",
+        "typed_data",
+        "x509"
       ]
     },
     {
@@ -1384,14 +1300,6 @@
       "name": "mustache_template",
       "version": "2.0.3",
       "dependencies": []
-    },
-    {
-      "name": "serverpod_auth_core_client",
-      "version": "3.4.0",
-      "dependencies": [
-        "clock",
-        "serverpod_client"
-      ]
     },
     {
       "name": "path_provider_windows",
@@ -1462,41 +1370,6 @@
       ]
     },
     {
-      "name": "file",
-      "version": "7.0.1",
-      "dependencies": [
-        "meta",
-        "path"
-      ]
-    },
-    {
-      "name": "http_parser",
-      "version": "4.1.2",
-      "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.2",
-      "dependencies": [
-        "collection",
-        "meta"
-      ]
-    },
-    {
-      "name": "posix",
-      "version": "6.5.0",
-      "dependencies": [
-        "ffi",
-        "meta",
-        "path"
-      ]
-    },
-    {
       "name": "sign_in_with_apple_web",
       "version": "3.0.0",
       "dependencies": [
@@ -1512,6 +1385,14 @@
         "flutter",
         "meta",
         "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "serverpod_auth_core_client",
+      "version": "3.4.0",
+      "dependencies": [
+        "clock",
+        "serverpod_client"
       ]
     },
     {
@@ -1666,6 +1547,16 @@
       "dependencies": []
     },
     {
+      "name": "http_parser",
+      "version": "4.1.2",
+      "dependencies": [
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
+      ]
+    },
+    {
       "name": "convert",
       "version": "3.1.2",
       "dependencies": [
@@ -1744,6 +1635,34 @@
       ]
     },
     {
+      "name": "posix",
+      "version": "6.5.0",
+      "dependencies": [
+        "ffi",
+        "meta",
+        "path"
+      ]
+    },
+    {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "ed25519_edwards",
+      "version": "0.3.1",
+      "dependencies": [
+        "adaptive_number",
+        "collection",
+        "convert",
+        "crypto"
+      ]
+    },
+    {
       "name": "cbor",
       "version": "6.5.1",
       "dependencies": [
@@ -1770,13 +1689,22 @@
       ]
     },
     {
-      "name": "ed25519_edwards",
-      "version": "0.3.1",
+      "name": "x509",
+      "version": "0.2.4+3",
       "dependencies": [
-        "adaptive_number",
+        "asn1lib",
+        "crypto_keys",
+        "quiver"
+      ]
+    },
+    {
+      "name": "crypto_keys",
+      "version": "0.3.0+2",
+      "dependencies": [
         "collection",
-        "convert",
-        "crypto"
+        "meta",
+        "pointycastle",
+        "quiver"
       ]
     },
     {
@@ -1906,6 +1834,14 @@
       ]
     },
     {
+      "name": "path_parsing",
+      "version": "1.1.0",
+      "dependencies": [
+        "meta",
+        "vector_math"
+      ]
+    },
+    {
       "name": "dbus",
       "version": "0.7.12",
       "dependencies": [
@@ -1916,9 +1852,32 @@
       ]
     },
     {
+      "name": "file",
+      "version": "7.0.1",
+      "dependencies": [
+        "meta",
+        "path"
+      ]
+    },
+    {
       "name": "type_plus",
       "version": "2.1.1",
       "dependencies": []
+    },
+    {
+      "name": "petitparser",
+      "version": "7.0.2",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
+    },
+    {
+      "name": "adaptive_number",
+      "version": "1.0.0",
+      "dependencies": [
+        "fixnum"
+      ]
     },
     {
       "name": "hex",
@@ -1926,10 +1885,10 @@
       "dependencies": []
     },
     {
-      "name": "adaptive_number",
-      "version": "1.0.0",
+      "name": "quiver",
+      "version": "3.2.2",
       "dependencies": [
-        "fixnum"
+        "matcher"
       ]
     },
     {

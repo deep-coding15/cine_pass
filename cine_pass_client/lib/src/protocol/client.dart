@@ -26,187 +26,44 @@ import 'package:cine_pass_client/src/protocol/salle.dart' as _i8;
 import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
     as _i9;
 import 'package:cine_pass_client/src/protocol/structure.dart' as _i10;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i11;
-import 'protocol.dart' as _i12;
+import 'package:cine_pass_client/src/protocol/cine_pass/demande_responsable_response.dart'
+    as _i11;
+import 'package:cine_pass_client/src/protocol/cine_pass/reservation_response.dart'
+    as _i12;
+import 'package:cine_pass_client/src/protocol/cine_pass/rapport_ca_response.dart'
+    as _i13;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i14;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i15;
+import 'protocol.dart' as _i16;
 
-/// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
-/// are made available on the server and enable the corresponding sign-in widget
-/// on the client.
+/// Exposes Google sign-in methods to the client.
 /// {@category Endpoint}
-class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
-  EndpointEmailIdp(_i2.EndpointCaller caller) : super(caller);
+class EndpointGoogleIdp extends _i1.EndpointGoogleIdpBase {
+  EndpointGoogleIdp(_i2.EndpointCaller caller) : super(caller);
 
   @override
-  String get name => 'emailIdp';
+  String get name => 'googleIdp';
 
-  /// Logs in the user and returns a new session.
+  /// Validates a Google ID token and either logs in the associated user or
+  /// creates a new user account if the Google account ID is not yet known.
   ///
-  /// Throws an [EmailAccountLoginException] in case of errors, with reason:
-  /// - [EmailAccountLoginExceptionReason.invalidCredentials] if the email or
-  ///   password is incorrect.
-  /// - [EmailAccountLoginExceptionReason.tooManyAttempts] if there have been
-  ///   too many failed login attempts.
-  ///
-  /// Throws an [AuthUserBlockedException] if the auth user is blocked.
+  /// If a new user is created an associated [UserProfile] is also created.
   @override
   _i3.Future<_i4.AuthSuccess> login({
-    required String email,
-    required String password,
+    required String idToken,
+    required String? accessToken,
   }) => caller.callServerEndpoint<_i4.AuthSuccess>(
-    'emailIdp',
+    'googleIdp',
     'login',
     {
-      'email': email,
-      'password': password,
-    },
-  );
-
-  /// Starts the registration for a new user account with an email-based login
-  /// associated to it.
-  ///
-  /// Upon successful completion of this method, an email will have been
-  /// sent to [email] with a verification link, which the user must open to
-  /// complete the registration.
-  ///
-  /// Always returns a account request ID, which can be used to complete the
-  /// registration. If the email is already registered, the returned ID will not
-  /// be valid.
-  @override
-  _i3.Future<_i2.UuidValue> startRegistration({required String email}) =>
-      caller.callServerEndpoint<_i2.UuidValue>(
-        'emailIdp',
-        'startRegistration',
-        {'email': email},
-      );
-
-  /// Verifies an account request code and returns a token
-  /// that can be used to complete the account creation.
-  ///
-  /// Throws an [EmailAccountRequestException] in case of errors, with reason:
-  /// - [EmailAccountRequestExceptionReason.expired] if the account request has
-  ///   already expired.
-  /// - [EmailAccountRequestExceptionReason.policyViolation] if the password
-  ///   does not comply with the password policy.
-  /// - [EmailAccountRequestExceptionReason.invalid] if no request exists
-  ///   for the given [accountRequestId] or [verificationCode] is invalid.
-  @override
-  _i3.Future<String> verifyRegistrationCode({
-    required _i2.UuidValue accountRequestId,
-    required String verificationCode,
-  }) => caller.callServerEndpoint<String>(
-    'emailIdp',
-    'verifyRegistrationCode',
-    {
-      'accountRequestId': accountRequestId,
-      'verificationCode': verificationCode,
-    },
-  );
-
-  /// Completes a new account registration, creating a new auth user with a
-  /// profile and attaching the given email account to it.
-  ///
-  /// Throws an [EmailAccountRequestException] in case of errors, with reason:
-  /// - [EmailAccountRequestExceptionReason.expired] if the account request has
-  ///   already expired.
-  /// - [EmailAccountRequestExceptionReason.policyViolation] if the password
-  ///   does not comply with the password policy.
-  /// - [EmailAccountRequestExceptionReason.invalid] if the [registrationToken]
-  ///   is invalid.
-  ///
-  /// Throws an [AuthUserBlockedException] if the auth user is blocked.
-  ///
-  /// Returns a session for the newly created user.
-  @override
-  _i3.Future<_i4.AuthSuccess> finishRegistration({
-    required String registrationToken,
-    required String password,
-  }) => caller.callServerEndpoint<_i4.AuthSuccess>(
-    'emailIdp',
-    'finishRegistration',
-    {
-      'registrationToken': registrationToken,
-      'password': password,
-    },
-  );
-
-  /// Requests a password reset for [email].
-  ///
-  /// If the email address is registered, an email with reset instructions will
-  /// be send out. If the email is unknown, this method will have no effect.
-  ///
-  /// Always returns a password reset request ID, which can be used to complete
-  /// the reset. If the email is not registered, the returned ID will not be
-  /// valid.
-  ///
-  /// Throws an [EmailAccountPasswordResetException] in case of errors, with reason:
-  /// - [EmailAccountPasswordResetExceptionReason.tooManyAttempts] if the user has
-  ///   made too many attempts trying to request a password reset.
-  ///
-  @override
-  _i3.Future<_i2.UuidValue> startPasswordReset({required String email}) =>
-      caller.callServerEndpoint<_i2.UuidValue>(
-        'emailIdp',
-        'startPasswordReset',
-        {'email': email},
-      );
-
-  /// Verifies a password reset code and returns a finishPasswordResetToken
-  /// that can be used to finish the password reset.
-  ///
-  /// Throws an [EmailAccountPasswordResetException] in case of errors, with reason:
-  /// - [EmailAccountPasswordResetExceptionReason.expired] if the password reset
-  ///   request has already expired.
-  /// - [EmailAccountPasswordResetExceptionReason.tooManyAttempts] if the user has
-  ///   made too many attempts trying to verify the password reset.
-  /// - [EmailAccountPasswordResetExceptionReason.invalid] if no request exists
-  ///   for the given [passwordResetRequestId] or [verificationCode] is invalid.
-  ///
-  /// If multiple steps are required to complete the password reset, this endpoint
-  /// should be overridden to return credentials for the next step instead
-  /// of the credentials for setting the password.
-  @override
-  _i3.Future<String> verifyPasswordResetCode({
-    required _i2.UuidValue passwordResetRequestId,
-    required String verificationCode,
-  }) => caller.callServerEndpoint<String>(
-    'emailIdp',
-    'verifyPasswordResetCode',
-    {
-      'passwordResetRequestId': passwordResetRequestId,
-      'verificationCode': verificationCode,
-    },
-  );
-
-  /// Completes a password reset request by setting a new password.
-  ///
-  /// The [verificationCode] returned from [verifyPasswordResetCode] is used to
-  /// validate the password reset request.
-  ///
-  /// Throws an [EmailAccountPasswordResetException] in case of errors, with reason:
-  /// - [EmailAccountPasswordResetExceptionReason.expired] if the password reset
-  ///   request has already expired.
-  /// - [EmailAccountPasswordResetExceptionReason.policyViolation] if the new
-  ///   password does not comply with the password policy.
-  /// - [EmailAccountPasswordResetExceptionReason.invalid] if no request exists
-  ///   for the given [passwordResetRequestId] or [verificationCode] is invalid.
-  ///
-  /// Throws an [AuthUserBlockedException] if the auth user is blocked.
-  @override
-  _i3.Future<void> finishPasswordReset({
-    required String finishPasswordResetToken,
-    required String newPassword,
-  }) => caller.callServerEndpoint<void>(
-    'emailIdp',
-    'finishPasswordReset',
-    {
-      'finishPasswordResetToken': finishPasswordResetToken,
-      'newPassword': newPassword,
+      'idToken': idToken,
+      'accessToken': accessToken,
     },
   );
 
   @override
   _i3.Future<bool> hasAccount() => caller.callServerEndpoint<bool>(
-    'emailIdp',
+    'googleIdp',
     'hasAccount',
     {},
   );
@@ -246,6 +103,35 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
     'jwtRefresh',
     'refreshAccessToken',
     {'refreshToken': refreshToken},
+    authenticated: false,
+  );
+}
+
+/// {@category Endpoint}
+class EndpointPhoneAuth extends _i2.EndpointRef {
+  EndpointPhoneAuth(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'phoneAuth';
+
+  _i3.Future<void> sendVerificationCode(String phoneNumber) =>
+      caller.callServerEndpoint<void>(
+        'phoneAuth',
+        'sendVerificationCode',
+        {'phoneNumber': phoneNumber},
+        authenticated: false,
+      );
+
+  _i3.Future<_i4.AuthSuccess?> verifyCode(
+    String phoneNumber,
+    String code,
+  ) => caller.callServerEndpoint<_i4.AuthSuccess?>(
+    'phoneAuth',
+    'verifyCode',
+    {
+      'phoneNumber': phoneNumber,
+      'code': code,
+    },
     authenticated: false,
   );
 }
@@ -479,14 +365,14 @@ class EndpointCinePass extends _i2.EndpointRef {
       );
 
   /// Admin: demandes en attente (devenir responsable).
-  _i3.Future<List<_i12.DemandeResponsableResponse>> getDemandesEnAttente() =>
-      caller.callServerEndpoint<List<_i12.DemandeResponsableResponse>>(
+  _i3.Future<List<_i11.DemandeResponsableResponse>> getDemandesEnAttente() =>
+      caller.callServerEndpoint<List<_i11.DemandeResponsableResponse>>(
         'cinePass',
         'getDemandesEnAttente',
         {},
       );
 
-  /// Admin: approuver une demande responsable.
+  /// Admin: approuver une demande responsable → crée la structure et l'assignment.
   _i3.Future<bool> approuverDemande(String id) =>
       caller.callServerEndpoint<bool>(
         'cinePass',
@@ -495,15 +381,20 @@ class EndpointCinePass extends _i2.EndpointRef {
       );
 
   /// Admin: rejeter une demande responsable.
-  _i3.Future<bool> rejeterDemande(String id, String reason) =>
-      caller.callServerEndpoint<bool>(
-        'cinePass',
-        'rejeterDemande',
-        {'id': id, 'reason': reason},
-      );
+  _i3.Future<bool> rejeterDemande(
+    String id,
+    String reason,
+  ) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'rejeterDemande',
+    {
+      'id': id,
+      'reason': reason,
+    },
+  );
 
-  /// Créer une demande pour devenir responsable.
-  _i3.Future<_i12.DemandeResponsableResponse?> createDemandeResponsable({
+  /// Créer une demande pour devenir responsable (utilisateur connecté).
+  _i3.Future<_i11.DemandeResponsableResponse?> createDemandeResponsable({
     required String structureType,
     required String structureName,
     required String structureCity,
@@ -511,7 +402,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     String? structureWebsite,
     String? structurePhone,
     required String description,
-  }) => caller.callServerEndpoint<_i12.DemandeResponsableResponse?>(
+  }) => caller.callServerEndpoint<_i11.DemandeResponsableResponse?>(
     'cinePass',
     'createDemandeResponsable',
     {
@@ -525,7 +416,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     },
   );
 
-  /// Admin: toutes les réservations.
+  /// Admin: toutes les réservations (événements et séances).
   _i3.Future<List<_i12.ReservationResponse>> getReservations() =>
       caller.callServerEndpoint<List<_i12.ReservationResponse>>(
         'cinePass',
@@ -533,7 +424,7 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
-  /// Responsable: réservations pour ses structures.
+  /// Responsable: réservations pour les événements de ses structures.
   _i3.Future<List<_i12.ReservationResponse>> getReservationsForMyStructures() =>
       caller.callServerEndpoint<List<_i12.ReservationResponse>>(
         'cinePass',
@@ -541,9 +432,9 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
-  /// Responsable: rapport CA (7j, 30j, 3m, 1an).
-  _i3.Future<_i12.RapportCAResponse> getRapportCA(String periode) =>
-      caller.callServerEndpoint<_i12.RapportCAResponse>(
+  /// Responsable: rapport CA sur une période (7j, 30j, 3m, 1an).
+  _i3.Future<_i13.RapportCAResponse> getRapportCA(String periode) =>
+      caller.callServerEndpoint<_i13.RapportCAResponse>(
         'cinePass',
         'getRapportCA',
         {'periode': periode},
@@ -607,8 +498,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i11.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i11.Greeting>(
+  _i3.Future<_i14.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i14.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -617,9 +508,12 @@ class EndpointGreeting extends _i2.EndpointRef {
 
 class Modules {
   Modules(Client client) {
+    auth = _i15.Caller(client);
     serverpod_auth_idp = _i1.Caller(client);
     serverpod_auth_core = _i4.Caller(client);
   }
+
+  late final _i15.Caller auth;
 
   late final _i1.Caller serverpod_auth_idp;
 
@@ -646,7 +540,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i12.Protocol(),
+         _i16.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -655,16 +549,19 @@ class Client extends _i2.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection:
              disconnectStreamsOnLostInternetConnection,
        ) {
-    emailIdp = EndpointEmailIdp(this);
+    googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    phoneAuth = EndpointPhoneAuth(this);
     cinePass = EndpointCinePass(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
 
-  late final EndpointEmailIdp emailIdp;
+  late final EndpointGoogleIdp googleIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointPhoneAuth phoneAuth;
 
   late final EndpointCinePass cinePass;
 
@@ -674,14 +571,16 @@ class Client extends _i2.ServerpodClientShared {
 
   @override
   Map<String, _i2.EndpointRef> get endpointRefLookup => {
-    'emailIdp': emailIdp,
+    'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
+    'phoneAuth': phoneAuth,
     'cinePass': cinePass,
     'greeting': greeting,
   };
 
   @override
   Map<String, _i2.ModuleEndpointCaller> get moduleLookup => {
+    'auth': modules.auth,
     'serverpod_auth_idp': modules.serverpod_auth_idp,
     'serverpod_auth_core': modules.serverpod_auth_core,
   };

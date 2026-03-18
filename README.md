@@ -73,9 +73,18 @@ cine_pass_flutter/
 
 ---
 
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Comment le projet a été conçu : stack, auth Google + SMS, IDP, schéma |
+| **[cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md)** | Guide complet pour installer et lancer le projet depuis zéro |
+
+---
+
 ## 🚀 Lancer le projet
 
-**Après un clone**, il faut une fois refaire la config et les migrations (mot de passe non versionné, base vide). → Voir **[cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md)** pour le détail et pourquoi.
+**Après un clone**, il faut une fois refaire la config et les migrations (mot de passe non versionné, base vide). → Voir **[cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md)** pour le guide complet.
 
 ```bash
 # 1. Démarrer Postgres (Docker)
