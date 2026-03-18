@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
+import 'dart:async';
 
+import '../../../../core/config/google_sign_in_config.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
@@ -27,6 +29,31 @@ class _ConnexionPageState extends State<ConnexionPage> {
   bool _codeRequested = false;
   String? _errorMessage;
   String? _infoMessage;
+  bool _googleReady = false;
+  int _googleWidgetNonce = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _warmUpGoogleSignIn();
+  }
+
+  Future<void> _warmUpGoogleSignIn() async {
+    if (!GoogleSignInConfig.needsNativeInit) {
+      setState(() => _googleReady = true);
+      return;
+    }
+    try {
+      await client.auth.initializeGoogleSignIn(
+        clientId: GoogleSignInConfig.clientId,
+        serverClientId: GoogleSignInConfig.serverClientId,
+      );
+    } catch (_) {
+      // We'll retry on demand after the first failure.
+    }
+    if (!mounted) return;
+    setState(() => _googleReady = true);
+  }
 
   @override
   void dispose() {
@@ -251,6 +278,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
           ),
           const SizedBox(height: 24),
           GoogleSignInWidget(
+            key: ValueKey('google-sign-in-$_googleWidgetNonce'),
             client: client,
             onAuthenticated: _onGoogleAuthenticated,
             onError: (error) {
@@ -259,8 +287,36 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 _errorMessage = 'Connexion Google echouee: $error';
                 _infoMessage = null;
               });
+              // Many "first attempt fails, second works" issues come from the native
+              // Google Sign-In SDK not being fully ready. Re-initialize and recreate
+              // the widget so the next attempt doesn't reuse a bad internal state.
+              unawaited(_warmUpGoogleSignIn());
+              setState(() => _googleWidgetNonce++);
             },
           ),
+          if (!_googleReady) ...[
+            const SizedBox(height: 10),
+            const Text(
+              'Initialisation de Google…',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+          ],
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 10),
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _errorMessage = null;
+                    _infoMessage = null;
+                    _googleWidgetNonce++;
+                  });
+                },
+                child: const Text('Réessayer Google'),
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           Row(
             children: [
