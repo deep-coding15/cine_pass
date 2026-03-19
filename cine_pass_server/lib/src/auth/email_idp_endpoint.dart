@@ -17,8 +17,8 @@ class EmailAuthEndpoint extends EmailIdpBaseEndpoint {
     if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
       throw Exception('Email invalide.');
     }
-    if (password.length < 6) {
-      throw Exception('Le mot de passe doit contenir au moins 6 caracteres.');
+    if (password.length < 8) {
+      throw Exception('Le mot de passe doit contenir au moins 8 caracteres.');
     }
 
     final existing = await emailIdp.admin.findAccount(

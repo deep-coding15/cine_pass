@@ -1,14 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
-import 'dart:async';
 
 import '../../../../core/config/google_sign_in_config.dart';
-import '../../../../core/state/auth_state.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/state/auth_state.dart';
 import '../../../../core/state/pending_reservation_state.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/cinepass_logo.dart';
 import '../../../../features/reservation/data/reservation_state.dart';
 import '../../../../main.dart';
@@ -34,19 +35,46 @@ class _EmailAuthEndpoint extends EndpointRef {
     return caller.callServerEndpoint<AuthSuccess>(
       name,
       'login',
+      {'email': email, 'password': password},
+      authenticated: false,
+    );
+  }
+
+  Future<UuidValue> startPasswordReset({required String email}) {
+    return caller.callServerEndpoint<UuidValue>(
+      name,
+      'startPasswordReset',
+      {'email': email},
+      authenticated: false,
+    );
+  }
+
+  Future<String> verifyPasswordResetCode({
+    required UuidValue passwordResetRequestId,
+    required String verificationCode,
+  }) {
+    return caller.callServerEndpoint<String>(
+      name,
+      'verifyPasswordResetCode',
       {
-        'email': email,
-        'password': password,
+        'passwordResetRequestId': passwordResetRequestId,
+        'verificationCode': verificationCode,
       },
       authenticated: false,
     );
   }
 
-  Future<void> startPasswordReset({required String email}) {
+  Future<void> finishPasswordReset({
+    required String finishPasswordResetToken,
+    required String newPassword,
+  }) {
     return caller.callServerEndpoint<void>(
       name,
-      'startPasswordReset',
-      {'email': email},
+      'finishPasswordReset',
+      {
+        'finishPasswordResetToken': finishPasswordResetToken,
+        'newPassword': newPassword,
+      },
       authenticated: false,
     );
   }
@@ -68,23 +96,6 @@ class _ConnexionPageState extends State<ConnexionPage> {
     _warmUpGoogleSignIn();
   }
 
-  Future<void> _warmUpGoogleSignIn() async {
-    if (!GoogleSignInConfig.needsNativeInit) {
-      setState(() => _googleReady = true);
-      return;
-    }
-    try {
-      await client.auth.initializeGoogleSignIn(
-        clientId: GoogleSignInConfig.clientId,
-        serverClientId: GoogleSignInConfig.serverClientId,
-      );
-    } catch (_) {
-      // We'll retry on demand after the first failure.
-    }
-    if (!mounted) return;
-    setState(() => _googleReady = true);
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -92,9 +103,27 @@ class _ConnexionPageState extends State<ConnexionPage> {
     super.dispose();
   }
 
+  Future<void> _warmUpGoogleSignIn() async {
+    if (!GoogleSignInConfig.needsNativeInit) {
+      setState(() => _googleReady = true);
+      return;
+    }
+
+    try {
+      await client.auth.initializeGoogleSignIn(
+        clientId: GoogleSignInConfig.clientId,
+        serverClientId: GoogleSignInConfig.serverClientId,
+      );
+    } catch (_) {
+      // Retried on demand in onError.
+    }
+
+    if (!mounted) return;
+    setState(() => _googleReady = true);
+  }
+
   Future<void> _onGoogleAuthenticated() async {
     if (!mounted) return;
-    // Pull real user info from backend after login.
     await context.read<AuthState>().refreshProfileFromServer();
     await _handlePostAuthRedirect();
   }
@@ -185,61 +214,147 @@ class _ConnexionPageState extends State<ConnexionPage> {
       await _handlePostAuthRedirect();
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _errorMessage = 'Connexion email echouee: $e';
-      });
+      setState(() => _errorMessage = 'Connexion email echouee: $e');
     } finally {
       if (mounted) {
-        setState(() {
-          _isEmailSubmitting = false;
-        });
+        setState(() => _isEmailSubmitting = false);
       }
     }
   }
 
   Future<void> _showForgotPasswordDialog() async {
-    final parentContext = context;
-    final resetController = TextEditingController(text: _emailController.text.trim());
+    final authState = context.read<AuthState>();
+
+    final resetEmailController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
+    final codeController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+
+    var step = 0;
     var isSubmitting = false;
     String? localError;
+    String? localInfo;
+    UuidValue? requestId;
+    String? finishToken;
 
     try {
-      await showDialog<void>(
-        context: parentContext,
-        builder: (context) {
+      final result = await showDialog<Map<String, String>?>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
           return StatefulBuilder(
             builder: (context, setModalState) {
+              final title = switch (step) {
+                0 => 'Mot de passe oublie',
+                1 => 'Verification du code',
+                _ => 'Nouveau mot de passe',
+              };
+
               return AlertDialog(
                 backgroundColor: AppTheme.cardDark,
-                title: const Text(
-                  'Mot de passe oublie',
-                  style: TextStyle(color: AppTheme.textPrimary),
+                title: Text(
+                  title,
+                  style: const TextStyle(color: AppTheme.textPrimary),
                 ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Entrez votre email pour recevoir les instructions de reinitialisation.',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: resetController,
-                      keyboardType: TextInputType.emailAddress,
-                      enabled: !isSubmitting,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'votre@email.com',
-                        filled: true,
-                        fillColor: AppTheme.backgroundDark,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                    if (step == 0) ...[
+                      const Text(
+                        'Entrez votre email. Un code de reinitialisation sera envoye.',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                       ),
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                    ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: resetEmailController,
+                        keyboardType: TextInputType.emailAddress,
+                        enabled: !isSubmitting,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'votre@email.com',
+                          filled: true,
+                          fillColor: AppTheme.backgroundDark,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                        ),
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                      ),
+                    ] else if (step == 1) ...[
+                      const Text(
+                        'Entrez le code recu par email.',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: codeController,
+                        enabled: !isSubmitting,
+                        decoration: InputDecoration(
+                          labelText: 'Code de verification',
+                          hintText: '123456',
+                          filled: true,
+                          fillColor: AppTheme.backgroundDark,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                        ),
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                      ),
+                    ] else ...[
+                      const Text(
+                        'Definissez un nouveau mot de passe.',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: newPasswordController,
+                        enabled: !isSubmitting,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'Nouveau mot de passe',
+                          hintText: '••••••••',
+                          filled: true,
+                          fillColor: AppTheme.backgroundDark,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                        ),
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: confirmPasswordController,
+                        enabled: !isSubmitting,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'Confirmer le mot de passe',
+                          hintText: '••••••••',
+                          filled: true,
+                          fillColor: AppTheme.backgroundDark,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                        ),
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                      ),
+                    ],
+                    if (localInfo != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        localInfo!,
+                        style: const TextStyle(
+                          color: AppTheme.accentGreen,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                     if (localError != null) ...[
                       const SizedBox(height: 10),
                       Text(
@@ -250,6 +365,19 @@ class _ConnexionPageState extends State<ConnexionPage> {
                   ],
                 ),
                 actions: [
+                  if (step > 0)
+                    TextButton(
+                      onPressed: isSubmitting
+                          ? null
+                          : () {
+                              setModalState(() {
+                                step -= 1;
+                                localError = null;
+                                localInfo = null;
+                              });
+                            },
+                      child: const Text('Retour'),
+                    ),
                   TextButton(
                     onPressed: isSubmitting ? null : () => context.pop(),
                     child: const Text('Annuler'),
@@ -258,38 +386,149 @@ class _ConnexionPageState extends State<ConnexionPage> {
                     onPressed: isSubmitting
                         ? null
                         : () async {
-                            final email = resetController.text.trim();
-                            if (email.isEmpty || !email.contains('@')) {
-                              setModalState(() => localError = 'Email invalide.');
+                            final dialogNavigator = Navigator.of(context);
+                            final email = resetEmailController.text.trim();
+
+                            setModalState(() {
+                              localError = null;
+                              localInfo = null;
+                            });
+
+                            if (step == 0) {
+                              if (email.isEmpty || !email.contains('@')) {
+                                setModalState(() => localError = 'Email invalide.');
+                                return;
+                              }
+
+                              setModalState(() => isSubmitting = true);
+                              try {
+                                requestId = await _EmailAuthEndpoint(client)
+                                    .startPasswordReset(email: email);
+                                setModalState(() {
+                                  step = 1;
+                                  localInfo =
+                                      'Code envoye. Verifiez votre boite mail.';
+                                });
+                              } catch (e) {
+                                final message = e.toString();
+                                // ignore: avoid_print
+                                print('[ForgotPassword] startPasswordReset error: $message');
+                                setModalState(() {
+                                  localError =
+                                      message.contains('tooManyAttempts')
+                                          ? 'Trop de tentatives. Reessayez dans quelques minutes.'
+                                          : 'Impossible d\'envoyer le code pour le moment.';
+                                });
+                              } finally {
+                                if (context.mounted) {
+                                  setModalState(() => isSubmitting = false);
+                                }
+                              }
                               return;
                             }
 
-                            setModalState(() {
-                              isSubmitting = true;
-                              localError = null;
-                            });
+                            if (step == 1) {
+                              final code = codeController.text.trim();
+                              if (requestId == null) {
+                                setModalState(() {
+                                  localError =
+                                      'Session de reinitialisation invalide. Recommencez.';
+                                });
+                                return;
+                              }
+                              if (code.length < 4) {
+                                setModalState(() => localError = 'Code invalide.');
+                                return;
+                              }
 
-                            final navigator = Navigator.of(context);
-                            final messenger = ScaffoldMessenger.of(context);
+                              setModalState(() => isSubmitting = true);
+                              try {
+                                finishToken = await _EmailAuthEndpoint(client)
+                                    .verifyPasswordResetCode(
+                                      passwordResetRequestId: requestId!,
+                                      verificationCode: code,
+                                    );
+                                setModalState(() {
+                                  step = 2;
+                                  localInfo = null;
+                                });
+                              } catch (_) {
+                                setModalState(
+                                  () => localError = 'Code invalide ou expire.',
+                                );
+                              } finally {
+                                if (context.mounted) {
+                                  setModalState(() => isSubmitting = false);
+                                }
+                              }
+                              return;
+                            }
 
-                            try {
-                              await _EmailAuthEndpoint(client).startPasswordReset(email: email);
-                              navigator.pop();
-                              messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Si ce compte existe, un email de reinitialisation a ete envoye.',
-                                  ),
-                                ),
-                              );
-                            } catch (_) {
+                            final newPassword = newPasswordController.text;
+                            final confirmPassword = confirmPasswordController.text;
+
+                            if (finishToken == null) {
                               setModalState(() {
-                                isSubmitting = false;
-                                localError = 'Impossible d\'envoyer la demande pour le moment.';
+                                localError =
+                                    'Jeton de reinitialisation invalide. Recommencez.';
                               });
+                              return;
+                            }
+                            if (newPassword.length < 8) {
+                              setModalState(() {
+                                localError =
+                                    'Le mot de passe doit contenir au moins 8 caracteres.';
+                              });
+                              return;
+                            }
+                            if (newPassword != confirmPassword) {
+                              setModalState(() {
+                                localError =
+                                    'La confirmation du mot de passe ne correspond pas.';
+                              });
+                              return;
+                            }
+
+                            setModalState(() => isSubmitting = true);
+                            try {
+                              await _EmailAuthEndpoint(client).finishPasswordReset(
+                                finishPasswordResetToken: finishToken!,
+                                newPassword: newPassword,
+                              );
+
+                              final authSuccess = await _EmailAuthEndpoint(client)
+                                  .login(email: email, password: newPassword);
+                              await client.auth.updateSignedInUser(authSuccess);
+                              if (!mounted) return;
+                              await authState.refreshProfileFromServer();
+                              if (!mounted) return;
+
+                              dialogNavigator.pop({
+                                'email': email,
+                                'password': newPassword,
+                              });
+                            } catch (e) {
+                              final message = e.toString();
+                              setModalState(() {
+                                localError = message.contains('policyViolation')
+                                    ? 'Mot de passe non conforme: au moins 8 caracteres, sans espaces en debut/fin.'
+                                    : 'Impossible de finaliser la reinitialisation pour le moment.';
+                              });
+                            } finally {
+                              if (context.mounted) {
+                                setModalState(() => isSubmitting = false);
+                              }
                             }
                           },
-                    child: Text(isSubmitting ? 'Envoi...' : 'Envoyer'),
+                    child: Text(
+                      isSubmitting
+                          ? 'Patientez...'
+                          : switch (step) {
+                              0 => 'Envoyer le code',
+                              1 => 'Verifier le code',
+                              _ => 'Valider le nouveau mot de passe',
+                            },
+                    ),
                   ),
                 ],
               );
@@ -297,10 +536,31 @@ class _ConnexionPageState extends State<ConnexionPage> {
           );
         },
       );
+
+      if (result != null && mounted) {
+        _emailController.text = result['email'] ?? _emailController.text;
+        _passwordController.text = result['password'] ?? _passwordController.text;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Mot de passe reinitialise avec succes. Vous etes connecte.',
+            ),
+          ),
+        );
+
+        // Let dialog disposal finish before triggering route changes.
+        await Future<void>.delayed(Duration.zero);
+        if (!mounted) return;
+        await _handlePostAuthRedirect();
+      }
     } finally {
-      resetController.dispose();
+      // Intentionally not disposing local controllers here to avoid
+      // rare dispose-while-rebuild issues on web dialog teardown.
     }
   }
+
+  Future<void> _handleForgotPasswordTap() => _showForgotPasswordDialog();
 
   @override
   Widget build(BuildContext context) {
@@ -316,9 +576,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
           const SizedBox(height: 32),
           Text(
             'Connexion',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 8),
           Text(
@@ -366,8 +627,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                   _obscurePassword ? Icons.visibility_off : Icons.visibility,
                   color: AppTheme.textSecondary,
                 ),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
+                onPressed: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
               ),
               filled: true,
               fillColor: AppTheme.cardDark,
@@ -381,7 +643,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: _showForgotPasswordDialog,
+              onPressed: _handleForgotPasswordTap,
               child: const Text('Mot de passe oublie ?'),
             ),
           ),
@@ -462,13 +724,11 @@ class _ConnexionPageState extends State<ConnexionPage> {
           Text(
             'Pour tester en admin : connectez-vous avec admin@cinepass.com (mot de passe au choix).',
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
           ),
         ],
       ),
     );
   }
 }
+

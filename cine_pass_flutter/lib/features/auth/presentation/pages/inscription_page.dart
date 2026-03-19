@@ -198,8 +198,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 if (v == null || v.trim().isEmpty) {
                   return 'Choisissez un mot de passe';
                 }
-                if (v.length < 6) {
-                  return 'Au moins 6 caractères';
+                if (v.length < 8) {
+                  return 'Au moins 8 caractères';
                 }
                 return null;
               },

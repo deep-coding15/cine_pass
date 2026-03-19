@@ -14,6 +14,7 @@ dependencies:
   serverpod_auth_idp_server: 3.4.0 # contient tous les composants necessaires à la configuration
   serverpod_auth_core_server: 3.4.0
   crypto: ^3.0.6
+  mailer: ^6.4.1
 
 dev_dependencies:
   lints: '>=3.0.0 <7.0.0'
