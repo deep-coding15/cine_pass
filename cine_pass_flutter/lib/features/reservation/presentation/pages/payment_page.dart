@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../billets/data/billets_cache_store.dart';
 import '../../data/reservation_state.dart';
 import '../../../../main.dart';
 
@@ -94,22 +95,57 @@ class _PaymentPageState extends State<PaymentPage> {
       }
     }
 
-    final numero = await client.cinePass.createReservationAndBillets(
-      isEvent: state.isEvent,
-      seanceId: state.seanceId,
-      eventId: state.eventId,
-      reservationNumber: reservationNumber,
-      seatLabels: seatLabels,
-      ticketTypes: ticketTypes,
-      optionParking: optParking,
-      optionPopcorn: optPopcorn,
-      optionBoisson: optBoisson,
-      prices: prices,
-      totalAmount: _total,
-    );
+    String? numero;
+    try {
+      numero = await client.cinePass.createReservationAndBillets(
+        isEvent: state.isEvent,
+        seanceId: state.seanceId,
+        eventId: state.eventId,
+        reservationNumber: reservationNumber,
+        seatLabels: seatLabels,
+        ticketTypes: ticketTypes,
+        optionParking: optParking,
+        optionPopcorn: optPopcorn,
+        optionBoisson: optBoisson,
+        prices: prices,
+        totalAmount: _total,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Paiement enregistre mais creation des billets impossible pour le moment. Verifiez votre connexion puis reessayez. ($e)',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (numero == null) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Impossible de finaliser la reservation: utilisateur non connecte ou parametres incomplets.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
 
     // Persist for any UI that still uses it (e.g. confirmation).
-    ReservationState.instance.setReservationNumber(numero ?? reservationNumber);
+    ReservationState.instance.setReservationNumber(numero);
+
+    // Best-effort: warm cache so QR remains visible offline in "Mes billets".
+    try {
+      final billets = await client.cinePass.getMyBillets();
+      await BilletsCacheStore().saveBillets(billets);
+    } catch (_) {
+      // Ignore: payment succeeded, cache may be filled on next online open.
+    }
 
     if (!context.mounted) return;
     // Direct redirect to "Mes billets" after payment.

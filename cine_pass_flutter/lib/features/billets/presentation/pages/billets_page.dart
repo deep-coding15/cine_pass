@@ -5,8 +5,21 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../data/billets_state.dart';
+import '../../data/billets_cache_store.dart';
 import '../../data/mock_billets_data.dart';
 import '../../../../main.dart';
+
+class _BilletsLoadResult {
+  const _BilletsLoadResult({
+    required this.items,
+    required this.isOffline,
+    this.networkError,
+  });
+
+  final List<BilletGroupResponse> items;
+  final bool isOffline;
+  final Object? networkError;
+}
 
 void _showQrFullScreen(BuildContext context, BilletGroupResponse billet) {
   showDialog(
@@ -75,12 +88,31 @@ class BilletsPage extends StatefulWidget {
 }
 
 class _BilletsPageState extends State<BilletsPage> {
-  late Future<List<BilletGroupResponse>> _future;
+  late Future<_BilletsLoadResult> _future;
+  final _cacheStore = BilletsCacheStore();
 
   @override
   void initState() {
     super.initState();
-    _future = client.cinePass.getMyBillets();
+    _future = _loadBilletsWithOfflineFallback();
+  }
+
+  Future<_BilletsLoadResult> _loadBilletsWithOfflineFallback() async {
+    try {
+      final remote = await client.cinePass.getMyBillets();
+      await _cacheStore.saveBillets(remote);
+      return _BilletsLoadResult(items: remote, isOffline: false);
+    } catch (e) {
+      final cached = await _cacheStore.loadBillets();
+      if (cached.isNotEmpty) {
+        return _BilletsLoadResult(
+          items: cached,
+          isOffline: true,
+          networkError: e,
+        );
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -101,7 +133,7 @@ class _BilletsPageState extends State<BilletsPage> {
                 ),
               ),
               IconButton(
-                onPressed: () => setState(() => _future = client.cinePass.getMyBillets()),
+                onPressed: () => setState(() => _future = _loadBilletsWithOfflineFallback()),
                 tooltip: 'Rafraîchir',
                 icon: const Icon(Icons.refresh_rounded, color: AppTheme.textSecondary),
               ),
@@ -113,7 +145,7 @@ class _BilletsPageState extends State<BilletsPage> {
             style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 24),
-          FutureBuilder<List<BilletGroupResponse>>(
+          FutureBuilder<_BilletsLoadResult>(
             future: _future,
             builder: (context, snap) {
               if (snap.connectionState == ConnectionState.waiting) {
@@ -126,11 +158,15 @@ class _BilletsPageState extends State<BilletsPage> {
               }
               if (snap.hasError) {
                 return Text(
-                  'Impossible de charger vos billets: ${snap.error}',
+                  'Impossible de charger vos billets pour le moment. Connectez-vous a internet puis reessayez.',
                   style: const TextStyle(color: Colors.redAccent),
                 );
               }
-              final list = snap.data ?? const [];
+
+              final result = snap.data ??
+                  const _BilletsLoadResult(items: [], isOffline: false);
+              final list = result.items;
+
               if (list.isEmpty) {
                 return const Text(
                   'Aucun billet pour le moment.',
@@ -138,7 +174,44 @@ class _BilletsPageState extends State<BilletsPage> {
                 );
               }
               return Column(
-                children: list.map((b) => _BilletCard(billet: b)).toList(),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (result.isOffline)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceDark,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppTheme.textSecondary.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.wifi_off_rounded,
+                            size: 16,
+                            color: AppTheme.textSecondary,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Mode hors ligne: affichage des billets enregistres localement (QR disponibles).',
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ...list.map((b) => _BilletCard(billet: b)),
+                ],
               );
             },
           ),
