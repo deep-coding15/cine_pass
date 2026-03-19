@@ -1,3 +1,12 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
 googleIdp:
   - login:
   - hasAccount:
@@ -33,5 +42,7 @@ cinePass:
   - getReservationsForMyStructures:
   - getRapportCA:
   - createSeance:
+  - getProfile:
+  - updateProfile:
 greeting:
   - hello:

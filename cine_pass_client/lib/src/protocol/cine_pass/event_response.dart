@@ -28,8 +28,8 @@ abstract class EventResponse implements _i1.SerializableModel {
     required this.placesTotal,
     required this.price,
     this.posterColor,
-    this.availableOptions,
     this.posterUrl,
+    this.availableOptions,
   });
 
   factory EventResponse({
@@ -46,8 +46,8 @@ abstract class EventResponse implements _i1.SerializableModel {
     required int placesTotal,
     required double price,
     int? posterColor,
-    List<String>? availableOptions,
     String? posterUrl,
+    List<String>? availableOptions,
   }) = _EventResponseImpl;
 
   factory EventResponse.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -65,12 +65,12 @@ abstract class EventResponse implements _i1.SerializableModel {
       placesTotal: jsonSerialization['placesTotal'] as int,
       price: (jsonSerialization['price'] as num).toDouble(),
       posterColor: jsonSerialization['posterColor'] as int?,
+      posterUrl: jsonSerialization['posterUrl'] as String?,
       availableOptions: jsonSerialization['availableOptions'] == null
           ? null
           : _i2.Protocol().deserialize<List<String>>(
               jsonSerialization['availableOptions'],
             ),
-      posterUrl: jsonSerialization['posterUrl'] as String?,
     );
   }
 
@@ -100,9 +100,9 @@ abstract class EventResponse implements _i1.SerializableModel {
 
   int? posterColor;
 
-  List<String>? availableOptions;
-
   String? posterUrl;
+
+  List<String>? availableOptions;
 
   /// Returns a shallow copy of this [EventResponse]
   /// with some or all fields replaced by the given arguments.
@@ -121,8 +121,8 @@ abstract class EventResponse implements _i1.SerializableModel {
     int? placesTotal,
     double? price,
     int? posterColor,
-    List<String>? availableOptions,
     String? posterUrl,
+    List<String>? availableOptions,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -141,9 +141,9 @@ abstract class EventResponse implements _i1.SerializableModel {
       'placesTotal': placesTotal,
       'price': price,
       if (posterColor != null) 'posterColor': posterColor,
+      if (posterUrl != null) 'posterUrl': posterUrl,
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
-      if (posterUrl != null) 'posterUrl': posterUrl,
     };
   }
 
@@ -170,8 +170,8 @@ class _EventResponseImpl extends EventResponse {
     required int placesTotal,
     required double price,
     int? posterColor,
-    List<String>? availableOptions,
     String? posterUrl,
+    List<String>? availableOptions,
   }) : super._(
          id: id,
          title: title,
@@ -186,8 +186,8 @@ class _EventResponseImpl extends EventResponse {
          placesTotal: placesTotal,
          price: price,
          posterColor: posterColor,
-         availableOptions: availableOptions,
          posterUrl: posterUrl,
+         availableOptions: availableOptions,
        );
 
   /// Returns a shallow copy of this [EventResponse]
@@ -208,8 +208,8 @@ class _EventResponseImpl extends EventResponse {
     int? placesTotal,
     double? price,
     Object? posterColor = _Undefined,
-    Object? availableOptions = _Undefined,
     Object? posterUrl = _Undefined,
+    Object? availableOptions = _Undefined,
   }) {
     return EventResponse(
       id: id ?? this.id,
@@ -225,10 +225,10 @@ class _EventResponseImpl extends EventResponse {
       placesTotal: placesTotal ?? this.placesTotal,
       price: price ?? this.price,
       posterColor: posterColor is int? ? posterColor : this.posterColor,
+      posterUrl: posterUrl is String? ? posterUrl : this.posterUrl,
       availableOptions: availableOptions is List<String>?
           ? availableOptions
           : this.availableOptions?.map((e0) => e0).toList(),
-      posterUrl: posterUrl is String? ? posterUrl : this.posterUrl,
     );
   }
 }

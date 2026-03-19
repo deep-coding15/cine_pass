@@ -18,143 +18,19 @@ class ConnexionPage extends StatefulWidget {
 }
 
 class _ConnexionPageState extends State<ConnexionPage> {
-  final _phoneController = TextEditingController();
-  final _codeController = TextEditingController();
-
-  bool _isSendingCode = false;
-  bool _isVerifyingCode = false;
-  bool _codeRequested = false;
   String? _errorMessage;
-  String? _infoMessage;
 
-  @override
-  void dispose() {
-    _phoneController.dispose();
-    _codeController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _onGoogleAuthenticated() async {
-    if (!mounted) return;
-    await _handlePostAuthRedirect();
-  }
-
-  Future<void> _sendCode() async {
-    final phone = _normalizedPhone();
-    if (phone == null) {
-      setState(() {
-        _errorMessage = 'Numero de telephone invalide.';
-        _infoMessage = null;
-      });
-      return;
+  void _validateEmail(String email) {
+    // "Domaine réel" (simple) : le domaine doit contenir un point et un TLD >= 2.
+    final parts = email.split('@');
+    if (parts.length != 2) throw const InvalidEmailException('Email invalide');
+    final domain = parts[1].trim();
+    if (domain.isEmpty || !domain.contains('.') || domain.endsWith('.')) {
+      throw const InvalidEmailException('Domaine email invalide');
     }
-
-    setState(() {
-      _isSendingCode = true;
-      _errorMessage = null;
-      _infoMessage = null;
-    });
-
-    try {
-      await client.phoneAuth.sendVerificationCode(phone);
-      if (!mounted) return;
-      setState(() {
-        _codeRequested = true;
-        _infoMessage = 'Code envoye par SMS. Verifiez votre telephone.';
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _errorMessage = 'Impossible d\'envoyer le code: $e';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSendingCode = false;
-        });
-      }
+    if (domain.split('.').last.length < 2) {
+      throw const InvalidEmailException('Domaine email invalide');
     }
-  }
-
-  Future<void> _verifyCode() async {
-    final phone = _normalizedPhone();
-    final code = _codeController.text.trim();
-
-    if (phone == null) {
-      setState(() {
-        _errorMessage = 'Numero de telephone invalide.';
-        _infoMessage = null;
-      });
-      return;
-    }
-    if (code.length < 4) {
-      setState(() {
-        _errorMessage = 'Code de verification invalide.';
-        _infoMessage = null;
-      });
-      return;
-    }
-
-    setState(() {
-      _isVerifyingCode = true;
-      _errorMessage = null;
-      _infoMessage = null;
-    });
-
-    try {
-      final authSuccess = await client.phoneAuth.verifyCode(phone, code);
-      if (!mounted) return;
-
-      if (authSuccess == null) {
-        setState(() {
-          _errorMessage = 'Code invalide, expire ou deja utilise.';
-        });
-        return;
-      }
-
-      await client.auth.updateSignedInUser(authSuccess);
-      if (!mounted) return;
-
-      setState(() {
-        _codeRequested = false;
-        _codeController.clear();
-        _infoMessage = 'Connexion reussie.';
-      });
-
-      await _handlePostAuthRedirect();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _errorMessage = 'Verification impossible: $e';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isVerifyingCode = false;
-        });
-      }
-    }
-  }
-
-  String? _normalizedPhone() {
-    final input = _phoneController.text.trim();
-    if (input.isEmpty) return null;
-
-    final buffer = StringBuffer();
-    for (var i = 0; i < input.length; i++) {
-      final ch = input[i];
-      final code = ch.codeUnitAt(0);
-      final isDigit = code >= 48 && code <= 57;
-      if (isDigit) {
-        buffer.write(ch);
-      } else if (ch == '+' && i == 0) {
-        buffer.write(ch);
-      }
-    }
-
-    final value = buffer.toString();
-    if (value.length < 8) return null;
-    return value;
   }
 
   Future<void> _handlePostAuthRedirect() async {
@@ -214,183 +90,101 @@ class _ConnexionPageState extends State<ConnexionPage> {
   Widget build(BuildContext context) {
     final pending = context.watch<PendingReservationState>();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 24),
-          const CinePassLogo(size: LogoSize.medium),
-          const SizedBox(height: 32),
-          Text(
-            'Connexion',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            pending.hasPending
-                ? 'Connectez-vous pour poursuivre votre reservation'
-                : 'Connectez-vous avec Google ou par numero de telephone',
-            style: TextStyle(
-              color: pending.hasPending
-                  ? AppTheme.primaryRed
-                  : AppTheme.textSecondary,
-              fontSize: 14,
-              fontWeight:
-                  pending.hasPending ? FontWeight.w600 : FontWeight.normal,
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundDark,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 24),
+            const CinePassLogo(size: LogoSize.medium),
+            const SizedBox(height: 32),
+            Text(
+              'Connexion',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: AppTheme.textPrimary,
+                  ),
             ),
-          ),
-          const SizedBox(height: 24),
-          GoogleSignInWidget(
-            client: client,
-            onAuthenticated: _onGoogleAuthenticated,
-            onError: (error) {
-              if (!mounted) return;
-              setState(() {
-                _errorMessage = 'Connexion Google echouee: $error';
-                _infoMessage = null;
-              });
-            },
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Divider(
-                  color: AppTheme.textSecondary.withValues(alpha: 0.35),
-                ),
+            const SizedBox(height: 8),
+            Text(
+              pending.hasPending
+                  ? 'Connectez-vous pour poursuivre votre réservation'
+                  : 'Connexion par email (mot de passe + reset) ou Google',
+              style: TextStyle(
+                color: pending.hasPending
+                    ? AppTheme.primaryRed
+                    : AppTheme.textSecondary,
+                fontSize: 14,
+                fontWeight: pending.hasPending ? FontWeight.w600 : FontWeight.normal,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  'OU',
-                  style: TextStyle(color: AppTheme.textSecondary),
-                ),
-              ),
-              Expanded(
-                child: Divider(
-                  color: AppTheme.textSecondary.withValues(alpha: 0.35),
-                ),
+            ),
+            const SizedBox(height: 24),
+            EmailSignInWidget(
+              client: client,
+              startScreen: EmailFlowScreen.login,
+              emailValidation: (email) => _validateEmail(email),
+              onAuthenticated: () {
+                // onAuthenticated attend un `void Function()`, on déclenche la
+                // redirection sans bloquer l'UI.
+                _handlePostAuthRedirect();
+              },
+              onError: (error) {
+                if (!mounted) return;
+                setState(() => _errorMessage = error.toString());
+              },
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 13),
               ),
             ],
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              labelText: 'Numero de telephone',
-              hintText: '+33612345678',
-              prefixIcon: const Icon(Icons.phone_outlined),
-              filled: true,
-              fillColor: AppTheme.cardDark,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              labelStyle: const TextStyle(color: AppTheme.textSecondary),
-            ),
-            style: const TextStyle(color: AppTheme.textPrimary),
-          ),
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _isSendingCode ? null : _sendCode,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.primaryRed,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(_isSendingCode ? 'Envoi...' : 'Envoyer le code SMS'),
-          ),
-          if (_codeRequested) ...[
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _codeController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Code SMS',
-                hintText: '123456',
-                prefixIcon: const Icon(Icons.lock_outline),
-                filled: true,
-                fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            Center(
+              child: TextButton.icon(
+                onPressed: () => context.go(AppRouter.connexionResponsable),
+                icon: const Icon(Icons.store_rounded, size: 18),
+                label: const Text('Connexion espace responsable'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.accentGreen,
                 ),
-                labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
-              style: const TextStyle(color: AppTheme.textPrimary),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Pas encore de compte ? ',
+                  style: const TextStyle(color: AppTheme.textSecondary),
+                ),
+                TextButton(
+                  onPressed: () => context.go(AppRouter.inscription),
+                  child: const Text("S'inscrire"),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Connexion via Google',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: _isVerifyingCode ? null : _verifyCode,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                side: const BorderSide(color: AppTheme.primaryRed),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                _isVerifyingCode ? 'Verification...' : 'Verifier le code',
-                style: const TextStyle(color: AppTheme.textPrimary),
-              ),
+            GoogleSignInWidget(
+              client: client,
+              onAuthenticated: _handlePostAuthRedirect,
+              onError: (error) {
+                if (!mounted) return;
+                setState(() => _errorMessage = error.toString());
+              },
             ),
           ],
-          if (_errorMessage != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(color: Colors.redAccent, fontSize: 13),
-            ),
-          ],
-          if (_infoMessage != null) ...[
-            const SizedBox(height: 10),
-            Text(
-              _infoMessage!,
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 13,
-              ),
-            ),
-          ],
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Pas encore de compte ? ',
-                style: const TextStyle(color: AppTheme.textSecondary),
-              ),
-              TextButton(
-                onPressed: () => context.go(AppRouter.inscription),
-                child: const Text('S\'inscrire'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: TextButton.icon(
-              onPressed: () => context.go(AppRouter.connexionResponsable),
-              icon: const Icon(Icons.store_rounded, size: 18),
-              label: const Text('Connexion espace responsable'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.accentGreen,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Pour tester en admin : connectez-vous avec admin@cinepass.com (mot de passe au choix).',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 12,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
