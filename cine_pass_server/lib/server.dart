@@ -39,9 +39,10 @@ void run(List<String> args) async {
       EmailIdpConfigFromPasswords(
         sendRegistrationVerificationCode: sendRegistrationVerificationCode,
         sendPasswordResetVerificationCode: sendPasswordResetVerificationCode,
+        // Dev-friendly limit to avoid frequent lockouts while testing reset flow.
         maxPasswordResetAttempts: const RateLimit(
-          maxAttempts: 10,
-          timeframe: Duration(minutes: 15),
+          maxAttempts: 30,
+          timeframe: Duration(minutes: 10),
         ),
       ),
       // Expects `googleClientSecret` in passwords.yaml with the Google web

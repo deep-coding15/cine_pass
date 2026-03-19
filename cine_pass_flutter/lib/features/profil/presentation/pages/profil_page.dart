@@ -2,7 +2,7 @@ import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
+import 'package:cine_pass_client/src/protocol/cine_pass/profile_response.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/router/app_router.dart';
@@ -20,6 +20,14 @@ class _ProfilPageState extends State<ProfilPage> {
   bool _loading = true;
   String? _error;
 
+  bool _needsProfileCompletion(ProfileResponse? p) {
+    if (p == null) return true;
+    final displayNameOk = (p.displayName?.trim().isNotEmpty ?? false);
+    final phoneOk = (p.phone?.trim().isNotEmpty ?? false);
+    final birthDateOk = (p.birthDate?.trim().isNotEmpty ?? false);
+    return !(displayNameOk && phoneOk && birthDateOk);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -34,10 +42,18 @@ class _ProfilPageState extends State<ProfilPage> {
     try {
       final p = await client.cinePass.getProfile();
       if (!mounted) return;
+      final needsCompletion = _needsProfileCompletion(p);
       setState(() {
         _profile = p;
         _loading = false;
+        _error = null;
       });
+      if (needsCompletion && mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _showEditProfile();
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
