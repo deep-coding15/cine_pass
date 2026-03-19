@@ -19,6 +19,7 @@ const double cinePassCommissionPercent = 8.0;
 class CinePassEndpoint extends Endpoint {
   // Helpers pour gestion des rôles
   bool _adminTableEnsured = false;
+  bool _responsableTableEnsured = false;
 
   Future<void> _ensureAdminRoleTable(Session session) async {
     if (_adminTableEnsured) return;
@@ -34,6 +35,22 @@ class CinePassEndpoint extends Endpoint {
     _adminTableEnsured = true;
   }
 
+  Future<void> _ensureResponsableRoleTable(Session session) async {
+    if (_responsableTableEnsured) return;
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_responsable_user" (
+        "id" bigserial PRIMARY KEY,
+        "user_id" uuid NOT NULL UNIQUE,
+        "active" boolean NOT NULL DEFAULT true,
+        "created_at" timestamp without time zone NOT NULL DEFAULT now(),
+        "updated_at" timestamp without time zone NOT NULL DEFAULT now()
+      )
+      ''',
+    );
+    _responsableTableEnsured = true;
+  }
+
   Future<bool> _isAdmin(Session session) async {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return false;
@@ -44,6 +61,23 @@ class CinePassEndpoint extends Endpoint {
       SELECT 1
       FROM "cine_pass_admin_user"
       WHERE "user_id" = (@uid)::uuid
+      LIMIT 1
+      ''',
+      parameters: QueryParameters.named({'uid': userId}),
+    );
+    return rows.isNotEmpty;
+  }
+
+  Future<bool> _isResponsable(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return false;
+
+    await _ensureResponsableRoleTable(session);
+    final rows = await session.db.unsafeQuery(
+      r'''
+      SELECT 1
+      FROM "cine_pass_responsable_user"
+      WHERE "user_id" = (@uid)::uuid AND "active" = true
       LIMIT 1
       ''',
       parameters: QueryParameters.named({'uid': userId}),
@@ -69,11 +103,6 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  Future<bool> _isResponsable(Session session) async {
-    final ids = await _responsableStructureIds(session);
-    return ids.isNotEmpty;
-  }
-
   /// Frontend: indique si l'utilisateur connecté est admin plateforme.
   Future<bool> isCurrentUserAdmin(Session session) async {
     return _isAdmin(session);
@@ -82,6 +111,69 @@ class CinePassEndpoint extends Endpoint {
   /// Frontend: indique si l'utilisateur connecté est responsable d'au moins une structure.
   Future<bool> isCurrentUserResponsable(Session session) async {
     return _isResponsable(session);
+  }
+
+  /// Admin: active/desactive le role responsable pour un utilisateur via son email.
+  Future<bool> setResponsableActiveByEmail(
+    Session session, {
+    required String email,
+    required bool active,
+  }) async {
+    try {
+      if (!await _isAdmin(session)) {
+        session.log('setResponsableActiveByEmail refuse: admin requis');
+        return false;
+      }
+
+      final normalizedEmail = email.trim().toLowerCase();
+      if (normalizedEmail.isEmpty) return false;
+
+      final userRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "authUserId"
+        FROM "serverpod_auth_core_profile"
+        WHERE lower("email") = @email
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'email': normalizedEmail}),
+      );
+      if (userRows.isEmpty) return false;
+      final userId = userRows.first[0].toString();
+
+      await _ensureResponsableRoleTable(session);
+      await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_responsable_user" ("user_id", "active", "updated_at")
+        VALUES ((@uid)::uuid, @active, now())
+        ON CONFLICT ("user_id") DO UPDATE SET
+          "active" = EXCLUDED."active",
+          "updated_at" = now()
+        ''',
+        parameters: QueryParameters.named({'uid': userId, 'active': active}),
+      );
+
+      // Keep assignment table aligned when role is deactivated.
+      if (!active) {
+        await session.db.unsafeQuery(
+          r'''
+          UPDATE "cine_pass_responsable_assignment"
+          SET "active" = false
+          WHERE "user_id" = (@uid)::uuid
+          ''',
+          parameters: QueryParameters.named({'uid': userId}),
+        );
+      }
+
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass setResponsableActiveByEmail',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
   }
 
   /// Liste de tous les films.
@@ -779,6 +871,19 @@ class CinePassEndpoint extends Endpoint {
         ''',
         parameters: QueryParameters.named({'uid': userId, 'sid': structureId}),
       );
+
+      await _ensureResponsableRoleTable(session);
+      await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_responsable_user" ("user_id", "active", "updated_at")
+        VALUES ((@uid)::uuid, true, now())
+        ON CONFLICT ("user_id") DO UPDATE SET
+          "active" = true,
+          "updated_at" = now()
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+
       await session.db.unsafeQuery(
         r'''
         UPDATE "cine_pass_responsable_request"

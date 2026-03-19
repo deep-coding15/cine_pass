@@ -6,6 +6,29 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../main.dart';
 
+class _CinePassRoleEndpoint extends EndpointRef {
+  _CinePassRoleEndpoint(super.caller);
+
+  @override
+  String get name => 'cinePass';
+
+  Future<bool> isCurrentUserAdmin() {
+    return caller.callServerEndpoint<bool>(
+      name,
+      'isCurrentUserAdmin',
+      {},
+    );
+  }
+
+  Future<bool> isCurrentUserResponsable() {
+    return caller.callServerEndpoint<bool>(
+      name,
+      'isCurrentUserResponsable',
+      {},
+    );
+  }
+}
+
 /// État d'authentification synchronisé avec Serverpod `client.auth`.
 class AuthState extends ChangeNotifier {
   static AuthState? _instance;
@@ -100,9 +123,10 @@ class AuthState extends ChangeNotifier {
     if (_isRefreshingProfile) return;
     _isRefreshingProfile = true;
     try {
+      final roleEndpoint = _CinePassRoleEndpoint(client);
       final ProfileResponse? profile = await client.cinePass.getProfile();
-      final bool isAdmin = await client.cinePass.isCurrentUserAdmin();
-      final bool isResponsable = await client.cinePass.isCurrentUserResponsable();
+      final bool isAdmin = await roleEndpoint.isCurrentUserAdmin();
+      final bool isResponsable = await roleEndpoint.isCurrentUserResponsable();
 
       final nextName = (profile?.displayName ?? '').trim();
       final nextEmail = (profile?.email ?? '').trim();

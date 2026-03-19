@@ -284,6 +284,20 @@ CREATE INDEX "cine_pass_responsable_request_status_idx"
     ON "cine_pass_responsable_request" ("status");
 
 -- =============================================================================
+-- RESPONSABLES — ROLE USER (source de verite du role)
+-- =============================================================================
+CREATE TABLE "cine_pass_responsable_user" (
+    "id"         bigserial PRIMARY KEY,
+    "user_id"    uuid NOT NULL UNIQUE REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "active"     boolean NOT NULL DEFAULT true,
+    "created_at" timestamp without time zone NOT NULL DEFAULT now(),
+    "updated_at" timestamp without time zone NOT NULL DEFAULT now()
+);
+
+CREATE INDEX "cine_pass_responsable_user_active_idx"
+    ON "cine_pass_responsable_user" ("active");
+
+-- =============================================================================
 -- RESPONSABLES — ASSIGNMENTS (lien user <-> structure)
 -- =============================================================================
 CREATE TABLE "cine_pass_responsable_assignment" (

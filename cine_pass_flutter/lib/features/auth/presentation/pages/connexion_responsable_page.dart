@@ -1,11 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/widgets/cinepass_logo.dart';
+import '../../../../main.dart';
+
+class _EmailAuthEndpoint extends EndpointRef {
+  _EmailAuthEndpoint(super.caller);
+
+  @override
+  String get name => 'emailAuth';
+
+  Future<AuthSuccess> login({required String email, required String password}) {
+    return caller.callServerEndpoint<AuthSuccess>(
+      name,
+      'login',
+      {
+        'email': email,
+        'password': password,
+      },
+      authenticated: false,
+    );
+  }
+}
 
 /// Connexion à l'espace responsable avec l'email professionnel et le mot de passe
 /// renseignés lors de la demande « Devenir responsable » (une fois la demande approuvée).
@@ -23,6 +44,7 @@ class _ConnexionResponsablePageState extends State<ConnexionResponsablePage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -33,16 +55,46 @@ class _ConnexionResponsablePageState extends State<ConnexionResponsablePage> {
 
   Future<void> _submit() async {
     if (_formKey.currentState?.validate() != true) return;
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
     final email = _emailController.text.trim().toLowerCase();
+    final password = _passwordController.text;
     final router = GoRouter.of(context);
     final auth = context.read<AuthState>();
-    // TODO: appeler l'API backend login responsable (email pro + password)
-    // Pour l'instant simulation : connexion acceptée
-    await Future.delayed(const Duration(milliseconds: 400));
-    auth.loginAsResponsable(email: email, name: null);
-    setState(() => _isLoading = false);
-    router.go(AppRouter.responsable);
+
+    try {
+      final authSuccess = await _EmailAuthEndpoint(client).login(
+        email: email,
+        password: password,
+      );
+      await client.auth.updateSignedInUser(authSuccess);
+      await auth.refreshProfileFromServer();
+
+      if (!mounted) return;
+      if (!auth.isResponsable) {
+        await client.auth.signOutDevice();
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              'Ce compte n\'est pas encore responsable approuve. Faites d\'abord valider votre demande.';
+        });
+        return;
+      }
+
+      router.go(AppRouter.responsable);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Connexion responsable impossible: $e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -149,6 +201,13 @@ class _ConnexionResponsablePageState extends State<ConnexionResponsablePage> {
                     )
                   : const Text('Accéder à mon espace responsable'),
             ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+              ),
+            ],
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

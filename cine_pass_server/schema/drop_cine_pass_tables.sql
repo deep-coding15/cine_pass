@@ -5,6 +5,7 @@
 
 BEGIN;
 
+DROP TABLE IF EXISTS "cine_pass_admin_user" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_user_role" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_favori" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_faq" CASCADE;
@@ -16,6 +17,7 @@ DROP TABLE IF EXISTS "cine_pass_seance" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_siege" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_salle" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_responsable_assignment" CASCADE;
+DROP TABLE IF EXISTS "cine_pass_responsable_user" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_structure" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_cinema" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_film" CASCADE;
