@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../data/reservation_state.dart';
+import '../../../../main.dart';
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
@@ -31,6 +32,88 @@ class _PaymentPageState extends State<PaymentPage> {
   double get _total {
     final state = ReservationState.instance;
     return state.isEvent ? state.totalEvent : state.totalFilm;
+  }
+
+  Future<void> _confirmPaymentAndCreateBillets(BuildContext context) async {
+    final state = ReservationState.instance;
+
+    final reservationNumber = 'BOOK-${DateTime.now().millisecondsSinceEpoch}';
+    final seatLabels = state.isEvent ? <String>[] : state.selectedSeats;
+
+    final ticketTypes = <String>[];
+    final optParking = <bool>[];
+    final optPopcorn = <bool>[];
+    final optBoisson = <bool>[];
+    final prices = <double>[];
+
+    if (state.isEvent) {
+      for (final t in state.eventTickets) {
+        final isVip = t.isVip;
+        final base = isVip ? state.eventPricePerTicket * 1.5 : state.eventPricePerTicket;
+        final opts = isVip
+            ? 0.0
+            : (t.optionParking ? 3.0 : 0.0) +
+                (t.optionPopcorn ? 5.0 : 0.0) +
+                (t.optionBoisson ? 2.0 : 0.0);
+        ticketTypes.add(isVip ? 'vip' : 'normal');
+        optParking.add(t.optionParking);
+        optPopcorn.add(t.optionPopcorn);
+        optBoisson.add(t.optionBoisson);
+        prices.add(base + opts);
+      }
+    } else if (state.filmTickets.isNotEmpty) {
+      for (final t in state.filmTickets) {
+        final isVip = t.isVip;
+        final base = isVip ? state.pricePerSeat * 1.5 : state.pricePerSeat;
+        final opts = isVip
+            ? 0.0
+            : (t.optionParking ? 3.0 : 0.0) +
+                (t.optionPopcorn ? 5.0 : 0.0) +
+                (t.optionBoisson ? 2.0 : 0.0);
+        ticketTypes.add(isVip ? 'vip' : 'normal');
+        optParking.add(t.optionParking);
+        optPopcorn.add(t.optionPopcorn);
+        optBoisson.add(t.optionBoisson);
+        prices.add(base + opts);
+      }
+    } else {
+      // Fallback (older flow): one choice for all seats.
+      final isVip = state.ticketType == 'vip';
+      for (var i = 0; i < state.selectedSeats.length; i++) {
+        final base = isVip ? state.pricePerSeat * 1.5 : state.pricePerSeat;
+        final opts = isVip
+            ? 0.0
+            : (state.optionParking ? 3.0 : 0.0) +
+                (state.optionPopcorn ? 5.0 : 0.0) +
+                (state.optionBoisson ? 2.0 : 0.0);
+        ticketTypes.add(isVip ? 'vip' : 'normal');
+        optParking.add(state.optionParking);
+        optPopcorn.add(state.optionPopcorn);
+        optBoisson.add(state.optionBoisson);
+        prices.add(base + opts);
+      }
+    }
+
+    final numero = await client.cinePass.createReservationAndBillets(
+      isEvent: state.isEvent,
+      seanceId: state.seanceId,
+      eventId: state.eventId,
+      reservationNumber: reservationNumber,
+      seatLabels: seatLabels,
+      ticketTypes: ticketTypes,
+      optionParking: optParking,
+      optionPopcorn: optPopcorn,
+      optionBoisson: optBoisson,
+      prices: prices,
+      totalAmount: _total,
+    );
+
+    // Persist for any UI that still uses it (e.g. confirmation).
+    ReservationState.instance.setReservationNumber(numero ?? reservationNumber);
+
+    if (!context.mounted) return;
+    // Direct redirect to "Mes billets" after payment.
+    context.go(AppRouter.billets);
   }
 
   @override
@@ -167,12 +250,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
-                            onPressed: () {
-                              ReservationState.instance.setReservationNumber(
-                                'BOOK-${DateTime.now().millisecondsSinceEpoch}',
-                              );
-                              context.go(AppRouter.confirmation);
-                            },
+                            onPressed: () => _confirmPaymentAndCreateBillets(context),
                             style: FilledButton.styleFrom(
                               backgroundColor: AppTheme.primaryRed,
                               padding: const EdgeInsets.symmetric(vertical: 16),

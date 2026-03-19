@@ -16,27 +16,29 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:cine_pass_client/src/protocol/cine_pass/film_response.dart'
+import 'package:cine_pass_client/src/protocol/cine_pass/billet_group_response.dart'
     as _i5;
-import 'package:cine_pass_client/src/protocol/cine_pass/seance_response.dart'
+import 'package:cine_pass_client/src/protocol/cine_pass/film_response.dart'
     as _i6;
-import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
+import 'package:cine_pass_client/src/protocol/cine_pass/seance_response.dart'
     as _i7;
-import 'package:cine_pass_client/src/protocol/salle.dart' as _i8;
+import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
+    as _i8;
+import 'package:cine_pass_client/src/protocol/salle.dart' as _i9;
 import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
-    as _i9;
-import 'package:cine_pass_client/src/protocol/structure.dart' as _i10;
+    as _i10;
+import 'package:cine_pass_client/src/protocol/structure.dart' as _i11;
 import 'package:cine_pass_client/src/protocol/cine_pass/demande_responsable_response.dart'
-    as _i11;
-import 'package:cine_pass_client/src/protocol/cine_pass/reservation_response.dart'
     as _i12;
-import 'package:cine_pass_client/src/protocol/cine_pass/rapport_ca_response.dart'
+import 'package:cine_pass_client/src/protocol/cine_pass/reservation_response.dart'
     as _i13;
-import 'package:cine_pass_client/src/protocol/cine_pass/profile_response.dart'
+import 'package:cine_pass_client/src/protocol/cine_pass/rapport_ca_response.dart'
     as _i14;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i15;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i16;
-import 'protocol.dart' as _i17;
+import 'package:cine_pass_client/src/protocol/cine_pass/profile_response.dart'
+    as _i15;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i16;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i17;
+import 'protocol.dart' as _i18;
 
 /// Exposes email/password auth and a simplified registration flow.
 /// {@category Endpoint}
@@ -342,6 +344,46 @@ class EndpointCinePass extends _i2.EndpointRef {
   @override
   String get name => 'cinePass';
 
+  /// Crée une réservation + billets après paiement (simulé).
+  /// Retourne le numéro de réservation (ex: BOOK-...).
+  _i3.Future<String?> createReservationAndBillets({
+    required bool isEvent,
+    String? seanceId,
+    String? eventId,
+    String? reservationNumber,
+    required List<String> seatLabels,
+    required List<String> ticketTypes,
+    required List<bool> optionParking,
+    required List<bool> optionPopcorn,
+    required List<bool> optionBoisson,
+    required List<double> prices,
+    required double totalAmount,
+  }) => caller.callServerEndpoint<String?>(
+    'cinePass',
+    'createReservationAndBillets',
+    {
+      'isEvent': isEvent,
+      'seanceId': seanceId,
+      'eventId': eventId,
+      'reservationNumber': reservationNumber,
+      'seatLabels': seatLabels,
+      'ticketTypes': ticketTypes,
+      'optionParking': optionParking,
+      'optionPopcorn': optionPopcorn,
+      'optionBoisson': optionBoisson,
+      'prices': prices,
+      'totalAmount': totalAmount,
+    },
+  );
+
+  /// Mes billets (1 entrée par réservation, avec la liste des billets associés).
+  _i3.Future<List<_i5.BilletGroupResponse>> getMyBillets() =>
+      caller.callServerEndpoint<List<_i5.BilletGroupResponse>>(
+        'cinePass',
+        'getMyBillets',
+        {},
+      );
+
   /// Frontend: indique si l'utilisateur connecté est admin plateforme.
   _i3.Future<bool> isCurrentUserAdmin() => caller.callServerEndpoint<bool>(
     'cinePass',
@@ -357,57 +399,70 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
+  /// Admin: active/desactive le role responsable pour un utilisateur via son email.
+  _i3.Future<bool> setResponsableActiveByEmail({
+    required String email,
+    required bool active,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setResponsableActiveByEmail',
+    {
+      'email': email,
+      'active': active,
+    },
+  );
+
   /// Liste de tous les films.
-  _i3.Future<List<_i5.FilmResponse>> getFilms() =>
-      caller.callServerEndpoint<List<_i5.FilmResponse>>(
+  _i3.Future<List<_i6.FilmResponse>> getFilms() =>
+      caller.callServerEndpoint<List<_i6.FilmResponse>>(
         'cinePass',
         'getFilms',
         {},
       );
 
   /// Détail d'un film par id.
-  _i3.Future<_i5.FilmResponse?> getFilmById(String id) =>
-      caller.callServerEndpoint<_i5.FilmResponse?>(
+  _i3.Future<_i6.FilmResponse?> getFilmById(String id) =>
+      caller.callServerEndpoint<_i6.FilmResponse?>(
         'cinePass',
         'getFilmById',
         {'id': id},
       );
 
   /// Séances pour un film (avec nom cinéma, salle, ville).
-  _i3.Future<List<_i6.SeanceResponse>> getSeancesForFilm(String filmId) =>
-      caller.callServerEndpoint<List<_i6.SeanceResponse>>(
+  _i3.Future<List<_i7.SeanceResponse>> getSeancesForFilm(String filmId) =>
+      caller.callServerEndpoint<List<_i7.SeanceResponse>>(
         'cinePass',
         'getSeancesForFilm',
         {'filmId': filmId},
       );
 
   /// Liste des cinémas.
-  _i3.Future<List<_i7.CinemaResponse>> getCinemas() =>
-      caller.callServerEndpoint<List<_i7.CinemaResponse>>(
+  _i3.Future<List<_i8.CinemaResponse>> getCinemas() =>
+      caller.callServerEndpoint<List<_i8.CinemaResponse>>(
         'cinePass',
         'getCinemas',
         {},
       );
 
   /// Liste des salles (pour admin séances).
-  _i3.Future<List<_i8.Salle>> getSalles() =>
-      caller.callServerEndpoint<List<_i8.Salle>>(
+  _i3.Future<List<_i9.Salle>> getSalles() =>
+      caller.callServerEndpoint<List<_i9.Salle>>(
         'cinePass',
         'getSalles',
         {},
       );
 
   /// Liste des événements à venir.
-  _i3.Future<List<_i9.EventResponse>> getEvents() =>
-      caller.callServerEndpoint<List<_i9.EventResponse>>(
+  _i3.Future<List<_i10.EventResponse>> getEvents() =>
+      caller.callServerEndpoint<List<_i10.EventResponse>>(
         'cinePass',
         'getEvents',
         {},
       );
 
   /// Détail d'un événement par id.
-  _i3.Future<_i9.EventResponse?> getEventById(String id) =>
-      caller.callServerEndpoint<_i9.EventResponse?>(
+  _i3.Future<_i10.EventResponse?> getEventById(String id) =>
+      caller.callServerEndpoint<_i10.EventResponse?>(
         'cinePass',
         'getEventById',
         {'id': id},
@@ -438,7 +493,7 @@ class EndpointCinePass extends _i2.EndpointRef {
       );
 
   /// Admin: créer un film.
-  _i3.Future<_i5.FilmResponse?> createFilm({
+  _i3.Future<_i6.FilmResponse?> createFilm({
     required String title,
     required String genre,
     required int durationMinutes,
@@ -450,7 +505,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     Object? dateSortie,
     Object? dateFin,
     String? audience,
-  }) => caller.callServerEndpoint<_i5.FilmResponse?>(
+  }) => caller.callServerEndpoint<_i6.FilmResponse?>(
     'cinePass',
     'createFilm',
     {
@@ -469,7 +524,7 @@ class EndpointCinePass extends _i2.EndpointRef {
   );
 
   /// Admin / Responsable: créer un événement (optionnellement lié à une structure).
-  _i3.Future<_i9.EventResponse?> createEvent({
+  _i3.Future<_i10.EventResponse?> createEvent({
     required String titre,
     required String categorie,
     String? description,
@@ -483,7 +538,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     int? posterColor,
     String? posterUrl,
     String? structureId,
-  }) => caller.callServerEndpoint<_i9.EventResponse?>(
+  }) => caller.callServerEndpoint<_i10.EventResponse?>(
     'cinePass',
     'createEvent',
     {
@@ -504,23 +559,23 @@ class EndpointCinePass extends _i2.EndpointRef {
   );
 
   /// Liste de toutes les structures (admin).
-  _i3.Future<List<_i10.Structure>> getStructures() =>
-      caller.callServerEndpoint<List<_i10.Structure>>(
+  _i3.Future<List<_i11.Structure>> getStructures() =>
+      caller.callServerEndpoint<List<_i11.Structure>>(
         'cinePass',
         'getStructures',
         {},
       );
 
   /// Détail d'une structure par id (admin).
-  _i3.Future<_i10.Structure?> getStructureById(String id) =>
-      caller.callServerEndpoint<_i10.Structure?>(
+  _i3.Future<_i11.Structure?> getStructureById(String id) =>
+      caller.callServerEndpoint<_i11.Structure?>(
         'cinePass',
         'getStructureById',
         {'id': id},
       );
 
   /// Mettre à jour un événement (admin ou responsable de la structure).
-  _i3.Future<_i9.EventResponse?> updateEvent({
+  _i3.Future<_i10.EventResponse?> updateEvent({
     required String id,
     String? titre,
     String? categorie,
@@ -534,7 +589,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     double? prixBase,
     int? posterColor,
     String? posterUrl,
-  }) => caller.callServerEndpoint<_i9.EventResponse?>(
+  }) => caller.callServerEndpoint<_i10.EventResponse?>(
     'cinePass',
     'updateEvent',
     {
@@ -562,24 +617,24 @@ class EndpointCinePass extends _i2.EndpointRef {
   );
 
   /// Structure(s) assignée(s) au responsable connecté.
-  _i3.Future<_i10.Structure?> getMyStructure() =>
-      caller.callServerEndpoint<_i10.Structure?>(
+  _i3.Future<_i11.Structure?> getMyStructure() =>
+      caller.callServerEndpoint<_i11.Structure?>(
         'cinePass',
         'getMyStructure',
         {},
       );
 
   /// Événements des structures du responsable connecté.
-  _i3.Future<List<_i9.EventResponse>> getMyEvents() =>
-      caller.callServerEndpoint<List<_i9.EventResponse>>(
+  _i3.Future<List<_i10.EventResponse>> getMyEvents() =>
+      caller.callServerEndpoint<List<_i10.EventResponse>>(
         'cinePass',
         'getMyEvents',
         {},
       );
 
   /// Admin: demandes en attente (devenir responsable).
-  _i3.Future<List<_i11.DemandeResponsableResponse>> getDemandesEnAttente() =>
-      caller.callServerEndpoint<List<_i11.DemandeResponsableResponse>>(
+  _i3.Future<List<_i12.DemandeResponsableResponse>> getDemandesEnAttente() =>
+      caller.callServerEndpoint<List<_i12.DemandeResponsableResponse>>(
         'cinePass',
         'getDemandesEnAttente',
         {},
@@ -607,7 +662,7 @@ class EndpointCinePass extends _i2.EndpointRef {
   );
 
   /// Créer une demande pour devenir responsable (utilisateur connecté).
-  _i3.Future<_i11.DemandeResponsableResponse?> createDemandeResponsable({
+  _i3.Future<_i12.DemandeResponsableResponse?> createDemandeResponsable({
     required String structureType,
     required String structureName,
     required String structureCity,
@@ -615,7 +670,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     String? structureWebsite,
     String? structurePhone,
     required String description,
-  }) => caller.callServerEndpoint<_i11.DemandeResponsableResponse?>(
+  }) => caller.callServerEndpoint<_i12.DemandeResponsableResponse?>(
     'cinePass',
     'createDemandeResponsable',
     {
@@ -630,31 +685,31 @@ class EndpointCinePass extends _i2.EndpointRef {
   );
 
   /// Admin: toutes les réservations (événements et séances).
-  _i3.Future<List<_i12.ReservationResponse>> getReservations() =>
-      caller.callServerEndpoint<List<_i12.ReservationResponse>>(
+  _i3.Future<List<_i13.ReservationResponse>> getReservations() =>
+      caller.callServerEndpoint<List<_i13.ReservationResponse>>(
         'cinePass',
         'getReservations',
         {},
       );
 
   /// Responsable: réservations pour les événements de ses structures.
-  _i3.Future<List<_i12.ReservationResponse>> getReservationsForMyStructures() =>
-      caller.callServerEndpoint<List<_i12.ReservationResponse>>(
+  _i3.Future<List<_i13.ReservationResponse>> getReservationsForMyStructures() =>
+      caller.callServerEndpoint<List<_i13.ReservationResponse>>(
         'cinePass',
         'getReservationsForMyStructures',
         {},
       );
 
   /// Responsable: rapport CA sur une période (7j, 30j, 3m, 1an).
-  _i3.Future<_i13.RapportCAResponse> getRapportCA(String periode) =>
-      caller.callServerEndpoint<_i13.RapportCAResponse>(
+  _i3.Future<_i14.RapportCAResponse> getRapportCA(String periode) =>
+      caller.callServerEndpoint<_i14.RapportCAResponse>(
         'cinePass',
         'getRapportCA',
         {'periode': periode},
       );
 
   /// Admin: créer une séance.
-  _i3.Future<_i6.SeanceResponse?> createSeance({
+  _i3.Future<_i7.SeanceResponse?> createSeance({
     required String filmId,
     required String salleId,
     required Object debutAt,
@@ -662,7 +717,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     required String format,
     required String type,
     required double prixBase,
-  }) => caller.callServerEndpoint<_i6.SeanceResponse?>(
+  }) => caller.callServerEndpoint<_i7.SeanceResponse?>(
     'cinePass',
     'createSeance',
     {
@@ -678,8 +733,8 @@ class EndpointCinePass extends _i2.EndpointRef {
 
   /// Profil de l'utilisateur connecté (displayName, phone, birthDate).
   /// Retourne null si non authentifié.
-  _i3.Future<_i14.ProfileResponse?> getProfile() =>
-      caller.callServerEndpoint<_i14.ProfileResponse?>(
+  _i3.Future<_i15.ProfileResponse?> getProfile() =>
+      caller.callServerEndpoint<_i15.ProfileResponse?>(
         'cinePass',
         'getProfile',
         {},
@@ -712,8 +767,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i15.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i15.Greeting>(
+  _i3.Future<_i16.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i16.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -722,12 +777,12 @@ class EndpointGreeting extends _i2.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i16.Caller(client);
+    auth = _i17.Caller(client);
     serverpod_auth_idp = _i1.Caller(client);
     serverpod_auth_core = _i4.Caller(client);
   }
 
-  late final _i16.Caller auth;
+  late final _i17.Caller auth;
 
   late final _i1.Caller serverpod_auth_idp;
 
@@ -754,7 +809,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i17.Protocol(),
+         _i18.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

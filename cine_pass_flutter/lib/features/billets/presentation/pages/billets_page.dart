@@ -1,3 +1,4 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -5,8 +6,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/billets_state.dart';
 import '../../data/mock_billets_data.dart';
+import '../../../../main.dart';
 
-void _showQrFullScreen(BuildContext context, MockBillet billet) {
+void _showQrFullScreen(BuildContext context, BilletGroupResponse billet) {
   showDialog(
     context: context,
     barrierColor: Colors.black87,
@@ -65,8 +67,21 @@ void _showQrFullScreen(BuildContext context, MockBillet billet) {
   );
 }
 
-class BilletsPage extends StatelessWidget {
+class BilletsPage extends StatefulWidget {
   const BilletsPage({super.key});
+
+  @override
+  State<BilletsPage> createState() => _BilletsPageState();
+}
+
+class _BilletsPageState extends State<BilletsPage> {
+  late Future<List<BilletGroupResponse>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = client.cinePass.getMyBillets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,11 +90,22 @@ class BilletsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Mes billets',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: AppTheme.textPrimary,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Mes billets',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: AppTheme.textPrimary,
+                      ),
+                ),
+              ),
+              IconButton(
+                onPressed: () => setState(() => _future = client.cinePass.getMyBillets()),
+                tooltip: 'Rafraîchir',
+                icon: const Icon(Icons.refresh_rounded, color: AppTheme.textSecondary),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
@@ -87,7 +113,35 @@ class BilletsPage extends StatelessWidget {
             style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 24),
-          ...mockBillets.map((b) => _BilletCard(billet: b)),
+          FutureBuilder<List<BilletGroupResponse>>(
+            future: _future,
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 24),
+                    child: CircularProgressIndicator(color: AppTheme.primaryRed),
+                  ),
+                );
+              }
+              if (snap.hasError) {
+                return Text(
+                  'Impossible de charger vos billets: ${snap.error}',
+                  style: const TextStyle(color: Colors.redAccent),
+                );
+              }
+              final list = snap.data ?? const [];
+              if (list.isEmpty) {
+                return const Text(
+                  'Aucun billet pour le moment.',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                );
+              }
+              return Column(
+                children: list.map((b) => _BilletCard(billet: b)).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -97,7 +151,7 @@ class BilletsPage extends StatelessWidget {
 class _BilletCard extends StatelessWidget {
   const _BilletCard({required this.billet});
 
-  final MockBillet billet;
+  final BilletGroupResponse billet;
 
   @override
   Widget build(BuildContext context) {

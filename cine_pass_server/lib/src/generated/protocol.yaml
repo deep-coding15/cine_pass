@@ -17,8 +17,11 @@ phoneAuth:
   - sendVerificationCode:
   - verifyCode:
 cinePass:
+  - createReservationAndBillets:
+  - getMyBillets:
   - isCurrentUserAdmin:
   - isCurrentUserResponsable:
+  - setResponsableActiveByEmail:
   - getFilms:
   - getFilmById:
   - getSeancesForFilm:

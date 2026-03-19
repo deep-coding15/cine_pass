@@ -395,6 +395,95 @@ class Endpoints extends _i1.EndpointDispatch {
       name: 'cinePass',
       endpoint: endpoints['cinePass']!,
       methodConnectors: {
+        'createReservationAndBillets': _i1.MethodConnector(
+          name: 'createReservationAndBillets',
+          params: {
+            'isEvent': _i1.ParameterDescription(
+              name: 'isEvent',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'seanceId': _i1.ParameterDescription(
+              name: 'seanceId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'eventId': _i1.ParameterDescription(
+              name: 'eventId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'reservationNumber': _i1.ParameterDescription(
+              name: 'reservationNumber',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'seatLabels': _i1.ParameterDescription(
+              name: 'seatLabels',
+              type: _i1.getType<List<String>>(),
+              nullable: false,
+            ),
+            'ticketTypes': _i1.ParameterDescription(
+              name: 'ticketTypes',
+              type: _i1.getType<List<String>>(),
+              nullable: false,
+            ),
+            'optionParking': _i1.ParameterDescription(
+              name: 'optionParking',
+              type: _i1.getType<List<bool>>(),
+              nullable: false,
+            ),
+            'optionPopcorn': _i1.ParameterDescription(
+              name: 'optionPopcorn',
+              type: _i1.getType<List<bool>>(),
+              nullable: false,
+            ),
+            'optionBoisson': _i1.ParameterDescription(
+              name: 'optionBoisson',
+              type: _i1.getType<List<bool>>(),
+              nullable: false,
+            ),
+            'prices': _i1.ParameterDescription(
+              name: 'prices',
+              type: _i1.getType<List<double>>(),
+              nullable: false,
+            ),
+            'totalAmount': _i1.ParameterDescription(
+              name: 'totalAmount',
+              type: _i1.getType<double>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .createReservationAndBillets(
+                    session,
+                    isEvent: params['isEvent'],
+                    seanceId: params['seanceId'],
+                    eventId: params['eventId'],
+                    reservationNumber: params['reservationNumber'],
+                    seatLabels: params['seatLabels'],
+                    ticketTypes: params['ticketTypes'],
+                    optionParking: params['optionParking'],
+                    optionPopcorn: params['optionPopcorn'],
+                    optionBoisson: params['optionBoisson'],
+                    prices: params['prices'],
+                    totalAmount: params['totalAmount'],
+                  ),
+        ),
+        'getMyBillets': _i1.MethodConnector(
+          name: 'getMyBillets',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .getMyBillets(session),
+        ),
         'isCurrentUserAdmin': _i1.MethodConnector(
           name: 'isCurrentUserAdmin',
           params: {},
@@ -414,6 +503,31 @@ class Endpoints extends _i1.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .isCurrentUserResponsable(session),
+        ),
+        'setResponsableActiveByEmail': _i1.MethodConnector(
+          name: 'setResponsableActiveByEmail',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'active': _i1.ParameterDescription(
+              name: 'active',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .setResponsableActiveByEmail(
+                    session,
+                    email: params['email'],
+                    active: params['active'],
+                  ),
         ),
         'getFilms': _i1.MethodConnector(
           name: 'getFilms',

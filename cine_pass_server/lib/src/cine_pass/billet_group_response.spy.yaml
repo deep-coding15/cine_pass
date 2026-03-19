@@ -1,0 +1,14 @@
+class: BilletGroupResponse
+fields:
+  id: String
+  title: String
+  location: String
+  dateTime: String
+  totalAmount: double
+  seats: List<String>?
+  ticketCount: int?
+  isEvent: bool
+  room: String?
+  ticketTypes: List<String>?
+  sessionDateTime: DateTime
+

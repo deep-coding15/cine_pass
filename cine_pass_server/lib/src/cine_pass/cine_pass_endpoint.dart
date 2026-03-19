@@ -7,6 +7,7 @@ import '../generated/cine_pass/demande_responsable_response.dart';
 import '../generated/cine_pass/reservation_response.dart';
 import '../generated/cine_pass/rapport_ca_response.dart';
 import '../generated/cine_pass/profile_response.dart';
+import '../generated/cine_pass/billet_group_response.dart';
 import '../generated/salle.dart';
 import '../generated/structure.dart';
 
@@ -17,6 +18,277 @@ const double cinePassCommissionPercent = 8.0;
 
 /// Endpoint CinePass : films, séances, cinémas, événements (données BDD).
 class CinePassEndpoint extends Endpoint {
+  /// Crée une réservation + billets après paiement (simulé).
+  /// Retourne le numéro de réservation (ex: BOOK-...).
+  Future<String?> createReservationAndBillets(
+    Session session, {
+    required bool isEvent,
+    String? seanceId,
+    String? eventId,
+    String? reservationNumber,
+    required List<String> seatLabels,
+    required List<String> ticketTypes,
+    required List<bool> optionParking,
+    required List<bool> optionPopcorn,
+    required List<bool> optionBoisson,
+    required List<double> prices,
+    required double totalAmount,
+  }) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return null;
+    if (isEvent) {
+      if (eventId == null || eventId.isEmpty) return null;
+    } else {
+      if (seanceId == null || seanceId.isEmpty) return null;
+    }
+    if (prices.isEmpty) return null;
+    if (ticketTypes.length != prices.length ||
+        optionParking.length != prices.length ||
+        optionPopcorn.length != prices.length ||
+        optionBoisson.length != prices.length) {
+      return null;
+    }
+
+    try {
+      final numero = (reservationNumber != null && reservationNumber.trim().isNotEmpty)
+          ? reservationNumber.trim()
+          : 'BOOK-${DateTime.now().millisecondsSinceEpoch}';
+
+      DateTime? sessionAt;
+      String? salleId;
+      if (isEvent) {
+        final rows = await session.db.unsafeQuery(
+          r'''
+          SELECT "eventDate", "eventTime"
+          FROM "cine_pass_evenement"
+          WHERE "id" = (@id)::uuid
+          ''',
+          parameters: QueryParameters.named({'id': eventId}),
+        );
+        if (rows.isNotEmpty) {
+          final d = _safeDateTime(rows.first[0]);
+          final t = _safeDateTime(rows.first[1]);
+          sessionAt = t ?? d;
+        }
+      } else {
+        final rows = await session.db.unsafeQuery(
+          r'''
+          SELECT "debutAt", "salleId"
+          FROM "cine_pass_seance"
+          WHERE "id" = (@id)::uuid
+          ''',
+          parameters: QueryParameters.named({'id': seanceId}),
+        );
+        if (rows.isNotEmpty) {
+          sessionAt = _safeDateTime(rows.first[0]);
+          salleId = rows.first.length > 1 ? rows.first[1].toString() : null;
+        }
+      }
+
+      final reservationInsert = await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_reservation" (
+          "user_id", "seance_id", "evenement_id", "numero", "statut",
+          "total_amount", "session_at"
+        )
+        VALUES (
+          (@uid)::uuid,
+          CASE WHEN @seanceId::text = '' OR @seanceId IS NULL THEN NULL ELSE (@seanceId)::uuid END,
+          CASE WHEN @eventId::text = '' OR @eventId IS NULL THEN NULL ELSE (@eventId)::uuid END,
+          @numero,
+          'paid',
+          @total,
+          @sessionAt
+        )
+        RETURNING "id"
+        ''',
+        parameters: QueryParameters.named({
+          'uid': userId,
+          'seanceId': isEvent ? '' : (seanceId ?? ''),
+          'eventId': isEvent ? (eventId ?? '') : '',
+          'numero': numero,
+          'total': totalAmount,
+          'sessionAt': sessionAt,
+        }),
+      );
+      if (reservationInsert.isEmpty) return null;
+      final reservationId = reservationInsert.first[0].toString();
+
+      for (var i = 0; i < prices.length; i++) {
+        final seatLabel =
+            (!isEvent && i < seatLabels.length) ? seatLabels[i] : null;
+        String? siegeId;
+        if (!isEvent && seatLabel != null && seatLabel.isNotEmpty && salleId != null) {
+          final parsed = _parseSeatLabel(seatLabel);
+          if (parsed != null) {
+            final seatRows = await session.db.unsafeQuery(
+              r'''
+              SELECT "id"
+              FROM "cine_pass_siege"
+              WHERE "salleId" = (@sid)::uuid AND "rangee" = @rangee AND "numero" = @numero
+              LIMIT 1
+              ''',
+              parameters: QueryParameters.named({
+                'sid': salleId,
+                'rangee': parsed.$1,
+                'numero': parsed.$2,
+              }),
+            );
+            if (seatRows.isNotEmpty) {
+              siegeId = seatRows.first[0].toString();
+            }
+          }
+        }
+
+        final tType = ticketTypes[i].trim().toLowerCase() == 'vip' ? 'vip' : 'normal';
+        await session.db.unsafeQuery(
+          r'''
+          INSERT INTO "cine_pass_billet" (
+            "reservation_id", "siege_id", "ticket_type",
+            "option_parking", "option_popcorn", "option_boisson",
+            "prix"
+          )
+          VALUES (
+            (@rid)::uuid,
+            CASE WHEN @siegeId::text = '' OR @siegeId IS NULL THEN NULL ELSE (@siegeId)::uuid END,
+            @ticketType,
+            @parking,
+            @popcorn,
+            @boisson,
+            @prix
+          )
+          ''',
+          parameters: QueryParameters.named({
+            'rid': reservationId,
+            'siegeId': siegeId ?? '',
+            'ticketType': tType,
+            'parking': optionParking[i],
+            'popcorn': optionPopcorn[i],
+            'boisson': optionBoisson[i],
+            'prix': prices[i],
+          }),
+        );
+      }
+
+      return numero;
+    } catch (e, st) {
+      session.log(
+        'CinePass createReservationAndBillets',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return null;
+    }
+  }
+
+  /// Mes billets (1 entrée par réservation, avec la liste des billets associés).
+  Future<List<BilletGroupResponse>> getMyBillets(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return [];
+    try {
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT r."id", r."numero", r."total_amount",
+               r."seance_id", r."evenement_id",
+               r."session_at", r."created_at",
+               f."titre" as film_title,
+               c."nom" as cinema_nom,
+               c."ville" as cinema_ville,
+               sal."nom" as salle_nom,
+               s."debutAt" as seance_debutAt,
+               e."titre" as event_title,
+               e."lieu" as event_lieu,
+               e."ville" as event_ville,
+               e."eventDate" as event_date,
+               e."eventTime" as event_time
+        FROM "cine_pass_reservation" r
+        LEFT JOIN "cine_pass_seance" s ON s."id" = r."seance_id"
+        LEFT JOIN "cine_pass_film" f ON f."id" = s."filmId"
+        LEFT JOIN "cine_pass_salle" sal ON sal."id" = s."salleId"
+        LEFT JOIN "cine_pass_cinema" c ON c."id" = sal."cinemaId"
+        LEFT JOIN "cine_pass_evenement" e ON e."id" = r."evenement_id"
+        WHERE r."user_id" = (@uid)::uuid
+        ORDER BY r."created_at" DESC
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+
+      final result = <BilletGroupResponse>[];
+      for (final row in rows) {
+        final reservationId = row[0].toString();
+        final numero = row[1]?.toString() ?? '';
+        final total = row[2] is num ? (row[2] as num).toDouble() : _safeDouble(row[2]);
+        final isEvent = row[4] != null;
+
+        DateTime sessionDt =
+            _safeDateTime(row[5]) ?? _safeDateTime(row[11]) ?? DateTime.now();
+        if (isEvent) {
+          sessionDt =
+              _safeDateTime(row[5]) ?? _safeDateTime(row[16]) ?? _safeDateTime(row[17]) ?? sessionDt;
+        }
+
+        final title = isEvent
+            ? (row[12] as String?) ?? ''
+            : (row[7] as String?) ?? '';
+        final location = isEvent
+            ? '${(row[13] as String?) ?? ''} - ${(row[14] as String?) ?? ''}'
+            : '${(row[8] as String?) ?? ''} - ${(row[9] as String?) ?? ''}';
+        final room = isEvent ? null : (row[10] as String?);
+        final dateTimeLabel = _formatDateTimeLabel(sessionDt);
+
+        final billetRows = await session.db.unsafeQuery(
+          r'''
+          SELECT b."ticket_type", sg."rangee", sg."numero"
+          FROM "cine_pass_billet" b
+          LEFT JOIN "cine_pass_siege" sg ON sg."id" = b."siege_id"
+          WHERE b."reservation_id" = (@rid)::uuid
+          ORDER BY b."created_at" ASC
+          ''',
+          parameters: QueryParameters.named({'rid': reservationId}),
+        );
+
+        final seats = <String>[];
+        final types = <String>[];
+        for (final b in billetRows) {
+          final t = (b.isNotEmpty ? b[0]?.toString() : null) ?? 'normal';
+          types.add(t.toLowerCase() == 'vip' ? 'VIP' : 'Normal');
+          final rangee = b.length > 1 ? b[1]?.toString() : null;
+          final num = b.length > 2 ? b[2] : null;
+          if (rangee != null && rangee.isNotEmpty && num != null) {
+            seats.add('$rangee${_safeInt(num)}');
+          }
+        }
+
+        result.add(
+          BilletGroupResponse(
+            id: numero.isNotEmpty ? numero : reservationId,
+            title: title,
+            location: location.trim().isEmpty ? '—' : location,
+            dateTime: dateTimeLabel,
+            totalAmount: total,
+            seats: seats.isEmpty ? null : seats,
+            ticketCount: isEvent ? billetRows.length : null,
+            isEvent: isEvent,
+            room: room,
+            ticketTypes: types.isEmpty ? null : types,
+            sessionDateTime: sessionDt,
+          ),
+        );
+      }
+
+      return result;
+    } catch (e, st) {
+      session.log(
+        'CinePass getMyBillets',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return [];
+    }
+  }
+
   // Helpers pour gestion des rôles
   bool _adminTableEnsured = false;
   bool _responsableTableEnsured = false;
@@ -1496,5 +1768,26 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
+  }
+
+  static (String, int)? _parseSeatLabel(String seatLabel) {
+    // Expected formats: "A12", "B7", "AA10"
+    final s = seatLabel.trim();
+    if (s.isEmpty) return null;
+    final match = RegExp(r'^([A-Za-z]+)\s*([0-9]+)$').firstMatch(s);
+    if (match == null) return null;
+    final row = match.group(1)!.toUpperCase();
+    final num = int.tryParse(match.group(2)!) ?? 0;
+    if (num <= 0) return null;
+    return (row, num);
+  }
+
+  static String _formatDateTimeLabel(DateTime dt) {
+    final dd = dt.day.toString().padLeft(2, '0');
+    final mm = dt.month.toString().padLeft(2, '0');
+    final yyyy = dt.year.toString();
+    final hh = dt.hour.toString().padLeft(2, '0');
+    final min = dt.minute.toString().padLeft(2, '0');
+    return '$dd/$mm/$yyyy à $hh:$min';
   }
 }
