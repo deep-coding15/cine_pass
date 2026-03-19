@@ -18,43 +18,37 @@ const double cinePassCommissionPercent = 8.0;
 /// Endpoint CinePass : films, séances, cinémas, événements (données BDD).
 class CinePassEndpoint extends Endpoint {
   // Helpers pour gestion des rôles
+  bool _adminTableEnsured = false;
 
-  Future<String?> _currentUserEmail(Session session) async {
-    final userId = session.authenticated?.userIdentifier;
-    if (userId == null) return null;
-    try {
-      final rows = await session.db.unsafeQuery(
-        r'''
-        SELECT "email"
-        FROM "serverpod_auth_core_profile"
-        WHERE "authUserId" = (@uid)::uuid
-        LIMIT 1
-        ''',
-        parameters: QueryParameters.named({'uid': userId}),
-      );
-      if (rows.isEmpty) return null;
-      return (rows.first[0] as String?)?.trim().toLowerCase();
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Set<String> _configuredAdminEmails(Session session) {
-    final raw = (Serverpod.instance.getPassword('adminEmails') ?? '')
-        .trim()
-        .toLowerCase();
-    if (raw.isEmpty) return {'admin@cinepass.com'};
-    return raw
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toSet();
+  Future<void> _ensureAdminRoleTable(Session session) async {
+    if (_adminTableEnsured) return;
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_admin_user" (
+        "id" bigserial PRIMARY KEY,
+        "user_id" uuid NOT NULL UNIQUE,
+        "created_at" timestamp without time zone NOT NULL DEFAULT now()
+      )
+      ''',
+    );
+    _adminTableEnsured = true;
   }
 
   Future<bool> _isAdmin(Session session) async {
-    final email = await _currentUserEmail(session);
-    if (email == null) return false;
-    return _configuredAdminEmails(session).contains(email);
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return false;
+
+    await _ensureAdminRoleTable(session);
+    final rows = await session.db.unsafeQuery(
+      r'''
+      SELECT 1
+      FROM "cine_pass_admin_user"
+      WHERE "user_id" = (@uid)::uuid
+      LIMIT 1
+      ''',
+      parameters: QueryParameters.named({'uid': userId}),
+    );
+    return rows.isNotEmpty;
   }
 
   Future<List<String>> _responsableStructureIds(Session session) async {
