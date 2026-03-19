@@ -54,21 +54,16 @@ class AuthState extends ChangeNotifier {
 
     if (client.auth.isAuthenticated && authInfo is AuthSuccess) {
       final strategy = authInfo.authStrategy.toLowerCase();
-      final nextIsAdmin = authInfo.scopeNames.contains('admin');
-      final nextIsResponsable = authInfo.scopeNames.contains('responsable');
+      // Roles are refreshed from backend profile access checks.
       final nextUserName = _displayNameForStrategy(strategy);
       final nextUserEmail = _emailLabelForStrategy(strategy);
 
       final changed =
           _isLoggedIn != true ||
-          _isAdmin != nextIsAdmin ||
-          _isResponsable != nextIsResponsable ||
           _userName != nextUserName ||
           _userEmail != nextUserEmail;
 
       _isLoggedIn = true;
-      _isAdmin = nextIsAdmin;
-      _isResponsable = nextIsResponsable;
       _userName = nextUserName;
       _userEmail = nextUserEmail;
 
@@ -76,8 +71,7 @@ class AuthState extends ChangeNotifier {
         notifyListeners();
       }
 
-      // After we know we're authenticated, pull real user data from backend.
-      // We intentionally do this asynchronously so auth state updates immediately.
+      // After we know we're authenticated, pull real user data and role flags.
       unawaited(refreshProfileFromServer(notify: true));
       return;
     }
@@ -100,18 +94,18 @@ class AuthState extends ChangeNotifier {
     }
   }
 
-  /// Charge les infos "réelles" depuis l'API (profil) et met à jour `userName` / `userEmail`.
-  /// Si le serveur ne renvoie rien (ou si non authentifié), on garde les valeurs existantes.
+  /// Charge les infos "réelles" depuis l'API (profil + rôles).
   Future<void> refreshProfileFromServer({bool notify = true}) async {
     if (!client.auth.isAuthenticated) return;
     if (_isRefreshingProfile) return;
     _isRefreshingProfile = true;
     try {
       final ProfileResponse? profile = await client.cinePass.getProfile();
-      if (profile == null) return;
+      final bool isAdmin = await client.cinePass.isCurrentUserAdmin();
+      final bool isResponsable = await client.cinePass.isCurrentUserResponsable();
 
-      final nextName = (profile.displayName ?? '').trim();
-      final nextEmail = (profile.email ?? '').trim();
+      final nextName = (profile?.displayName ?? '').trim();
+      final nextEmail = (profile?.email ?? '').trim();
 
       var changed = false;
       if (nextName.isNotEmpty && nextName != _userName) {
@@ -122,12 +116,20 @@ class AuthState extends ChangeNotifier {
         _userEmail = nextEmail;
         changed = true;
       }
+      if (_isAdmin != isAdmin) {
+        _isAdmin = isAdmin;
+        changed = true;
+      }
+      if (_isResponsable != isResponsable) {
+        _isResponsable = isResponsable;
+        changed = true;
+      }
 
       if (notify && changed) {
         notifyListeners();
       }
     } catch (_) {
-      // Intentionally swallow: auth state remains usable even if profile endpoint fails.
+      // Keep auth usable even if one of these endpoints fails.
     } finally {
       _isRefreshingProfile = false;
     }

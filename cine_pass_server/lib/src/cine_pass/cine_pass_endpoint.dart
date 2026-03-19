@@ -17,6 +17,79 @@ const double cinePassCommissionPercent = 8.0;
 
 /// Endpoint CinePass : films, séances, cinémas, événements (données BDD).
 class CinePassEndpoint extends Endpoint {
+  // Helpers pour gestion des rôles
+
+  Future<String?> _currentUserEmail(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return null;
+    try {
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT "email"
+        FROM "serverpod_auth_core_profile"
+        WHERE "authUserId" = (@uid)::uuid
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      if (rows.isEmpty) return null;
+      return (rows.first[0] as String?)?.trim().toLowerCase();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Set<String> _configuredAdminEmails(Session session) {
+    final raw = (Serverpod.instance.getPassword('adminEmails') ?? '')
+        .trim()
+        .toLowerCase();
+    if (raw.isEmpty) return {'admin@cinepass.com'};
+    return raw
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toSet();
+  }
+
+  Future<bool> _isAdmin(Session session) async {
+    final email = await _currentUserEmail(session);
+    if (email == null) return false;
+    return _configuredAdminEmails(session).contains(email);
+  }
+
+  Future<List<String>> _responsableStructureIds(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return [];
+    try {
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT "structure_id"
+        FROM "cine_pass_responsable_assignment"
+        WHERE "user_id" = (@uid)::uuid AND "active" = true
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      return rows.map((r) => r[0].toString()).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<bool> _isResponsable(Session session) async {
+    final ids = await _responsableStructureIds(session);
+    return ids.isNotEmpty;
+  }
+
+  /// Frontend: indique si l'utilisateur connecté est admin plateforme.
+  Future<bool> isCurrentUserAdmin(Session session) async {
+    return _isAdmin(session);
+  }
+
+  /// Frontend: indique si l'utilisateur connecté est responsable d'au moins une structure.
+  Future<bool> isCurrentUserResponsable(Session session) async {
+    return _isResponsable(session);
+  }
+
   /// Liste de tous les films.
   Future<List<FilmResponse>> getFilms(Session session) async {
     try {
@@ -280,8 +353,8 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Admin / Responsable: créer un événement (optionnellement lié à une structure).
-  Future<EventResponse?> createEvent(
+    /// Admin / Responsable: créer un événement (optionnellement lié à une structure).
+    Future<EventResponse?> createEvent(
     Session session, {
     required String titre,
     required String categorie,
@@ -296,8 +369,29 @@ class CinePassEndpoint extends Endpoint {
     int? posterColor,
       String? posterUrl,
     String? structureId,
-  }) async {
+    }) async {
     try {
+      final isAdmin = await _isAdmin(session);
+      var effectiveStructureId = structureId?.trim();
+      if (effectiveStructureId != null && effectiveStructureId.isEmpty) {
+        effectiveStructureId = null;
+      }
+
+      if (!isAdmin) {
+        final assigned = await _responsableStructureIds(session);
+        if (assigned.isEmpty) {
+          session.log('createEvent refuse: utilisateur non admin/non responsable');
+          return null;
+        }
+
+        if (effectiveStructureId == null) {
+          effectiveStructureId = assigned.first;
+        } else if (!assigned.contains(effectiveStructureId)) {
+          session.log('createEvent refuse: structure hors perimetre responsable');
+          return null;
+        }
+      }
+
       final eventDateDt = _parseDateTime(eventDate);
       if (eventDateDt == null) {
         return null;
@@ -347,7 +441,7 @@ class CinePassEndpoint extends Endpoint {
           'prixBase': prixBase,
           'posterColor': posterColor,
           'posterUrl': posterUrl,
-          'structureId': structureId ?? '',
+          'structureId': effectiveStructureId ?? '',
         }),
       );
       if (result.isEmpty) return null;
@@ -361,7 +455,7 @@ class CinePassEndpoint extends Endpoint {
       );
       return null;
     }
-  }
+    }
 
   /// Liste de toutes les structures (admin).
   Future<List<Structure>> getStructures(Session session) async {
@@ -397,8 +491,8 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Mettre à jour un événement (admin ou responsable de la structure).
-  Future<EventResponse?> updateEvent(
+    /// Mettre à jour un événement (admin ou responsable de la structure).
+    Future<EventResponse?> updateEvent(
     Session session, {
     required String id,
     String? titre,
@@ -413,8 +507,24 @@ class CinePassEndpoint extends Endpoint {
     double? prixBase,
     int? posterColor,
       String? posterUrl,
-  }) async {
+    }) async {
     try {
+      final isAdmin = await _isAdmin(session);
+      if (!isAdmin) {
+        final assigned = await _responsableStructureIds(session);
+        if (assigned.isEmpty) return null;
+        final targetRows = await session.db.unsafeQuery(
+          r'''SELECT "structureId" FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid''',
+          parameters: QueryParameters.named({'id': id}),
+        );
+        if (targetRows.isEmpty) return null;
+        final targetStructureId = targetRows.first[0]?.toString();
+        if (targetStructureId == null || !assigned.contains(targetStructureId)) {
+          session.log('updateEvent refuse: structure hors perimetre responsable');
+          return null;
+        }
+      }
+
       final eventDateDt = eventDate != null ? _parseDateTime(eventDate) : null;
       DateTime? eventTimeDt;
       if (eventDateDt != null &&
@@ -481,11 +591,27 @@ class CinePassEndpoint extends Endpoint {
       );
       return null;
     }
-  }
+    }
 
-  /// Supprimer un événement (admin ou responsable de la structure).
-  Future<bool> deleteEvent(Session session, String id) async {
+    /// Supprimer un événement (admin ou responsable de la structure).
+    Future<bool> deleteEvent(Session session, String id) async {
     try {
+      final isAdmin = await _isAdmin(session);
+      if (!isAdmin) {
+        final assigned = await _responsableStructureIds(session);
+        if (assigned.isEmpty) return false;
+        final targetRows = await session.db.unsafeQuery(
+          r'''SELECT "structureId" FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid''',
+          parameters: QueryParameters.named({'id': id}),
+        );
+        if (targetRows.isEmpty) return false;
+        final targetStructureId = targetRows.first[0]?.toString();
+        if (targetStructureId == null || !assigned.contains(targetStructureId)) {
+          session.log('deleteEvent refuse: structure hors perimetre responsable');
+          return false;
+        }
+      }
+
       await session.db.unsafeQuery(
         r'DELETE FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid',
         parameters: QueryParameters.named({'id': id}),
@@ -500,7 +626,7 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
-  }
+    }
 
   /// Structure(s) assignée(s) au responsable connecté.
   Future<Structure?> getMyStructure(Session session) async {
@@ -566,11 +692,16 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Admin: demandes en attente (devenir responsable).
-  Future<List<DemandeResponsableResponse>> getDemandesEnAttente(
+    /// Admin: demandes en attente (devenir responsable).
+    Future<List<DemandeResponsableResponse>> getDemandesEnAttente(
     Session session,
-  ) async {
+    ) async {
     try {
+      if (!await _isAdmin(session)) {
+        session.log('getDemandesEnAttente refuse: admin requis');
+        return [];
+      }
+
       final result = await session.db.unsafeQuery(
         r'''
         SELECT r."id", r."user_id", r."structure_type", r."structure_name", r."structure_city",
@@ -593,11 +724,16 @@ class CinePassEndpoint extends Endpoint {
       );
       return [];
     }
-  }
+    }
 
-  /// Admin: approuver une demande responsable → crée la structure et l'assignment.
-  Future<bool> approuverDemande(Session session, String id) async {
+    /// Admin: approuver une demande responsable → crée la structure et l'assignment.
+    Future<bool> approuverDemande(Session session, String id) async {
     try {
+      if (!await _isAdmin(session)) {
+        session.log('approuverDemande refuse: admin requis');
+        return false;
+      }
+
       final adminId = session.authenticated?.userIdentifier;
       if (adminId == null) {
         return false;
@@ -667,11 +803,16 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
-  }
+    }
 
-  /// Admin: rejeter une demande responsable.
-  Future<bool> rejeterDemande(Session session, String id, String reason) async {
+    /// Admin: rejeter une demande responsable.
+    Future<bool> rejeterDemande(Session session, String id, String reason) async {
     try {
+      if (!await _isAdmin(session)) {
+        session.log('rejeterDemande refuse: admin requis');
+        return false;
+      }
+
       final adminId = session.authenticated?.userIdentifier;
       if (adminId == null) {
         return false;
@@ -698,7 +839,7 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
-  }
+    }
 
   /// Créer une demande pour devenir responsable (utilisateur connecté).
   Future<DemandeResponsableResponse?> createDemandeResponsable(

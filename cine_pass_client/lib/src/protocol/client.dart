@@ -342,6 +342,21 @@ class EndpointCinePass extends _i2.EndpointRef {
   @override
   String get name => 'cinePass';
 
+  /// Frontend: indique si l'utilisateur connecté est admin plateforme.
+  _i3.Future<bool> isCurrentUserAdmin() => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'isCurrentUserAdmin',
+    {},
+  );
+
+  /// Frontend: indique si l'utilisateur connecté est responsable d'au moins une structure.
+  _i3.Future<bool> isCurrentUserResponsable() =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'isCurrentUserResponsable',
+        {},
+      );
+
   /// Liste de tous les films.
   _i3.Future<List<_i5.FilmResponse>> getFilms() =>
       caller.callServerEndpoint<List<_i5.FilmResponse>>(

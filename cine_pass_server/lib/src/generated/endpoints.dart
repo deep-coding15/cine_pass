@@ -395,6 +395,26 @@ class Endpoints extends _i1.EndpointDispatch {
       name: 'cinePass',
       endpoint: endpoints['cinePass']!,
       methodConnectors: {
+        'isCurrentUserAdmin': _i1.MethodConnector(
+          name: 'isCurrentUserAdmin',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .isCurrentUserAdmin(session),
+        ),
+        'isCurrentUserResponsable': _i1.MethodConnector(
+          name: 'isCurrentUserResponsable',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .isCurrentUserResponsable(session),
+        ),
         'getFilms': _i1.MethodConnector(
           name: 'getFilms',
           params: {},

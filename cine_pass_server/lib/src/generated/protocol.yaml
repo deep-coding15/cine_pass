@@ -17,6 +17,8 @@ phoneAuth:
   - sendVerificationCode:
   - verifyCode:
 cinePass:
+  - isCurrentUserAdmin:
+  - isCurrentUserResponsable:
   - getFilms:
   - getFilmById:
   - getSeancesForFilm:
