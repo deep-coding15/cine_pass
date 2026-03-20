@@ -427,14 +427,15 @@ class CinePassEndpoint extends Endpoint {
     required String userId,
   }) async {
     await _ensureUserRoleTable(session);
+    await _syncConfiguredAdminRole(session, userId: userId);
     final roles = <String>{};
 
     // Lire uniquement depuis la source de verite (roles actifs).
     final roleRows = await session.db.unsafeQuery(
       r'''
-      SELECT "role"
+      SELECT lower(trim("role")) as role
       FROM "cine_pass_user_role"
-      WHERE "user_id" = (@uid)::uuid AND "status" = 'actif'
+      WHERE "user_id" = (@uid)::uuid AND lower(trim("status")) = 'actif'
       ''',
       parameters: QueryParameters.named({'uid': userId}),
     );
@@ -453,6 +454,55 @@ class CinePassEndpoint extends Endpoint {
     );
 
     return roles.toList()..sort();
+  }
+
+  /// Synchronise le rôle admin configuré dans passwords.yaml
+  /// Basé sur la présence de l'email dans la liste adminEmails.
+  Future<void> _syncConfiguredAdminRole(
+    Session session, {
+    required String userId,
+  }) async {
+    try {
+      final raw = Serverpod.instance.getPassword('adminEmails');
+      if (raw == null || raw.trim().isEmpty) return;
+
+      final configured = raw
+          .split(',')
+          .map((e) => e.trim().toLowerCase())
+          .where((e) => e.isNotEmpty)
+          .toSet();
+      if (configured.isEmpty) return;
+
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT lower("email")
+        FROM "serverpod_auth_core_profile"
+        WHERE "authUserId" = (@uid)::uuid
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      if (rows.isEmpty) return;
+
+      final email = rows.first[0]?.toString().toLowerCase() ?? '';
+      if (email.isEmpty) return;
+
+      if (configured.contains(email)) {
+        await _grantUserRoleWithStatus(
+          session,
+          userId: userId,
+          role: 'admin',
+          status: 'actif',
+        );
+      }
+    } catch (e, st) {
+      session.log(
+        'CinePass _syncConfiguredAdminRole warning',
+        level: LogLevel.warning,
+        exception: e,
+        stackTrace: st,
+      );
+    }
   }
 
   /// Crée une demande de changement de rôle critique (admin ↔ responsable).
@@ -2050,6 +2100,23 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
+  bool _userProfileTableEnsured = false;
+
+  Future<void> _ensureUserProfileTable(Session session) async {
+    if (_userProfileTableEnsured) return;
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_user_profile" (
+        "user_id" uuid PRIMARY KEY,
+        "display_name" text,
+        "phone" text,
+        "birth_date" date
+      )
+      ''',
+    );
+    _userProfileTableEnsured = true;
+  }
+
   static int _safeInt(dynamic v) {
     if (v == null) return 0;
     if (v is int) return v;
@@ -2245,12 +2312,23 @@ class CinePassEndpoint extends Endpoint {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return null;
     try {
-      await _grantUserRoleWithStatus(
-        session,
-        userId: userId,
-        role: 'client',
-        status: 'actif',
-      );
+      await _ensureUserProfileTable(session);
+
+      try {
+        await _grantUserRoleWithStatus(
+          session,
+          userId: userId,
+          role: 'client',
+          status: 'actif',
+        );
+      } catch (e, st) {
+        session.log(
+          'CinePass getProfile role-sync warning',
+          level: LogLevel.warning,
+          exception: e,
+          stackTrace: st,
+        );
+      }
 
       final profileRows = await session.db.unsafeQuery(
         r'''
@@ -2281,8 +2359,14 @@ class CinePassEndpoint extends Endpoint {
         }
       } catch (_) {}
       if (profileRows.isEmpty) {
+        final fallbackDisplayName =
+            (fullName != null && fullName.trim().isNotEmpty)
+                ? fullName.trim()
+                : ((email != null && email.contains('@'))
+                    ? email.split('@').first
+                    : null);
         return ProfileResponse(
-          displayName: fullName,
+          displayName: fallbackDisplayName,
           email: email,
           phone: null,
           birthDate: null,
@@ -2296,8 +2380,19 @@ class CinePassEndpoint extends Endpoint {
                   ? row[2].toString().substring(0, 10)
                   : row[2].toString())
           : null;
+      final dbDisplayNameRaw = row.isNotEmpty ? row[0] as String? : null;
+      final dbDisplayName =
+          (dbDisplayNameRaw != null && dbDisplayNameRaw.trim().isNotEmpty)
+              ? dbDisplayNameRaw.trim()
+              : null;
+      final authDisplayName =
+          (fullName != null && fullName.trim().isNotEmpty)
+              ? fullName.trim()
+              : null;
+      final emailFallbackName =
+          (email != null && email.contains('@')) ? email.split('@').first : null;
       return ProfileResponse(
-        displayName: (row.isNotEmpty ? row[0] as String? : null) ?? fullName,
+        displayName: dbDisplayName ?? authDisplayName ?? emailFallbackName,
         email: email,
         phone: row.length > 1 ? row[1] as String? : null,
         birthDate: birthDate,
@@ -2324,6 +2419,8 @@ class CinePassEndpoint extends Endpoint {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return false;
     try {
+      await _ensureUserProfileTable(session);
+
       final existing = await session.db.unsafeQuery(
         r'SELECT "display_name", "phone", "birth_date" FROM "cine_pass_user_profile" WHERE "user_id" = (@uid)::uuid',
         parameters: QueryParameters.named({'uid': userId}),

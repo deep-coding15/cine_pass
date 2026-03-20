@@ -4,7 +4,24 @@ import 'package:serverpod_auth_idp_server/providers/email.dart';
 
 /// Exposes email/password auth and a simplified registration flow.
 class EmailAuthEndpoint extends EmailIdpBaseEndpoint {
-  Future<void> _ensureClientRoleByEmail(Session session, String email) async {
+  Future<void> _ensureUserProfileTable(Session session) async {
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_user_profile" (
+        "user_id" uuid PRIMARY KEY,
+        "display_name" text,
+        "phone" text,
+        "birth_date" date
+      )
+      ''',
+    );
+  }
+
+  Future<void> _ensureClientDataByEmail(
+    Session session,
+    String email, {
+    String? displayName,
+  }) async {
     final rows = await session.db.unsafeQuery(
       r'''
       SELECT "authUserId"
@@ -17,6 +34,7 @@ class EmailAuthEndpoint extends EmailIdpBaseEndpoint {
     if (rows.isEmpty) return;
 
     final userId = rows.first[0].toString();
+
     await session.db.unsafeQuery(
       r'''
       INSERT INTO "cine_pass_user_role" ("user_id", "role", "status", "updated_at")
@@ -27,6 +45,27 @@ class EmailAuthEndpoint extends EmailIdpBaseEndpoint {
       ''',
       parameters: QueryParameters.named({'uid': userId}),
     );
+
+    final safeDisplayName = (displayName ?? '').trim();
+    if (safeDisplayName.isNotEmpty) {
+      await _ensureUserProfileTable(session);
+      await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_user_profile" ("user_id", "display_name")
+        VALUES ((@uid)::uuid, @displayName)
+        ON CONFLICT ("user_id") DO UPDATE SET
+          "display_name" = CASE
+            WHEN EXCLUDED."display_name" IS NOT NULL AND EXCLUDED."display_name" <> ''
+              THEN EXCLUDED."display_name"
+            ELSE "cine_pass_user_profile"."display_name"
+          END
+        ''',
+        parameters: QueryParameters.named({
+          'uid': userId,
+          'displayName': safeDisplayName,
+        }),
+      );
+    }
   }
 
   /// Creates an email account in DB and returns a signed-in auth session.
@@ -81,7 +120,11 @@ class EmailAuthEndpoint extends EmailIdpBaseEndpoint {
       password: password,
     );
 
-    await _ensureClientRoleByEmail(session, normalizedEmail);
+    await _ensureClientDataByEmail(
+      session,
+      normalizedEmail,
+      displayName: normalizedFullName,
+    );
     return auth;
   }
 }

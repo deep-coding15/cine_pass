@@ -54,24 +54,23 @@ class AuthState extends ChangeNotifier {
 
     if (client.auth.isAuthenticated && authInfo is AuthSuccess) {
       final strategy = authInfo.authStrategy.toLowerCase();
-      // Roles are refreshed from backend profile access checks.
-      final nextUserName = _displayNameForStrategy(strategy);
-      final nextUserEmail = _emailLabelForStrategy(strategy);
-
-      final changed =
-          _isLoggedIn != true ||
-          _userName != nextUserName ||
-          _userEmail != nextUserEmail;
+      final provisionalName = _displayNameForStrategy(strategy);
+      final changed = _isLoggedIn != true ||
+          (_userName.trim().isEmpty && provisionalName.isNotEmpty);
 
       _isLoggedIn = true;
-      _userName = nextUserName;
-      _userEmail = nextUserEmail;
+      // Show a temporary label until backend profile is loaded.
+      if (_userName.trim().isEmpty && provisionalName.isNotEmpty) {
+        _userName = provisionalName;
+      }
+      if (_isGenericEmailLabel(_userEmail)) {
+        _userEmail = '';
+      }
 
       if (notify && changed) {
         notifyListeners();
       }
 
-      // After we know we're authenticated, pull real user data and role flags.
       unawaited(refreshProfileFromServer(notify: true));
       return;
     }
@@ -106,11 +105,17 @@ class AuthState extends ChangeNotifier {
       final bool isAdmin = roles.contains('admin');
       final bool isResponsable = roles.contains('responsable');
 
-      final nextName = (profile?.displayName ?? '').trim();
       final nextEmail = (profile?.email ?? '').trim();
+      final backendName = (profile?.displayName ?? '').trim();
+      final fallbackNameFromEmail = _nameFromEmail(nextEmail);
+      final nextName = backendName.isNotEmpty
+          ? backendName
+          : (fallbackNameFromEmail.isNotEmpty
+              ? fallbackNameFromEmail
+              : (_userName.trim().isNotEmpty ? _userName.trim() : 'Utilisateur'));
 
       var changed = false;
-      if (nextName.isNotEmpty && nextName != _userName) {
+      if (nextName != _userName) {
         _userName = nextName;
         changed = true;
       }
@@ -137,7 +142,31 @@ class AuthState extends ChangeNotifier {
     }
   }
 
+  bool _isGenericName(String name) {
+    final value = name.trim().toLowerCase();
+    return value.isEmpty ||
+        value == 'utilisateur' ||
+        value == 'utilisateur google' ||
+        value == 'utilisateur mobile';
+  }
+
+  bool _isGenericEmailLabel(String emailLabel) {
+    final value = emailLabel.trim().toLowerCase();
+    return value.isEmpty ||
+        value == 'compte google connecte' ||
+        value == 'connexion par sms';
+  }
+
+  String _nameFromEmail(String email) {
+    final value = email.trim();
+    if (value.isEmpty || !value.contains('@')) return '';
+    final localPart = value.split('@').first.trim();
+    if (localPart.isEmpty) return '';
+    return _capitalizeWords(localPart.replaceAll(RegExp(r'[._-]+'), ' '));
+  }
+
   String _displayNameForStrategy(String strategy) {
+    // Legacy helper kept for compatibility; real name comes from backend profile.
     if (_userName.trim().isNotEmpty) {
       return _userName.trim();
     }
@@ -151,14 +180,9 @@ class AuthState extends ChangeNotifier {
   }
 
   String _emailLabelForStrategy(String strategy) {
+    // Legacy helper kept for compatibility; real email comes from backend profile.
     if (_userEmail.trim().isNotEmpty) {
       return _userEmail.trim();
-    }
-    if (strategy.contains('google')) {
-      return 'Compte Google connecté';
-    }
-    if (strategy.contains('phone') || strategy.contains('sms')) {
-      return 'Connexion par SMS';
     }
     return '';
   }
