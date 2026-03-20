@@ -2,7 +2,6 @@
 class: Seance
 extends: CinePassRow
 table: cine_pass_seance
-managedMigration: false
 fields:
   filmId: UuidValue, relation(parent=cine_pass_film, onDelete=Cascade)
   salleId: UuidValue, relation(parent=cine_pass_salle, onDelete=Cascade)

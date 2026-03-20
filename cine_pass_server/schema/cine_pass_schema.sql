@@ -234,16 +234,64 @@ CREATE INDEX "cine_pass_faq_ordre_idx"
     ON "cine_pass_faq" USING btree ("ordre");
 
 -- =============================================================================
--- RÔLE ADMIN (lien user -> rôle)
+-- RÔLE UTILISATEUR (avec status : actif, inactif, bloqué, banni)
 -- =============================================================================
 CREATE TABLE "cine_pass_user_role" (
-    "id"      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
-    "role"    text NOT NULL DEFAULT 'client'   -- client | responsable | admin
+    "id"         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "user_id"    uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "role"       text NOT NULL,  -- 'client' | 'responsable' | 'admin'
+    "status"     text NOT NULL DEFAULT 'actif',  -- 'actif' | 'inactif' | 'bloqué' | 'banni'
+    "created_at" timestamp without time zone NOT NULL DEFAULT now(),
+    "updated_at" timestamp without time zone NOT NULL DEFAULT now()
 );
 
+CREATE UNIQUE INDEX "cine_pass_user_role_user_role_uniq"
+    ON "cine_pass_user_role" ("user_id", "role");
+
 CREATE INDEX "cine_pass_user_role_user_idx"
-    ON "cine_pass_user_role" USING btree ("user_id");
+    ON "cine_pass_user_role" ("user_id");
+
+CREATE INDEX "cine_pass_user_role_status_idx"
+    ON "cine_pass_user_role" ("status");
+
+-- =============================================================================
+-- DEMANDES DE CHANGEMENT RÔLE CRITIQUE (admin ↔ responsable)
+-- Nécessite 2 confirmations minimum avant changement
+-- =============================================================================
+CREATE TABLE "cine_pass_role_change_request" (
+    "id"                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "user_id"           uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "from_role"         text NOT NULL,  -- Rôle actuel ('admin' | 'responsable' | 'client')
+    "to_role"           text NOT NULL,  -- Rôle cible ('admin' | 'responsable' | 'client')
+    "requested_by"      uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "status"            text NOT NULL DEFAULT 'pending',  -- 'pending' | 'approved' | 'rejected' | 'cancelled'
+    "approvals_count"   integer NOT NULL DEFAULT 0,  -- Nombre d'approbations (min 2 requis)
+    "rejection_reason"  text,
+    "created_at"        timestamp without time zone NOT NULL DEFAULT now(),
+    "expires_at"        timestamp without time zone NOT NULL DEFAULT (now() + interval '7 days')
+);
+
+CREATE INDEX "cine_pass_role_change_request_user_idx"
+    ON "cine_pass_role_change_request" ("user_id");
+
+CREATE INDEX "cine_pass_role_change_request_status_idx"
+    ON "cine_pass_role_change_request" ("status");
+
+-- =============================================================================
+-- APPROBATIONS DE CHANGEMENT RÔLE (audit trail)
+-- =============================================================================
+CREATE TABLE "cine_pass_role_change_approval" (
+    "id"           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "change_id"    uuid NOT NULL REFERENCES "cine_pass_role_change_request"("id") ON DELETE CASCADE,
+    "approver_id"  uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "approval_at"  timestamp without time zone NOT NULL DEFAULT now()
+);
+
+CREATE INDEX "cine_pass_role_change_approval_change_idx"
+    ON "cine_pass_role_change_approval" ("change_id");
+
+CREATE INDEX "cine_pass_role_change_approval_approver_idx"
+    ON "cine_pass_role_change_approval" ("approver_id");
 
 -- =============================================================================
 -- PROFIL UTILISATEUR (nom affiché, téléphone, date de naissance)
@@ -283,19 +331,6 @@ CREATE INDEX "cine_pass_responsable_request_user_idx"
 CREATE INDEX "cine_pass_responsable_request_status_idx"
     ON "cine_pass_responsable_request" ("status");
 
--- =============================================================================
--- RESPONSABLES — ROLE USER (source de verite du role)
--- =============================================================================
-CREATE TABLE "cine_pass_responsable_user" (
-    "id"         bigserial PRIMARY KEY,
-    "user_id"    uuid NOT NULL UNIQUE REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
-    "active"     boolean NOT NULL DEFAULT true,
-    "created_at" timestamp without time zone NOT NULL DEFAULT now(),
-    "updated_at" timestamp without time zone NOT NULL DEFAULT now()
-);
-
-CREATE INDEX "cine_pass_responsable_user_active_idx"
-    ON "cine_pass_responsable_user" ("active");
 
 -- =============================================================================
 -- RESPONSABLES — ASSIGNMENTS (lien user <-> structure)

@@ -6,30 +6,7 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../main.dart';
 
-class _CinePassRoleEndpoint extends EndpointRef {
-  _CinePassRoleEndpoint(super.caller);
-
-  @override
-  String get name => 'cinePass';
-
-  Future<bool> isCurrentUserAdmin() {
-    return caller.callServerEndpoint<bool>(
-      name,
-      'isCurrentUserAdmin',
-      {},
-    );
-  }
-
-  Future<bool> isCurrentUserResponsable() {
-    return caller.callServerEndpoint<bool>(
-      name,
-      'isCurrentUserResponsable',
-      {},
-    );
-  }
-}
-
-/// État d'authentification synchronisé avec Serverpod `client.auth`.
+/// Etat d'authentification synchronise avec Serverpod `client.auth`.
 class AuthState extends ChangeNotifier {
   static AuthState? _instance;
   static AuthState get instance => _instance ??= AuthState._();
@@ -117,16 +94,17 @@ class AuthState extends ChangeNotifier {
     }
   }
 
-  /// Charge les infos "réelles" depuis l'API (profil + rôles).
+  /// Charge les infos reelles depuis l'API (profil + roles backend).
   Future<void> refreshProfileFromServer({bool notify = true}) async {
     if (!client.auth.isAuthenticated) return;
     if (_isRefreshingProfile) return;
     _isRefreshingProfile = true;
     try {
-      final roleEndpoint = _CinePassRoleEndpoint(client);
       final ProfileResponse? profile = await client.cinePass.getProfile();
-      final bool isAdmin = await roleEndpoint.isCurrentUserAdmin();
-      final bool isResponsable = await roleEndpoint.isCurrentUserResponsable();
+      final List<String> roles = await client.cinePass.getUserRoles();
+
+      final bool isAdmin = roles.contains('admin');
+      final bool isResponsable = roles.contains('responsable');
 
       final nextName = (profile?.displayName ?? '').trim();
       final nextEmail = (profile?.email ?? '').trim();
@@ -185,49 +163,7 @@ class AuthState extends ChangeNotifier {
     return '';
   }
 
-  /// Simule une connexion en tant qu'utilisateur.
-  /// Pour le frontend de test : [email] et [name] optionnels (ex. formulaire Connexion/Inscription).
-  void loginAsUser({String? email, String? name}) {
-    _isLoggedIn = true;
-    _isAdmin = false;
-    _isResponsable = false;
-    _userName = name?.trim().isNotEmpty == true ? name!.trim() : 'Marie Dubois';
-    _userEmail = email?.trim().isNotEmpty == true
-        ? email!.trim()
-        : 'marie.dubois@email.com';
-    notifyListeners();
-  }
-
-  /// Simule une connexion en tant qu'admin (Jean Admin).
-  void loginAsAdmin() {
-    _isLoggedIn = true;
-    _isAdmin = true;
-    _isResponsable = false;
-    _userName = 'Jean Admin';
-    _userEmail = 'admin@cinepass.com';
-    notifyListeners();
-  }
-
-  /// Connexion locale temporaire pour l'espace responsable.
-  void loginAsResponsable({String? email, String? name}) {
-    final normalizedEmail = email?.trim().toLowerCase();
-    final derivedName = name?.trim();
-    final fallbackName = normalizedEmail != null && normalizedEmail.isNotEmpty
-        ? normalizedEmail.split('@').first.replaceAll('.', ' ')
-        : 'Responsable';
-
-    _isLoggedIn = true;
-    _isAdmin = false;
-    _isResponsable = true;
-    _userName = derivedName != null && derivedName.isNotEmpty
-        ? derivedName
-        : _capitalizeWords(fallbackName);
-    _userEmail = normalizedEmail?.isNotEmpty == true
-        ? normalizedEmail!
-        : 'responsable@cinepass.com';
-    notifyListeners();
-  }
-
+  /// Deconnexion reelle (backend/session) + reset state local.
   void logout() {
     if (client.auth.isAuthenticated) {
       unawaited(client.auth.signOutDevice());

@@ -1,7 +1,6 @@
 ### Salle d'un cinéma (pas de created_at dans le schéma).
 class: Salle
 table: cine_pass_salle
-managedMigration: false
 fields:
   id: UuidValue, defaultModel=random
   cinemaId: UuidValue, relation(parent=cine_pass_cinema, onDelete=Cascade)

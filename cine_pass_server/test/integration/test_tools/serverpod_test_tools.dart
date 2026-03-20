@@ -16,26 +16,21 @@ import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
-import 'package:cine_pass_server/src/generated/cine_pass/billet_group_response.dart'
+import 'package:cine_pass_server/src/generated/billet_group_response.dart'
     as _i5;
-import 'package:cine_pass_server/src/generated/cine_pass/film_response.dart'
-    as _i6;
-import 'package:cine_pass_server/src/generated/cine_pass/seance_response.dart'
-    as _i7;
-import 'package:cine_pass_server/src/generated/cine_pass/cinema_response.dart'
-    as _i8;
+import 'package:cine_pass_server/src/generated/film_response.dart' as _i6;
+import 'package:cine_pass_server/src/generated/seance_response.dart' as _i7;
+import 'package:cine_pass_server/src/generated/cinema_response.dart' as _i8;
 import 'package:cine_pass_server/src/generated/salle.dart' as _i9;
-import 'package:cine_pass_server/src/generated/cine_pass/event_response.dart'
-    as _i10;
+import 'package:cine_pass_server/src/generated/event_response.dart' as _i10;
 import 'package:cine_pass_server/src/generated/structure.dart' as _i11;
-import 'package:cine_pass_server/src/generated/cine_pass/demande_responsable_response.dart'
+import 'package:cine_pass_server/src/generated/demande_responsable_response.dart'
     as _i12;
-import 'package:cine_pass_server/src/generated/cine_pass/reservation_response.dart'
+import 'package:cine_pass_server/src/generated/reservation_response.dart'
     as _i13;
-import 'package:cine_pass_server/src/generated/cine_pass/rapport_ca_response.dart'
+import 'package:cine_pass_server/src/generated/rapport_ca_response.dart'
     as _i14;
-import 'package:cine_pass_server/src/generated/cine_pass/profile_response.dart'
-    as _i15;
+import 'package:cine_pass_server/src/generated/profile_response.dart' as _i15;
 import 'package:cine_pass_server/src/generated/greetings/greeting.dart' as _i16;
 import 'package:cine_pass_server/src/generated/protocol.dart';
 import 'package:cine_pass_server/src/generated/endpoints.dart';
@@ -790,6 +785,36 @@ class _CinePassEndpoint {
     });
   }
 
+  _i3.Future<List<String>> getUserRoles(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getUserRoles',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getUserRoles',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<bool> isCurrentUserAdmin(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
@@ -850,25 +875,27 @@ class _CinePassEndpoint {
     });
   }
 
-  _i3.Future<bool> setResponsableActiveByEmail(
+  _i3.Future<bool> setRoleStatus(
     _i1.TestSessionBuilder sessionBuilder, {
-    required String email,
-    required bool active,
+    required String userEmail,
+    required String role,
+    required String newStatus,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
             endpoint: 'cinePass',
-            method: 'setResponsableActiveByEmail',
+            method: 'setRoleStatus',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'cinePass',
-          methodName: 'setResponsableActiveByEmail',
+          methodName: 'setRoleStatus',
           parameters: _i1.testObjectToJson({
-            'email': email,
-            'active': active,
+            'userEmail': userEmail,
+            'role': role,
+            'newStatus': newStatus,
           }),
           serializationManager: _serializationManager,
         );
@@ -878,6 +905,213 @@ class _CinePassEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String?> createRoleChangeRequest(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String userEmail,
+    required String toRole,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'createRoleChangeRequest',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'createRoleChangeRequest',
+          parameters: _i1.testObjectToJson({
+            'userEmail': userEmail,
+            'toRole': toRole,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> approveRoleChangeRequest(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String changeRequestId,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'approveRoleChangeRequest',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'approveRoleChangeRequest',
+          parameters: _i1.testObjectToJson({
+            'changeRequestId': changeRequestId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> rejectRoleChangeRequest(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String changeRequestId,
+    required String reason,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'rejectRoleChangeRequest',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'rejectRoleChangeRequest',
+          parameters: _i1.testObjectToJson({
+            'changeRequestId': changeRequestId,
+            'reason': reason,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  @Deprecated(
+    'Utiliser createRoleChangeRequest + approveRoleChangeRequest à la place',
+  )
+  _i3.Future<bool> grantRoleByEmail(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String email,
+    required String role,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'grantRoleByEmail',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'grantRoleByEmail',
+          parameters: _i1.testObjectToJson({
+            'email': email,
+            'role': role,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> revokeRoleByEmail(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String email,
+    required String role,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'revokeRoleByEmail',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'revokeRoleByEmail',
+          parameters: _i1.testObjectToJson({
+            'email': email,
+            'role': role,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getRolesByEmail(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String email,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'cinePass',
+            method: 'getRolesByEmail',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'cinePass',
+          methodName: 'getRolesByEmail',
+          parameters: _i1.testObjectToJson({'email': email}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<String>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

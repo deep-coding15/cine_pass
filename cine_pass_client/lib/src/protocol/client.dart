@@ -16,26 +16,20 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:cine_pass_client/src/protocol/cine_pass/billet_group_response.dart'
+import 'package:cine_pass_client/src/protocol/billet_group_response.dart'
     as _i5;
-import 'package:cine_pass_client/src/protocol/cine_pass/film_response.dart'
-    as _i6;
-import 'package:cine_pass_client/src/protocol/cine_pass/seance_response.dart'
-    as _i7;
-import 'package:cine_pass_client/src/protocol/cine_pass/cinema_response.dart'
-    as _i8;
+import 'package:cine_pass_client/src/protocol/film_response.dart' as _i6;
+import 'package:cine_pass_client/src/protocol/seance_response.dart' as _i7;
+import 'package:cine_pass_client/src/protocol/cinema_response.dart' as _i8;
 import 'package:cine_pass_client/src/protocol/salle.dart' as _i9;
-import 'package:cine_pass_client/src/protocol/cine_pass/event_response.dart'
-    as _i10;
+import 'package:cine_pass_client/src/protocol/event_response.dart' as _i10;
 import 'package:cine_pass_client/src/protocol/structure.dart' as _i11;
-import 'package:cine_pass_client/src/protocol/cine_pass/demande_responsable_response.dart'
+import 'package:cine_pass_client/src/protocol/demande_responsable_response.dart'
     as _i12;
-import 'package:cine_pass_client/src/protocol/cine_pass/reservation_response.dart'
+import 'package:cine_pass_client/src/protocol/reservation_response.dart'
     as _i13;
-import 'package:cine_pass_client/src/protocol/cine_pass/rapport_ca_response.dart'
-    as _i14;
-import 'package:cine_pass_client/src/protocol/cine_pass/profile_response.dart'
-    as _i15;
+import 'package:cine_pass_client/src/protocol/rapport_ca_response.dart' as _i14;
+import 'package:cine_pass_client/src/protocol/profile_response.dart' as _i15;
 import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i16;
 import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i17;
 import 'protocol.dart' as _i18;
@@ -244,10 +238,6 @@ class EndpointGoogleIdp extends _i1.EndpointGoogleIdpBase {
   @override
   String get name => 'googleIdp';
 
-  /// Validates a Google ID token and either logs in the associated user or
-  /// creates a new user account if the Google account ID is not yet known.
-  ///
-  /// If a new user is created an associated [UserProfile] is also created.
   @override
   _i3.Future<_i4.AuthSuccess> login({
     required String idToken,
@@ -384,14 +374,22 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
-  /// Frontend: indique si l'utilisateur connecté est admin plateforme.
+  /// Frontend: récupère tous les rôles actifs de l'utilisateur connecté.
+  _i3.Future<List<String>> getUserRoles() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getUserRoles',
+        {},
+      );
+
+  /// Frontend: indique si l'utilisateur connecté est admin.
   _i3.Future<bool> isCurrentUserAdmin() => caller.callServerEndpoint<bool>(
     'cinePass',
     'isCurrentUserAdmin',
     {},
   );
 
-  /// Frontend: indique si l'utilisateur connecté est responsable d'au moins une structure.
+  /// Frontend: indique si l'utilisateur connecté est responsable.
   _i3.Future<bool> isCurrentUserResponsable() =>
       caller.callServerEndpoint<bool>(
         'cinePass',
@@ -399,18 +397,97 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
-  /// Admin: active/desactive le role responsable pour un utilisateur via son email.
-  _i3.Future<bool> setResponsableActiveByEmail({
-    required String email,
-    required bool active,
+  /// Admin: change le statut d'un rôle utilisateur (actif, inactif, bloqué, banni).
+  _i3.Future<bool> setRoleStatus({
+    required String userEmail,
+    required String role,
+    required String newStatus,
   }) => caller.callServerEndpoint<bool>(
     'cinePass',
-    'setResponsableActiveByEmail',
+    'setRoleStatus',
     {
-      'email': email,
-      'active': active,
+      'userEmail': userEmail,
+      'role': role,
+      'newStatus': newStatus,
     },
   );
+
+  /// Admin: crée une demande de changement de rôle critique (admin ↔ responsable).
+  /// Retourne l'ID de la demande, ou null si erreur.
+  /// Requiert 2 approbations minimum avant application.
+  _i3.Future<String?> createRoleChangeRequest({
+    required String userEmail,
+    required String toRole,
+  }) => caller.callServerEndpoint<String?>(
+    'cinePass',
+    'createRoleChangeRequest',
+    {
+      'userEmail': userEmail,
+      'toRole': toRole,
+    },
+  );
+
+  /// Admin: approuve une demande de changement de rôle.
+  /// Retourne true si approbation enregistrée (changement appliqué si 2 approbations atteintes).
+  _i3.Future<bool> approveRoleChangeRequest({
+    required String changeRequestId,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'approveRoleChangeRequest',
+    {'changeRequestId': changeRequestId},
+  );
+
+  /// Admin: rejette une demande de changement de rôle.
+  _i3.Future<bool> rejectRoleChangeRequest({
+    required String changeRequestId,
+    required String reason,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'rejectRoleChangeRequest',
+    {
+      'changeRequestId': changeRequestId,
+      'reason': reason,
+    },
+  );
+
+  /// Admin: simule une promotion directe (pour test/migration).
+  /// N'utilise PAS le système de demande critique.
+  /// À utiliser avec prudence (admin direct seulement).
+  @Deprecated(
+    'Utiliser createRoleChangeRequest + approveRoleChangeRequest à la place',
+  )
+  _i3.Future<bool> grantRoleByEmail({
+    required String email,
+    required String role,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'grantRoleByEmail',
+    {
+      'email': email,
+      'role': role,
+    },
+  );
+
+  /// Admin: retire un rôle cote frontend en le bloquant en base.
+  _i3.Future<bool> revokeRoleByEmail({
+    required String email,
+    required String role,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'revokeRoleByEmail',
+    {
+      'email': email,
+      'role': role,
+    },
+  );
+
+  /// Admin: récupère les rôles d'un utilisateur.
+  _i3.Future<List<String>> getRolesByEmail({required String email}) =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getRolesByEmail',
+        {'email': email},
+      );
 
   /// Liste de tous les films.
   _i3.Future<List<_i6.FilmResponse>> getFilms() =>

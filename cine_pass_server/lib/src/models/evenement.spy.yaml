@@ -2,7 +2,6 @@
 class: Evenement
 extends: CinePassRow
 table: cine_pass_evenement
-managedMigration: false
 fields:
   titre: String
   categorie: String

@@ -8,6 +8,7 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 // ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: deprecated_member_use_from_same_package
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
@@ -484,6 +485,16 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getMyBillets(session),
         ),
+        'getUserRoles': _i1.MethodConnector(
+          name: 'getUserRoles',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .getUserRoles(session),
+        ),
         'isCurrentUserAdmin': _i1.MethodConnector(
           name: 'isCurrentUserAdmin',
           params: {},
@@ -504,17 +515,48 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .isCurrentUserResponsable(session),
         ),
-        'setResponsableActiveByEmail': _i1.MethodConnector(
-          name: 'setResponsableActiveByEmail',
+        'setRoleStatus': _i1.MethodConnector(
+          name: 'setRoleStatus',
           params: {
-            'email': _i1.ParameterDescription(
-              name: 'email',
+            'userEmail': _i1.ParameterDescription(
+              name: 'userEmail',
               type: _i1.getType<String>(),
               nullable: false,
             ),
-            'active': _i1.ParameterDescription(
-              name: 'active',
-              type: _i1.getType<bool>(),
+            'role': _i1.ParameterDescription(
+              name: 'role',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'newStatus': _i1.ParameterDescription(
+              name: 'newStatus',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).setRoleStatus(
+                    session,
+                    userEmail: params['userEmail'],
+                    role: params['role'],
+                    newStatus: params['newStatus'],
+                  ),
+        ),
+        'createRoleChangeRequest': _i1.MethodConnector(
+          name: 'createRoleChangeRequest',
+          params: {
+            'userEmail': _i1.ParameterDescription(
+              name: 'userEmail',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'toRole': _i1.ParameterDescription(
+              name: 'toRole',
+              type: _i1.getType<String>(),
               nullable: false,
             ),
           },
@@ -523,10 +565,123 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
-                  .setResponsableActiveByEmail(
+                  .createRoleChangeRequest(
+                    session,
+                    userEmail: params['userEmail'],
+                    toRole: params['toRole'],
+                  ),
+        ),
+        'approveRoleChangeRequest': _i1.MethodConnector(
+          name: 'approveRoleChangeRequest',
+          params: {
+            'changeRequestId': _i1.ParameterDescription(
+              name: 'changeRequestId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .approveRoleChangeRequest(
+                    session,
+                    changeRequestId: params['changeRequestId'],
+                  ),
+        ),
+        'rejectRoleChangeRequest': _i1.MethodConnector(
+          name: 'rejectRoleChangeRequest',
+          params: {
+            'changeRequestId': _i1.ParameterDescription(
+              name: 'changeRequestId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'reason': _i1.ParameterDescription(
+              name: 'reason',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .rejectRoleChangeRequest(
+                    session,
+                    changeRequestId: params['changeRequestId'],
+                    reason: params['reason'],
+                  ),
+        ),
+        'grantRoleByEmail': _i1.MethodConnector(
+          name: 'grantRoleByEmail',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'role': _i1.ParameterDescription(
+              name: 'role',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .grantRoleByEmail(
                     session,
                     email: params['email'],
-                    active: params['active'],
+                    role: params['role'],
+                  ),
+        ),
+        'revokeRoleByEmail': _i1.MethodConnector(
+          name: 'revokeRoleByEmail',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'role': _i1.ParameterDescription(
+              name: 'role',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .revokeRoleByEmail(
+                    session,
+                    email: params['email'],
+                    role: params['role'],
+                  ),
+        ),
+        'getRolesByEmail': _i1.MethodConnector(
+          name: 'getRolesByEmail',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .getRolesByEmail(
+                    session,
+                    email: params['email'],
                   ),
         ),
         'getFilms': _i1.MethodConnector(

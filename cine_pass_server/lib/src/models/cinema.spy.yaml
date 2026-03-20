@@ -4,7 +4,6 @@
 class: Cinema
 extends: CinePassRow
 table: cine_pass_cinema
-managedMigration: false
 fields:
   nom: String
   ville: String

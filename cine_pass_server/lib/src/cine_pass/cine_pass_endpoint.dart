@@ -1,14 +1,15 @@
 import 'package:serverpod/serverpod.dart';
-import '../generated/cine_pass/film_response.dart';
-import '../generated/cine_pass/seance_response.dart';
-import '../generated/cine_pass/event_response.dart';
-import '../generated/cine_pass/cinema_response.dart';
-import '../generated/cine_pass/demande_responsable_response.dart';
-import '../generated/cine_pass/reservation_response.dart';
-import '../generated/cine_pass/rapport_ca_response.dart';
-import '../generated/cine_pass/profile_response.dart';
-import '../generated/cine_pass/billet_group_response.dart';
+import '../generated/billet_group_response.dart';
+import '../generated/film_response.dart';
+import '../generated/seance_response.dart';
+import '../generated/event_response.dart';
+import '../generated/cinema_response.dart';
+import '../generated/demande_responsable_response.dart';
+import '../generated/reservation_response.dart';
+import '../generated/rapport_ca_response.dart';
+import '../generated/profile_response.dart';
 import '../generated/salle.dart';
+
 import '../generated/structure.dart';
 
 /// Taux de commission CinePass sur chaque réservation (en %).
@@ -289,74 +290,391 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  // Helpers pour gestion des rôles
-  bool _adminTableEnsured = false;
-  bool _responsableTableEnsured = false;
+  // ============================================================================
+  // GESTION ROLES V2 (source unique: cine_pass_user_role)
+  // ============================================================================
+  // Status: 'actif' | 'inactif' | 'bloque' | 'banni'
+  // Changement admin <-> responsable: demande + 2 approbations minimum.
+  bool _userRoleTableEnsured = false;
 
-  Future<void> _ensureAdminRoleTable(Session session) async {
-    if (_adminTableEnsured) return;
+  Future<void> _ensureUserRoleTable(Session session) async {
+    if (_userRoleTableEnsured) return;
     await session.db.unsafeQuery(
       r'''
-      CREATE TABLE IF NOT EXISTS "cine_pass_admin_user" (
-        "id" bigserial PRIMARY KEY,
-        "user_id" uuid NOT NULL UNIQUE,
-        "created_at" timestamp without time zone NOT NULL DEFAULT now()
-      )
-      ''',
-    );
-    _adminTableEnsured = true;
-  }
-
-  Future<void> _ensureResponsableRoleTable(Session session) async {
-    if (_responsableTableEnsured) return;
-    await session.db.unsafeQuery(
-      r'''
-      CREATE TABLE IF NOT EXISTS "cine_pass_responsable_user" (
-        "id" bigserial PRIMARY KEY,
-        "user_id" uuid NOT NULL UNIQUE,
-        "active" boolean NOT NULL DEFAULT true,
+      CREATE TABLE IF NOT EXISTS "cine_pass_user_role" (
+        "id"         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "user_id"    uuid NOT NULL,
+        "role"       text NOT NULL DEFAULT 'CLIENT',
+        "status"     text NOT NULL DEFAULT 'actif',
         "created_at" timestamp without time zone NOT NULL DEFAULT now(),
         "updated_at" timestamp without time zone NOT NULL DEFAULT now()
       )
       ''',
     );
-    _responsableTableEnsured = true;
+    await session.db.unsafeQuery(
+      r'''
+      CREATE UNIQUE INDEX IF NOT EXISTS "cine_pass_user_role_user_role_uniq"
+      ON "cine_pass_user_role" ("user_id", "role")
+      ''',
+    );
+    _userRoleTableEnsured = true;
   }
 
+  /// Récupère le statut d'un rôle pour un utilisateur.
+  /// Retourne : 'actif', 'inactif', 'bloqué', 'banni', ou null si pas de rôle.
+  Future<String?> _getRoleStatus(
+    Session session, {
+    required String userId,
+    required String role,
+  }) async {
+    await _ensureUserRoleTable(session);
+    final normalizedRole = role.toLowerCase().trim();
+
+    final rows = await session.db.unsafeQuery(
+      r'''
+      SELECT "status"
+      FROM "cine_pass_user_role"
+      WHERE "user_id" = (@uid)::uuid AND "role" = @role
+      LIMIT 1
+      ''',
+      parameters: QueryParameters.named({'uid': userId, 'role': normalizedRole}),
+    );
+
+    if (rows.isEmpty) return null;
+    return rows.first[0]?.toString().toLowerCase();
+  }
+
+  /// Accorde un rôle avec un statut spécifique.
+  /// Idempotent : met à jour le statut si le rôle existe déjà.
+  Future<void> _grantUserRoleWithStatus(
+    Session session, {
+    required String userId,
+    required String role,
+    String status = 'actif',
+  }) async {
+    await _ensureUserRoleTable(session);
+    final normalizedRole = role.toLowerCase().trim();
+    final normalizedStatus = status.toLowerCase().trim();
+
+    if (normalizedRole.isEmpty) return;
+
+    await session.db.unsafeQuery(
+      r'''
+      INSERT INTO "cine_pass_user_role" ("user_id", "role", "status", "updated_at")
+      VALUES ((@uid)::uuid, @role, @status, now())
+      ON CONFLICT ("user_id", "role") DO UPDATE SET
+        "status" = @status,
+        "updated_at" = now()
+      ''',
+      parameters: QueryParameters.named({
+        'uid': userId,
+        'role': normalizedRole,
+        'status': normalizedStatus,
+      }),
+    );
+  }
+
+  /// Change le statut d'un rôle (inactif, bloqué, banni, etc.).
+  Future<void> _setRoleStatus(
+    Session session, {
+    required String userId,
+    required String role,
+    required String newStatus,
+  }) async {
+    await _ensureUserRoleTable(session);
+    final normalizedRole = role.toLowerCase().trim();
+    final normalizedStatus = newStatus.toLowerCase().trim();
+
+    await session.db.unsafeQuery(
+      r'''
+      UPDATE "cine_pass_user_role"
+      SET "status" = @status, "updated_at" = now()
+      WHERE "user_id" = (@uid)::uuid AND "role" = @role
+      ''',
+      parameters: QueryParameters.named({
+        'uid': userId,
+        'role': normalizedRole,
+        'status': normalizedStatus,
+      }),
+    );
+  }
+
+  /// Retire complètement un rôle (sauf 'client' qui ne peut pas être retiré).
+  Future<void> _revokeUserRole(
+    Session session, {
+    required String userId,
+    required String role,
+  }) async {
+    await _ensureUserRoleTable(session);
+    final normalizedRole = role.toLowerCase().trim();
+
+    // Ne jamais retirer 'client'
+    if (normalizedRole == 'client') return;
+
+    await session.db.unsafeQuery(
+      r'''
+      DELETE FROM "cine_pass_user_role"
+      WHERE "user_id" = (@uid)::uuid AND "role" = @role
+      ''',
+      parameters: QueryParameters.named({'uid': userId, 'role': normalizedRole}),
+    );
+  }
+
+  /// Récupère tous les rôles actifs de l'utilisateur.
+  /// Seuls les rôles avec status='actif' sont retournés.
+  Future<List<String>> _getUserRoles(
+    Session session, {
+    required String userId,
+  }) async {
+    await _ensureUserRoleTable(session);
+    final roles = <String>{};
+
+    // Lire uniquement depuis la source de verite (roles actifs).
+    final roleRows = await session.db.unsafeQuery(
+      r'''
+      SELECT "role"
+      FROM "cine_pass_user_role"
+      WHERE "user_id" = (@uid)::uuid AND "status" = 'actif'
+      ''',
+      parameters: QueryParameters.named({'uid': userId}),
+    );
+    for (final row in roleRows) {
+      final role = row[0]?.toString().toLowerCase() ?? '';
+      if (role.isNotEmpty) roles.add(role);
+    }
+
+    // Garantir le role client au minimum.
+    roles.add('client');
+    await _grantUserRoleWithStatus(
+      session,
+      userId: userId,
+      role: 'client',
+      status: 'actif',
+    );
+
+    return roles.toList()..sort();
+  }
+
+  /// Crée une demande de changement de rôle critique (admin ↔ responsable).
+  /// Retourne l'ID de la demande, ou null si erreur.
+  /// Requiert 2 approbations minimum avant changement.
+  Future<String?> _requestRoleChange(
+    Session session, {
+    required String userId,
+    required String fromRole,
+    required String toRole,
+    required String requestedByUserId,
+  }) async {
+    try {
+      await session.db.unsafeQuery(
+        r'''
+        CREATE TABLE IF NOT EXISTS "cine_pass_role_change_request" (
+          "id"              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          "user_id"         uuid NOT NULL,
+          "from_role"       text NOT NULL,
+          "to_role"         text NOT NULL,
+          "requested_by"    uuid NOT NULL,
+          "status"          text NOT NULL DEFAULT 'pending',
+          "approvals_count" integer NOT NULL DEFAULT 0,
+          "rejection_reason" text,
+          "created_at"      timestamp without time zone NOT NULL DEFAULT now(),
+          "expires_at"      timestamp without time zone NOT NULL DEFAULT (now() + interval '7 days')
+        )
+        ''',
+      );
+
+      final result = await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_role_change_request" (
+          "user_id", "from_role", "to_role", "requested_by", "status", "approvals_count"
+        )
+        VALUES (
+          (@uid)::uuid, @fromRole, @toRole, (@reqBy)::uuid, 'pending', 0
+        )
+        RETURNING "id"
+        ''',
+        parameters: QueryParameters.named({
+          'uid': userId,
+          'fromRole': fromRole.toLowerCase().trim(),
+          'toRole': toRole.toLowerCase().trim(),
+          'reqBy': requestedByUserId,
+        }),
+      );
+
+      if (result.isEmpty) return null;
+      return result.first[0].toString();
+    } catch (e, st) {
+      session.log(
+        'CinePass _requestRoleChange',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return null;
+    }
+  }
+
+  /// Approuve une demande de changement rôle.
+  /// Retourne true si approbation enregistrée et changement appliqué (si 2 approbations atteintes).
+  Future<bool> _approveRoleChange(
+    Session session, {
+    required String changeRequestId,
+    required String approverId,
+  }) async {
+    try {
+      await session.db.unsafeQuery(
+        r'''
+        CREATE TABLE IF NOT EXISTS "cine_pass_role_change_approval" (
+          "id"          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          "change_id"   uuid NOT NULL,
+          "approver_id" uuid NOT NULL,
+          "approval_at" timestamp without time zone NOT NULL DEFAULT now()
+        )
+        ''',
+      );
+
+      // 1) Vérifier si la demande existe et est pending
+      final reqRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "user_id", "from_role", "to_role", "approvals_count", "status"
+        FROM "cine_pass_role_change_request"
+        WHERE "id" = (@id)::uuid
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'id': changeRequestId}),
+      );
+
+      if (reqRows.isEmpty) return false;
+      final reqRow = reqRows.first;
+      final targetUserId = reqRow[0].toString();
+      final fromRole = (reqRow[1] as String?)?.toLowerCase() ?? '';
+      final toRole = (reqRow[2] as String?)?.toLowerCase() ?? '';
+      final status = (reqRow[4] as String?)?.toLowerCase() ?? '';
+
+      if (status != 'pending') return false;
+
+      // 2) Ajouter l'approbation
+      await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_role_change_approval" ("change_id", "approver_id")
+        VALUES ((@changeId)::uuid, (@approverId)::uuid)
+        ''',
+        parameters: QueryParameters.named({
+          'changeId': changeRequestId,
+          'approverId': approverId,
+        }),
+      );
+
+      // 3) Compter les approbations
+      final approvalCount = await session.db.unsafeQuery(
+        r'''
+        SELECT COUNT(*)::integer
+        FROM "cine_pass_role_change_approval"
+        WHERE "change_id" = (@id)::uuid
+        ''',
+        parameters: QueryParameters.named({'id': changeRequestId}),
+      );
+
+      final newApprovalCount = _safeInt(approvalCount.first[0]);
+
+      // 4) Si >= 2 approbations, appliquer le changement
+      if (newApprovalCount >= 2) {
+        // Retirer l'ancien rôle (sauf client)
+        if (fromRole != 'client') {
+          await _revokeUserRole(session, userId: targetUserId, role: fromRole);
+        }
+
+        // Accorder le nouveau rôle
+        await _grantUserRoleWithStatus(session, userId: targetUserId, role: toRole, status: 'actif');
+
+        // Marquer la demande comme approuvée
+        await session.db.unsafeQuery(
+          r'''
+          UPDATE "cine_pass_role_change_request"
+          SET "status" = 'approved', "approvals_count" = @count
+          WHERE "id" = (@id)::uuid
+          ''',
+          parameters: QueryParameters.named({
+            'id': changeRequestId,
+            'count': newApprovalCount,
+          }),
+        );
+
+        return true;
+      } else {
+        // Juste incrémenter le compteur
+        await session.db.unsafeQuery(
+          r'''
+          UPDATE "cine_pass_role_change_request"
+          SET "approvals_count" = @count
+          WHERE "id" = (@id)::uuid
+          ''',
+          parameters: QueryParameters.named({
+            'id': changeRequestId,
+            'count': newApprovalCount,
+          }),
+        );
+
+        return true; // Approbation enregistrée (mais changement pas encore appliqué)
+      }
+    } catch (e, st) {
+      session.log(
+        'CinePass _approveRoleChange',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Rejette une demande de changement rôle.
+  Future<bool> _rejectRoleChange(
+    Session session, {
+    required String changeRequestId,
+    required String reason,
+  }) async {
+    try {
+      await session.db.unsafeQuery(
+        r'''
+        UPDATE "cine_pass_role_change_request"
+        SET "status" = 'rejected', "rejection_reason" = @reason
+        WHERE "id" = (@id)::uuid
+        ''',
+        parameters: QueryParameters.named({
+          'id': changeRequestId,
+          'reason': reason,
+        }),
+      );
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass _rejectRoleChange',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Vérifie si l'utilisateur connecté est admin (rôle actif).
   Future<bool> _isAdmin(Session session) async {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return false;
-
-    await _ensureAdminRoleTable(session);
-    final rows = await session.db.unsafeQuery(
-      r'''
-      SELECT 1
-      FROM "cine_pass_admin_user"
-      WHERE "user_id" = (@uid)::uuid
-      LIMIT 1
-      ''',
-      parameters: QueryParameters.named({'uid': userId}),
-    );
-    return rows.isNotEmpty;
+    final roles = await _getUserRoles(session, userId: userId);
+    return roles.contains('admin');
   }
 
+  /// Vérifie si l'utilisateur connecté est responsable (rôle actif).
   Future<bool> _isResponsable(Session session) async {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return false;
-
-    await _ensureResponsableRoleTable(session);
-    final rows = await session.db.unsafeQuery(
-      r'''
-      SELECT 1
-      FROM "cine_pass_responsable_user"
-      WHERE "user_id" = (@uid)::uuid AND "active" = true
-      LIMIT 1
-      ''',
-      parameters: QueryParameters.named({'uid': userId}),
-    );
-    return rows.isNotEmpty;
+    final roles = await _getUserRoles(session, userId: userId);
+    return roles.contains('responsable');
   }
 
+  /// Retourne les IDs des structures assignées au responsable connecté.
   Future<List<String>> _responsableStructureIds(Session session) async {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return [];
@@ -375,30 +693,59 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Frontend: indique si l'utilisateur connecté est admin plateforme.
+  /// Frontend: récupère tous les rôles actifs de l'utilisateur connecté.
+  Future<List<String>> getUserRoles(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return ['guest'];
+    try {
+      return await _getUserRoles(session, userId: userId);
+    } catch (e, st) {
+      session.log(
+        'CinePass getUserRoles',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return ['client'];
+    }
+  }
+
+  /// Frontend: indique si l'utilisateur connecté est admin.
   Future<bool> isCurrentUserAdmin(Session session) async {
     return _isAdmin(session);
   }
 
-  /// Frontend: indique si l'utilisateur connecté est responsable d'au moins une structure.
+  /// Frontend: indique si l'utilisateur connecté est responsable.
   Future<bool> isCurrentUserResponsable(Session session) async {
     return _isResponsable(session);
   }
 
-  /// Admin: active/desactive le role responsable pour un utilisateur via son email.
-  Future<bool> setResponsableActiveByEmail(
+  /// Admin: change le statut d'un rôle utilisateur (actif, inactif, bloqué, banni).
+  Future<bool> setRoleStatus(
     Session session, {
-    required String email,
-    required bool active,
+    required String userEmail,
+    required String role,
+    required String newStatus,
   }) async {
     try {
       if (!await _isAdmin(session)) {
-        session.log('setResponsableActiveByEmail refuse: admin requis');
+        session.log('setRoleStatus refuse: admin requis');
         return false;
       }
 
-      final normalizedEmail = email.trim().toLowerCase();
-      if (normalizedEmail.isEmpty) return false;
+      final normalizedEmail = userEmail.trim().toLowerCase();
+      final normalizedRole = role.trim().toLowerCase();
+      final normalizedStatus = newStatus.trim().toLowerCase();
+
+      if (normalizedEmail.isEmpty || normalizedRole.isEmpty || normalizedStatus.isEmpty) {
+        return false;
+      }
+
+      // Valider le statut
+      const validStatuses = ['actif', 'inactif', 'bloqué', 'banni'];
+      if (!validStatuses.contains(normalizedStatus)) {
+        return false;
+      }
 
       final userRows = await session.db.unsafeQuery(
         r'''
@@ -412,39 +759,289 @@ class CinePassEndpoint extends Endpoint {
       if (userRows.isEmpty) return false;
       final userId = userRows.first[0].toString();
 
-      await _ensureResponsableRoleTable(session);
-      await session.db.unsafeQuery(
-        r'''
-        INSERT INTO "cine_pass_responsable_user" ("user_id", "active", "updated_at")
-        VALUES ((@uid)::uuid, @active, now())
-        ON CONFLICT ("user_id") DO UPDATE SET
-          "active" = EXCLUDED."active",
-          "updated_at" = now()
-        ''',
-        parameters: QueryParameters.named({'uid': userId, 'active': active}),
+      await _setRoleStatus(
+        session,
+        userId: userId,
+        role: normalizedRole,
+        newStatus: normalizedStatus,
       );
-
-      // Keep assignment table aligned when role is deactivated.
-      if (!active) {
-        await session.db.unsafeQuery(
-          r'''
-          UPDATE "cine_pass_responsable_assignment"
-          SET "active" = false
-          WHERE "user_id" = (@uid)::uuid
-          ''',
-          parameters: QueryParameters.named({'uid': userId}),
-        );
-      }
 
       return true;
     } catch (e, st) {
       session.log(
-        'CinePass setResponsableActiveByEmail',
+        'CinePass setRoleStatus',
         level: LogLevel.error,
         exception: e,
         stackTrace: st,
       );
       return false;
+    }
+  }
+
+  /// Admin: crée une demande de changement de rôle critique (admin ↔ responsable).
+  /// Retourne l'ID de la demande, ou null si erreur.
+  /// Requiert 2 approbations minimum avant application.
+  Future<String?> createRoleChangeRequest(
+    Session session, {
+    required String userEmail,
+    required String toRole,
+  }) async {
+    try {
+      if (!await _isAdmin(session)) {
+        session.log('createRoleChangeRequest refuse: admin requis');
+        return null;
+      }
+
+      final normalizedEmail = userEmail.trim().toLowerCase();
+      final normalizedToRole = toRole.trim().toLowerCase();
+
+      if (normalizedEmail.isEmpty || normalizedToRole.isEmpty) return null;
+
+      // Valider la transition
+      const criticalRoles = ['admin', 'responsable'];
+      if (!criticalRoles.contains(normalizedToRole)) return null;
+
+      final userRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "authUserId"
+        FROM "serverpod_auth_core_profile"
+        WHERE lower("email") = @email
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'email': normalizedEmail}),
+      );
+      if (userRows.isEmpty) return null;
+      final userId = userRows.first[0].toString();
+
+      // Déterminer le rôle actuel (admin ou responsable)
+      final currentRoles = await _getUserRoles(session, userId: userId);
+      String fromRole = 'client';
+      if (currentRoles.contains('admin')) {
+        fromRole = 'admin';
+      } else if (currentRoles.contains('responsable')) {
+        fromRole = 'responsable';
+      }
+
+      // Créer la demande
+      final adminId = session.authenticated?.userIdentifier;
+      if (adminId == null) return null;
+
+      final changeId = await _requestRoleChange(
+        session,
+        userId: userId,
+        fromRole: fromRole,
+        toRole: normalizedToRole,
+        requestedByUserId: adminId,
+      );
+
+      return changeId;
+    } catch (e, st) {
+      session.log(
+        'CinePass createRoleChangeRequest',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return null;
+    }
+  }
+
+  /// Admin: approuve une demande de changement de rôle.
+  /// Retourne true si approbation enregistrée (changement appliqué si 2 approbations atteintes).
+  Future<bool> approveRoleChangeRequest(
+    Session session, {
+    required String changeRequestId,
+  }) async {
+    try {
+      if (!await _isAdmin(session)) {
+        session.log('approveRoleChangeRequest refuse: admin requis');
+        return false;
+      }
+
+      final approverId = session.authenticated?.userIdentifier;
+      if (approverId == null) return false;
+
+      return await _approveRoleChange(
+        session,
+        changeRequestId: changeRequestId,
+        approverId: approverId,
+      );
+    } catch (e, st) {
+      session.log(
+        'CinePass approveRoleChangeRequest',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Admin: rejette une demande de changement de rôle.
+  Future<bool> rejectRoleChangeRequest(
+    Session session, {
+    required String changeRequestId,
+    required String reason,
+  }) async {
+    try {
+      if (!await _isAdmin(session)) {
+        session.log('rejectRoleChangeRequest refuse: admin requis');
+        return false;
+      }
+
+      return await _rejectRoleChange(
+        session,
+        changeRequestId: changeRequestId,
+        reason: reason,
+      );
+    } catch (e, st) {
+      session.log(
+        'CinePass rejectRoleChangeRequest',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Admin: simule une promotion directe (pour test/migration).
+  /// N'utilise PAS le système de demande critique.
+  /// À utiliser avec prudence (admin direct seulement).
+  @Deprecated('Utiliser createRoleChangeRequest + approveRoleChangeRequest à la place')
+  Future<bool> grantRoleByEmail(
+    Session session, {
+    required String email,
+    required String role,
+  }) async {
+    try {
+      if (!await _isAdmin(session)) {
+        session.log('grantRoleByEmail refuse: admin requis');
+        return false;
+      }
+
+      final normalizedEmail = email.trim().toLowerCase();
+      final normalizedRole = role.trim().toLowerCase();
+
+      if (normalizedEmail.isEmpty || normalizedRole.isEmpty) return false;
+      if (normalizedRole == 'guest' || normalizedRole == 'client') return false;
+
+      final userRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "authUserId"
+        FROM "serverpod_auth_core_profile"
+        WHERE lower("email") = @email
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'email': normalizedEmail}),
+      );
+      if (userRows.isEmpty) return false;
+      final userId = userRows.first[0].toString();
+
+      // Accorder le role uniquement via le systeme v2.
+      await _grantUserRoleWithStatus(
+        session,
+        userId: userId,
+        role: normalizedRole,
+        status: 'actif',
+      );
+
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass grantRoleByEmail',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Admin: retire un rôle cote frontend en le bloquant en base.
+  Future<bool> revokeRoleByEmail(
+    Session session, {
+    required String email,
+    required String role,
+  }) async {
+    try {
+      if (!await _isAdmin(session)) {
+        session.log('revokeRoleByEmail refuse: admin requis');
+        return false;
+      }
+
+      final normalizedEmail = email.trim().toLowerCase();
+      final normalizedRole = role.trim().toLowerCase();
+
+      if (normalizedEmail.isEmpty || normalizedRole.isEmpty) return false;
+      if (normalizedRole == 'client') return false;
+
+      final userRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "authUserId"
+        FROM "serverpod_auth_core_profile"
+        WHERE lower("email") = @email
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'email': normalizedEmail}),
+      );
+      if (userRows.isEmpty) return false;
+      final userId = userRows.first[0].toString();
+
+      // Un retrait frontend devient un blocage explicite en base.
+      await _grantUserRoleWithStatus(
+        session,
+        userId: userId,
+        role: normalizedRole,
+        status: 'bloqué',
+      );
+
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass revokeRoleByEmail',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Admin: récupère les rôles d'un utilisateur.
+  Future<List<String>> getRolesByEmail(
+    Session session, {
+    required String email,
+  }) async {
+    try {
+      if (!await _isAdmin(session)) {
+        return [];
+      }
+
+      final normalizedEmail = email.trim().toLowerCase();
+      if (normalizedEmail.isEmpty) return [];
+
+      final userRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "authUserId"
+        FROM "serverpod_auth_core_profile"
+        WHERE lower("email") = @email
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'email': normalizedEmail}),
+      );
+      if (userRows.isEmpty) return [];
+      final userId = userRows.first[0].toString();
+
+      return await _getUserRoles(session, userId: userId);
+    } catch (e, st) {
+      session.log(
+        'CinePass getRolesByEmail',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return [];
     }
   }
 
@@ -1144,16 +1741,11 @@ class CinePassEndpoint extends Endpoint {
         parameters: QueryParameters.named({'uid': userId, 'sid': structureId}),
       );
 
-      await _ensureResponsableRoleTable(session);
-      await session.db.unsafeQuery(
-        r'''
-        INSERT INTO "cine_pass_responsable_user" ("user_id", "active", "updated_at")
-        VALUES ((@uid)::uuid, true, now())
-        ON CONFLICT ("user_id") DO UPDATE SET
-          "active" = true,
-          "updated_at" = now()
-        ''',
-        parameters: QueryParameters.named({'uid': userId}),
+      await _grantUserRoleWithStatus(
+        session,
+        userId: userId,
+        role: 'responsable',
+        status: 'actif',
       );
 
       await session.db.unsafeQuery(
@@ -1653,6 +2245,13 @@ class CinePassEndpoint extends Endpoint {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return null;
     try {
+      await _grantUserRoleWithStatus(
+        session,
+        userId: userId,
+        role: 'client',
+        status: 'actif',
+      );
+
       final profileRows = await session.db.unsafeQuery(
         r'''
         SELECT "display_name", "phone", "birth_date"
