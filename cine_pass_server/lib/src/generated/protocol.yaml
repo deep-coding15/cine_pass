@@ -37,6 +37,10 @@ cinePass:
   - getSalles:
   - getEvents:
   - getEventById:
+  - getEventSeances:
+  - createEventSeance:
+  - updateEventSeance:
+  - deleteEventSeance:
   - getCities:
   - getGenres:
   - getEventCategories:
@@ -46,6 +50,7 @@ cinePass:
   - getStructureById:
   - updateEvent:
   - deleteEvent:
+  - deleteSeance:
   - getMyStructure:
   - getMyEvents:
   - getDemandesEnAttente:
@@ -54,6 +59,10 @@ cinePass:
   - createDemandeResponsable:
   - getReservations:
   - getReservationsForMyStructures:
+  - getBilletsForReservationForMyStructures:
+  - updateBilletStatusForMyStructures:
+  - updateReservationStatusForMyStructures:
+  - archiveEvent:
   - getRapportCA:
   - createSeance:
   - getProfile:

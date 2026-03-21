@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:cine_pass_client/cine_pass_client.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../main.dart';
 
 /// Tableau de bord responsable : CA, indicateurs clés, graphiques détaillés.
 class ResponsableDashboardPage extends StatefulWidget {
@@ -23,16 +25,9 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
   double _chiffreAffaires = 0;
   bool _loading = true;
 
-  /// CA par mois (6 derniers mois) — mock.
-  final List<double> _caParMois = [120.0, 340.0, 180.0, 520.0, 410.0, 380.0];
-  final List<String> _moisLabels = ['Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar'];
-
-  /// Réservations / CA par événement — mock.
-  final List<_EventStats> _eventStats = [
-    _EventStats(title: 'Concert Jazz', reservations: 12, ca: 540.0),
-    _EventStats(title: 'Théâtre', reservations: 8, ca: 320.0),
-    _EventStats(title: 'Soirée Ciné', reservations: 5, ca: 75.0),
-  ];
+  List<double> _caParMois = [0, 0, 0, 0, 0, 0];
+  List<String> _moisLabels = const ['M-5', 'M-4', 'M-3', 'M-2', 'M-1', 'M'];
+  List<_EventStats> _eventStats = [];
 
   @override
   void initState() {
@@ -41,15 +36,75 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
   }
 
   Future<void> _load() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _countStructures = 1;
-      _countEvents = 1;
-      _countReservations = 3;
-      _chiffreAffaires = _caParMois.reduce((a, b) => a + b);
-      _loading = false;
-    });
+    setState(() => _loading = true);
+    try {
+      final structure = await client.cinePass.getMyStructure();
+      final events = await client.cinePass.getMyEvents();
+      final reservations = await client.cinePass.getReservationsForMyStructures();
+      final rapport = await client.cinePass.getRapportCA('30j');
+
+      final now = DateTime.now();
+      final labels = List<String>.generate(6, (i) {
+        final d = DateTime(now.year, now.month - (5 - i), 1);
+        const m = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return m[d.month - 1];
+      });
+      final monthly = List<double>.filled(6, 0);
+      for (final r in reservations) {
+        final dt = DateTime.tryParse(r.createdAtStr);
+        if (dt == null) continue;
+        final monthsAgo = (now.year - dt.year) * 12 + now.month - dt.month;
+        if (monthsAgo < 0 || monthsAgo > 5) continue;
+        final idx = 5 - monthsAgo;
+        monthly[idx] += r.totalAmount;
+      }
+
+      final Map<String, _EventStats> statsByEvent = {};
+      for (final r in reservations) {
+        final key = (r.eventTitle == null || r.eventTitle!.trim().isEmpty)
+            ? 'Événement'
+            : r.eventTitle!.trim();
+        final current = statsByEvent[key];
+        if (current == null) {
+          statsByEvent[key] = _EventStats(
+            title: key,
+            reservations: 1,
+            ca: r.totalAmount,
+          );
+        } else {
+          statsByEvent[key] = _EventStats(
+            title: current.title,
+            reservations: current.reservations + 1,
+            ca: current.ca + r.totalAmount,
+          );
+        }
+      }
+      final eventStats = statsByEvent.values.toList()
+        ..sort((a, b) => b.ca.compareTo(a.ca));
+
+      if (!mounted) return;
+      setState(() {
+        _countStructures = structure == null ? 0 : 1;
+        _countEvents = events.length;
+        _countReservations = reservations.length;
+        _chiffreAffaires = rapport.totalCA;
+        _moisLabels = labels;
+        _caParMois = monthly;
+        _eventStats = eventStats;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _countStructures = 0;
+        _countEvents = 0;
+        _countReservations = 0;
+        _chiffreAffaires = 0;
+        _caParMois = [0, 0, 0, 0, 0, 0];
+        _eventStats = [];
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -155,7 +210,9 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
                 child: BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
-                    maxY: (_caParMois.reduce((a, b) => a > b ? a : b) * 1.2)
+                    maxY: ((_caParMois.reduce((a, b) => a > b ? a : b)) <= 0
+                            ? 100
+                            : (_caParMois.reduce((a, b) => a > b ? a : b) * 1.2))
                         .ceilToDouble(),
                     barTouchData: BarTouchData(enabled: true),
                     titlesData: FlTitlesData(
@@ -254,7 +311,17 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
-                children: _eventStats.map((e) {
+                children: _eventStats.isEmpty
+                    ? const [
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            'Aucune donnée réservation pour le moment.',
+                            style: TextStyle(color: AppTheme.textSecondary),
+                          ),
+                        ),
+                      ]
+                    : _eventStats.map((e) {
                   final maxCa = _eventStats
                       .map((x) => x.ca)
                       .reduce((a, b) => a > b ? a : b);

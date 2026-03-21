@@ -57,9 +57,253 @@ class ResponsableEventDetailPage extends StatefulWidget {
 }
 
 class _ResponsableEventDetailPageState
-    extends State<ResponsableEventDetailPage> {
-  bool _loading = true;
-  ResponsableEventDetailData? _event;
+     extends State<ResponsableEventDetailPage> {
+   bool _loading = true;
+   ResponsableEventDetailData? _event;
+
+  Future<void> _showEditEventDialog(ResponsableEventDetailData event) async {
+    final titleCtrl = TextEditingController(text: event.title);
+    final categoryCtrl = TextEditingController(text: event.category);
+    final cityCtrl = TextEditingController();
+    final lieuCtrl = TextEditingController(text: event.structureName);
+    final addressCtrl = TextEditingController(text: event.address ?? '');
+    final dateCtrl = TextEditingController(text: event.date);
+    final timeCtrl = TextEditingController(
+      text: event.seances.isNotEmpty ? event.seances.first.timeStr : '20:00',
+    );
+    final placesCtrl = TextEditingController(text: event.placesTotal.toString());
+    final descriptionCtrl = TextEditingController(text: event.description ?? '');
+
+    final eventFromApi = await client.cinePass.getEventById(event.id);
+    if (!mounted) return;
+    if (eventFromApi != null) {
+      cityCtrl.text = eventFromApi.city;
+      lieuCtrl.text = eventFromApi.location;
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Modifier l\'événement'),
+        content: SizedBox(
+          width: 520,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Titre')),
+                TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: 'Catégorie')),
+                TextField(controller: cityCtrl, decoration: const InputDecoration(labelText: 'Ville')),
+                TextField(controller: lieuCtrl, decoration: const InputDecoration(labelText: 'Lieu')),
+                TextField(controller: addressCtrl, decoration: const InputDecoration(labelText: 'Adresse')),
+                TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: 'Date (AAAA-MM-JJ)'), keyboardType: TextInputType.datetime),
+                TextField(controller: timeCtrl, decoration: const InputDecoration(labelText: 'Heure (HH:mm)')),
+                TextField(controller: placesCtrl, decoration: const InputDecoration(labelText: 'Places'), keyboardType: TextInputType.number),
+                TextField(controller: descriptionCtrl, decoration: const InputDecoration(labelText: 'Description')),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Annuler')),
+          FilledButton(
+            onPressed: () async {
+              final parsedDate = DateTime.tryParse(dateCtrl.text.trim());
+              if (parsedDate == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Date invalide (AAAA-MM-JJ).')),
+                );
+                return;
+              }
+
+              final updated = await client.cinePass.updateEvent(
+                id: event.id,
+                titre: titleCtrl.text.trim(),
+                categorie: categoryCtrl.text.trim(),
+                description: descriptionCtrl.text.trim().isEmpty ? null : descriptionCtrl.text.trim(),
+                lieu: lieuCtrl.text.trim(),
+                adresse: addressCtrl.text.trim().isEmpty ? null : addressCtrl.text.trim(),
+                ville: cityCtrl.text.trim(),
+                eventDate: parsedDate,
+                eventTimeStr: timeCtrl.text.trim(),
+                placesTotal: int.tryParse(placesCtrl.text.trim()),
+              );
+
+              if (!mounted || !ctx.mounted) return;
+              Navigator.of(ctx).pop();
+
+              final ok = updated != null;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(ok ? 'Événement modifié.' : 'Modification impossible.'),
+                  backgroundColor: ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+                ),
+              );
+              if (ok) await _load();
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _archiveEvent(ResponsableEventDetailData event) async {
+    final ok = await client.cinePass.archiveEvent(event.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Événement archivé.' : 'Archivage impossible.'),
+        backgroundColor: ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+      ),
+    );
+    if (ok) {
+      context.go('/responsable/events');
+    }
+  }
+
+  Future<void> _showEditSeanceDialog(
+    ResponsableEventDetailData event,
+    ResponsableSeanceItem seance,
+  ) async {
+    final dateCtrl = TextEditingController(text: seance.dateStr);
+    final timeCtrl = TextEditingController(text: seance.timeStr);
+    final lieuCtrl = TextEditingController(text: seance.lieu);
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Modifier la séance'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: dateCtrl,
+              keyboardType: TextInputType.datetime,
+              decoration: const InputDecoration(labelText: 'Date (AAAA-MM-JJ)'),
+            ),
+            TextField(
+              controller: timeCtrl,
+              decoration: const InputDecoration(labelText: 'Heure (HH:mm)'),
+            ),
+            TextField(
+              controller: lieuCtrl,
+              decoration: const InputDecoration(labelText: 'Lieu'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final parsedDate = DateTime.tryParse(dateCtrl.text.trim());
+              if (parsedDate == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Date invalide (AAAA-MM-JJ).')),
+                );
+                return;
+              }
+              final updated = await client.cinePass.updateEventSeance(
+                seanceId: seance.id,
+                eventDate: parsedDate,
+                eventTimeStr: timeCtrl.text.trim(),
+                lieu: lieuCtrl.text.trim(),
+              );
+              if (!mounted || !ctx.mounted) return;
+              Navigator.of(ctx).pop();
+              final ok = updated != null;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(ok ? 'Séance modifiée.' : 'Modification impossible.'),
+                  backgroundColor: ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+                ),
+              );
+              if (ok) {
+                await _load();
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAddSeanceDialog(ResponsableEventDetailData event) async {
+    final dateCtrl = TextEditingController(text: event.date);
+    final timeCtrl = TextEditingController(text: '20:00');
+    final lieuCtrl = TextEditingController(text: event.address ?? event.structureName);
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Ajouter une séance'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: dateCtrl,
+              keyboardType: TextInputType.datetime,
+              decoration: const InputDecoration(labelText: 'Date (AAAA-MM-JJ)'),
+            ),
+            TextField(
+              controller: timeCtrl,
+              decoration: const InputDecoration(labelText: 'Heure (HH:mm)'),
+            ),
+            TextField(
+              controller: lieuCtrl,
+              decoration: const InputDecoration(labelText: 'Lieu'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final parsedDate = DateTime.tryParse(dateCtrl.text.trim());
+              if (parsedDate == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Date invalide (AAAA-MM-JJ).')),
+                );
+                return;
+              }
+              final created = await client.cinePass.createEventSeance(
+                eventId: event.id,
+                eventDate: parsedDate,
+                eventTimeStr: timeCtrl.text.trim(),
+                lieu: lieuCtrl.text.trim(),
+              );
+              if (!mounted || !ctx.mounted) return;
+              Navigator.of(ctx).pop();
+              final ok = created != null;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(ok ? 'Séance ajoutée.' : 'Ajout impossible.'),
+                  backgroundColor: ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+                ),
+              );
+              if (ok) {
+                await _load();
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+            child: const Text('Ajouter'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -71,6 +315,7 @@ class _ResponsableEventDetailPageState
     setState(() => _loading = true);
     try {
       final ev = await client.cinePass.getEventById(widget.eventId);
+      final seancesApi = await client.cinePass.getEventSeances(widget.eventId);
       if (!mounted) return;
       if (ev == null) {
         setState(() {
@@ -94,17 +339,28 @@ class _ResponsableEventDetailPageState
           placesLeft: ev.placesLeft,
           description: ev.description,
           address: ev.address ?? ev.location,
-          seances: [
-            ResponsableSeanceItem(
-              id: ev.id,
-              dateStr: ev.date,
-              timeStr: ev.time,
-              lieu: ev.location,
-            ),
-          ],
-        );
-        _loading = false;
-      });
+          seances: seancesApi.isNotEmpty
+              ? seancesApi
+                    .map(
+                      (s) => ResponsableSeanceItem(
+                        id: s.id,
+                        dateStr: s.dateStr,
+                        timeStr: s.timeStr,
+                        lieu: s.lieu,
+                      ),
+                    )
+                    .toList()
+              : [
+                  ResponsableSeanceItem(
+                    id: ev.id,
+                    dateStr: ev.date,
+                    timeStr: ev.time,
+                    lieu: ev.location,
+                  ),
+                ],
+         );
+         _loading = false;
+       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -286,14 +542,7 @@ class _ResponsableEventDetailPageState
                       ),
                       FilledButton.icon(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Ajout de séance à brancher sur l\'API',
-                              ),
-                              backgroundColor: AppTheme.accentGreen,
-                            ),
-                          );
+                          _showAddSeanceDialog(e);
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: AppTheme.accentGreen,
@@ -347,7 +596,7 @@ class _ResponsableEventDetailPageState
                               ),
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () => _showEditSeanceDialog(e, s),
                               icon: const Icon(
                                 Icons.edit_outlined,
                                 size: 20,
@@ -356,7 +605,42 @@ class _ResponsableEventDetailPageState
                               tooltip: 'Modifier la séance',
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    backgroundColor: AppTheme.cardDark,
+                                    title: const Text('Supprimer cette séance ?'),
+                                    content: const Text('Action irréversible.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(ctx).pop(false),
+                                        child: const Text('Annuler'),
+                                      ),
+                                      FilledButton(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: AppTheme.primaryRed,
+                                        ),
+                                        onPressed: () => Navigator.of(ctx).pop(true),
+                                        child: const Text('Supprimer'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm != true || !mounted) return;
+                                final ok = await client.cinePass.deleteEventSeance(s.id);
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(ok
+                                        ? 'Séance supprimée.'
+                                        : 'Suppression impossible.'),
+                                    backgroundColor:
+                                        ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+                                  ),
+                                );
+                                if (ok) await _load();
+                              },
                               icon: const Icon(
                                 Icons.delete_outline_rounded,
                                 size: 20,
@@ -364,11 +648,11 @@ class _ResponsableEventDetailPageState
                               ),
                               tooltip: 'Supprimer la séance',
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                           ],
+                         ),
+                       ),
+                     ),
+                   ),
                 ],
               ),
             ),
@@ -379,14 +663,7 @@ class _ResponsableEventDetailPageState
             runSpacing: 12,
             children: [
               FilledButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Modification à brancher sur l\'API'),
-                      backgroundColor: AppTheme.accentGreen,
-                    ),
-                  );
-                },
+                onPressed: () => _showEditEventDialog(e),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.accentGreen,
                 ),
@@ -394,18 +671,11 @@ class _ResponsableEventDetailPageState
                 label: const Text('Modifier l\'événement'),
               ),
               OutlinedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Archiver à brancher sur l\'API'),
-                      backgroundColor: AppTheme.textSecondary,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.archive_rounded, size: 20),
-                label: const Text('Archiver'),
-              ),
-              OutlinedButton.icon(
+                onPressed: () => _archiveEvent(e),
+                 icon: const Icon(Icons.archive_rounded, size: 20),
+                 label: const Text('Archiver'),
+               ),
+               OutlinedButton.icon(
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
@@ -446,7 +716,7 @@ class _ResponsableEventDetailPageState
                       } else {
                         messenger.showSnackBar(
                           const SnackBar(
-                            content: Text('Échec de la suppression.'),
+                            content: Text('Suppression refusée: il existe déjà des inscrits/réservations.'),
                           ),
                         );
                       }

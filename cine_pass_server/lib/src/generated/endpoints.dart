@@ -806,6 +806,118 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['id'],
                   ),
         ),
+        'getEventSeances': _i1.MethodConnector(
+          name: 'getEventSeances',
+          params: {
+            'eventId': _i1.ParameterDescription(
+              name: 'eventId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .getEventSeances(
+                    session,
+                    params['eventId'],
+                  ),
+        ),
+        'createEventSeance': _i1.MethodConnector(
+          name: 'createEventSeance',
+          params: {
+            'eventId': _i1.ParameterDescription(
+              name: 'eventId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'eventDate': _i1.ParameterDescription(
+              name: 'eventDate',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'eventTimeStr': _i1.ParameterDescription(
+              name: 'eventTimeStr',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'lieu': _i1.ParameterDescription(
+              name: 'lieu',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .createEventSeance(
+                    session,
+                    eventId: params['eventId'],
+                    eventDate: params['eventDate'],
+                    eventTimeStr: params['eventTimeStr'],
+                    lieu: params['lieu'],
+                  ),
+        ),
+        'updateEventSeance': _i1.MethodConnector(
+          name: 'updateEventSeance',
+          params: {
+            'seanceId': _i1.ParameterDescription(
+              name: 'seanceId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'eventDate': _i1.ParameterDescription(
+              name: 'eventDate',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'eventTimeStr': _i1.ParameterDescription(
+              name: 'eventTimeStr',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'lieu': _i1.ParameterDescription(
+              name: 'lieu',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .updateEventSeance(
+                    session,
+                    seanceId: params['seanceId'],
+                    eventDate: params['eventDate'],
+                    eventTimeStr: params['eventTimeStr'],
+                    lieu: params['lieu'],
+                  ),
+        ),
+        'deleteEventSeance': _i1.MethodConnector(
+          name: 'deleteEventSeance',
+          params: {
+            'seanceId': _i1.ParameterDescription(
+              name: 'seanceId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .deleteEventSeance(
+                    session,
+                    params['seanceId'],
+                  ),
+        ),
         'getCities': _i1.MethodConnector(
           name: 'getCities',
           params: {},
@@ -881,12 +993,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'dateSortie': _i1.ParameterDescription(
               name: 'dateSortie',
-              type: _i1.getType<Object?>(),
+              type: _i1.getType<DateTime?>(),
               nullable: true,
             ),
             'dateFin': _i1.ParameterDescription(
               name: 'dateFin',
-              type: _i1.getType<Object?>(),
+              type: _i1.getType<DateTime?>(),
               nullable: true,
             ),
             'audience': _i1.ParameterDescription(
@@ -950,7 +1062,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'eventDate': _i1.ParameterDescription(
               name: 'eventDate',
-              type: _i1.getType<Object>(),
+              type: _i1.getType<DateTime>(),
               nullable: false,
             ),
             'eventTimeStr': _i1.ParameterDescription(
@@ -1075,7 +1187,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'eventDate': _i1.ParameterDescription(
               name: 'eventDate',
-              type: _i1.getType<Object?>(),
+              type: _i1.getType<DateTime?>(),
               nullable: true,
             ),
             'eventTimeStr': _i1.ParameterDescription(
@@ -1141,6 +1253,25 @@ class Endpoints extends _i1.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async =>
                   (endpoints['cinePass'] as _i6.CinePassEndpoint).deleteEvent(
+                    session,
+                    params['id'],
+                  ),
+        ),
+        'deleteSeance': _i1.MethodConnector(
+          name: 'deleteSeance',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).deleteSeance(
                     session,
                     params['id'],
                   ),
@@ -1300,6 +1431,94 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .getReservationsForMyStructures(session),
         ),
+        'getBilletsForReservationForMyStructures': _i1.MethodConnector(
+          name: 'getBilletsForReservationForMyStructures',
+          params: {
+            'reservationId': _i1.ParameterDescription(
+              name: 'reservationId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .getBilletsForReservationForMyStructures(
+                    session,
+                    params['reservationId'],
+                  ),
+        ),
+        'updateBilletStatusForMyStructures': _i1.MethodConnector(
+          name: 'updateBilletStatusForMyStructures',
+          params: {
+            'billetId': _i1.ParameterDescription(
+              name: 'billetId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'statut': _i1.ParameterDescription(
+              name: 'statut',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .updateBilletStatusForMyStructures(
+                    session,
+                    billetId: params['billetId'],
+                    statut: params['statut'],
+                  ),
+        ),
+        'updateReservationStatusForMyStructures': _i1.MethodConnector(
+          name: 'updateReservationStatusForMyStructures',
+          params: {
+            'reservationId': _i1.ParameterDescription(
+              name: 'reservationId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'statut': _i1.ParameterDescription(
+              name: 'statut',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .updateReservationStatusForMyStructures(
+                    session,
+                    reservationId: params['reservationId'],
+                    statut: params['statut'],
+                  ),
+        ),
+        'archiveEvent': _i1.MethodConnector(
+          name: 'archiveEvent',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['cinePass'] as _i6.CinePassEndpoint).archiveEvent(
+                    session,
+                    params['id'],
+                  ),
+        ),
         'getRapportCA': _i1.MethodConnector(
           name: 'getRapportCA',
           params: {
@@ -1334,12 +1553,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'debutAt': _i1.ParameterDescription(
               name: 'debutAt',
-              type: _i1.getType<Object>(),
+              type: _i1.getType<DateTime>(),
               nullable: false,
             ),
             'finAt': _i1.ParameterDescription(
               name: 'finAt',
-              type: _i1.getType<Object?>(),
+              type: _i1.getType<DateTime?>(),
               nullable: true,
             ),
             'format': _i1.ParameterDescription(

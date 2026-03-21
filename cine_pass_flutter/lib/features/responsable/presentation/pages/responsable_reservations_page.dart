@@ -17,6 +17,14 @@ class _ResponsableReservationsPageState
     extends State<ResponsableReservationsPage> {
   bool _loading = true;
   List<ReservationResponse> _reservations = [];
+  final Map<String, List<ResponsableBilletResponse>> _billetsByReservation = {};
+  final Set<String> _loadingBilletsFor = <String>{};
+
+  // Règle métier responsable: uniquement scan et annulation.
+  static const List<String> _allowedStatuses = [
+    'checked_in',
+    'cancelled',
+  ];
 
   @override
   void initState() {
@@ -42,143 +50,279 @@ class _ResponsableReservationsPageState
     }
   }
 
-  void _showDetail(ReservationResponse r) {
+  Future<void> _loadBillets(String reservationId) async {
+    if (_loadingBilletsFor.contains(reservationId)) return;
+    setState(() => _loadingBilletsFor.add(reservationId));
+    try {
+      final billets =
+          await client.cinePass.getBilletsForReservationForMyStructures(reservationId);
+      if (!mounted) return;
+      setState(() {
+        _billetsByReservation[reservationId] = billets;
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _loadingBilletsFor.remove(reservationId));
+      }
+    }
+  }
+
+  String _prettyStatus(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'checked_in':
+        return 'Scanne (entree validee)';
+      case 'cancelled':
+        return 'Annule (remboursement)';
+      case 'paid':
+        return 'Paye';
+      case 'refunded':
+        return 'Rembourse';
+      default:
+        return raw;
+    }
+  }
+
+  Future<void> _updateBilletStatus({
+    required String reservationId,
+    required ResponsableBilletResponse billet,
+    required String nextStatus,
+  }) async {
+    final ok = await client.cinePass.updateBilletStatusForMyStructures(
+      billetId: billet.id,
+      statut: nextStatus,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Action refusee: seul scan/annulation est autorise.'),
+          backgroundColor: AppTheme.primaryRed,
+        ),
+      );
+      return;
+    }
+
+    final current = _billetsByReservation[reservationId] ?? const <ResponsableBilletResponse>[];
+    setState(() {
+      _billetsByReservation[reservationId] = current
+          .map((b) => b.id == billet.id ? b.copyWith(statut: nextStatus) : b)
+          .toList();
+    });
+  }
+
+  Future<void> _updateReservationStatus({
+    required ReservationResponse reservation,
+    required String nextStatus,
+  }) async {
+    final ok = await client.cinePass.updateReservationStatusForMyStructures(
+      reservationId: reservation.id,
+      statut: nextStatus,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Action refusee: seul scan/annulation est autorise.'),
+          backgroundColor: AppTheme.primaryRed,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _reservations = _reservations
+          .map((r) => r.id == reservation.id ? r.copyWith(statut: nextStatus) : r)
+          .toList();
+      final currentBillets = _billetsByReservation[reservation.id];
+      if (currentBillets != null) {
+        _billetsByReservation[reservation.id] =
+            currentBillets.map((b) => b.copyWith(statut: nextStatus)).toList();
+      }
+    });
+  }
+
+  Future<void> _showDetail(ReservationResponse r) async {
+    await _loadBillets(r.id);
+    if (!mounted) return;
+
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: AppTheme.cardDark,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Détail réservation',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppTheme.textPrimary,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final reservation = _reservations.firstWhere(
+            (item) => item.id == r.id,
+            orElse: () => r,
+          );
+          final billets = _billetsByReservation[reservation.id] ??
+              const <ResponsableBilletResponse>[];
+          final isLoading = _loadingBilletsFor.contains(reservation.id);
+
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.72,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Detail reservation',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: AppTheme.textPrimary,
+                              ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.close_rounded),
+                          color: AppTheme.textSecondary,
+                        ),
+                      ],
                     ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.accentGreen.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      r.statut == 'confirmed' || r.statut == 'confirmée'
-                          ? 'Confirmée'
-                          : r.statut == 'pending' || r.statut == 'en_attente'
-                          ? 'En attente'
-                          : r.statut,
-                      style: const TextStyle(
-                        color: AppTheme.accentGreen,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded),
-                    color: AppTheme.textSecondary,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _DetailRow(
-                label: 'N° réservation',
-                value: r.numero,
-                highlight: true,
-              ),
-              _DetailRow(label: 'Événement', value: r.eventTitle ?? '—'),
-              _DetailRow(label: 'Date', value: r.createdAtStr),
-              _DetailRow(label: 'Billets', value: '${r.nbBillets}'),
-              _DetailRow(
-                label: 'Total',
-                value: '${r.totalAmount.toStringAsFixed(2)} €',
-              ),
-              _DetailRow(label: 'Statut', value: r.statut),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Ouverture page de détail complète / billets — à brancher',
+                    const SizedBox(height: 8),
+                    _DetailRow(label: 'N° reservation', value: reservation.numero, highlight: true),
+                    _DetailRow(label: 'Evenement', value: reservation.eventTitle ?? '-'),
+                    _DetailRow(label: 'Date', value: reservation.createdAtStr),
+                    _DetailRow(label: 'Billets', value: '${reservation.nbBillets}'),
+                    _DetailRow(label: 'Total', value: '${reservation.totalAmount.toStringAsFixed(2)} EUR'),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 130,
+                          child: Text(
+                            'Statut global',
+                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                           ),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.receipt_long_rounded, size: 20),
-                    label: const Text('Voir les billets'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppTheme.accentGreen,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Changer le statut (annuler / rembourser) — à brancher',
-                          ),
+                        DropdownButton<String>(
+                          value: _allowedStatuses.contains(reservation.statut)
+                              ? reservation.statut
+                              : 'checked_in',
+                          dropdownColor: AppTheme.cardDark,
+                          items: _allowedStatuses
+                              .map(
+                                (s) => DropdownMenuItem<String>(
+                                  value: s,
+                                  child: Text(_prettyStatus(s)),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) async {
+                            if (value == null || value == reservation.statut) return;
+                            await _updateReservationStatus(
+                              reservation: reservation,
+                              nextStatus: value,
+                            );
+                            if (!mounted) return;
+                            await _loadBillets(reservation.id);
+                            if (!mounted) return;
+                            setModalState(() {});
+                          },
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.swap_horiz_rounded, size: 20),
-                    label: const Text('Gérer le statut'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.accentGreen,
-                      side: const BorderSide(color: AppTheme.accentGreen),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    const Divider(color: AppTheme.textSecondary, height: 1),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Billets clients',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: AppTheme.textPrimary,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(color: AppTheme.accentGreen),
+                            )
+                          : billets.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    'Aucun billet trouve pour cette reservation.',
+                                    style: TextStyle(color: AppTheme.textSecondary),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  itemCount: billets.length,
+                                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                                  itemBuilder: (_, index) {
+                                    final b = billets[index];
+                                    return Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.surfaceDark,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  '${b.ticketType.toUpperCase()}${b.seatLabel != null ? ' - ${b.seatLabel}' : ''}',
+                                                  style: const TextStyle(
+                                                    color: AppTheme.textPrimary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  '${b.prix.toStringAsFixed(2)} EUR',
+                                                  style: const TextStyle(color: AppTheme.textSecondary),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          DropdownButton<String>(
+                                            value: _allowedStatuses.contains(b.statut)
+                                                ? b.statut
+                                                : 'checked_in',
+                                            dropdownColor: AppTheme.cardDark,
+                                            items: _allowedStatuses
+                                                .map(
+                                                  (s) => DropdownMenuItem<String>(
+                                                    value: s,
+                                                    child: Text(_prettyStatus(s)),
+                                                  ),
+                                                )
+                                                .toList(),
+                                            onChanged: (value) async {
+                                              if (value == null || value == b.statut) return;
+                                              await _updateBilletStatus(
+                                                reservationId: reservation.id,
+                                                billet: b,
+                                                nextStatus: value,
+                                              );
+                                              if (!mounted) return;
+                                              await _loadBillets(reservation.id);
+                                              if (!mounted) return;
+                                              setModalState(() {});
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Export PDF à venir')),
-                      );
-                    },
-                    icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
-                    label: const Text('Exporter PDF'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.accentGreen,
-                      side: const BorderSide(color: AppTheme.accentGreen),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  FilledButton.icon(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.check_rounded, size: 20),
-                    label: const Text('Fermer'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.accentGreen,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -191,15 +335,15 @@ class _ResponsableReservationsPageState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Réservations',
+            'Reservations',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: AppTheme.textPrimary,
-            ),
+                  color: AppTheme.textPrimary,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Réservations pour les événements de vos structures. Cliquez sur une ligne pour voir le détail.',
-            style: TextStyle(
+            'Cliquez sur une reservation pour scanner/annuler les billets.',
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 14,
             ),
@@ -210,27 +354,14 @@ class _ResponsableReservationsPageState
               child: CircularProgressIndicator(color: AppTheme.accentGreen),
             )
           else if (_reservations.isEmpty)
-            Card(
+            const Card(
               color: AppTheme.cardDark,
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: EdgeInsets.all(24),
                 child: Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.confirmation_number_rounded,
-                        size: 64,
-                        color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucune réservation pour le moment.',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Aucune reservation pour le moment.',
+                    style: TextStyle(color: AppTheme.textSecondary),
                   ),
                 ),
               ),
@@ -249,10 +380,7 @@ class _ResponsableReservationsPageState
                     onTap: () => _showDetail(r),
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       child: Row(
                         children: [
                           Expanded(
@@ -269,24 +397,13 @@ class _ResponsableReservationsPageState
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${r.eventTitle ?? '—'}\n${r.totalAmount.toStringAsFixed(2)} € • ${r.createdAtStr}',
-                                  style: TextStyle(
+                                  '${r.eventTitle ?? '-'} - ${r.totalAmount.toStringAsFixed(2)} EUR - ${_prettyStatus(r.statut)}',
+                                  style: const TextStyle(
                                     color: AppTheme.textSecondary,
                                     fontSize: 13,
                                   ),
                                 ),
                               ],
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: () => _showDetail(r),
-                            icon: const Icon(
-                              Icons.visibility_rounded,
-                              size: 18,
-                            ),
-                            label: const Text('Voir détails'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppTheme.accentGreen,
                             ),
                           ),
                           const Icon(
@@ -328,7 +445,7 @@ class _DetailRow extends StatelessWidget {
             width: 130,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 13,
               ),
@@ -340,7 +457,6 @@ class _DetailRow extends StatelessWidget {
               style: TextStyle(
                 color: highlight ? AppTheme.accentGreen : AppTheme.textPrimary,
                 fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
-                fontSize: 14,
               ),
             ),
           ),

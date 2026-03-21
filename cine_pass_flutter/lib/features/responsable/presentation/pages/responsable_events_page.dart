@@ -17,6 +17,7 @@ class ResponsableEventsPage extends StatefulWidget {
 class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
   bool _loading = true;
   List<EventResponse> _events = [];
+  String _statusFilter = 'a_venir';
 
   /// Structures pour le dropdown "Créer un événement" (même source que Mes structures, mock pour l’instant).
   List<ResponsableStructureItem> _structuresForDialog = [];
@@ -65,8 +66,144 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
     );
   }
 
+  Future<void> _deleteEvent(EventResponse event) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Supprimer cet événement ?'),
+        content: Text('Vous allez supprimer "${event.title}".'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    final ok = await client.cinePass.deleteEvent(event.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Événement supprimé.' : 'Suppression impossible.'),
+        backgroundColor: ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+      ),
+    );
+    if (ok) {
+      await _load();
+    }
+  }
+
+  Future<void> _showEditEventDialog(EventResponse event) async {
+    final titleCtrl = TextEditingController(text: event.title);
+    final categoryCtrl = TextEditingController(text: event.category);
+    final cityCtrl = TextEditingController(text: event.city);
+    final lieuCtrl = TextEditingController(text: event.location);
+    final addressCtrl = TextEditingController(text: event.address ?? '');
+    final dateCtrl = TextEditingController(text: event.date);
+    final timeCtrl = TextEditingController(text: event.time);
+    final placesCtrl = TextEditingController(text: event.placesTotal.toString());
+    final priceCtrl = TextEditingController(text: event.price.toStringAsFixed(2));
+    final descriptionCtrl = TextEditingController(text: event.description ?? '');
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Modifier l\'événement'),
+        content: SizedBox(
+          width: 520,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Titre')),
+                TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: 'Catégorie')),
+                TextField(controller: cityCtrl, decoration: const InputDecoration(labelText: 'Ville')),
+                TextField(controller: lieuCtrl, decoration: const InputDecoration(labelText: 'Lieu')),
+                TextField(controller: addressCtrl, decoration: const InputDecoration(labelText: 'Adresse')),
+                TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: 'Date (AAAA-MM-JJ)')),
+                TextField(controller: timeCtrl, decoration: const InputDecoration(labelText: 'Heure (HH:mm)')),
+                TextField(controller: placesCtrl, decoration: const InputDecoration(labelText: 'Places'), keyboardType: TextInputType.number),
+                TextField(controller: priceCtrl, decoration: const InputDecoration(labelText: 'Prix'), keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                TextField(controller: descriptionCtrl, decoration: const InputDecoration(labelText: 'Description')),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Annuler')),
+          FilledButton(
+            onPressed: () async {
+              final parsedDate = DateTime.tryParse(dateCtrl.text.trim());
+              if (parsedDate == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Date invalide (AAAA-MM-JJ).')),
+                );
+                return;
+              }
+              final updated = await client.cinePass.updateEvent(
+                id: event.id,
+                titre: titleCtrl.text.trim(),
+                categorie: categoryCtrl.text.trim(),
+                description: descriptionCtrl.text.trim().isEmpty ? null : descriptionCtrl.text.trim(),
+                lieu: lieuCtrl.text.trim(),
+                adresse: addressCtrl.text.trim().isEmpty ? null : addressCtrl.text.trim(),
+                ville: cityCtrl.text.trim(),
+                eventDate: parsedDate,
+                eventTimeStr: timeCtrl.text.trim(),
+                placesTotal: int.tryParse(placesCtrl.text.trim()),
+                prixBase: double.tryParse(priceCtrl.text.trim().replaceAll(',', '.')),
+              );
+
+              if (!mounted || !ctx.mounted) return;
+              Navigator.of(ctx).pop();
+
+              final ok = updated != null;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(ok ? 'Événement mis à jour.' : 'Mise à jour impossible.'),
+                  backgroundColor: ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+                ),
+              );
+              if (ok) {
+                await _load();
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _eventStatus(EventResponse event) {
+    final d = DateTime.tryParse(event.date);
+    if (d == null) return 'a_venir';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final eventDay = DateTime(d.year, d.month, d.day);
+    if (eventDay.isBefore(today)) return 'archives';
+    if (eventDay.isAfter(today)) return 'a_venir';
+    return 'en_cours';
+  }
+
+  List<EventResponse> _filteredEvents() {
+    if (_statusFilter == 'tous') return _events;
+    return _events.where((e) => _eventStatus(e) == _statusFilter).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final visibleEvents = _filteredEvents();
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -100,11 +237,38 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
             ),
           ),
           const SizedBox(height: 24),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('A venir'),
+                selected: _statusFilter == 'a_venir',
+                onSelected: (_) => setState(() => _statusFilter = 'a_venir'),
+              ),
+              ChoiceChip(
+                label: const Text('En cours'),
+                selected: _statusFilter == 'en_cours',
+                onSelected: (_) => setState(() => _statusFilter = 'en_cours'),
+              ),
+              ChoiceChip(
+                label: const Text('Archives'),
+                selected: _statusFilter == 'archives',
+                onSelected: (_) => setState(() => _statusFilter = 'archives'),
+              ),
+              ChoiceChip(
+                label: const Text('Tous'),
+                selected: _statusFilter == 'tous',
+                onSelected: (_) => setState(() => _statusFilter = 'tous'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           if (_loading)
             const Center(
               child: CircularProgressIndicator(color: AppTheme.accentGreen),
             )
-          else if (_events.isEmpty)
+          else if (visibleEvents.isEmpty)
             Card(
               color: AppTheme.cardDark,
               child: Padding(
@@ -143,9 +307,10 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _events.length,
+              itemCount: visibleEvents.length,
               itemBuilder: (context, index) {
-                final e = _events[index];
+                final e = visibleEvents[index];
+                final status = _eventStatus(e);
                 return Card(
                   color: AppTheme.cardDark,
                   margin: const EdgeInsets.only(bottom: 12),
@@ -175,7 +340,7 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
                       ),
                     ),
                     subtitle: Text(
-                      '${e.category} • ${e.location}\n${e.date} ${e.time} • ${e.placesTotal} places',
+                      '${e.category} • ${e.location}\n${e.date} ${e.time} • ${e.placesTotal} places • ${status == 'archives' ? 'Archive' : status == 'en_cours' ? 'En cours' : 'A venir'}',
                       style: TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 13,
@@ -186,11 +351,11 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit_rounded),
-                          onPressed: () {},
+                          onPressed: () => _showEditEventDialog(e),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete_outline_rounded),
-                          onPressed: () {},
+                          onPressed: () => _deleteEvent(e),
                         ),
                       ],
                     ),

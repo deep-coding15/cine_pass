@@ -1,0 +1,12 @@
+class: ResponsableBilletResponse
+fields:
+  id: String
+  reservationId: String
+  reservationNumero: String
+  eventTitle: String?
+  ticketType: String
+  seatLabel: String?
+  prix: double
+  statut: String
+  createdAtStr: String
+

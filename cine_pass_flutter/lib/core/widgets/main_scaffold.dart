@@ -72,7 +72,9 @@ class _MainScaffoldState extends State<MainScaffold> {
             ),
             PopupMenuButton<String>(
               offset: const Offset(0, 48),
-              tooltip: 'Profil · Devenir responsable · Déconnexion',
+              tooltip: auth.isResponsable
+                  ? 'Profil · Déconnexion'
+                  : 'Profil · Devenir responsable · Déconnexion',
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -100,20 +102,21 @@ class _MainScaffoldState extends State<MainScaffold> {
                   value: 'profil',
                   child: Text('Voir mon profil'),
                 ),
-                const PopupMenuItem(
-                  value: 'devenir_responsable',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.badge_outlined,
-                        size: 20,
-                        color: AppTheme.textSecondary,
-                      ),
-                      SizedBox(width: 12),
-                      Text('Devenir responsable'),
-                    ],
+                if (!auth.isResponsable)
+                  const PopupMenuItem(
+                    value: 'devenir_responsable',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.badge_outlined,
+                          size: 20,
+                          color: AppTheme.textSecondary,
+                        ),
+                        SizedBox(width: 12),
+                        Text('Devenir responsable'),
+                      ],
+                    ),
                   ),
-                ),
                 const PopupMenuItem(
                   value: 'deconnexion',
                   child: Text('Déconnexion'),

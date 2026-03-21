@@ -152,7 +152,7 @@ class AppDrawer extends StatelessWidget {
                 context.go(AppRouter.events);
               },
             ),
-            if (auth.isLoggedIn)
+            if ((auth.isLoggedIn && !auth.isResponsable) || (auth.isLoggedIn && !auth.isAdmin))
               _DrawerTile(
                 icon: Icons.badge_outlined,
                 label: 'Devenir responsable',

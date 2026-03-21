@@ -6,8 +6,10 @@ import '../generated/event_response.dart';
 import '../generated/cinema_response.dart';
 import '../generated/demande_responsable_response.dart';
 import '../generated/reservation_response.dart';
+import '../generated/responsable_billet_response.dart';
 import '../generated/rapport_ca_response.dart';
 import '../generated/profile_response.dart';
+import '../generated/event_seance_response.dart';
 import '../generated/salle.dart';
 
 import '../generated/structure.dart';
@@ -36,6 +38,7 @@ class CinePassEndpoint extends Endpoint {
     required List<double> prices,
     required double totalAmount,
   }) async {
+    await _ensureReservationTables(session);
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return null;
     if (isEvent) {
@@ -148,7 +151,7 @@ class CinePassEndpoint extends Endpoint {
           INSERT INTO "cine_pass_billet" (
             "reservation_id", "siege_id", "ticket_type",
             "option_parking", "option_popcorn", "option_boisson",
-            "prix"
+            "prix", "statut"
           )
           VALUES (
             (@rid)::uuid,
@@ -157,7 +160,8 @@ class CinePassEndpoint extends Endpoint {
             @parking,
             @popcorn,
             @boisson,
-            @prix
+            @prix,
+            'paid'
           )
           ''',
           parameters: QueryParameters.named({
@@ -186,6 +190,7 @@ class CinePassEndpoint extends Endpoint {
 
   /// Mes billets (1 entrée par réservation, avec la liste des billets associés).
   Future<List<BilletGroupResponse>> getMyBillets(Session session) async {
+    await _ensureReservationTables(session);
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return [];
     try {
@@ -1203,6 +1208,217 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
+  /// Seances d'un evenement (responsable admin de sa structure).
+  Future<List<EventSeanceResponse>> getEventSeances(
+    Session session,
+    String eventId,
+  ) async {
+    try {
+      await _ensureEventSeanceTables(session);
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT s."id", s."event_id", s."event_date", s."event_time", s."lieu", s."created_at"
+        FROM "cine_pass_event_seance" s
+        WHERE s."event_id" = (@eid)::uuid
+        ORDER BY s."event_date", s."event_time"
+        ''',
+        parameters: QueryParameters.named({'eid': eventId}),
+      );
+      return rows.map(_rowToEventSeanceResponse).toList();
+    } catch (e, st) {
+      session.log(
+        'CinePass getEventSeances',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return [];
+    }
+  }
+
+  Future<EventSeanceResponse?> createEventSeance(
+    Session session, {
+    required String eventId,
+    required DateTime eventDate,
+    required String eventTimeStr,
+    required String lieu,
+  }) async {
+    try {
+      await _ensureEventSeanceTables(session);
+
+      final isAdmin = await _isAdmin(session);
+      if (!isAdmin) {
+        final assigned = await _responsableStructureIds(session);
+        if (assigned.isEmpty) return null;
+        final targetRows = await session.db.unsafeQuery(
+          r'''SELECT "structureId" FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid''',
+          parameters: QueryParameters.named({'id': eventId}),
+        );
+        if (targetRows.isEmpty) return null;
+        final targetStructureId = targetRows.first[0]?.toString();
+        if (targetStructureId == null || !assigned.contains(targetStructureId)) {
+          return null;
+        }
+      }
+
+      DateTime eventTime = eventDate;
+      if (eventTimeStr.length >= 5) {
+        final parts = eventTimeStr.split(':');
+        if (parts.length >= 2) {
+          final h = int.tryParse(parts[0]) ?? 0;
+          final m = int.tryParse(parts[1]) ?? 0;
+          eventTime = DateTime(eventDate.year, eventDate.month, eventDate.day, h, m);
+        }
+      }
+
+      final inserted = await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_event_seance" (
+          "event_id", "event_date", "event_time", "lieu"
+        )
+        VALUES ((@eid)::uuid, @eventDate, @eventTime, @lieu)
+        RETURNING "id", "event_id", "event_date", "event_time", "lieu", "created_at"
+        ''',
+        parameters: QueryParameters.named({
+          'eid': eventId,
+          'eventDate': DateTime(eventDate.year, eventDate.month, eventDate.day),
+          'eventTime': eventTime,
+          'lieu': lieu.trim(),
+        }),
+      );
+      if (inserted.isEmpty) return null;
+      return _rowToEventSeanceResponse(inserted.first);
+    } catch (e, st) {
+      session.log(
+        'CinePass createEventSeance',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return null;
+    }
+  }
+
+  Future<EventSeanceResponse?> updateEventSeance(
+    Session session, {
+    required String seanceId,
+    DateTime? eventDate,
+    String? eventTimeStr,
+    String? lieu,
+  }) async {
+    try {
+      await _ensureEventSeanceTables(session);
+
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT s."event_id"
+        FROM "cine_pass_event_seance" s
+        WHERE s."id" = (@sid)::uuid
+        ''',
+        parameters: QueryParameters.named({'sid': seanceId}),
+      );
+      if (rows.isEmpty) return null;
+      final eventId = rows.first[0].toString();
+
+      final isAdmin = await _isAdmin(session);
+      if (!isAdmin) {
+        final assigned = await _responsableStructureIds(session);
+        if (assigned.isEmpty) return null;
+        final targetRows = await session.db.unsafeQuery(
+          r'''SELECT "structureId" FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid''',
+          parameters: QueryParameters.named({'id': eventId}),
+        );
+        if (targetRows.isEmpty) return null;
+        final targetStructureId = targetRows.first[0]?.toString();
+        if (targetStructureId == null || !assigned.contains(targetStructureId)) {
+          return null;
+        }
+      }
+
+      DateTime? eventTime;
+      if (eventDate != null && eventTimeStr != null && eventTimeStr.length >= 5) {
+        final parts = eventTimeStr.split(':');
+        if (parts.length >= 2) {
+          final h = int.tryParse(parts[0]) ?? 0;
+          final m = int.tryParse(parts[1]) ?? 0;
+          eventTime = DateTime(eventDate.year, eventDate.month, eventDate.day, h, m);
+        }
+      }
+
+      final updated = await session.db.unsafeQuery(
+        r'''
+        UPDATE "cine_pass_event_seance"
+        SET
+          "event_date" = COALESCE(@eventDate, "event_date"),
+          "event_time" = COALESCE(@eventTime, "event_time"),
+          "lieu" = CASE WHEN @lieu IS NOT NULL AND @lieu != '' THEN @lieu ELSE "lieu" END
+        WHERE "id" = (@sid)::uuid
+        RETURNING "id", "event_id", "event_date", "event_time", "lieu", "created_at"
+        ''',
+        parameters: QueryParameters.named({
+          'sid': seanceId,
+          'eventDate': eventDate == null
+              ? null
+              : DateTime(eventDate.year, eventDate.month, eventDate.day),
+          'eventTime': eventTime,
+          'lieu': lieu,
+        }),
+      );
+      if (updated.isEmpty) return null;
+      return _rowToEventSeanceResponse(updated.first);
+    } catch (e, st) {
+      session.log(
+        'CinePass updateEventSeance',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return null;
+    }
+  }
+
+  Future<bool> deleteEventSeance(Session session, String seanceId) async {
+    try {
+      await _ensureEventSeanceTables(session);
+
+      final rows = await session.db.unsafeQuery(
+        r'''SELECT "event_id" FROM "cine_pass_event_seance" WHERE "id" = (@sid)::uuid''',
+        parameters: QueryParameters.named({'sid': seanceId}),
+      );
+      if (rows.isEmpty) return false;
+      final eventId = rows.first[0].toString();
+
+      final isAdmin = await _isAdmin(session);
+      if (!isAdmin) {
+        final assigned = await _responsableStructureIds(session);
+        if (assigned.isEmpty) return false;
+        final targetRows = await session.db.unsafeQuery(
+          r'''SELECT "structureId" FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid''',
+          parameters: QueryParameters.named({'id': eventId}),
+        );
+        if (targetRows.isEmpty) return false;
+        final targetStructureId = targetRows.first[0]?.toString();
+        if (targetStructureId == null || !assigned.contains(targetStructureId)) {
+          return false;
+        }
+      }
+
+      final deleted = await session.db.unsafeQuery(
+        r'''DELETE FROM "cine_pass_event_seance" WHERE "id" = (@sid)::uuid RETURNING "id"''',
+        parameters: QueryParameters.named({'sid': seanceId}),
+      );
+      return deleted.isNotEmpty;
+    } catch (e, st) {
+      session.log(
+        'CinePass deleteEventSeance',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
   /// Villes distinctes (films + événements) pour les filtres.
   Future<List<String>> getCities(Session session) async {
     try {
@@ -1260,14 +1476,14 @@ class CinePassEndpoint extends Endpoint {
     String? director,
     String? casting,
     int? posterColor,
-      String? posterUrl,
-    Object? dateSortie,
-    Object? dateFin,
+    String? posterUrl,
+    DateTime? dateSortie,
+    DateTime? dateFin,
     String? audience,
   }) async {
     try {
-      final dSortie = _parseDateTime(dateSortie);
-      final dFin = _parseDateTime(dateFin);
+      final dSortie = dateSortie;
+      final dFin = dateFin;
       final id = await session.db.unsafeQuery(
         r'''
         INSERT INTO "cine_pass_film" (
@@ -1317,7 +1533,7 @@ class CinePassEndpoint extends Endpoint {
     required String lieu,
     String? adresse,
     required String ville,
-    required Object eventDate,
+    required DateTime eventDate,
     required String eventTimeStr,
     required int placesTotal,
     required double prixBase,
@@ -1347,10 +1563,7 @@ class CinePassEndpoint extends Endpoint {
         }
       }
 
-      final eventDateDt = _parseDateTime(eventDate);
-      if (eventDateDt == null) {
-        return null;
-      }
+      final eventDateDt = eventDate;
       DateTime eventTime = eventDateDt;
       if (eventTimeStr.length >= 5) {
         final parts = eventTimeStr.split(':');
@@ -1456,7 +1669,7 @@ class CinePassEndpoint extends Endpoint {
     String? lieu,
     String? adresse,
     String? ville,
-    Object? eventDate,
+    DateTime? eventDate,
     String? eventTimeStr,
     int? placesTotal,
     double? prixBase,
@@ -1480,7 +1693,7 @@ class CinePassEndpoint extends Endpoint {
         }
       }
 
-      final eventDateDt = eventDate != null ? _parseDateTime(eventDate) : null;
+      final eventDateDt = eventDate;
       DateTime? eventTimeDt;
       if (eventDateDt != null &&
           eventTimeStr != null &&
@@ -1549,6 +1762,7 @@ class CinePassEndpoint extends Endpoint {
     }
 
     /// Supprimer un événement (admin ou responsable de la structure).
+    /// Refuse la suppression si des inscriptions/reservations existent deja.
     Future<bool> deleteEvent(Session session, String id) async {
     try {
       final isAdmin = await _isAdmin(session);
@@ -1567,6 +1781,20 @@ class CinePassEndpoint extends Endpoint {
         }
       }
 
+      final usedRows = await session.db.unsafeQuery(
+        r'''
+        SELECT COUNT(*)::int
+        FROM "cine_pass_reservation"
+        WHERE "evenement_id" = (@id)::uuid
+        ''',
+        parameters: QueryParameters.named({'id': id}),
+      );
+      final usedCount = usedRows.isEmpty ? 0 : _safeInt(usedRows.first[0]);
+      if (usedCount > 0) {
+        session.log('deleteEvent refuse: inscriptions existantes');
+        return false;
+      }
+
       await session.db.unsafeQuery(
         r'DELETE FROM "cine_pass_evenement" WHERE "id" = (@id)::uuid',
         parameters: QueryParameters.named({'id': id}),
@@ -1581,26 +1809,75 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
-    }
+  }
 
-  /// Structure(s) assignée(s) au responsable connecté.
+  /// Admin: supprimer une seance.
+  /// Refuse la suppression si des inscriptions/reservations existent deja.
+  Future<bool> deleteSeance(Session session, String id) async {
+    try {
+      if (!await _isAdmin(session)) {
+        session.log('deleteSeance refuse: admin requis');
+        return false;
+      }
+
+      await _ensureReservationTables(session);
+
+      final usedRows = await session.db.unsafeQuery(
+        r'''
+        SELECT COUNT(*)::int
+        FROM "cine_pass_reservation"
+        WHERE "seance_id" = (@id)::uuid
+        ''',
+        parameters: QueryParameters.named({'id': id}),
+      );
+      final usedCount = usedRows.isEmpty ? 0 : _safeInt(usedRows.first[0]);
+      if (usedCount > 0) {
+        session.log('deleteSeance refuse: inscriptions existantes');
+        return false;
+      }
+
+      final deleted = await session.db.unsafeQuery(
+        r'''
+        DELETE FROM "cine_pass_seance"
+        WHERE "id" = (@id)::uuid
+        RETURNING "id"
+        ''',
+        parameters: QueryParameters.named({'id': id}),
+      );
+
+      return deleted.isNotEmpty;
+    } catch (e, st) {
+      session.log(
+        'CinePass deleteSeance',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Structure assignee au responsable connecte.
   Future<Structure?> getMyStructure(Session session) async {
     try {
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) {
-        return null;
-      }
+      if (userId == null) return null;
+
       final rows = await session.db.unsafeQuery(
-        r'SELECT "structure_id" FROM "cine_pass_responsable_assignment" WHERE "user_id" = (@uid)::uuid AND "active" = true LIMIT 1',
+        r'''
+        SELECT "structure_id"
+        FROM "cine_pass_responsable_assignment"
+        WHERE "user_id" = (@uid)::uuid AND "active" = true
+        LIMIT 1
+        ''',
         parameters: QueryParameters.named({'uid': userId}),
       );
       if (rows.isEmpty) return null;
+
       final structureId = rows.first[0].toString();
       final all = await Structure.db.find(session);
       for (final s in all) {
-        if (s.id.toString() == structureId) {
-          return s;
-        }
+        if (s.id.toString() == structureId) return s;
       }
       return null;
     } catch (e, st) {
@@ -1614,13 +1891,12 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Événements des structures du responsable connecté.
+  /// Evenements des structures du responsable connecte.
   Future<List<EventResponse>> getMyEvents(Session session) async {
     try {
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) {
-        return [];
-      }
+      if (userId == null) return [];
+
       final result = await session.db.unsafeQuery(
         r'''
         SELECT e."id", e."titre", e."categorie", e."description", e."lieu", e."adresse", e."ville",
@@ -1635,6 +1911,7 @@ class CinePassEndpoint extends Endpoint {
         ''',
         parameters: QueryParameters.named({'uid': userId}),
       );
+
       return result.map((row) => _rowToEventResponse(row)).toList();
     } catch (e, st) {
       session.log(
@@ -1647,16 +1924,13 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-    /// Admin: demandes en attente (devenir responsable).
-    Future<List<DemandeResponsableResponse>> getDemandesEnAttente(
+  /// Admin: demandes en attente (devenir responsable).
+  Future<List<DemandeResponsableResponse>> getDemandesEnAttente(
     Session session,
-    ) async {
+  ) async {
     try {
       await _ensureResponsableTables(session);
-      if (!await _isAdmin(session)) {
-        session.log('getDemandesEnAttente refuse: admin requis');
-        return [];
-      }
+      if (!await _isAdmin(session)) return [];
 
       final result = await session.db.unsafeQuery(
         r'''
@@ -1669,9 +1943,8 @@ class CinePassEndpoint extends Endpoint {
         ORDER BY r."created_at" ASC
         ''',
       );
-      return result
-          .map((row) => _rowToDemandeResponsableResponse(row))
-          .toList();
+
+      return result.map((row) => _rowToDemandeResponsableResponse(row)).toList();
     } catch (e, st) {
       session.log(
         'CinePass getDemandesEnAttente',
@@ -1681,21 +1954,17 @@ class CinePassEndpoint extends Endpoint {
       );
       return [];
     }
-    }
+  }
 
-    /// Admin: approuver une demande responsable → crée la structure et l'assignment.
-    Future<bool> approuverDemande(Session session, String id) async {
+  /// Admin: approuve une demande responsable.
+  Future<bool> approuverDemande(Session session, String id) async {
     try {
       await _ensureResponsableTables(session);
-      if (!await _isAdmin(session)) {
-        session.log('approuverDemande refuse: admin requis');
-        return false;
-      }
+      if (!await _isAdmin(session)) return false;
 
       final adminId = session.authenticated?.userIdentifier;
-      if (adminId == null) {
-        return false;
-      }
+      if (adminId == null) return false;
+
       final rows = await session.db.unsafeQuery(
         r'''
         SELECT "user_id", "structure_type", "structure_name", "structure_city", "structure_address",
@@ -1705,9 +1974,8 @@ class CinePassEndpoint extends Endpoint {
         ''',
         parameters: QueryParameters.named({'id': id}),
       );
-      if (rows.isEmpty) {
-        return false;
-      }
+      if (rows.isEmpty) return false;
+
       final r = rows.first;
       final userId = r[0].toString();
       final type = (r[1] as String?) ?? 'ORGANIZER';
@@ -1716,6 +1984,7 @@ class CinePassEndpoint extends Endpoint {
       final address = r[4] as String?;
       final website = r[5] as String?;
       final phone = r[6] as String?;
+
       final structureResult = await session.db.unsafeQuery(
         r'''
         INSERT INTO "cine_pass_structure" ("type", "name", "city", "address", "website", "phone")
@@ -1731,9 +2000,8 @@ class CinePassEndpoint extends Endpoint {
           'phone': phone,
         }),
       );
-      if (structureResult.isEmpty) {
-        return false;
-      }
+      if (structureResult.isEmpty) return false;
+
       final structureId = structureResult.first[0].toString();
       await session.db.unsafeQuery(
         r'''
@@ -1759,6 +2027,7 @@ class CinePassEndpoint extends Endpoint {
         ''',
         parameters: QueryParameters.named({'id': id, 'adminId': adminId}),
       );
+
       return true;
     } catch (e, st) {
       session.log(
@@ -1769,33 +2038,26 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
-    }
+  }
 
-    /// Admin: rejeter une demande responsable.
-    Future<bool> rejeterDemande(Session session, String id, String reason) async {
+  /// Admin: rejette une demande responsable.
+  Future<bool> rejeterDemande(Session session, String id, String reason) async {
     try {
       await _ensureResponsableTables(session);
-      if (!await _isAdmin(session)) {
-        session.log('rejeterDemande refuse: admin requis');
-        return false;
-      }
+      if (!await _isAdmin(session)) return false;
 
       final adminId = session.authenticated?.userIdentifier;
-      if (adminId == null) {
-        return false;
-      }
+      if (adminId == null) return false;
+
       await session.db.unsafeQuery(
         r'''
         UPDATE "cine_pass_responsable_request"
         SET "status" = 'REJECTED', "decided_at" = now(), "admin_id" = (@adminId)::uuid, "rejection_reason" = @reason
         WHERE "id" = (@id)::uuid
         ''',
-        parameters: QueryParameters.named({
-          'id': id,
-          'adminId': adminId,
-          'reason': reason,
-        }),
+        parameters: QueryParameters.named({'id': id, 'adminId': adminId, 'reason': reason}),
       );
+
       return true;
     } catch (e, st) {
       session.log(
@@ -1806,10 +2068,10 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
-    }
+  }
 
-    /// Créer une demande pour devenir responsable (utilisateur connecté).
-    Future<DemandeResponsableResponse?> createDemandeResponsable(
+  /// Utilisateur: cree une demande pour devenir responsable.
+  Future<DemandeResponsableResponse?> createDemandeResponsable(
     Session session, {
     required String structureType,
     required String structureName,
@@ -1823,10 +2085,7 @@ class CinePassEndpoint extends Endpoint {
     try {
       await _ensureResponsableTables(session);
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) {
-        return null;
-      }
-
+      if (userId == null) return null;
 
       final pendingRows = await session.db.unsafeQuery(
         r'''
@@ -1838,9 +2097,7 @@ class CinePassEndpoint extends Endpoint {
         parameters: QueryParameters.named({'uid': userId}),
       );
       if (pendingRows.isNotEmpty) {
-        throw Exception(
-          'Une demande est deja en attente. Attendez la decision de l\'admin.',
-        );
+        throw Exception('Une demande est deja en attente.');
       }
 
       final result = await session.db.unsafeQuery(
@@ -1869,17 +2126,9 @@ class CinePassEndpoint extends Endpoint {
         }),
       );
       if (result.isEmpty) return null;
+
       final row = result.first;
-      final createdAt = row[7];
-      String createdAtStr = '';
-      if (createdAt != null) {
-        final dt = _safeDateTime(createdAt);
-        if (dt != null) {
-          createdAtStr = dt.toIso8601String();
-        } else {
-          createdAtStr = createdAt.toString();
-        }
-      }
+      final createdAt = _safeDateTime(row[7]);
       return DemandeResponsableResponse(
         id: row[0].toString(),
         userId: row[1].toString(),
@@ -1888,7 +2137,7 @@ class CinePassEndpoint extends Endpoint {
         structureCity: (row[4] as String?) ?? '',
         structureAddress: row[5] as String?,
         status: (row[6] as String?) ?? 'PENDING',
-        createdAt: createdAtStr,
+        createdAt: createdAt?.toIso8601String() ?? '',
         userName: null,
       );
     } catch (e, st) {
@@ -1900,11 +2149,12 @@ class CinePassEndpoint extends Endpoint {
       );
       rethrow;
     }
-    }
+  }
 
-  /// Admin: toutes les réservations (événements et séances).
+  /// Admin: toutes les reservations.
   Future<List<ReservationResponse>> getReservations(Session session) async {
     try {
+      await _ensureReservationTables(session);
       final result = await session.db.unsafeQuery(
         r'''
         SELECT r."id", r."numero", r."total_amount", r."created_at", r."statut",
@@ -1927,15 +2177,15 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Responsable: réservations pour les événements de ses structures.
+  /// Responsable: reservations pour ses structures.
   Future<List<ReservationResponse>> getReservationsForMyStructures(
     Session session,
   ) async {
     try {
+      await _ensureReservationTables(session);
       final userId = session.authenticated?.userIdentifier;
-      if (userId == null) {
-        return [];
-      }
+      if (userId == null) return [];
+
       final result = await session.db.unsafeQuery(
         r'''
         SELECT r."id", r."numero", r."total_amount", r."created_at", r."statut",
@@ -1951,6 +2201,7 @@ class CinePassEndpoint extends Endpoint {
         ''',
         parameters: QueryParameters.named({'uid': userId}),
       );
+
       return result.map((row) => _rowToReservationResponse(row)).toList();
     } catch (e, st) {
       session.log(
@@ -1963,12 +2214,268 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Responsable: rapport CA sur une période (7j, 30j, 3m, 1an).
+  Future<List<ResponsableBilletResponse>> getBilletsForReservationForMyStructures(
+    Session session,
+    String reservationId,
+  ) async {
+    try {
+      await _ensureReservationTables(session);
+      final userId = session.authenticated?.userIdentifier;
+      if (userId == null) return [];
+
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT b."id", b."reservation_id", r."numero", e."titre", b."ticket_type",
+               sg."rangee", sg."numero", b."prix", b."statut", b."created_at"
+        FROM "cine_pass_billet" b
+        JOIN "cine_pass_reservation" r ON r."id" = b."reservation_id"
+        JOIN "cine_pass_evenement" e ON e."id" = r."evenement_id"
+        LEFT JOIN "cine_pass_siege" sg ON sg."id" = b."siege_id"
+        WHERE b."reservation_id" = (@rid)::uuid
+          AND e."structureId" IN (
+            SELECT a."structure_id" FROM "cine_pass_responsable_assignment" a
+            WHERE a."user_id" = (@uid)::uuid AND a."active" = true
+          )
+        ORDER BY b."created_at" ASC
+        ''',
+        parameters: QueryParameters.named({'rid': reservationId, 'uid': userId}),
+      );
+
+      return rows.map((row) {
+        final rangee = row[5]?.toString();
+        final numero = row[6];
+        final seatLabel = (rangee != null && rangee.isNotEmpty && numero != null)
+            ? '$rangee${_safeInt(numero)}'
+            : null;
+        final createdAt = _safeDateTime(row[9]);
+        return ResponsableBilletResponse(
+          id: row[0].toString(),
+          reservationId: row[1].toString(),
+          reservationNumero: row[2]?.toString() ?? '',
+          eventTitle: row[3] as String?,
+          ticketType: row[4]?.toString() ?? 'normal',
+          seatLabel: seatLabel,
+          prix: _safeDouble(row[7]),
+          statut: row[8]?.toString() ?? 'paid',
+          createdAtStr: createdAt?.toIso8601String() ?? '',
+        );
+      }).toList();
+    } catch (e, st) {
+      session.log(
+        'CinePass getBilletsForReservationForMyStructures',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return [];
+    }
+  }
+
+  Future<bool> updateBilletStatusForMyStructures(
+    Session session, {
+    required String billetId,
+    required String statut,
+  }) async {
+    try {
+      await _ensureReservationTables(session);
+      final userId = session.authenticated?.userIdentifier;
+      if (userId == null) return false;
+
+      final normalized = statut.trim().toLowerCase();
+      // Responsable: uniquement scan (checked_in) ou annulation (cancelled).
+      const allowed = {'checked_in', 'cancelled'};
+      if (!allowed.contains(normalized)) return false;
+
+      final updated = await session.db.unsafeQuery(
+        r'''
+        UPDATE "cine_pass_billet" b
+        SET "statut" = @statut
+        FROM "cine_pass_reservation" r, "cine_pass_evenement" e
+        WHERE b."id" = (@bid)::uuid
+          AND r."id" = b."reservation_id"
+          AND e."id" = r."evenement_id"
+          AND e."structureId" IN (
+            SELECT a."structure_id" FROM "cine_pass_responsable_assignment" a
+            WHERE a."user_id" = (@uid)::uuid AND a."active" = true
+          )
+        RETURNING b."id"
+        ''',
+        parameters: QueryParameters.named({'bid': billetId, 'statut': normalized, 'uid': userId}),
+      );
+
+      return updated.isNotEmpty;
+    } catch (e, st) {
+      session.log(
+        'CinePass updateBilletStatusForMyStructures',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Responsable: met a jour le statut global d'une reservation et propage ce statut a tous ses billets.
+  Future<bool> updateReservationStatusForMyStructures(
+    Session session, {
+    required String reservationId,
+    required String statut,
+  }) async {
+    try {
+      await _ensureReservationTables(session);
+      final userId = session.authenticated?.userIdentifier;
+      if (userId == null) return false;
+
+      final normalized = statut.trim().toLowerCase();
+      // Responsable: uniquement scan (checked_in) ou annulation (cancelled).
+      const allowed = {'checked_in', 'cancelled'};
+      if (!allowed.contains(normalized)) return false;
+
+      final reservationUpdated = await session.db.unsafeQuery(
+        r'''
+        UPDATE "cine_pass_reservation" r
+        SET "statut" = @statut
+        FROM "cine_pass_evenement" e
+        WHERE r."id" = (@rid)::uuid
+          AND e."id" = r."evenement_id"
+          AND e."structureId" IN (
+            SELECT a."structure_id" FROM "cine_pass_responsable_assignment" a
+            WHERE a."user_id" = (@uid)::uuid AND a."active" = true
+          )
+        RETURNING r."id"
+        ''',
+        parameters: QueryParameters.named({
+          'rid': reservationId,
+          'statut': normalized,
+          'uid': userId,
+        }),
+      );
+
+      if (reservationUpdated.isEmpty) return false;
+
+      await session.db.unsafeQuery(
+        r'''
+        UPDATE "cine_pass_billet"
+        SET "statut" = @statut
+        WHERE "reservation_id" = (@rid)::uuid
+        ''',
+        parameters: QueryParameters.named({
+          'rid': reservationId,
+          'statut': normalized,
+        }),
+      );
+
+      if (normalized == 'cancelled') {
+        // L'annulation declenche le workflow de remboursement cote metier/paiement.
+        session.log(
+          'CinePass remboursement a declencher pour reservation=$reservationId',
+          level: LogLevel.info,
+        );
+      }
+
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass updateReservationStatusForMyStructures',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Admin / Responsable: archive un evenement (le retire des evenements a venir).
+  Future<bool> archiveEvent(Session session, String id) async {
+    try {
+      final userId = session.authenticated?.userIdentifier;
+      if (userId == null) return false;
+
+      final isAdmin = await _isAdmin(session);
+      if (isAdmin) {
+        final updated = await session.db.unsafeQuery(
+          r'''
+          UPDATE "cine_pass_evenement"
+          SET "eventDate" = (CURRENT_DATE - interval '1 day')::date
+          WHERE "id" = (@id)::uuid
+          RETURNING "id"
+          ''',
+          parameters: QueryParameters.named({'id': id}),
+        );
+        return updated.isNotEmpty;
+      }
+
+      final assigned = await _responsableStructureIds(session);
+      if (assigned.isEmpty) {
+        session.log('archiveEvent refuse: aucune structure assignee');
+        return false;
+      }
+
+      // Fallback: certains anciens evenements n'ont pas de structureId.
+      // Si le responsable n'a qu'une structure, on rattache l'evenement a cette structure avant archivage.
+      final eventRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "structureId"
+        FROM "cine_pass_evenement"
+        WHERE "id" = (@id)::uuid
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'id': id}),
+      );
+      if (eventRows.isEmpty) return false;
+
+      final eventStructureId = eventRows.first[0]?.toString();
+      if (eventStructureId == null || eventStructureId.isEmpty) {
+        if (assigned.length != 1) {
+          session.log('archiveEvent refuse: evenement sans structure et responsable multi-structures');
+          return false;
+        }
+        await session.db.unsafeQuery(
+          r'''
+          UPDATE "cine_pass_evenement"
+          SET "structureId" = (@sid)::uuid
+          WHERE "id" = (@id)::uuid
+          ''',
+          parameters: QueryParameters.named({'id': id, 'sid': assigned.first}),
+        );
+      }
+
+      final updated = await session.db.unsafeQuery(
+        r'''
+        UPDATE "cine_pass_evenement" e
+        SET "eventDate" = (CURRENT_DATE - interval '1 day')::date
+        WHERE e."id" = (@id)::uuid
+          AND e."structureId" IN (
+            SELECT a."structure_id"
+            FROM "cine_pass_responsable_assignment" a
+            WHERE a."user_id" = (@uid)::uuid AND a."active" = true
+          )
+        RETURNING e."id"
+        ''',
+        parameters: QueryParameters.named({'id': id, 'uid': userId}),
+      );
+
+      if (updated.isEmpty) {
+        session.log('archiveEvent refuse: evenement hors perimetre responsable');
+      }
+      return updated.isNotEmpty;
+    } catch (e, st) {
+      session.log(
+        'CinePass archiveEvent',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
   Future<RapportCAResponse> getRapportCA(
     Session session,
     String periode,
   ) async {
     try {
+      await _ensureReservationTables(session);
       final userId = session.authenticated?.userIdentifier;
       if (userId == null) {
         return RapportCAResponse(totalCA: 0, nbReservations: 0);
@@ -1983,13 +2490,14 @@ class CinePassEndpoint extends Endpoint {
       }
       final result = await session.db.unsafeQuery(
         '''
-        SELECT COALESCE(SUM(r."total_amount"), 0)::double AS total, COUNT(r."id")::int AS nb
+        SELECT COALESCE(SUM(r."total_amount"), 0)::double precision AS total, COUNT(r."id")::int AS nb
         FROM "cine_pass_reservation" r
         JOIN "cine_pass_evenement" e ON e."id" = r."evenement_id"
         WHERE e."structureId" IN (
           SELECT a."structure_id" FROM "cine_pass_responsable_assignment" a
           WHERE a."user_id" = (@uid)::uuid AND a."active" = true
         )
+        AND r."statut" IN ('paid', 'checked_in')
         AND r."created_at" >= now() - $intervalExpr
         '''
             .replaceAll(r'$intervalExpr', intervalExpr),
@@ -2018,17 +2526,15 @@ class CinePassEndpoint extends Endpoint {
     Session session, {
     required String filmId,
     required String salleId,
-    required Object debutAt,
-    Object? finAt,
+    required DateTime debutAt,
+    DateTime? finAt,
     String format = 'VF',
     String type = '2D',
     required double prixBase,
   }) async {
     try {
-      final debut = _parseDateTime(debutAt);
-      if (debut == null) return null;
-      final endDt = _parseDateTime(finAt);
-      final end = endDt ?? debut.add(const Duration(minutes: 120));
+      final debut = debutAt;
+      final end = finAt ?? debut.add(const Duration(minutes: 120));
       await session.db.unsafeQuery(
         r'''
         INSERT INTO "cine_pass_seance" (
@@ -2148,6 +2654,109 @@ class CinePassEndpoint extends Endpoint {
     _responsableTablesEnsured = true;
   }
 
+  bool _reservationTablesEnsured = false;
+  bool _eventSeanceTablesEnsured = false;
+
+  Future<void> _ensureEventSeanceTables(Session session) async {
+    if (_eventSeanceTablesEnsured) return;
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_event_seance" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "event_id" uuid NOT NULL,
+        "event_date" date NOT NULL,
+        "event_time" timestamp without time zone NOT NULL,
+        "lieu" text NOT NULL,
+        "created_at" timestamp without time zone NOT NULL DEFAULT now()
+      )
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE INDEX IF NOT EXISTS "cine_pass_event_seance_event_idx"
+      ON "cine_pass_event_seance" ("event_id", "event_date", "event_time")
+      ''',
+    );
+
+    _eventSeanceTablesEnsured = true;
+  }
+
+  Future<void> _ensureReservationTables(Session session) async {
+    if (_reservationTablesEnsured) return;
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_reservation" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "user_id" uuid NOT NULL,
+        "seance_id" uuid,
+        "evenement_id" uuid,
+        "numero" text NOT NULL,
+        "statut" text NOT NULL DEFAULT 'paid',
+        "total_amount" double precision NOT NULL DEFAULT 0,
+        "session_at" timestamp without time zone,
+        "created_at" timestamp without time zone NOT NULL DEFAULT now()
+      )
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_billet" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "reservation_id" uuid NOT NULL,
+        "siege_id" uuid,
+        "ticket_type" text NOT NULL DEFAULT 'normal',
+        "option_parking" boolean NOT NULL DEFAULT false,
+        "option_popcorn" boolean NOT NULL DEFAULT false,
+        "option_boisson" boolean NOT NULL DEFAULT false,
+        "prix" double precision NOT NULL DEFAULT 0,
+        "statut" text NOT NULL DEFAULT 'paid',
+        "created_at" timestamp without time zone NOT NULL DEFAULT now()
+      )
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      ALTER TABLE "cine_pass_billet"
+      ADD COLUMN IF NOT EXISTS "statut" text NOT NULL DEFAULT 'paid'
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE UNIQUE INDEX IF NOT EXISTS "cine_pass_reservation_numero_uniq"
+      ON "cine_pass_reservation" ("numero")
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE INDEX IF NOT EXISTS "cine_pass_reservation_user_idx"
+      ON "cine_pass_reservation" ("user_id", "created_at")
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE INDEX IF NOT EXISTS "cine_pass_reservation_event_idx"
+      ON "cine_pass_reservation" ("evenement_id")
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE INDEX IF NOT EXISTS "cine_pass_billet_reservation_idx"
+      ON "cine_pass_billet" ("reservation_id")
+      ''',
+    );
+
+    _reservationTablesEnsured = true;
+  }
+
   static int _safeInt(dynamic v) {
     if (v == null) return 0;
     if (v is int) return v;
@@ -2162,13 +2771,6 @@ class CinePassEndpoint extends Endpoint {
   }
 
   static DateTime? _safeDateTime(dynamic v) {
-    if (v == null) return null;
-    if (v is DateTime) return v;
-    if (v is String) return DateTime.tryParse(v);
-    return null;
-  }
-
-  static DateTime? _parseDateTime(Object? v) {
     if (v == null) return null;
     if (v is DateTime) return v;
     if (v is String) return DateTime.tryParse(v);
@@ -2271,6 +2873,26 @@ class CinePassEndpoint extends Endpoint {
       posterColor: posterColor,
       availableOptions: options,
       posterUrl: posterUrl,
+    );
+  }
+
+  static EventSeanceResponse _rowToEventSeanceResponse(List<dynamic> row) {
+    final d = _safeDateTime(row[2]);
+    final t = _safeDateTime(row[3]);
+    final created = _safeDateTime(row[5]);
+    final dateStr = d == null
+        ? ''
+        : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    final timeStr = t == null
+        ? ''
+        : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+    return EventSeanceResponse(
+      id: row[0].toString(),
+      eventId: row[1].toString(),
+      dateStr: dateStr,
+      timeStr: timeStr,
+      lieu: row[4]?.toString() ?? '',
+      createdAtStr: created?.toIso8601String() ?? '',
     );
   }
 

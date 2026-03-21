@@ -279,6 +279,17 @@ class _ProfilPageState extends State<ProfilPage> {
                     ),
                     onTap: _showEditProfile,
                   ),
+                  if (!auth.isResponsable) ...[
+                    const Divider(color: AppTheme.textSecondary, height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.badge_outlined, color: AppTheme.textPrimary),
+                      title: const Text(
+                        'Devenir responsable',
+                        style: TextStyle(color: AppTheme.textPrimary),
+                      ),
+                      onTap: () => context.go(AppRouter.devenirResponsable),
+                    ),
+                  ],
                   const Divider(color: AppTheme.textSecondary, height: 1),
                   ListTile(
                     leading: const Icon(Icons.logout_rounded, color: AppTheme.primaryRed),
