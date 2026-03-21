@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../main.dart';
 
 /// Types de structure alignés sur la BDD : CINEMA | VENUE | ORGANIZER | OTHER
 const List<Map<String, String>> _structureTypes = [
@@ -63,19 +64,82 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
     if (_formKey.currentState?.validate() != true) return;
     setState(() => _isSubmitting = true);
     try {
-      // TODO: appeler l'endpoint backend createDemandeResponsable (email pro, password hashé, autres champs)
-      await Future.delayed(const Duration(milliseconds: 800));
+      // Les champs non supportes par le backend sont ajoutes dans la description.
+      final extraDetails = <String>[];
+      if (_professionalEmailController.text.trim().isNotEmpty) {
+        extraDetails.add('Email pro: ${_professionalEmailController.text.trim()}');
+      }
+      if (_contactNameController.text.trim().isNotEmpty) {
+        extraDetails.add('Contact: ${_contactNameController.text.trim()}');
+      }
+      if (_contactRoleController.text.trim().isNotEmpty) {
+        extraDetails.add('Role contact: ${_contactRoleController.text.trim()}');
+      }
+      if (_structureSiretController.text.trim().isNotEmpty) {
+        extraDetails.add('SIRET: ${_structureSiretController.text.trim()}');
+      }
+      if (_socialLinksController.text.trim().isNotEmpty) {
+        extraDetails.add('Reseaux: ${_socialLinksController.text.trim()}');
+      }
+
+      final payloadDescription = [
+        _descriptionController.text.trim(),
+        if (extraDetails.isNotEmpty) '',
+        if (extraDetails.isNotEmpty) '--- Infos complementaires ---',
+        ...extraDetails,
+      ].join('\n');
+
+      await client.emailAuth.ensureCredentialForCurrentUser(
+        email: _professionalEmailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      final created = await client.cinePass.createDemandeResponsable(
+        structureType: _selectedStructureType,
+        structureName: _structureNameController.text.trim(),
+        structureCity: _structureCityController.text.trim(),
+        structureAddress: _structureAddressController.text.trim().isEmpty
+            ? null
+            : _structureAddressController.text.trim(),
+        structureWebsite: _structureWebsiteController.text.trim().isEmpty
+            ? null
+            : _structureWebsiteController.text.trim(),
+        structurePhone: _structurePhoneController.text.trim().isEmpty
+            ? null
+            : _structurePhoneController.text.trim(),
+        description: payloadDescription,
+        professionalEmail: _professionalEmailController.text.trim(),
+      );
+
       if (!mounted) return;
+
+      if (created == null) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Demande non enregistree. Verifiez votre connexion.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       setState(() {
         _isSubmitting = false;
         _submitted = true;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
+      final rawMessage = e.toString();
+      final message = rawMessage.contains('deja en attente')
+          ? 'Vous avez deja une demande en attente. Attendez la decision de l\'admin.'
+          : rawMessage.contains('deja utilise')
+              ? 'Cet email professionnel est deja utilise par un autre compte.'
+              : 'Erreur lors de l\'envoi. Reessayez.';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur lors de l\'envoi. Réessayez.'),
+        SnackBar(
+          content: Text(message),
           backgroundColor: Colors.red,
         ),
       );

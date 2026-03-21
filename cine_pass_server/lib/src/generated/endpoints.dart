@@ -100,6 +100,31 @@ class Endpoints extends _i1.EndpointDispatch {
                     fullName: params['fullName'],
                   ),
         ),
+        'ensureCredentialForCurrentUser': _i1.MethodConnector(
+          name: 'ensureCredentialForCurrentUser',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'password': _i1.ParameterDescription(
+              name: 'password',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailAuth'] as _i2.EmailAuthEndpoint)
+                  .ensureCredentialForCurrentUser(
+                    session,
+                    email: params['email'],
+                    password: params['password'],
+                  ),
+        ),
         'login': _i1.MethodConnector(
           name: 'login',
           params: {
@@ -1232,6 +1257,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<String>(),
               nullable: false,
             ),
+            'professionalEmail': _i1.ParameterDescription(
+              name: 'professionalEmail',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
           },
           call:
               (
@@ -1247,6 +1277,7 @@ class Endpoints extends _i1.EndpointDispatch {
                     structureWebsite: params['structureWebsite'],
                     structurePhone: params['structurePhone'],
                     description: params['description'],
+                    professionalEmail: params['professionalEmail'],
                   ),
         ),
         'getReservations': _i1.MethodConnector(

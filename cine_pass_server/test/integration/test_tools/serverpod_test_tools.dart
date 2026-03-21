@@ -233,6 +233,41 @@ class _EmailAuthEndpoint {
     });
   }
 
+  _i3.Future<bool> ensureCredentialForCurrentUser(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String email,
+    required String password,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'emailAuth',
+            method: 'ensureCredentialForCurrentUser',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'emailAuth',
+          methodName: 'ensureCredentialForCurrentUser',
+          parameters: _i1.testObjectToJson({
+            'email': email,
+            'password': password,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i4.AuthSuccess> login(
     _i1.TestSessionBuilder sessionBuilder, {
     required String email,
@@ -1846,6 +1881,7 @@ class _CinePassEndpoint {
     String? structureWebsite,
     String? structurePhone,
     required String description,
+    required String professionalEmail,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1866,6 +1902,7 @@ class _CinePassEndpoint {
             'structureWebsite': structureWebsite,
             'structurePhone': structurePhone,
             'description': description,
+            'professionalEmail': professionalEmail,
           }),
           serializationManager: _serializationManager,
         );

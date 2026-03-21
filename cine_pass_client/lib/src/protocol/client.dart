@@ -57,6 +57,22 @@ class EndpointEmailAuth extends _i1.EndpointEmailIdpBase {
     },
   );
 
+  /// Lie un email/mot de passe a l'utilisateur deja connecte.
+  /// - si l'email n'existe pas: creation du credential
+  /// - si l'email existe pour le meme user: OK
+  /// - si l'email existe pour un autre user: erreur
+  _i3.Future<bool> ensureCredentialForCurrentUser({
+    required String email,
+    required String password,
+  }) => caller.callServerEndpoint<bool>(
+    'emailAuth',
+    'ensureCredentialForCurrentUser',
+    {
+      'email': email,
+      'password': password,
+    },
+  );
+
   /// Logs in the user and returns a new session.
   ///
   /// Throws an [EmailAccountLoginException] in case of errors, with reason:
@@ -747,6 +763,7 @@ class EndpointCinePass extends _i2.EndpointRef {
     String? structureWebsite,
     String? structurePhone,
     required String description,
+    required String professionalEmail,
   }) => caller.callServerEndpoint<_i12.DemandeResponsableResponse?>(
     'cinePass',
     'createDemandeResponsable',
@@ -758,6 +775,7 @@ class EndpointCinePass extends _i2.EndpointRef {
       'structureWebsite': structureWebsite,
       'structurePhone': structurePhone,
       'description': description,
+      'professionalEmail': professionalEmail,
     },
   );
 

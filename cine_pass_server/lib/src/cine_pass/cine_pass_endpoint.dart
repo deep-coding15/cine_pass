@@ -19,6 +19,7 @@ const double cinePassCommissionPercent = 8.0;
 
 /// Endpoint CinePass : films, séances, cinémas, événements (données BDD).
 class CinePassEndpoint extends Endpoint {
+
   /// Crée une réservation + billets après paiement (simulé).
   /// Retourne le numéro de réservation (ex: BOOK-...).
   Future<String?> createReservationAndBillets(
@@ -427,10 +428,8 @@ class CinePassEndpoint extends Endpoint {
     required String userId,
   }) async {
     await _ensureUserRoleTable(session);
-    await _syncConfiguredAdminRole(session, userId: userId);
     final roles = <String>{};
 
-    // Lire uniquement depuis la source de verite (roles actifs).
     final roleRows = await session.db.unsafeQuery(
       r'''
       SELECT lower(trim("role")) as role
@@ -454,55 +453,6 @@ class CinePassEndpoint extends Endpoint {
     );
 
     return roles.toList()..sort();
-  }
-
-  /// Synchronise le rôle admin configuré dans passwords.yaml
-  /// Basé sur la présence de l'email dans la liste adminEmails.
-  Future<void> _syncConfiguredAdminRole(
-    Session session, {
-    required String userId,
-  }) async {
-    try {
-      final raw = Serverpod.instance.getPassword('adminEmails');
-      if (raw == null || raw.trim().isEmpty) return;
-
-      final configured = raw
-          .split(',')
-          .map((e) => e.trim().toLowerCase())
-          .where((e) => e.isNotEmpty)
-          .toSet();
-      if (configured.isEmpty) return;
-
-      final rows = await session.db.unsafeQuery(
-        r'''
-        SELECT lower("email")
-        FROM "serverpod_auth_core_profile"
-        WHERE "authUserId" = (@uid)::uuid
-        LIMIT 1
-        ''',
-        parameters: QueryParameters.named({'uid': userId}),
-      );
-      if (rows.isEmpty) return;
-
-      final email = rows.first[0]?.toString().toLowerCase() ?? '';
-      if (email.isEmpty) return;
-
-      if (configured.contains(email)) {
-        await _grantUserRoleWithStatus(
-          session,
-          userId: userId,
-          role: 'admin',
-          status: 'actif',
-        );
-      }
-    } catch (e, st) {
-      session.log(
-        'CinePass _syncConfiguredAdminRole warning',
-        level: LogLevel.warning,
-        exception: e,
-        stackTrace: st,
-      );
-    }
   }
 
   /// Crée une demande de changement de rôle critique (admin ↔ responsable).
@@ -1702,6 +1652,7 @@ class CinePassEndpoint extends Endpoint {
     Session session,
     ) async {
     try {
+      await _ensureResponsableTables(session);
       if (!await _isAdmin(session)) {
         session.log('getDemandesEnAttente refuse: admin requis');
         return [];
@@ -1711,9 +1662,10 @@ class CinePassEndpoint extends Endpoint {
         r'''
         SELECT r."id", r."user_id", r."structure_type", r."structure_name", r."structure_city",
                r."structure_address", r."status", r."created_at",
-               COALESCE(r."professional_email", '') AS user_name
+               COALESCE(r."professional_email", p."email", p."fullName", p."userName", '') AS user_name
         FROM "cine_pass_responsable_request" r
-        WHERE r."status" = 'PENDING'
+        LEFT JOIN "serverpod_auth_core_profile" p ON p."authUserId" = r."user_id"
+        WHERE upper(r."status") = 'PENDING'
         ORDER BY r."created_at" ASC
         ''',
       );
@@ -1734,6 +1686,7 @@ class CinePassEndpoint extends Endpoint {
     /// Admin: approuver une demande responsable → crée la structure et l'assignment.
     Future<bool> approuverDemande(Session session, String id) async {
     try {
+      await _ensureResponsableTables(session);
       if (!await _isAdmin(session)) {
         session.log('approuverDemande refuse: admin requis');
         return false;
@@ -1821,6 +1774,7 @@ class CinePassEndpoint extends Endpoint {
     /// Admin: rejeter une demande responsable.
     Future<bool> rejeterDemande(Session session, String id, String reason) async {
     try {
+      await _ensureResponsableTables(session);
       if (!await _isAdmin(session)) {
         session.log('rejeterDemande refuse: admin requis');
         return false;
@@ -1854,8 +1808,8 @@ class CinePassEndpoint extends Endpoint {
     }
     }
 
-  /// Créer une demande pour devenir responsable (utilisateur connecté).
-  Future<DemandeResponsableResponse?> createDemandeResponsable(
+    /// Créer une demande pour devenir responsable (utilisateur connecté).
+    Future<DemandeResponsableResponse?> createDemandeResponsable(
     Session session, {
     required String structureType,
     required String structureName,
@@ -1864,21 +1818,40 @@ class CinePassEndpoint extends Endpoint {
     String? structureWebsite,
     String? structurePhone,
     required String description,
+    required String professionalEmail,
   }) async {
     try {
+      await _ensureResponsableTables(session);
       final userId = session.authenticated?.userIdentifier;
       if (userId == null) {
         return null;
       }
+
+
+      final pendingRows = await session.db.unsafeQuery(
+        r'''
+        SELECT "id"
+        FROM "cine_pass_responsable_request"
+        WHERE "user_id" = (@uid)::uuid AND upper("status") = 'PENDING'
+        LIMIT 1
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      if (pendingRows.isNotEmpty) {
+        throw Exception(
+          'Une demande est deja en attente. Attendez la decision de l\'admin.',
+        );
+      }
+
       final result = await session.db.unsafeQuery(
         r'''
         INSERT INTO "cine_pass_responsable_request" (
           "user_id", "structure_type", "structure_name", "structure_city",
-          "structure_address", "structure_website", "structure_phone", "description", "status"
+          "structure_address", "structure_website", "structure_phone", "description", "professional_email", "status"
         )
         VALUES (
           (@uid)::uuid, @structureType, @structureName, @structureCity,
-          @structureAddress, @structureWebsite, @structurePhone, @description, 'PENDING'
+          @structureAddress, @structureWebsite, @structurePhone, @description, @professionalEmail, 'PENDING'
         )
         RETURNING "id", "user_id", "structure_type", "structure_name", "structure_city",
                   "structure_address", "status", "created_at"
@@ -1892,6 +1865,7 @@ class CinePassEndpoint extends Endpoint {
           'structureWebsite': structureWebsite,
           'structurePhone': structurePhone,
           'description': description,
+          'professionalEmail': professionalEmail.trim().toLowerCase(),
         }),
       );
       if (result.isEmpty) return null;
@@ -1924,9 +1898,9 @@ class CinePassEndpoint extends Endpoint {
         exception: e,
         stackTrace: st,
       );
-      return null;
+      rethrow;
     }
-  }
+    }
 
   /// Admin: toutes les réservations (événements et séances).
   Future<List<ReservationResponse>> getReservations(Session session) async {
@@ -2115,6 +2089,63 @@ class CinePassEndpoint extends Endpoint {
       ''',
     );
     _userProfileTableEnsured = true;
+  }
+
+  bool _responsableTablesEnsured = false;
+
+  Future<void> _ensureResponsableTables(Session session) async {
+    if (_responsableTablesEnsured) return;
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_responsable_request" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "user_id" uuid NOT NULL,
+        "structure_type" text NOT NULL,
+        "structure_name" text NOT NULL,
+        "structure_city" text NOT NULL,
+        "structure_address" text,
+        "structure_website" text,
+        "structure_phone" text,
+        "description" text NOT NULL,
+        "professional_email" text,
+        "status" text NOT NULL DEFAULT 'PENDING',
+        "created_at" timestamp without time zone NOT NULL DEFAULT now(),
+        "decided_at" timestamp without time zone,
+        "admin_id" uuid,
+        "rejection_reason" text
+      )
+      ''',
+    );
+
+    // Une seule demande PENDING par utilisateur.
+    await session.db.unsafeQuery(
+      r'''
+      CREATE UNIQUE INDEX IF NOT EXISTS "cine_pass_responsable_request_pending_uniq"
+      ON "cine_pass_responsable_request" ("user_id")
+      WHERE upper("status") = 'PENDING'
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE TABLE IF NOT EXISTS "cine_pass_responsable_assignment" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "user_id" uuid NOT NULL,
+        "structure_id" uuid NOT NULL,
+        "active" boolean NOT NULL DEFAULT true
+      )
+      ''',
+    );
+
+    await session.db.unsafeQuery(
+      r'''
+      CREATE UNIQUE INDEX IF NOT EXISTS "cine_pass_responsable_assignment_user_structure_uniq"
+      ON "cine_pass_responsable_assignment" ("user_id", "structure_id")
+      ''',
+    );
+
+    _responsableTablesEnsured = true;
   }
 
   static int _safeInt(dynamic v) {

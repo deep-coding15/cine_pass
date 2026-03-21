@@ -127,4 +127,48 @@ class EmailAuthEndpoint extends EmailIdpBaseEndpoint {
     );
     return auth;
   }
+
+  /// Lie un email/mot de passe a l'utilisateur deja connecte.
+  /// - si l'email n'existe pas: creation du credential
+  /// - si l'email existe pour le meme user: OK
+  /// - si l'email existe pour un autre user: erreur
+  Future<bool> ensureCredentialForCurrentUser(
+    Session session, {
+    required String email,
+    required String password,
+  }) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) {
+      throw Exception('Utilisateur non authentifie.');
+    }
+
+    final normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
+      throw Exception('Email invalide.');
+    }
+    if (password.length < 8) {
+      throw Exception('Le mot de passe doit contenir au moins 8 caracteres.');
+    }
+
+    final existing = await emailIdp.admin.findAccount(
+      session,
+      email: normalizedEmail,
+    );
+
+    if (existing == null) {
+      await emailIdp.admin.createEmailAuthentication(
+        session,
+        authUserId: UuidValue.fromString(userId),
+        email: normalizedEmail,
+        password: password,
+      );
+      return true;
+    }
+
+    if (existing.authUserId.toString() != userId) {
+      throw Exception('Cet email est deja utilise par un autre compte.');
+    }
+
+    return true;
+  }
 }
