@@ -207,7 +207,9 @@ class _ResponsableEventSeatPlanDialogState
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Échec de l’enregistrement (droits ou données invalides).'),
+            content: Text(
+              'Échec de l’enregistrement (droits ou données invalides).',
+            ),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -238,7 +240,10 @@ class _ResponsableEventSeatPlanDialogState
             children: [
               Row(
                 children: [
-                  const Icon(Icons.event_seat_rounded, color: AppTheme.accentGreen),
+                  const Icon(
+                    Icons.event_seat_rounded,
+                    color: AppTheme.accentGreen,
+                  ),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
@@ -265,14 +270,19 @@ class _ResponsableEventSeatPlanDialogState
               if (_loading)
                 const Expanded(
                   child: Center(
-                    child: CircularProgressIndicator(color: AppTheme.accentGreen),
+                    child: CircularProgressIndicator(
+                      color: AppTheme.accentGreen,
+                    ),
                   ),
                 )
               else ...[
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
                   ),
                 Wrap(
                   spacing: 8,
@@ -310,7 +320,10 @@ class _ResponsableEventSeatPlanDialogState
                     const Expanded(
                       child: Text(
                         'Ex. 2 = rangs A et B réservés aux billets VIP.',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                   ],
@@ -368,26 +381,35 @@ class _ResponsableEventSeatPlanDialogState
                                   children: [
                                     TextButton(
                                       onPressed: () async {
-                                        final ctrl = TextEditingController(text: d.zone);
+                                        final ctrl = TextEditingController(
+                                          text: d.zone,
+                                        );
                                         try {
                                           final z = await showDialog<String>(
                                             context: context,
                                             builder: (x) => AlertDialog(
-                                              title: const Text('Zone (ex. VIP)'),
+                                              title: const Text(
+                                                'Zone (ex. VIP)',
+                                              ),
                                               content: TextField(
                                                 controller: ctrl,
                                                 decoration: const InputDecoration(
-                                                  hintText: 'Vide = tout type de billet',
+                                                  hintText:
+                                                      'Vide = tout type de billet',
                                                 ),
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed: () => Navigator.pop(x),
+                                                  onPressed: () =>
+                                                      Navigator.pop(x),
                                                   child: const Text('Annuler'),
                                                 ),
                                                 FilledButton(
                                                   onPressed: () =>
-                                                      Navigator.pop(x, ctrl.text.trim()),
+                                                      Navigator.pop(
+                                                        x,
+                                                        ctrl.text.trim(),
+                                                      ),
                                                   child: const Text('OK'),
                                                 ),
                                               ],
@@ -434,7 +456,9 @@ class _ResponsableEventSeatPlanDialogState
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: _saving ? null : _save,
-                      style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.accentGreen,
+                      ),
                       child: _saving
                           ? const SizedBox(
                               width: 20,

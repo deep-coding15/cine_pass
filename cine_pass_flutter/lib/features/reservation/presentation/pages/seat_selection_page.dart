@@ -65,7 +65,8 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   void _ensureEventPlanLoaded(ReservationState state) {
     final id = state.eventId;
     if (!_eventAvecSieges(state) || id == null) return;
-    if (_loadedPlanEventId == id && (_eventPlan != null || _eventPlanError != null)) {
+    if (_loadedPlanEventId == id &&
+        (_eventPlan != null || _eventPlanError != null)) {
       return;
     }
     _loadedPlanEventId = id;
@@ -362,7 +363,8 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     final currentBilletIndex = _assignedSeats != null
         ? _assignedSeats!.indexWhere((s) => s == null)
         : -1;
-    final hasPerBilletMode = _assignedSeats != null &&
+    final hasPerBilletMode =
+        _assignedSeats != null &&
         (eventAvec
             ? state.eventTickets.isNotEmpty
             : state.filmTickets.isNotEmpty);
@@ -613,7 +615,9 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
                         'Sièges sélectionnés',
                         state.selectedSeats.isEmpty
                             ? 'Aucun siège sélectionné'
-                            : state.selectedSeats.where((s) => s.isNotEmpty).join(', '),
+                            : state.selectedSeats
+                                  .where((s) => s.isNotEmpty)
+                                  .join(', '),
                       ),
                     const SizedBox(height: 8),
                     Text(
@@ -628,8 +632,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
                     Builder(
                       builder: (context) {
                         final ok = perBilletCount > 0
-                            ? state.selectedSeats.length ==
-                                      perBilletCount &&
+                            ? state.selectedSeats.length == perBilletCount &&
                                   !state.selectedSeats.any((s) => s.isEmpty)
                             : state.selectedSeats.any((s) => s.isNotEmpty);
                         return SizedBox(
@@ -660,14 +663,17 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     );
   }
 
-  Widget _buildEventPlanSection(ReservationState state, int currentBilletIndex) {
+  Widget _buildEventPlanSection(
+    ReservationState state,
+    int currentBilletIndex,
+  ) {
     final childKey = _eventPlanLoading
         ? 'loading'
         : _eventPlanError != null
-            ? 'error'
-            : (_eventPlan == null || _eventPlan!.seats.isEmpty)
-                ? 'empty'
-                : 'ok';
+        ? 'error'
+        : (_eventPlan == null || _eventPlan!.seats.isEmpty)
+        ? 'empty'
+        : 'ok';
 
     final Widget child;
     if (_eventPlanLoading) {
@@ -710,8 +716,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
               style: TextStyle(color: AppTheme.textPrimary),
             ),
             TextButton(
-              onPressed: () =>
-                  context.go(AppRouter.reservationTypeBillet),
+              onPressed: () => context.go(AppRouter.reservationTypeBillet),
               child: const Text('Retour'),
             ),
           ],
@@ -753,7 +758,10 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             const SizedBox(height: 16),
             Text(
               'Plan défini par l’organisateur (${plan.seats.length} sièges)',
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 12,
+              ),
             ),
             const SizedBox(height: 12),
             Center(
@@ -821,24 +829,26 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     int currentBilletIndex,
   ) {
     final isMine = _assignedSeats?.contains(e.label) ?? false;
-    final billetNum =
-        isMine && _assignedSeats != null ? _assignedBilletIndex(e.label) + 1 : null;
+    final billetNum = isMine && _assignedSeats != null
+        ? _assignedBilletIndex(e.label) + 1
+        : null;
     final unavailable = e.taken || e.blocked;
-    final bi =
-        currentBilletIndex >= 0 ? currentBilletIndex : _assignedSeats?.indexWhere((s) => s == null) ?? -1;
-    final canTap = !unavailable &&
-        (isMine ||
-            (bi >= 0 && _canSelectEventPlanSeat(e, bi, state)));
+    final bi = currentBilletIndex >= 0
+        ? currentBilletIndex
+        : _assignedSeats?.indexWhere((s) => s == null) ?? -1;
+    final canTap =
+        !unavailable &&
+        (isMine || (bi >= 0 && _canSelectEventPlanSeat(e, bi, state)));
     final restrictedZone = e.zone.trim().isNotEmpty;
 
     return Tooltip(
       message: e.blocked
           ? 'Bloqué'
           : e.taken
-              ? 'Déjà vendu'
-              : (e.zone.isEmpty
-                  ? 'Siège ${e.label}'
-                  : 'Siège ${e.label} (zone ${e.zone})'),
+          ? 'Déjà vendu'
+          : (e.zone.isEmpty
+                ? 'Siège ${e.label}'
+                : 'Siège ${e.label} (zone ${e.zone})'),
       child: GestureDetector(
         onTap: canTap ? () => _toggleEventPlanSeat(e) : null,
         child: AnimatedContainer(
@@ -850,16 +860,16 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             color: unavailable
                 ? AppTheme.surfaceDark
                 : isMine
-                    ? AppTheme.primaryRed
-                    : (restrictedZone
-                        ? AppTheme.primaryRed.withValues(alpha: 0.2)
-                        : AppTheme.cardDark),
+                ? AppTheme.primaryRed
+                : (restrictedZone
+                      ? AppTheme.primaryRed.withValues(alpha: 0.2)
+                      : AppTheme.cardDark),
             border: Border.all(
               color: unavailable
                   ? AppTheme.textSecondary.withValues(alpha: 0.3)
                   : (restrictedZone
-                      ? AppTheme.primaryRed
-                      : AppTheme.textSecondary),
+                        ? AppTheme.primaryRed
+                        : AppTheme.textSecondary),
               width: restrictedZone ? 1.5 : 1,
             ),
             borderRadius: BorderRadius.circular(6),

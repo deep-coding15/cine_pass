@@ -129,14 +129,18 @@ class _BilletsPageState extends State<BilletsPage> {
                 child: Text(
                   'Mes billets',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: AppTheme.textPrimary,
-                      ),
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
               ),
               IconButton(
-                onPressed: () => setState(() => _future = _loadBilletsWithOfflineFallback()),
+                onPressed: () =>
+                    setState(() => _future = _loadBilletsWithOfflineFallback()),
                 tooltip: 'Rafraîchir',
-                icon: const Icon(Icons.refresh_rounded, color: AppTheme.textSecondary),
+                icon: const Icon(
+                  Icons.refresh_rounded,
+                  color: AppTheme.textSecondary,
+                ),
               ),
             ],
           ),
@@ -153,7 +157,9 @@ class _BilletsPageState extends State<BilletsPage> {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.only(top: 24),
-                    child: CircularProgressIndicator(color: AppTheme.primaryRed),
+                    child: CircularProgressIndicator(
+                      color: AppTheme.primaryRed,
+                    ),
                   ),
                 );
               }
@@ -164,7 +170,8 @@ class _BilletsPageState extends State<BilletsPage> {
                 );
               }
 
-              final result = snap.data ??
+              final result =
+                  snap.data ??
                   const _BilletsLoadResult(items: [], isOffline: false);
               final list = result.items;
 
@@ -215,7 +222,9 @@ class _BilletsPageState extends State<BilletsPage> {
                     (b) => _BilletCard(
                       billet: b,
                       onCancelled: () {
-                        setState(() => _future = _loadBilletsWithOfflineFallback());
+                        setState(
+                          () => _future = _loadBilletsWithOfflineFallback(),
+                        );
                       },
                     ),
                   ),
@@ -239,9 +248,12 @@ class _BilletCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final billetsState = context.watch<BilletsState>();
     final cancelled =
-        billet.status.toLowerCase() == 'cancelled' || billetsState.isCancelled(billet.id);
+        billet.status.toLowerCase() == 'cancelled' ||
+        billetsState.isCancelled(billet.id);
     final canCancel =
-        billet.isEvent && !cancelled && canCancelReservation(billet.sessionDateTime);
+        billet.isEvent &&
+        !cancelled &&
+        canCancelReservation(billet.sessionDateTime);
     final refundPercent = getRefundPercent(billet.sessionDateTime);
     final refundWhenCancelled = billetsState.getRefundPercentWhenCancelled(
       billet.id,
@@ -515,9 +527,10 @@ class _BilletCard extends StatelessWidget {
                         final percent = getRefundPercent(
                           billet.sessionDateTime,
                         );
-                        final ok = await client.cinePass.cancelMyEventReservation(
-                          reservationNumber: billet.id,
-                        );
+                        final ok = await client.cinePass
+                            .cancelMyEventReservation(
+                              reservationNumber: billet.id,
+                            );
                         if (!context.mounted) return;
                         if (!ok) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -588,7 +601,9 @@ class _BilletCard extends StatelessWidget {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Impossible de générer le PDF : $e'),
+                              content: Text(
+                                'Impossible de générer le PDF : $e',
+                              ),
                             ),
                           );
                         }

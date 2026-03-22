@@ -79,6 +79,7 @@ class ResponsableAddEventDialog extends StatefulWidget {
     this.onSaved,
   });
   final List<ResponsableStructureItem> structures;
+
   /// Si renseigné, préremplit le formulaire comme à la création et enregistre via [updateEvent].
   final String? editEventId;
   final VoidCallback? onSaved;
@@ -97,13 +98,14 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
   bool _adjacent = true;
   bool _vip = false;
   bool _loadingEdit = false;
+
   /// Chargement de l’événement à éditer impossible (éviter une création par erreur).
   String? _editLoadError;
   List<String> _editingSeriesIds = [];
   late final Map<String, TextEditingController> _paidPriceControllers;
   final List<({TextEditingController label})> _customVipRows = [];
   final List<({TextEditingController label, TextEditingController price})>
-      _customStandardPaidRows = [];
+  _customStandardPaidRows = [];
   String _seatNumbering = 'ALPHA_NUM';
   final _seatRows = TextEditingController(text: '10');
   final _seatCols = TextEditingController(text: '10');
@@ -461,8 +463,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               if (tc == 'STANDARD') {
                 if (_standardPaidCatalog.containsKey(o.optionCode)) {
                   _selectedStandardPaid.add(o.optionCode);
-                  _paidPriceControllers[o.optionCode]?.text =
-                      o.price.toStringAsFixed(0);
+                  _paidPriceControllers[o.optionCode]?.text = o.price
+                      .toStringAsFixed(0);
                 } else if (o.optionCode.startsWith('CUSTOM_PAID')) {
                   _customStandardPaidRows.add(
                     (
@@ -715,7 +717,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
           .map((s) => s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}')
           .join(' ');
       final ctl = _paidPriceControllers[code];
-      final price = double.tryParse(
+      final price =
+          double.tryParse(
             (ctl?.text ?? '').replaceAll(',', '.'),
           ) ??
           _standardPaidCatalog[code] ??
@@ -730,8 +733,7 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
     for (final row in _customStandardPaidRows) {
       final lab = row.label.text.trim();
       if (lab.isEmpty) continue;
-      final price =
-          double.tryParse(row.price.text.replaceAll(',', '.')) ?? 0;
+      final price = double.tryParse(row.price.text.replaceAll(',', '.')) ?? 0;
       optionTicketTypeCodes.add('STANDARD');
       optionCodes.add('CUSTOM_PAID_$customPaidIdx');
       optionLabels.add(lab);
@@ -995,10 +997,14 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
     }
   }
 
-  (List<String>, List<int>, List<int>, List<bool>, List<String>) _buildSeatPlan() {
+  (List<String>, List<int>, List<int>, List<bool>, List<String>)
+  _buildSeatPlan() {
     final rows = (int.tryParse(_seatRows.text.trim()) ?? 10).clamp(1, 40);
     final cols = (int.tryParse(_seatCols.text.trim()) ?? 10).clamp(1, 40);
-    final vipRows = (int.tryParse(_seatVipRows.text.trim()) ?? 0).clamp(0, rows);
+    final vipRows = (int.tryParse(_seatVipRows.text.trim()) ?? 0).clamp(
+      0,
+      rows,
+    );
     final labels = <String>[];
     final rowIndices = <int>[];
     final colIndices = <int>[];
@@ -1271,21 +1277,21 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
                         ),
                       )
                     : _editLoadError != null
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Text(
-                                _editLoadError!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: AppTheme.primaryRed,
-                                ),
-                              ),
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            _editLoadError!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppTheme.primaryRed,
                             ),
-                          )
-                        : SingleChildScrollView(
-                            child: _step == 0 ? _formStep() : _reprStep(),
                           ),
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        child: _step == 0 ? _formStep() : _reprStep(),
+                      ),
               ),
             ],
           ),
@@ -1424,7 +1430,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
                   child: Text('Rang-Siège (R1-S1, R1-S2...)'),
                 ),
               ],
-              onChanged: (v) => setState(() => _seatNumbering = v ?? 'ALPHA_NUM'),
+              onChanged: (v) =>
+                  setState(() => _seatNumbering = v ?? 'ALPHA_NUM'),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1636,7 +1643,13 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
                       style: const TextStyle(color: AppTheme.textPrimary),
                     ),
                   ),
-                  const Text(' MAD', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  const Text(
+                    ' MAD',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1755,7 +1768,7 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
         Text(
           lockReprCount
               ? 'Chaque bloc = une séance du même titre. Pour une seule date, modifiez '
-                  'les champs ou utilisez « Modifier la séance » sur la fiche détail.'
+                    'les champs ou utilisez « Modifier la séance » sur la fiche détail.'
               : 'Chaque bloc correspond à une représentation.',
           style: const TextStyle(color: AppTheme.textSecondary),
         ),
@@ -1808,9 +1821,7 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
                 child: _saving
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        widget.editEventId != null
-                            ? 'Enregistrer'
-                            : 'Créer',
+                        widget.editEventId != null ? 'Enregistrer' : 'Créer',
                       ),
               ),
             ),

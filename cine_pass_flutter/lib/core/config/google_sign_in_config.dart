@@ -8,8 +8,9 @@ class GoogleSignInConfig {
       '780713404787-th1oi0uk8pvtuofjmap99bc1o7num427.apps.googleusercontent.com';
 
   static const _clientIdFromDefine = String.fromEnvironment('GOOGLE_CLIENT_ID');
-  static const _serverClientIdFromDefine =
-      String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+  static const _serverClientIdFromDefine = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+  );
 
   static String? _normalizedOrNull(String value) {
     final normalized = value.trim();
@@ -27,4 +28,3 @@ class GoogleSignInConfig {
   /// Google sign-in initialization is only required on non-web.
   static bool get needsNativeInit => !kIsWeb;
 }
-

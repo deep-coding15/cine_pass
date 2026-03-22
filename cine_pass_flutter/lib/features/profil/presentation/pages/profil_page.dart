@@ -67,15 +67,21 @@ class _ProfilPageState extends State<ProfilPage> {
   String get _birthDate => _profile?.birthDate ?? '—';
 
   void _showEditProfile() {
-    final nameController = TextEditingController(text: _profile?.displayName ?? context.read<AuthState>().userName);
+    final nameController = TextEditingController(
+      text: _profile?.displayName ?? context.read<AuthState>().userName,
+    );
     final phoneController = TextEditingController(text: _profile?.phone ?? '');
-    final birthController = TextEditingController(text: _profile?.birthDate ?? '');
+    final birthController = TextEditingController(
+      text: _profile?.birthDate ?? '',
+    );
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppTheme.cardDark,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Padding(
@@ -86,7 +92,9 @@ class _ProfilPageState extends State<ProfilPage> {
             children: [
               Text(
                 'Modifier mon profil',
-                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
+                style: Theme.of(
+                  ctx,
+                ).textTheme.titleLarge?.copyWith(color: AppTheme.textPrimary),
               ),
               const SizedBox(height: 20),
               TextField(
@@ -127,15 +135,23 @@ class _ProfilPageState extends State<ProfilPage> {
                   FilledButton(
                     onPressed: () async {
                       final ok = await client.cinePass.updateProfile(
-                        displayName: nameController.text.trim().isEmpty ? null : nameController.text.trim(),
-                        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-                        birthDate: birthController.text.trim().isEmpty ? null : birthController.text.trim(),
+                        displayName: nameController.text.trim().isEmpty
+                            ? null
+                            : nameController.text.trim(),
+                        phone: phoneController.text.trim().isEmpty
+                            ? null
+                            : phoneController.text.trim(),
+                        birthDate: birthController.text.trim().isEmpty
+                            ? null
+                            : birthController.text.trim(),
                       );
                       if (!ctx.mounted) return;
                       Navigator.of(ctx).pop();
                       if (ok) await _loadProfile();
                     },
-                    style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.primaryRed,
+                    ),
                     child: const Text('Enregistrer'),
                   ),
                 ],
@@ -256,10 +272,18 @@ class _ProfilPageState extends State<ProfilPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _infoRow(Icons.person_outline_rounded, 'Nom complet', _displayName),
+                  _infoRow(
+                    Icons.person_outline_rounded,
+                    'Nom complet',
+                    _displayName,
+                  ),
                   _infoRow(Icons.email_outlined, 'Email', _email),
                   _infoRow(Icons.phone_outlined, 'Téléphone', _phone),
-                  _infoRow(Icons.calendar_today_rounded, 'Date de naissance', _birthDate),
+                  _infoRow(
+                    Icons.calendar_today_rounded,
+                    'Date de naissance',
+                    _birthDate,
+                  ),
                 ],
               ),
             ),
@@ -272,7 +296,10 @@ class _ProfilPageState extends State<ProfilPage> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.edit_rounded, color: AppTheme.textPrimary),
+                    leading: const Icon(
+                      Icons.edit_rounded,
+                      color: AppTheme.textPrimary,
+                    ),
                     title: const Text(
                       'Modifier mon profil',
                       style: TextStyle(color: AppTheme.textPrimary),
@@ -282,7 +309,10 @@ class _ProfilPageState extends State<ProfilPage> {
                   if (!auth.isResponsable) ...[
                     const Divider(color: AppTheme.textSecondary, height: 1),
                     ListTile(
-                      leading: const Icon(Icons.badge_outlined, color: AppTheme.textPrimary),
+                      leading: const Icon(
+                        Icons.badge_outlined,
+                        color: AppTheme.textPrimary,
+                      ),
                       title: const Text(
                         'Devenir responsable',
                         style: TextStyle(color: AppTheme.textPrimary),
@@ -292,7 +322,10 @@ class _ProfilPageState extends State<ProfilPage> {
                   ],
                   const Divider(color: AppTheme.textSecondary, height: 1),
                   ListTile(
-                    leading: const Icon(Icons.logout_rounded, color: AppTheme.primaryRed),
+                    leading: const Icon(
+                      Icons.logout_rounded,
+                      color: AppTheme.primaryRed,
+                    ),
                     title: const Text(
                       'Se déconnecter',
                       style: TextStyle(

@@ -56,4 +56,3 @@ Future<String> getServerUrl() async {
   final config = await loadAppConfig();
   return config.apiUrl;
 }
-

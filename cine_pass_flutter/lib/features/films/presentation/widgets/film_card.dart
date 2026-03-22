@@ -49,15 +49,15 @@ class FilmCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorBuilder: (context, Object? error, StackTrace? _) =>
                             Container(
-                          color: Color(posterColor),
-                          child: Center(
-                            child: Icon(
-                              Icons.movie_rounded,
-                              size: 32,
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: Color(posterColor),
+                              child: Center(
+                                child: Icon(
+                                  Icons.movie_rounded,
+                                  size: 32,
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
                       ),
                     ),
             ),
@@ -117,7 +117,10 @@ class FilmCard extends StatelessWidget {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text('Réserver', style: TextStyle(fontSize: 12)),
+                      child: const Text(
+                        'Réserver',
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ),
                   ),
                 ],

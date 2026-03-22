@@ -17,8 +17,7 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
-    with TickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   static const String _appName = 'CinePass';
   static const Duration _duration = Duration(milliseconds: 3000);
 
@@ -124,9 +123,10 @@ class _SplashPageState extends State<SplashPage>
             animation: _mainController,
             builder: (context, child) {
               final progress = _mainController.value;
-              final letterCount = (progress * _appName.length)
-                  .floor()
-                  .clamp(0, _appName.length);
+              final letterCount = (progress * _appName.length).floor().clamp(
+                0,
+                _appName.length,
+              );
               final visibleName = _appName.substring(0, letterCount);
               final angle = _rotationAnimation.value * 2 * math.pi;
 

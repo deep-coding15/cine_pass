@@ -55,7 +55,8 @@ class AuthState extends ChangeNotifier {
     if (client.auth.isAuthenticated && authInfo is AuthSuccess) {
       final strategy = authInfo.authStrategy.toLowerCase();
       final provisionalName = _displayNameForStrategy(strategy);
-      final changed = _isLoggedIn != true ||
+      final changed =
+          _isLoggedIn != true ||
           (_userName.trim().isEmpty && provisionalName.isNotEmpty);
 
       _isLoggedIn = true;
@@ -101,8 +102,8 @@ class AuthState extends ChangeNotifier {
     try {
       final ProfileResponse? profile = await client.cinePass.getProfile();
       final bool isAdmin = await client.cinePass.isCurrentUserAdmin();
-      final bool isResponsable =
-          await client.cinePass.isCurrentUserResponsable();
+      final bool isResponsable = await client.cinePass
+          .isCurrentUserResponsable();
 
       final nextEmail = (profile?.email ?? '').trim();
       final backendName = (profile?.displayName ?? '').trim();
@@ -110,8 +111,10 @@ class AuthState extends ChangeNotifier {
       final nextName = backendName.isNotEmpty
           ? backendName
           : (fallbackNameFromEmail.isNotEmpty
-              ? fallbackNameFromEmail
-              : (_userName.trim().isNotEmpty ? _userName.trim() : 'Utilisateur'));
+                ? fallbackNameFromEmail
+                : (_userName.trim().isNotEmpty
+                      ? _userName.trim()
+                      : 'Utilisateur'));
 
       var changed = false;
       if (nextName != _userName) {

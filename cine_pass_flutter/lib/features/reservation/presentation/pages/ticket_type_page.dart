@@ -34,8 +34,9 @@ class _TicketTypePageState extends State<TicketTypePage> {
     setState(() => _loadingEventConfig = true);
     try {
       if (state.eventReservationConfig == null) {
-        final cfg =
-            await client.cinePass.getEventReservationConfig(state.eventId!);
+        final cfg = await client.cinePass.getEventReservationConfig(
+          state.eventId!,
+        );
         if (cfg != null && mounted) {
           state.applyEventReservationConfig(cfg);
         }
@@ -135,8 +136,9 @@ class _TicketTypePageState extends State<TicketTypePage> {
             const SizedBox(height: 16),
             ...List.generate(state.eventTickets.length, (i) {
               final cfg = state.eventReservationConfig!;
-              final activeTypes =
-                  cfg.ticketTypes.where((t) => t.active).toList();
+              final activeTypes = cfg.ticketTypes
+                  .where((t) => t.active)
+                  .toList();
               final ticket = state.eventTickets[i];
               final selectedCode = ticket.eventTypeCode.toUpperCase();
               EventTicketTypeConfigResponse? currentType;
@@ -169,7 +171,8 @@ class _TicketTypePageState extends State<TicketTypePage> {
                         children: activeTypes.map((type) {
                           final selected =
                               selectedCode == type.code.toUpperCase();
-                          final can = selected ||
+                          final can =
+                              selected ||
                               state.canAssignEventTicketType(i, type.code);
                           return ChoiceChip(
                             label: Text(
@@ -187,10 +190,11 @@ class _TicketTypePageState extends State<TicketTypePage> {
                             selected: selected,
                             onSelected: (can || selected)
                                 ? (_) =>
-                                    state.setEventTicketTypeCode(i, type.code)
+                                      state.setEventTicketTypeCode(i, type.code)
                                 : null,
-                            selectedColor:
-                                AppTheme.accentGreen.withValues(alpha: 0.25),
+                            selectedColor: AppTheme.accentGreen.withValues(
+                              alpha: 0.25,
+                            ),
                             checkmarkColor: AppTheme.accentGreen,
                             disabledColor: AppTheme.surfaceDark,
                           );
@@ -603,7 +607,7 @@ class _TicketTypePageState extends State<TicketTypePage> {
                         if (state.isEvent) {
                           final avecSieges =
                               state.eventReservationConfig?.reservationMode ==
-                                  'AVEC_SIEGES';
+                              'AVEC_SIEGES';
                           if (avecSieges && !_eventSeatFlowReady(state)) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

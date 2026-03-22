@@ -165,8 +165,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
           pending.eventDateTime != null) {
         EventReservationConfigResponse? evCfg;
         try {
-          evCfg = await client.cinePass
-              .getEventReservationConfig(pending.eventId!);
+          evCfg = await client.cinePass.getEventReservationConfig(
+            pending.eventId!,
+          );
         } catch (_) {}
         if (!mounted) return;
         reservationState.setEventReservation(
@@ -186,7 +187,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
       return;
     }
 
-      context.go(AppRouter.home);
+    context.go(AppRouter.home);
   }
 
   Future<void> _loginWithEmail() async {
@@ -325,7 +326,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
                     if (step == 0) ...[
                       const Text(
                         'Entrez votre email. Un code de reinitialisation sera envoye.',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
@@ -340,14 +344,19 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                       ),
                     ] else if (step == 1) ...[
                       const Text(
                         'Entrez le code recu par email.',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
@@ -361,14 +370,19 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                       ),
                     ] else ...[
                       const Text(
                         'Definissez un nouveau mot de passe.',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
@@ -383,7 +397,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                         onChanged: (value) {
@@ -429,7 +445,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                       ),
@@ -448,7 +466,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
                       const SizedBox(height: 10),
                       Text(
                         localError!,
-                        style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ],
@@ -472,7 +493,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
                     child: const Text('Annuler'),
                   ),
                   FilledButton(
-                    onPressed: (isSubmitting || (step == 2 && !isNewPasswordValid))
+                    onPressed:
+                        (isSubmitting || (step == 2 && !isNewPasswordValid))
                         ? null
                         : () async {
                             final dialogNavigator = Navigator.of(context);
@@ -485,14 +507,17 @@ class _ConnexionPageState extends State<ConnexionPage> {
 
                             if (step == 0) {
                               if (email.isEmpty || !email.contains('@')) {
-                                setModalState(() => localError = 'Email invalide.');
+                                setModalState(
+                                  () => localError = 'Email invalide.',
+                                );
                                 return;
                               }
 
                               setModalState(() => isSubmitting = true);
                               try {
-                                requestId = await _EmailAuthEndpoint(client)
-                                    .startPasswordReset(email: email);
+                                requestId = await _EmailAuthEndpoint(
+                                  client,
+                                ).startPasswordReset(email: email);
                                 setModalState(() {
                                   step = 1;
                                   localInfo =
@@ -501,12 +526,14 @@ class _ConnexionPageState extends State<ConnexionPage> {
                               } catch (e) {
                                 final message = e.toString();
                                 // ignore: avoid_print
-                                print('[ForgotPassword] startPasswordReset error: $message');
+                                print(
+                                  '[ForgotPassword] startPasswordReset error: $message',
+                                );
                                 setModalState(() {
                                   localError =
                                       message.contains('tooManyAttempts')
-                                          ? 'Trop de tentatives. Reessayez dans quelques minutes.'
-                                          : 'Impossible d\'envoyer le code pour le moment.';
+                                      ? 'Trop de tentatives. Reessayez dans quelques minutes.'
+                                      : 'Impossible d\'envoyer le code pour le moment.';
                                 });
                               } finally {
                                 if (context.mounted) {
@@ -517,8 +544,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                             }
 
                             if (step == 1) {
-                              final normalizedCode =
-                                  codeController.text.trim().toLowerCase();
+                              final normalizedCode = codeController.text
+                                  .trim()
+                                  .toLowerCase();
                               if (requestId == null) {
                                 setModalState(() {
                                   localError =
@@ -527,8 +555,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                 return;
                               }
                               if (normalizedCode.length != 8) {
-                                setModalState(() => localError =
-                                    'Code invalide : colle exactement 8 caractères (sans espaces).');
+                                setModalState(
+                                  () => localError =
+                                      'Code invalide : colle exactement 8 caractères (sans espaces).',
+                                );
                                 return;
                               }
 
@@ -556,7 +586,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
                             }
 
                             final newPassword = newPasswordController.text;
-                            final confirmPassword = confirmPasswordController.text;
+                            final confirmPassword =
+                                confirmPasswordController.text;
 
                             if (finishToken == null) {
                               setModalState(() {
@@ -582,13 +613,16 @@ class _ConnexionPageState extends State<ConnexionPage> {
 
                             setModalState(() => isSubmitting = true);
                             try {
-                              await _EmailAuthEndpoint(client).finishPasswordReset(
+                              await _EmailAuthEndpoint(
+                                client,
+                              ).finishPasswordReset(
                                 finishPasswordResetToken: finishToken!,
                                 newPassword: newPassword,
                               );
 
-                              final authSuccess = await _EmailAuthEndpoint(client)
-                                  .login(email: email, password: newPassword);
+                              final authSuccess = await _EmailAuthEndpoint(
+                                client,
+                              ).login(email: email, password: newPassword);
                               await client.auth.updateSignedInUser(authSuccess);
                               if (!mounted) return;
                               await authState.refreshProfileFromServer();
@@ -630,7 +664,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
 
       if (result != null && mounted) {
         _emailController.text = result['email'] ?? _emailController.text;
-        _passwordController.text = result['password'] ?? _passwordController.text;
+        _passwordController.text =
+            result['password'] ?? _passwordController.text;
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -659,77 +694,77 @@ class _ConnexionPageState extends State<ConnexionPage> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 24),
-            const CinePassLogo(size: LogoSize.medium),
-            const SizedBox(height: 32),
-            Text(
-              'Connexion',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(color: AppTheme.textPrimary),
-            ),
-            const SizedBox(height: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 24),
+          const CinePassLogo(size: LogoSize.medium),
+          const SizedBox(height: 32),
           Text(
-                  pending.hasPending
+            'Connexion',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            pending.hasPending
                 ? 'Connectez-vous pour poursuivre votre reservation'
                 : 'Connectez-vous avec email ou Google',
-                  style: TextStyle(
-                    color: pending.hasPending
-                        ? AppTheme.primaryRed
-                        : AppTheme.textSecondary,
-                    fontSize: 14,
-              fontWeight:
-                  pending.hasPending ? FontWeight.w600 : FontWeight.normal,
+            style: TextStyle(
+              color: pending.hasPending
+                  ? AppTheme.primaryRed
+                  : AppTheme.textSecondary,
+              fontSize: 14,
+              fontWeight: pending.hasPending
+                  ? FontWeight.w600
+                  : FontWeight.normal,
             ),
           ),
           const SizedBox(height: 24),
           const AuthModeTabs(activeTab: AuthModeTab.connexion),
           const SizedBox(height: 20),
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'votre@email.com',
-                prefixIcon: const Icon(Icons.email_outlined),
-                filled: true,
-                fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                labelStyle: const TextStyle(color: AppTheme.textSecondary),
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'votre@email.com',
+              prefixIcon: const Icon(Icons.email_outlined),
+              filled: true,
+              fillColor: AppTheme.cardDark,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              style: const TextStyle(color: AppTheme.textPrimary),
+              labelStyle: const TextStyle(color: AppTheme.textSecondary),
             ),
+            style: const TextStyle(color: AppTheme.textPrimary),
+          ),
           const SizedBox(height: 12),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              decoration: InputDecoration(
-                labelText: 'Mot de passe',
-                hintText: '••••••••',
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    color: AppTheme.textSecondary,
-                  ),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            decoration: InputDecoration(
+              labelText: 'Mot de passe',
+              hintText: '••••••••',
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  color: AppTheme.textSecondary,
+                ),
                 onPressed: () {
                   setState(() => _obscurePassword = !_obscurePassword);
                 },
-                ),
-                filled: true,
-                fillColor: AppTheme.cardDark,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
-              style: const TextStyle(color: AppTheme.textPrimary),
+              filled: true,
+              fillColor: AppTheme.cardDark,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              labelStyle: const TextStyle(color: AppTheme.textSecondary),
+            ),
+            style: const TextStyle(color: AppTheme.textPrimary),
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -738,20 +773,20 @@ class _ConnexionPageState extends State<ConnexionPage> {
               child: const Text('Mot de passe oublie ?'),
             ),
           ),
-            FilledButton(
+          FilledButton(
             onPressed: _isEmailSubmitting ? null : _loginWithEmail,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.primaryRed,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.primaryRed,
               padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-            child: Text(_isEmailSubmitting ? 'Connexion...' : 'Se connecter'),
             ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
+            child: Text(_isEmailSubmitting ? 'Connexion...' : 'Se connecter'),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
               Expanded(
                 child: Divider(
                   color: AppTheme.textSecondary.withValues(alpha: 0.35),
@@ -768,9 +803,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 child: Divider(
                   color: AppTheme.textSecondary.withValues(alpha: 0.35),
                 ),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
           GoogleSignInWidget(
             key: ValueKey('google-sign-in-$_googleWidgetNonce'),
@@ -833,4 +868,3 @@ class _ConnexionPageState extends State<ConnexionPage> {
     );
   }
 }
-

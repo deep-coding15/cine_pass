@@ -102,8 +102,12 @@ class _TicketLogoPainter extends CustomPainter {
 }
 
 /// Dessine un ticket (pour barre de progression).
-void _drawTicket(Canvas canvas, Size size,
-    {required bool filled, double lineOpacity = 0.4}) {
+void _drawTicket(
+  Canvas canvas,
+  Size size, {
+  required bool filled,
+  double lineOpacity = 0.4,
+}) {
   final w = size.width;
   final h = size.height;
   final r = w * 0.22;
@@ -143,7 +147,9 @@ void _drawTicket(Canvas canvas, Size size,
   if (filled) {
     canvas.drawPath(
       path,
-      Paint()..color = AppTheme.primaryRed..style = PaintingStyle.fill,
+      Paint()
+        ..color = AppTheme.primaryRed
+        ..style = PaintingStyle.fill,
     );
     final linePaint = Paint()
       ..color = Colors.white.withValues(alpha: lineOpacity)

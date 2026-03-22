@@ -13,7 +13,8 @@ class ResponsableRapportsPage extends StatefulWidget {
   const ResponsableRapportsPage({super.key});
 
   @override
-  State<ResponsableRapportsPage> createState() => _ResponsableRapportsPageState();
+  State<ResponsableRapportsPage> createState() =>
+      _ResponsableRapportsPageState();
 }
 
 class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
@@ -81,15 +82,24 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
             children: [
               header,
               pw.SizedBox(height: 20),
-              pw.Text('Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} MAD', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text(
+                'Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} MAD',
+                style: const pw.TextStyle(fontSize: 14),
+              ),
               pw.SizedBox(height: 8),
-              pw.Text('Nombre de réservations: $_nbReservations', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text(
+                'Nombre de réservations: $_nbReservations',
+                style: const pw.TextStyle(fontSize: 14),
+              ),
             ],
           );
         },
       ),
     );
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'cinepass-rapport-ca-$_selectedPeriode.pdf');
+    await Printing.sharePdf(
+      bytes: await pdf.save(),
+      filename: 'cinepass-rapport-ca-$_selectedPeriode.pdf',
+    );
   }
 
   Future<void> _exportPdfStatsEvenements() async {
@@ -266,10 +276,15 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
           ),
           if (_loading) ...[
             const SizedBox(height: 24),
-            const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+            const Center(
+              child: CircularProgressIndicator(color: AppTheme.primaryRed),
+            ),
           ] else if (_error != null) ...[
             const SizedBox(height: 24),
-            Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+            Text(
+              _error!,
+              style: const TextStyle(color: Colors.red, fontSize: 13),
+            ),
           ] else ...[
             const SizedBox(height: 24),
             Row(

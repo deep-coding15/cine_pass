@@ -61,8 +61,12 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
 
     final nameController = TextEditingController(text: current.name);
     final cityController = TextEditingController(text: current.city);
-    final addressController = TextEditingController(text: current.address ?? '');
-    final websiteController = TextEditingController(text: current.website ?? '');
+    final addressController = TextEditingController(
+      text: current.address ?? '',
+    );
+    final websiteController = TextEditingController(
+      text: current.website ?? '',
+    );
     final phoneController = TextEditingController(text: current.phone ?? '');
     final formKey = GlobalKey<FormState>();
 
@@ -139,7 +143,9 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
               if (!mounted) return;
               Navigator.pop(ctx, updated != null);
             },
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.accentGreen,
+            ),
             child: const Text('Enregistrer'),
           ),
         ],

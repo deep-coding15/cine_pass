@@ -90,4 +90,3 @@ class _AuthTabButton extends StatelessWidget {
     );
   }
 }
-

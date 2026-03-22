@@ -260,8 +260,7 @@ class _ResponsableEventsPageState extends State<ResponsableEventsPage> {
               itemCount: series.length,
               itemBuilder: (context, index) {
                 final s = series[index];
-                final allArchived =
-                    s.events.every((x) => x.archived == true);
+                final allArchived = s.events.every((x) => x.archived == true);
                 final someArchived =
                     s.events.any((x) => x.archived == true) && !allArchived;
                 final archPrefix = allArchived

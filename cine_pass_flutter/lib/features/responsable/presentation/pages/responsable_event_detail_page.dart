@@ -32,6 +32,7 @@ class ResponsableEventDetailData {
   final String? description;
   final String? address;
   final List<ResponsableSeanceItem> seances;
+
   /// Archivé : masqué du catalogue public, visible ici pour le responsable.
   final bool archived;
 }
@@ -63,12 +64,12 @@ String _timeStrForSeanceEdit(String time) {
 }
 
 InputDecoration _seanceDialogFieldDecoration(String label) => InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: AppTheme.textSecondary),
-      filled: true,
-      fillColor: AppTheme.surfaceDark,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    );
+  labelText: label,
+  labelStyle: const TextStyle(color: AppTheme.textSecondary),
+  filled: true,
+  fillColor: AppTheme.surfaceDark,
+  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+);
 
 /// Page responsable : détail d’un événement (lieu, date, plan de sièges, archivage, etc.).
 class ResponsableEventDetailPage extends StatefulWidget {
@@ -154,7 +155,8 @@ class _ResponsableEventDetailPageState
               .toList()
             ..sort((a, b) => a.date.compareTo(b.date));
       if (!sameSeries.any((x) => x.id == ev.id)) {
-        sameSeries = [...sameSeries, ev]..sort((a, b) => a.date.compareTo(b.date));
+        sameSeries = [...sameSeries, ev]
+          ..sort((a, b) => a.date.compareTo(b.date));
       }
       if (!mounted) return;
       setState(() {
@@ -210,7 +212,9 @@ class _ResponsableEventDetailPageState
         return;
       }
       var pickedDate = DateTime.tryParse(ev.date) ?? DateTime.now();
-      final timeCtrl = TextEditingController(text: _timeStrForSeanceEdit(ev.time));
+      final timeCtrl = TextEditingController(
+        text: _timeStrForSeanceEdit(ev.time),
+      );
       final lieuCtrl = TextEditingController(text: ev.location);
       final villeCtrl = TextEditingController(text: ev.city);
       final addrCtrl = TextEditingController(text: ev.address ?? '');
@@ -257,7 +261,9 @@ class _ResponsableEventDetailPageState
                       ),
                       TextField(
                         controller: timeCtrl,
-                        decoration: _seanceDialogFieldDecoration('Heure (HH:mm)'),
+                        decoration: _seanceDialogFieldDecoration(
+                          'Heure (HH:mm)',
+                        ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                       ),
                       const SizedBox(height: 8),
@@ -275,7 +281,9 @@ class _ResponsableEventDetailPageState
                       const SizedBox(height: 8),
                       TextField(
                         controller: addrCtrl,
-                        decoration: _seanceDialogFieldDecoration('Adresse (optionnel)'),
+                        decoration: _seanceDialogFieldDecoration(
+                          'Adresse (optionnel)',
+                        ),
                         style: const TextStyle(color: AppTheme.textPrimary),
                       ),
                     ],
@@ -425,7 +433,9 @@ class _ResponsableEventDetailPageState
 
   Future<void> _loadReservationConfig() async {
     try {
-      final config = await client.cinePass.getEventReservationConfig(widget.eventId);
+      final config = await client.cinePass.getEventReservationConfig(
+        widget.eventId,
+      );
       if (!mounted) return;
       setState(() {
         _reservationConfig = config;
@@ -441,18 +451,28 @@ class _ResponsableEventDetailPageState
     final maxPerOrderController = TextEditingController(
       text: current.maxTicketsPerOrder.toString(),
     );
-    final adjacentBestEffortEnabled =
-        ValueNotifier<bool>(current.adjacentBestEffort);
+    final adjacentBestEffortEnabled = ValueNotifier<bool>(
+      current.adjacentBestEffort,
+    );
 
-    final standard = current.ticketTypes.where((t) => t.code.toUpperCase() == 'STANDARD').isNotEmpty
-        ? current.ticketTypes.firstWhere((t) => t.code.toUpperCase() == 'STANDARD')
+    final standard =
+        current.ticketTypes
+            .where((t) => t.code.toUpperCase() == 'STANDARD')
+            .isNotEmpty
+        ? current.ticketTypes.firstWhere(
+            (t) => t.code.toUpperCase() == 'STANDARD',
+          )
         : null;
-    final vip = current.ticketTypes.where((t) => t.code.toUpperCase() == 'VIP').isNotEmpty
+    final vip =
+        current.ticketTypes
+            .where((t) => t.code.toUpperCase() == 'VIP')
+            .isNotEmpty
         ? current.ticketTypes.firstWhere((t) => t.code.toUpperCase() == 'VIP')
         : null;
 
     final standardPriceController = TextEditingController(
-      text: (standard?.price ?? (_event?.placesTotal != null ? 0 : 0)).toStringAsFixed(2),
+      text: (standard?.price ?? (_event?.placesTotal != null ? 0 : 0))
+          .toStringAsFixed(2),
     );
     final standardQuotaController = TextEditingController(
       text: (standard?.quota ?? (_event?.placesTotal ?? 100)).toString(),
@@ -478,14 +498,23 @@ class _ResponsableEventDetailPageState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Mode de réservation', style: TextStyle(color: AppTheme.textSecondary)),
+                  const Text(
+                    'Mode de réservation',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
                   const SizedBox(height: 8),
                   ValueListenableBuilder<String>(
                     valueListenable: mode,
                     builder: (context, value, child) => SegmentedButton<String>(
                       segments: const [
-                        ButtonSegment(value: 'SANS_SIEGES', label: Text('Sans sièges')),
-                        ButtonSegment(value: 'AVEC_SIEGES', label: Text('Avec sièges')),
+                        ButtonSegment(
+                          value: 'SANS_SIEGES',
+                          label: Text('Sans sièges'),
+                        ),
+                        ButtonSegment(
+                          value: 'AVEC_SIEGES',
+                          label: Text('Avec sièges'),
+                        ),
                       ],
                       selected: {value},
                       onSelectionChanged: (s) => mode.value = s.first,
@@ -504,8 +533,7 @@ class _ResponsableEventDetailPageState
                   const SizedBox(height: 20),
                   ValueListenableBuilder<bool>(
                     valueListenable: adjacentBestEffortEnabled,
-                    builder: (context, enabled, child) =>
-                        CheckboxListTile(
+                    builder: (context, enabled, child) => CheckboxListTile(
                       value: enabled,
                       contentPadding: EdgeInsets.zero,
                       title: const Text(
@@ -516,14 +544,22 @@ class _ResponsableEventDetailPageState
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text('Billet STANDARD', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700)),
+                  const Text(
+                    'Billet STANDARD',
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: standardPriceController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: const InputDecoration(
                             labelText: 'Prix',
                             filled: true,
@@ -567,7 +603,10 @@ class _ResponsableEventDetailPageState
                             Expanded(
                               child: TextField(
                                 controller: vipPriceController,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
                                 decoration: const InputDecoration(
                                   labelText: 'Prix VIP',
                                   filled: true,
@@ -597,20 +636,41 @@ class _ResponsableEventDetailPageState
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Annuler')),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Annuler'),
+            ),
             FilledButton(
               onPressed: _savingConfig
                   ? null
                   : () async {
-                      final maxPerOrder = int.tryParse(maxPerOrderController.text.trim()) ?? 8;
-                      final stdPrice = double.tryParse(standardPriceController.text.trim().replaceAll(',', '.'));
-                      final stdQuota = int.tryParse(standardQuotaController.text.trim());
-                      final vipPrice = double.tryParse(vipPriceController.text.trim().replaceAll(',', '.')) ?? 0;
-                      final vipQuota = int.tryParse(vipQuotaController.text.trim()) ?? 0;
-                      if (stdPrice == null || stdQuota == null || stdQuota <= 0 || stdPrice < 0) {
+                      final maxPerOrder =
+                          int.tryParse(maxPerOrderController.text.trim()) ?? 8;
+                      final stdPrice = double.tryParse(
+                        standardPriceController.text.trim().replaceAll(
+                          ',',
+                          '.',
+                        ),
+                      );
+                      final stdQuota = int.tryParse(
+                        standardQuotaController.text.trim(),
+                      );
+                      final vipPrice =
+                          double.tryParse(
+                            vipPriceController.text.trim().replaceAll(',', '.'),
+                          ) ??
+                          0;
+                      final vipQuota =
+                          int.tryParse(vipQuotaController.text.trim()) ?? 0;
+                      if (stdPrice == null ||
+                          stdQuota == null ||
+                          stdQuota <= 0 ||
+                          stdPrice < 0) {
                         if (!ctx.mounted) return;
                         ScaffoldMessenger.of(ctx).showSnackBar(
-                          const SnackBar(content: Text('Valeurs STANDARD invalides.')),
+                          const SnackBar(
+                            content: Text('Valeurs STANDARD invalides.'),
+                          ),
                         );
                         return;
                       }
@@ -627,21 +687,23 @@ class _ResponsableEventDetailPageState
                           ticketQuotas.add(vipQuota);
                         }
 
-                        final ok = await client.cinePass.setEventReservationConfig(
-                          eventId: widget.eventId,
-                          reservationMode: mode.value,
-                          maxTicketsPerOrder: maxPerOrder,
-                          adjacentBestEffort: adjacentBestEffortEnabled.value,
-                          ticketTypeCodes: ticketCodes,
-                          ticketTypeLabels: ticketLabels,
-                          ticketTypePrices: ticketPrices,
-                          ticketTypeQuotas: ticketQuotas,
-                          optionTicketTypeCodes: const [],
-                          optionCodes: const [],
-                          optionLabels: const [],
-                          optionPrices: const [],
-                          optionIncluded: const [],
-                        );
+                        final ok = await client.cinePass
+                            .setEventReservationConfig(
+                              eventId: widget.eventId,
+                              reservationMode: mode.value,
+                              maxTicketsPerOrder: maxPerOrder,
+                              adjacentBestEffort:
+                                  adjacentBestEffortEnabled.value,
+                              ticketTypeCodes: ticketCodes,
+                              ticketTypeLabels: ticketLabels,
+                              ticketTypePrices: ticketPrices,
+                              ticketTypeQuotas: ticketQuotas,
+                              optionTicketTypeCodes: const [],
+                              optionCodes: const [],
+                              optionLabels: const [],
+                              optionPrices: const [],
+                              optionIncluded: const [],
+                            );
                         if (!mounted) return;
                         if (ok) {
                           await _loadReservationConfig();
@@ -650,7 +712,11 @@ class _ResponsableEventDetailPageState
                         } else {
                           if (!ctx.mounted) return;
                           ScaffoldMessenger.of(ctx).showSnackBar(
-                            const SnackBar(content: Text('Échec de sauvegarde de la configuration.')),
+                            const SnackBar(
+                              content: Text(
+                                'Échec de sauvegarde de la configuration.',
+                              ),
+                            ),
                           );
                         }
                       } finally {
@@ -838,8 +904,8 @@ class _ResponsableEventDetailPageState
                   Text(
                     'Séances',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   ...e.seances.map(
@@ -924,16 +990,21 @@ class _ResponsableEventDetailPageState
                     children: [
                       Text(
                         'Réservation',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppTheme.textPrimary,
+                            ),
                       ),
                       const Spacer(),
                       FilledButton.icon(
-                        onPressed: _reservationConfig == null ? null : _showReservationConfigDialog,
+                        onPressed: _reservationConfig == null
+                            ? null
+                            : _showReservationConfigDialog,
                         icon: const Icon(Icons.tune_rounded, size: 18),
                         label: const Text('Configurer'),
-                        style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.accentGreen,
+                        ),
                       ),
                     ],
                   ),

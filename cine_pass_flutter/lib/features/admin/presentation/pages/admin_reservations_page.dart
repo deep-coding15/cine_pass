@@ -122,7 +122,10 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
                     const SizedBox(height: 4),
                     const Text(
                       'Toutes les réservations (films et événements), données base',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),

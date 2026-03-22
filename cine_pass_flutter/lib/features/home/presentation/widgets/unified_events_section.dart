@@ -122,10 +122,11 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
                       const SizedBox(width: 8),
                       Text(
                         'Films',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ],
                   ),
@@ -165,10 +166,11 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
                       const SizedBox(width: 8),
                       Text(
                         'Événements',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ],
                   ),

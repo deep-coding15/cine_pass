@@ -33,14 +33,27 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
       final reservations = await client.cinePass.getReservations();
       final events = await client.cinePass.getEvents();
 
-      final start = DateTime(_dateStart!.year, _dateStart!.month, _dateStart!.day);
-      final end = DateTime(_dateEnd!.year, _dateEnd!.month, _dateEnd!.day, 23, 59, 59);
+      final start = DateTime(
+        _dateStart!.year,
+        _dateStart!.month,
+        _dateStart!.day,
+      );
+      final end = DateTime(
+        _dateEnd!.year,
+        _dateEnd!.month,
+        _dateEnd!.day,
+        23,
+        59,
+        59,
+      );
 
       int nb = 0;
       double ca = 0;
       for (final r in reservations) {
         final createdAt = DateTime.tryParse(r.createdAtStr);
-        if (createdAt != null && !createdAt.isBefore(start) && !createdAt.isAfter(end)) {
+        if (createdAt != null &&
+            !createdAt.isBefore(start) &&
+            !createdAt.isAfter(end)) {
           nb++;
           ca += r.totalAmount;
         }
@@ -79,17 +92,29 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
             children: [
               header,
               pw.SizedBox(height: 24),
-              pw.Text('Réservations: $_nbReservations', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text(
+                'Réservations: $_nbReservations',
+                style: const pw.TextStyle(fontSize: 14),
+              ),
               pw.SizedBox(height: 4),
-              pw.Text('Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} MAD', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text(
+                'Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} MAD',
+                style: const pw.TextStyle(fontSize: 14),
+              ),
               pw.SizedBox(height: 4),
-              pw.Text('Événements (catalogue): $_nbEvents', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text(
+                'Événements (catalogue): $_nbEvents',
+                style: const pw.TextStyle(fontSize: 14),
+              ),
             ],
           );
         },
       ),
     );
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'cinepass-rapport-admin.pdf');
+    await Printing.sharePdf(
+      bytes: await pdf.save(),
+      filename: 'cinepass-rapport-admin.pdf',
+    );
   }
 
   @override
@@ -101,7 +126,9 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
         children: [
           Text(
             'Rapport de statistiques',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -118,7 +145,9 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                 children: [
                   Text(
                     'Période',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -153,7 +182,10 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                               : () async {
                                   final d = await showDatePicker(
                                     context: context,
-                                    initialDate: _dateEnd ?? _dateStart ?? DateTime.now(),
+                                    initialDate:
+                                        _dateEnd ??
+                                        _dateStart ??
+                                        DateTime.now(),
                                     firstDate: _dateStart ?? DateTime(2020),
                                     lastDate: DateTime(2030),
                                   );
@@ -174,18 +206,26 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                   Row(
                     children: [
                       FilledButton.icon(
-                        onPressed: _loading || _dateStart == null || _dateEnd == null
+                        onPressed:
+                            _loading || _dateStart == null || _dateEnd == null
                             ? null
                             : _loadReport,
                         icon: _loading
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
                               )
                             : const Icon(Icons.assessment),
-                        label: Text(_loading ? 'Chargement...' : 'Générer le rapport'),
-                        style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                        label: Text(
+                          _loading ? 'Chargement...' : 'Générer le rapport',
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.primaryRed,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       if (_nbReservations > 0 || _totalCA > 0 || _nbEvents > 0)
@@ -198,7 +238,10 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 16),
-                    Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                    Text(
+                      _error!,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    ),
                   ],
                 ],
               ),
@@ -208,7 +251,9 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
             const SizedBox(height: 32),
             Text(
               'Résumé',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 16),
             Row(

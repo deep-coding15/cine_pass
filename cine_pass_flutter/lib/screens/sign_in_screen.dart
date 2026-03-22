@@ -22,7 +22,7 @@ class _SignInScreenState extends State<SignInScreen> {
     _isSignedIn = client.auth.isAuthenticated;
   }
 
-// Don't forget to remove the listener when the widget is disposed.
+  // Don't forget to remove the listener when the widget is disposed.
   @override
   void dispose() {
     client.auth.authInfoListenable.removeListener(_updateSignedInState);
@@ -38,7 +38,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<bool> signOutDevice() async {
     return await client.auth.signOutDevice();
   }
-  
+
   Future<bool> signOutAllDevices() async {
     return await client.auth.signOutAllDevices();
   }

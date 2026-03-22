@@ -36,6 +36,7 @@ class _EventsListPageState extends State<EventsListPage> {
   List<EventResponse> _events = [];
   List<String> _cities = ['Toutes'];
   List<String> _genres = ['Tous'];
+
   /// Résultat brut de [getGenres] (recalcul des options avec films + événements ciné).
   List<String> _genrePoolFromApi = const [];
 
@@ -147,8 +148,7 @@ class _EventsListPageState extends State<EventsListPage> {
 
   bool _eventMatchesCity(EventResponse e) {
     if (_selectedCity == 'Toutes') return true;
-    return e.city.trim().toLowerCase() ==
-        _selectedCity.trim().toLowerCase();
+    return e.city.trim().toLowerCase() == _selectedCity.trim().toLowerCase();
   }
 
   /// Même logique que le serveur (`_extractPrefixedValue` / lignes « Genre: … »).
@@ -209,16 +209,16 @@ class _EventsListPageState extends State<EventsListPage> {
     List<EventResponse> events = _events;
 
     if (_selectedType == 'Film') {
-      events = events.where((e) => _eventMatchesDisplayType(e, 'Film')).toList();
+      events = events
+          .where((e) => _eventMatchesDisplayType(e, 'Film'))
+          .toList();
       if (_selectedCity != 'Toutes') {
         events = events.where(_eventMatchesCity).toList();
       }
       events = _filterEventsByDate(events);
       if (_selectedGenre != 'Tous') {
         final gSel = _selectedGenre.toLowerCase();
-        films = films
-            .where((f) => f.genre.toLowerCase() == gSel)
-            .toList();
+        films = films.where((f) => f.genre.toLowerCase() == gSel).toList();
         events = events
             .where(
               (e) => _resolvedFilmGenre(e).toLowerCase() == gSel,
@@ -257,9 +257,7 @@ class _EventsListPageState extends State<EventsListPage> {
     } else if (_selectedType == 'Tous') {
       if (_selectedGenre != 'Tous') {
         final gSel = _selectedGenre.toLowerCase();
-        films = films
-            .where((f) => f.genre.toLowerCase() == gSel)
-            .toList();
+        films = films.where((f) => f.genre.toLowerCase() == gSel).toList();
         events = events.where((e) {
           if (!_eventMatchesDisplayType(e, 'Film')) return true;
           return _resolvedFilmGenre(e).toLowerCase() == gSel;

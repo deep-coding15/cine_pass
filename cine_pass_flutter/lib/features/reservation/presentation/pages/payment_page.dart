@@ -92,7 +92,9 @@ class _PaymentPageState extends State<PaymentPage> {
           return;
         }
 
-        ReservationState.instance.setReservationNumber(confirm.reservationNumber!);
+        ReservationState.instance.setReservationNumber(
+          confirm.reservationNumber!,
+        );
         try {
           final billets = await client.cinePass.getMyBillets();
           await BilletsCacheStore().saveBillets(billets);
@@ -128,8 +130,8 @@ class _PaymentPageState extends State<PaymentPage> {
         final opts = isVip
             ? 0.0
             : (t.optionParking ? 3.0 : 0.0) +
-                (t.optionPopcorn ? 5.0 : 0.0) +
-                (t.optionBoisson ? 2.0 : 0.0);
+                  (t.optionPopcorn ? 5.0 : 0.0) +
+                  (t.optionBoisson ? 2.0 : 0.0);
         ticketTypes.add(isVip ? 'vip' : 'normal');
         optParking.add(t.optionParking);
         optPopcorn.add(t.optionPopcorn);
@@ -144,8 +146,8 @@ class _PaymentPageState extends State<PaymentPage> {
         final opts = isVip
             ? 0.0
             : (state.optionParking ? 3.0 : 0.0) +
-                (state.optionPopcorn ? 5.0 : 0.0) +
-                (state.optionBoisson ? 2.0 : 0.0);
+                  (state.optionPopcorn ? 5.0 : 0.0) +
+                  (state.optionBoisson ? 2.0 : 0.0);
         ticketTypes.add(isVip ? 'vip' : 'normal');
         optParking.add(state.optionParking);
         optPopcorn.add(state.optionPopcorn);
@@ -345,7 +347,8 @@ class _PaymentPageState extends State<PaymentPage> {
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
-                            onPressed: () => _confirmPaymentAndCreateBillets(context),
+                            onPressed: () =>
+                                _confirmPaymentAndCreateBillets(context),
                             style: FilledButton.styleFrom(
                               backgroundColor: AppTheme.primaryRed,
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -423,8 +426,9 @@ class _PaymentPageState extends State<PaymentPage> {
                           by.forEach((k, v) => buf.add('$v × $k'));
                           return buf.isEmpty ? '—' : buf.join(', ');
                         }
-                        final vip =
-                            state.eventTickets.where((t) => t.isVip).length;
+                        final vip = state.eventTickets
+                            .where((t) => t.isVip)
+                            .length;
                         final normal = state.eventTickets.length - vip;
                         if (vip == 0) return '$normal Normal';
                         if (normal == 0) return '$vip VIP';

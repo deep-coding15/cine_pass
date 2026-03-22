@@ -37,7 +37,7 @@ class AppBottomBar extends StatelessWidget {
                 letterSpacing: 0.3,
               ),
             ),
-        
+
             SizedBox(width: compactLinks ? 8 : 12),
             Expanded(
               child: Text(
@@ -54,7 +54,10 @@ class AppBottomBar extends StatelessWidget {
               TextButton(
                 onPressed: () => context.go(AppRouter.faq),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   foregroundColor: AppTheme.textSecondary,
@@ -64,7 +67,10 @@ class AppBottomBar extends StatelessWidget {
               TextButton(
                 onPressed: () => context.go(AppRouter.support),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   foregroundColor: AppTheme.textSecondary,

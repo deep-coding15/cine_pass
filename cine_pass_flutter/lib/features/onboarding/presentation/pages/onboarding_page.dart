@@ -87,9 +87,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               Text(
                 step.title,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),

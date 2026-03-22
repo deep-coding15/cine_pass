@@ -239,10 +239,12 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
                                               : _castingController.text.trim(),
                                           posterColor: null,
                                           posterUrl:
-                                              _posterUrlController.text.trim().isEmpty
-                                                  ? null
-                                                  : _posterUrlController.text
-                                                      .trim(),
+                                              _posterUrlController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _posterUrlController.text
+                                                    .trim(),
                                           dateSortie: _startDate,
                                           dateFin: _endDate,
                                           audience:

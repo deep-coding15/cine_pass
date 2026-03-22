@@ -92,8 +92,7 @@ class AppRouter {
       ),
       GoRoute(
         path: onboarding,
-        pageBuilder: (_, _) =>
-            const NoTransitionPage(child: OnboardingPage()),
+        pageBuilder: (_, _) => const NoTransitionPage(child: OnboardingPage()),
       ),
       ShellRoute(
         builder: (context, state, child) => MainScaffold(

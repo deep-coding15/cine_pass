@@ -180,8 +180,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
           pending.eventDateTime != null) {
         EventReservationConfigResponse? evCfg;
         try {
-          evCfg = await client.cinePass
-              .getEventReservationConfig(pending.eventId!);
+          evCfg = await client.cinePass.getEventReservationConfig(
+            pending.eventId!,
+          );
         } catch (_) {}
         if (!mounted) return;
         reservationState.setEventReservation(
@@ -230,8 +231,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
             Text(
               'Inscription',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.textPrimary,
-                  ),
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -308,34 +309,34 @@ class _InscriptionPageState extends State<InscriptionPage> {
             ),
 
             // Le code apparaît ensuite sur la même page.
-            if (_emailAuthController.currentScreen == EmailFlowScreen.verifyRegistration)
-              ...[
-                const SizedBox(height: 12),
-                Text(
-                  'Entrez le code de vérification reçu par email',
-                  style: TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 13,
-                  ),
+            if (_emailAuthController.currentScreen ==
+                EmailFlowScreen.verifyRegistration) ...[
+              const SizedBox(height: 12),
+              Text(
+                'Entrez le code de vérification reçu par email',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 13,
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _emailAuthController.verificationCodeController,
-                  decoration: InputDecoration(
-                    labelText: 'Code de vérification',
-                    hintText: 'XXXXXXXX',
-                    prefixIcon: const Icon(Icons.verified_outlined),
-                    filled: true,
-                    fillColor: AppTheme.cardDark,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _emailAuthController.verificationCodeController,
+                decoration: InputDecoration(
+                  labelText: 'Code de vérification',
+                  hintText: 'XXXXXXXX',
+                  prefixIcon: const Icon(Icons.verified_outlined),
+                  filled: true,
+                  fillColor: AppTheme.cardDark,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  style: const TextStyle(color: AppTheme.textPrimary),
-                  keyboardType: TextInputType.text,
+                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
                 ),
-              ],
+                style: const TextStyle(color: AppTheme.textPrimary),
+                keyboardType: TextInputType.text,
+              ),
+            ],
 
             const SizedBox(height: 20),
             if (_emailAuthController.isLoading)
@@ -348,8 +349,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   : () async {
                       // Vérifie le mot de passe AVANT de lancer les étapes
                       // (sinon on obtient policyViolation au moment du finish).
-                      if (_emailAuthController.currentScreen != EmailFlowScreen.completeRegistration) {
-                        if (!_isPasswordValidForClient(_passwordUiController.text)) {
+                      if (_emailAuthController.currentScreen !=
+                          EmailFlowScreen.completeRegistration) {
+                        if (!_isPasswordValidForClient(
+                          _passwordUiController.text,
+                        )) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
@@ -366,9 +370,12 @@ class _InscriptionPageState extends State<InscriptionPage> {
                           await _emailAuthController.startRegistration();
                           break;
                         case EmailFlowScreen.verifyRegistration:
-                          final rawCode = _emailAuthController.verificationCodeController.text;
+                          final rawCode = _emailAuthController
+                              .verificationCodeController
+                              .text;
                           final normalizedCode = rawCode.trim().toLowerCase();
-                          _emailAuthController.verificationCodeController.text = normalizedCode;
+                          _emailAuthController.verificationCodeController.text =
+                              normalizedCode;
 
                           if (normalizedCode.length != 8) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -383,7 +390,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
                           await _emailAuthController.verifyRegistrationCode();
                           break;
                         case EmailFlowScreen.completeRegistration:
-                          if (!_isPasswordValidForClient(_passwordUiController.text)) {
+                          if (!_isPasswordValidForClient(
+                            _passwordUiController.text,
+                          )) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -410,7 +419,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: Text(
-                _emailAuthController.currentScreen == EmailFlowScreen.verifyRegistration
+                _emailAuthController.currentScreen ==
+                        EmailFlowScreen.verifyRegistration
                     ? 'Valider le code et créer le compte'
                     : 'Créer le compte (code email)',
               ),
@@ -463,6 +473,4 @@ class _InscriptionPageState extends State<InscriptionPage> {
       ),
     );
   }
-
 }
-

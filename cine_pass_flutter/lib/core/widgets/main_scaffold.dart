@@ -40,132 +40,132 @@ class _MainScaffoldState extends State<MainScaffold> {
       appBar: isAdmin
           ? null
           : AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.menu_rounded),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        title: isAuthPage
-            ? null
-            : GestureDetector(
-                onTap: () => context.go(AppRouter.home),
-                child: const CinePassLogo(size: LogoSize.small),
+              leading: IconButton(
+                icon: const Icon(Icons.menu_rounded),
+                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
               ),
-        centerTitle: true,
-        actions: [
-          if (auth.isLoggedIn) ...[
-            IconButton(
-              icon: const Icon(Icons.favorite_rounded),
-              color: AppTheme.primaryRed,
-              onPressed: () => context.go(AppRouter.preferences),
-              tooltip: 'Préférences',
-            ),
-            TextButton(
-              onPressed: () => context.go(AppRouter.home),
-              child: const Text('Accueil'),
-            ),
-            TextButton(
-              onPressed: () => context.go(AppRouter.events),
-              child: const Text('Événements'),
-            ),
-            TextButton(
-              onPressed: () => context.go(AppRouter.billets),
-              child: const Text('Billets'),
-            ),
-            if (auth.isResponsable) ...[
-              const SizedBox(width: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: FilledButton(
-                  onPressed: () => context.go(AppRouter.responsable),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppTheme.accentGreen,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+              title: isAuthPage
+                  ? null
+                  : GestureDetector(
+                      onTap: () => context.go(AppRouter.home),
+                      child: const CinePassLogo(size: LogoSize.small),
+                    ),
+              centerTitle: true,
+              actions: [
+                if (auth.isLoggedIn) ...[
+                  IconButton(
+                    icon: const Icon(Icons.favorite_rounded),
+                    color: AppTheme.primaryRed,
+                    onPressed: () => context.go(AppRouter.preferences),
+                    tooltip: 'Préférences',
                   ),
-                  child: const Text('Espace responsable'),
-                ),
-              ),
-            ],
-            PopupMenuButton<String>(
-              offset: const Offset(0, 48),
-              tooltip: auth.isResponsable
-                  ? 'Profil · Déconnexion'
-                  : 'Profil · Devenir responsable · Déconnexion',
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Profil'),
-                    SizedBox(width: 4),
-                    Icon(Icons.arrow_drop_down, size: 20),
-                  ],
-                ),
-              ),
-              onSelected: (value) {
-                if (value == 'profil') {
-                  context.go(AppRouter.profil);
-                } else if (value == 'devenir_responsable') {
-                  context.go(AppRouter.devenirResponsable);
-                } else if (value == 'deconnexion') {
-                  context.read<PendingReservationState>().clear();
-                  auth.logout();
-                  context.go(AppRouter.home);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'profil',
-                  child: Text('Voir mon profil'),
-                ),
-                if (!auth.isResponsable)
-                  const PopupMenuItem(
-                    value: 'devenir_responsable',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.badge_outlined,
-                          size: 20,
-                          color: AppTheme.textSecondary,
+                  TextButton(
+                    onPressed: () => context.go(AppRouter.home),
+                    child: const Text('Accueil'),
+                  ),
+                  TextButton(
+                    onPressed: () => context.go(AppRouter.events),
+                    child: const Text('Événements'),
+                  ),
+                  TextButton(
+                    onPressed: () => context.go(AppRouter.billets),
+                    child: const Text('Billets'),
+                  ),
+                  if (auth.isResponsable) ...[
+                    const SizedBox(width: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: FilledButton(
+                        onPressed: () => context.go(AppRouter.responsable),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.accentGreen,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                        SizedBox(width: 12),
-                        Text('Devenir responsable'),
-                      ],
+                        child: const Text('Espace responsable'),
+                      ),
+                    ),
+                  ],
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 48),
+                    tooltip: auth.isResponsable
+                        ? 'Profil · Déconnexion'
+                        : 'Profil · Devenir responsable · Déconnexion',
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Profil'),
+                          SizedBox(width: 4),
+                          Icon(Icons.arrow_drop_down, size: 20),
+                        ],
+                      ),
+                    ),
+                    onSelected: (value) {
+                      if (value == 'profil') {
+                        context.go(AppRouter.profil);
+                      } else if (value == 'devenir_responsable') {
+                        context.go(AppRouter.devenirResponsable);
+                      } else if (value == 'deconnexion') {
+                        context.read<PendingReservationState>().clear();
+                        auth.logout();
+                        context.go(AppRouter.home);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'profil',
+                        child: Text('Voir mon profil'),
+                      ),
+                      if (!auth.isResponsable)
+                        const PopupMenuItem(
+                          value: 'devenir_responsable',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.badge_outlined,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                              SizedBox(width: 12),
+                              Text('Devenir responsable'),
+                            ],
+                          ),
+                        ),
+                      const PopupMenuItem(
+                        value: 'deconnexion',
+                        child: Text('Déconnexion'),
+                      ),
+                    ],
+                  ),
+                  if (auth.isAdmin) ...[
+                    const SizedBox(width: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: FilledButton(
+                        onPressed: () => context.go(AppRouter.admin),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.primaryRed,
+                        ),
+                        child: const Text('Espace admin'),
+                      ),
+                    ),
+                  ],
+                ] else if (!isAuthPage) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: FilledButton.icon(
+                      onPressed: () => context.go(AppRouter.connexion),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.primaryRed,
+                      ),
+                      icon: const Icon(Icons.login_rounded, size: 18),
+                      label: const Text('S\'authentifier'),
                     ),
                   ),
-                const PopupMenuItem(
-                  value: 'deconnexion',
-                  child: Text('Déconnexion'),
-                ),
+                ],
               ],
             ),
-            if (auth.isAdmin) ...[
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: FilledButton(
-                  onPressed: () => context.go(AppRouter.admin),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppTheme.primaryRed,
-                  ),
-                  child: const Text('Espace admin'),
-                ),
-              ),
-            ],
-          ] else if (!isAuthPage) ...[
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: FilledButton.icon(
-                onPressed: () => context.go(AppRouter.connexion),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.primaryRed,
-                ),
-                icon: const Icon(Icons.login_rounded, size: 18),
-                label: const Text('S\'authentifier'),
-              ),
-            ),
-          ],
-        ],
-      ),
       drawer: isAdmin
           ? null
           : Drawer(
@@ -211,8 +211,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                     width: 24,
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      onEnter: (_) =>
-                          _scaffoldKey.currentState?.openDrawer(),
+                      onEnter: (_) => _scaffoldKey.currentState?.openDrawer(),
                       child: const SizedBox.expand(),
                     ),
                   ),

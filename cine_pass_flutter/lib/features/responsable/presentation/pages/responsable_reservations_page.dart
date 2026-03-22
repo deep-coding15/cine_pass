@@ -47,9 +47,10 @@ class _ResponsableReservationsPageState
   }
 
   Future<void> _showBillets(ReservationResponse r) async {
-    final lines = await client.cinePass.getReservationBilletDetailsForMyStructures(
-      reservationId: r.id,
-    );
+    final lines = await client.cinePass
+        .getReservationBilletDetailsForMyStructures(
+          reservationId: r.id,
+        );
     if (!mounted) return;
     showDialog<void>(
       context: context,
@@ -70,7 +71,9 @@ class _ResponsableReservationsPageState
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Text(
                               '- $l',
-                              style: const TextStyle(color: AppTheme.textPrimary),
+                              style: const TextStyle(
+                                color: AppTheme.textPrimary,
+                              ),
                             ),
                           ),
                         )
@@ -125,9 +128,10 @@ class _ResponsableReservationsPageState
   }
 
   Future<void> _exportReservationPdf(ReservationResponse r) async {
-    final lines = await client.cinePass.getReservationBilletDetailsForMyStructures(
-      reservationId: r.id,
-    );
+    final lines = await client.cinePass
+        .getReservationBilletDetailsForMyStructures(
+          reservationId: r.id,
+        );
     final header = await cinePassPdfHeader(
       title: 'CinePass — Réservation',
       subtitle: 'N° ${r.numero}',
@@ -157,10 +161,12 @@ class _ResponsableReservationsPageState
             if (lines.isEmpty)
               pw.Text('Aucun billet detaille.')
             else
-              ...lines.map((l) => pw.Padding(
-                    padding: const pw.EdgeInsets.only(bottom: 4),
-                    child: pw.Text('- $l'),
-                  )),
+              ...lines.map(
+                (l) => pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 4),
+                  child: pw.Text('- $l'),
+                ),
+              ),
           ],
         ),
       ),
@@ -300,121 +306,121 @@ class _ResponsableReservationsPageState
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(24),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Réservations',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Réservations pour les événements de vos structures. Cliquez sur une ligne pour voir le détail.',
-            style: TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (_loading)
-            const Center(
-              child: CircularProgressIndicator(color: AppTheme.accentGreen),
-            )
-          else if (_reservations.isEmpty)
-            Card(
-              color: AppTheme.cardDark,
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.confirmation_number_rounded,
-                        size: 64,
-                        color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucune réservation pour le moment.',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Réservations',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: AppTheme.textPrimary,
               ),
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _reservations.length,
-              itemBuilder: (context, index) {
-                final r = _reservations[index];
-                return Card(
-                  color: AppTheme.cardDark,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: InkWell(
-                    onTap: () => _showDetail(r),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  r.numero,
-                                  style: const TextStyle(
-                                    color: AppTheme.accentGreen,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${r.eventTitle ?? '—'}\n${r.totalAmount.toStringAsFixed(2)} MAD • ${r.createdAtStr}',
-                                  style: TextStyle(
-                                    color: AppTheme.textSecondary,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: () => _showDetail(r),
-                            icon: const Icon(
-                              Icons.visibility_rounded,
-                              size: 18,
-                            ),
-                            label: const Text('Voir détails'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppTheme.accentGreen,
-                            ),
-                          ),
-                          const Icon(
-                            Icons.chevron_right_rounded,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Réservations pour les événements de vos structures. Cliquez sur une ligne pour voir le détail.',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 24),
+            if (_loading)
+              const Center(
+                child: CircularProgressIndicator(color: AppTheme.accentGreen),
+              )
+            else if (_reservations.isEmpty)
+              Card(
+                color: AppTheme.cardDark,
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.confirmation_number_rounded,
+                          size: 64,
+                          color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Aucune réservation pour le moment.',
+                          style: TextStyle(
                             color: AppTheme.textSecondary,
+                            fontSize: 16,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
-            ),
-        ],
+                ),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _reservations.length,
+                itemBuilder: (context, index) {
+                  final r = _reservations[index];
+                  return Card(
+                    color: AppTheme.cardDark,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: InkWell(
+                      onTap: () => _showDetail(r),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    r.numero,
+                                    style: const TextStyle(
+                                      color: AppTheme.accentGreen,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${r.eventTitle ?? '—'}\n${r.totalAmount.toStringAsFixed(2)} MAD • ${r.createdAtStr}',
+                                    style: TextStyle(
+                                      color: AppTheme.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => _showDetail(r),
+                              icon: const Icon(
+                                Icons.visibility_rounded,
+                                size: 18,
+                              ),
+                              label: const Text('Voir détails'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.accentGreen,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
-    ),
     );
   }
 }
