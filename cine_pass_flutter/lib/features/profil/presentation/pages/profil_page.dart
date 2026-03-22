@@ -2,7 +2,7 @@ import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:cine_pass_client/src/protocol/cine_pass/profile_response.dart';
+//import 'package:cine_pass_client/src/protocol/cine_pass/profile_response.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/router/app_router.dart';
@@ -279,6 +279,17 @@ class _ProfilPageState extends State<ProfilPage> {
                     ),
                     onTap: _showEditProfile,
                   ),
+                  if (!auth.isResponsable) ...[
+                    const Divider(color: AppTheme.textSecondary, height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.badge_outlined, color: AppTheme.textPrimary),
+                      title: const Text(
+                        'Devenir responsable',
+                        style: TextStyle(color: AppTheme.textPrimary),
+                      ),
+                      onTap: () => context.go(AppRouter.devenirResponsable),
+                    ),
+                  ],
                   const Divider(color: AppTheme.textSecondary, height: 1),
                   ListTile(
                     leading: const Icon(Icons.logout_rounded, color: AppTheme.primaryRed),

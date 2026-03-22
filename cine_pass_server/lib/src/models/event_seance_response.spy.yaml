@@ -1,0 +1,9 @@
+class: EventSeanceResponse
+fields:
+  id: String
+  eventId: String
+  dateStr: String
+  timeStr: String
+  lieu: String
+  createdAtStr: String
+

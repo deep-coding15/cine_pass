@@ -1,7 +1,6 @@
 ### Structure (cinéma, salle, organisateur) — table gérée par le schéma SQL.
 class: Structure
 table: cine_pass_structure
-managedMigration: false
 fields:
   id: UuidValue, defaultModel=random
   type: String
