@@ -1,17 +1,26 @@
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/foundation.dart';
 
-/// Choix par billet pour une réservation événement (Normal/VIP + options par billet normal).
+/// Choix par billet (film: Normal/VIP + options; événement: type serveur + options payantes config).
 class EventTicketChoice {
   EventTicketChoice({
     this.isVip = false,
     this.optionParking = false,
     this.optionPopcorn = false,
     this.optionBoisson = false,
-  });
+    this.eventTypeCode = 'STANDARD',
+    Set<String>? eventPayantOptionCodes,
+  }) : eventPayantOptionCodes = eventPayantOptionCodes ?? {};
   bool isVip;
   bool optionParking;
   bool optionPopcorn;
   bool optionBoisson;
+
+  /// Code type billet événement (STANDARD, VIP, etc.) — aligné sur la config organisateur.
+  String eventTypeCode;
+
+  /// Options payantes sélectionnées (codes en majuscules).
+  Set<String> eventPayantOptionCodes;
 }
 
 /// État partagé de la réservation en cours (film ou événement).
@@ -52,6 +61,7 @@ class ReservationState extends ChangeNotifier {
       []; // options définies par l'admin pour l'événement
   List<String> _seanceAvailableOptions =
       []; // options définies par l'admin pour la séance (film)
+  EventReservationConfigResponse? _eventReservationConfig;
   static const double _priceParking = 3.0;
   static const double _pricePopcorn = 5.0;
   static const double _priceBoisson = 2.0;
@@ -95,6 +105,8 @@ class ReservationState extends ChangeNotifier {
       List.unmodifiable(_eventAvailableOptions);
   List<String> get seanceAvailableOptions =>
       List.unmodifiable(_seanceAvailableOptions);
+  EventReservationConfigResponse? get eventReservationConfig =>
+      _eventReservationConfig;
 
   double get totalFilm {
     if (_filmTickets.isNotEmpty) {
@@ -118,7 +130,26 @@ class ReservationState extends ChangeNotifier {
   }
 
   double get totalEvent {
-    double sum = 0;
+    final cfg = _eventReservationConfig;
+    if (cfg != null && cfg.ticketTypes.isNotEmpty) {
+      var sum = 0.0;
+      for (final ticket in _eventTickets) {
+        final typeCfg = _findTicketTypeConfig(cfg, ticket.eventTypeCode);
+        if (typeCfg == null) continue;
+        var line = typeCfg.price;
+        for (final oc in ticket.eventPayantOptionCodes) {
+          for (final o in typeCfg.options) {
+            if (o.optionCode.toUpperCase() != oc.toUpperCase()) continue;
+            if (!o.active || o.included) continue;
+            line += o.price;
+            break;
+          }
+        }
+        sum += line;
+      }
+      return sum;
+    }
+    var fallbackSum = 0.0;
     for (final t in _eventTickets) {
       final base = t.isVip ? _eventPricePerTicket * 1.5 : _eventPricePerTicket;
       final opts = t.isVip
@@ -126,9 +157,49 @@ class ReservationState extends ChangeNotifier {
           : (t.optionParking ? _priceParking : 0) +
                 (t.optionPopcorn ? _pricePopcorn : 0) +
                 (t.optionBoisson ? _priceBoisson : 0);
-      sum += base + opts;
+      fallbackSum += base + opts;
     }
-    return sum;
+    return fallbackSum;
+  }
+
+  EventTicketTypeConfigResponse? _findTicketTypeConfig(
+    EventReservationConfigResponse cfg,
+    String code,
+  ) {
+    final u = code.toUpperCase();
+    for (final t in cfg.ticketTypes) {
+      if (t.code.toUpperCase() == u) return t;
+    }
+    return null;
+  }
+
+  String _firstActiveEventTypeCode(EventReservationConfigResponse cfg) {
+    for (final t in cfg.ticketTypes) {
+      if (t.active) return t.code;
+    }
+    return cfg.ticketTypes.isNotEmpty ? cfg.ticketTypes.first.code : 'STANDARD';
+  }
+
+  /// Peut-on assigner ce type au billet [index] sans dépasser les quotas restants ?
+  bool canAssignEventTicketType(int index, String newTypeCode) {
+    final cfg = _eventReservationConfig;
+    if (cfg == null) return true;
+    final newU = newTypeCode.toUpperCase();
+    final counts = <String, int>{};
+    for (final t in cfg.ticketTypes) {
+      counts[t.code.toUpperCase()] = 0;
+    }
+    for (var j = 0; j < _eventTickets.length; j++) {
+      final c = (j == index ? newU : _eventTickets[j].eventTypeCode)
+          .toUpperCase();
+      counts[c] = (counts[c] ?? 0) + 1;
+    }
+    for (final t in cfg.ticketTypes) {
+      final c = t.code.toUpperCase();
+      final n = counts[c] ?? 0;
+      if (n > t.remaining) return false;
+    }
+    return true;
   }
 
   void setFilmReservation({
@@ -202,6 +273,7 @@ class ReservationState extends ChangeNotifier {
     required int quantity,
     required double pricePerTicket,
     List<String>? availableOptions,
+    EventReservationConfigResponse? reservationConfig,
   }) {
     _isEvent = true;
     _eventId = eventId;
@@ -210,11 +282,18 @@ class ReservationState extends ChangeNotifier {
     _eventDateTime = eventDateTime;
     _eventQuantity = quantity;
     _eventPricePerTicket = pricePerTicket;
+    _eventReservationConfig = reservationConfig;
     _eventAvailableOptions =
         availableOptions ?? ['parking', 'popcorn', 'boisson'];
+    final defaultType = reservationConfig != null
+        ? _firstActiveEventTypeCode(reservationConfig)
+        : 'STANDARD';
     _eventTickets = List.generate(
       quantity,
-      (_) => EventTicketChoice(isVip: false),
+      (_) => EventTicketChoice(
+        isVip: false,
+        eventTypeCode: defaultType,
+      ),
     );
     _filmId = null;
     _filmTickets = [];
@@ -223,9 +302,67 @@ class ReservationState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Si la config arrive après coup (ex. fetch API sur l’écran types de billets).
+  void applyEventReservationConfig(EventReservationConfigResponse cfg) {
+    _eventReservationConfig = cfg;
+    final def = _firstActiveEventTypeCode(cfg);
+    for (final t in _eventTickets) {
+      if (_findTicketTypeConfig(cfg, t.eventTypeCode) == null) {
+        t.eventTypeCode = def;
+      }
+      final tc = _findTicketTypeConfig(cfg, t.eventTypeCode);
+      if (tc != null) {
+        t.eventPayantOptionCodes.removeWhere(
+          (o) => !tc.options.any(
+            (opt) =>
+                opt.optionCode.toUpperCase() == o.toUpperCase() &&
+                opt.active &&
+                !opt.included,
+          ),
+        );
+      }
+    }
+    notifyListeners();
+  }
+
   void setEventTicketVip(int index, bool isVip) {
     if (index < 0 || index >= _eventTickets.length) return;
     _eventTickets[index].isVip = isVip;
+    notifyListeners();
+  }
+
+  void setEventTicketTypeCode(int index, String code) {
+    if (index < 0 || index >= _eventTickets.length) return;
+    final upper = code.toUpperCase();
+    if (!canAssignEventTicketType(index, upper)) return;
+    _eventTickets[index].eventTypeCode = upper;
+    _eventTickets[index].eventPayantOptionCodes.removeWhere((o) {
+      final cfg = _eventReservationConfig;
+      if (cfg == null) return true;
+      final tc = _findTicketTypeConfig(cfg, upper);
+      if (tc == null) return true;
+      return !tc.options.any(
+        (opt) =>
+            opt.optionCode.toUpperCase() == o.toUpperCase() &&
+            opt.active &&
+            !opt.included,
+      );
+    });
+    notifyListeners();
+  }
+
+  void setEventTicketPayantOption(
+    int index,
+    String optionCode,
+    bool value,
+  ) {
+    if (index < 0 || index >= _eventTickets.length) return;
+    final u = optionCode.toUpperCase();
+    if (value) {
+      _eventTickets[index].eventPayantOptionCodes.add(u);
+    } else {
+      _eventTickets[index].eventPayantOptionCodes.remove(u);
+    }
     notifyListeners();
   }
 
@@ -302,6 +439,7 @@ class ReservationState extends ChangeNotifier {
     _optionParking = false;
     _optionPopcorn = false;
     _optionBoisson = false;
+    _eventReservationConfig = null;
     notifyListeners();
   }
 }

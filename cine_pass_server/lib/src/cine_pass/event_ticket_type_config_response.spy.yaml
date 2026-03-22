@@ -1,0 +1,11 @@
+class: EventTicketTypeConfigResponse
+fields:
+  code: String
+  label: String
+  price: double
+  quota: int
+  soldCount: int
+  remaining: int
+  active: bool
+  sortOrder: int
+  options: List<EventTicketOptionResponse>

@@ -39,6 +39,8 @@ dependencies:
   fl_chart: ^0.69.0
   pdf: ^3.11.1
   printing: ^5.13.2
+  barcode: ^2.2.9
+  file_picker: ^10.3.2
   shared_preferences: ^2.2.2
 
 dev_dependencies:

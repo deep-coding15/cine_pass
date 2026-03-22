@@ -1,0 +1,8 @@
+class: ReservationQuoteLineResponse
+fields:
+  ticketTypeCode: String
+  ticketTypeLabel: String
+  quantity: int
+  unitPrice: double
+  lineTotal: double
+  remainingAfterQuote: int

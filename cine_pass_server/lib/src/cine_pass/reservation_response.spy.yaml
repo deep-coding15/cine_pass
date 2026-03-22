@@ -7,3 +7,6 @@ fields:
   createdAtStr: String
   statut: String
   nbBillets: int
+  userEmail: String?
+  locationLabel: String?
+  sessionAtStr: String?

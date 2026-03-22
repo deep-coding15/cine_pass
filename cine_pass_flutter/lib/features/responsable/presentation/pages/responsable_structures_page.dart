@@ -55,6 +55,107 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
     }
   }
 
+  Future<void> _editStructure() async {
+    final current = _structure;
+    if (current == null) return;
+
+    final nameController = TextEditingController(text: current.name);
+    final cityController = TextEditingController(text: current.city);
+    final addressController = TextEditingController(text: current.address ?? '');
+    final websiteController = TextEditingController(text: current.website ?? '');
+    final phoneController = TextEditingController(text: current.phone ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Modifier ma structure'),
+        content: SizedBox(
+          width: 520,
+          child: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Nom *'),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Le nom est requis'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: cityController,
+                    decoration: const InputDecoration(labelText: 'Ville *'),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'La ville est requise'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: addressController,
+                    decoration: const InputDecoration(labelText: 'Adresse'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: websiteController,
+                    decoration: const InputDecoration(labelText: 'Site web'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: phoneController,
+                    decoration: const InputDecoration(labelText: 'Téléphone'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (formKey.currentState?.validate() != true) return;
+              final updated = await client.cinePass.updateMyStructure(
+                structureId: current.id.uuid,
+                name: nameController.text.trim(),
+                city: cityController.text.trim(),
+                address: addressController.text.trim().isEmpty
+                    ? null
+                    : addressController.text.trim(),
+                website: websiteController.text.trim().isEmpty
+                    ? null
+                    : websiteController.text.trim(),
+                phone: phoneController.text.trim().isEmpty
+                    ? null
+                    : phoneController.text.trim(),
+              );
+              if (!mounted) return;
+              Navigator.pop(ctx, updated != null);
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGreen),
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || saved != true) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Structure mise à jour.'),
+        backgroundColor: AppTheme.accentGreen,
+      ),
+    );
+    await _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -117,7 +218,11 @@ class _ResponsableStructuresPageState extends State<ResponsableStructuresPage> {
               ),
             )
           else
-            _MaStructureCard(structure: _structure!, labelType: _labelType),
+            _MaStructureCard(
+              structure: _structure!,
+              labelType: _labelType,
+              onEdit: _editStructure,
+            ),
         ],
       ),
     );
@@ -128,10 +233,12 @@ class _MaStructureCard extends StatelessWidget {
   const _MaStructureCard({
     required this.structure,
     required this.labelType,
+    required this.onEdit,
   });
 
   final Structure structure;
   final String Function(String) labelType;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +286,12 @@ class _MaStructureCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Modifier'),
                 ),
               ],
             ),

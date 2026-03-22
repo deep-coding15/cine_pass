@@ -1,0 +1,8 @@
+class: EventTicketOptionResponse
+fields:
+  optionCode: String
+  label: String
+  price: double
+  included: bool
+  active: bool
+  sortOrder: int

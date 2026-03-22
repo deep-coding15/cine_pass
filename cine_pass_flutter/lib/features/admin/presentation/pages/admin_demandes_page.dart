@@ -65,6 +65,71 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
     }
   }
 
+  void _voirDetails(DemandeResponsableResponse d) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: Text(d.structureName),
+        content: SingleChildScrollView(
+          child: SizedBox(
+            width: 480,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _dLine('Type de structure', _labelType(d.structureType)),
+                _dLine('Ville', d.structureCity),
+                _dLine('Adresse', d.structureAddress),
+                _dLine('Site web', d.structureWebsite),
+                _dLine('SIRET', d.structureSiret),
+                _dLine('Téléphone structure', d.structurePhone),
+                _dLine('Rôle du contact', d.contactRole),
+                _dLine('Description du projet', d.description),
+                _dLine('Réseaux / liens', d.socialLinks),
+                const Divider(height: 24),
+                _dLine('Compte (email connexion)', d.userEmail),
+                _dLine('Nom profil', d.userName),
+                _dLine('Email pro (responsable)', d.professionalEmail),
+                _dLine('ID utilisateur', d.userId),
+                _dLine('Reçue le', d.createdAt),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dLine(String label, String? value) {
+    final v = (value ?? '').trim();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppTheme.textSecondary.withValues(alpha: 0.9),
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 2),
+          SelectableText(
+            v.isEmpty ? '—' : v,
+            style: const TextStyle(color: AppTheme.textPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _rejeter(String id) {
     showDialog(
       context: context,
@@ -103,6 +168,14 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
                       ),
                     );
                     setState(() => _demandes.removeWhere((d) => d.id == id));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Demande introuvable ou déjà traitée.',
+                        ),
+                      ),
+                    );
                   }
                 } catch (_) {
                   if (!mounted) return;
@@ -224,6 +297,10 @@ class _AdminDemandesPageState extends State<AdminDemandesPage> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          TextButton(
+                            onPressed: () => _voirDetails(d),
+                            child: const Text('Détails'),
+                          ),
                           TextButton(
                             onPressed: () => _rejeter(d.id),
                             child: const Text('Rejeter'),

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math' as math;
+
 import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +13,81 @@ import '../../../../core/state/favorites_state.dart';
 import '../../../../core/state/pending_reservation_state.dart';
 import '../../../../features/reservation/data/reservation_state.dart';
 import '../../../../main.dart';
+import '../widgets/event_type_badge.dart';
+
+/// Places encore réservables : somme des quotas restants (types actifs), sinon `placesLeft` de l’événement.
+String _formatEventTimeLabel(String raw) {
+  final t = raw.trim();
+  if (t.isEmpty) return '—';
+  final d = DateTime.tryParse(t);
+  if (d != null) {
+    final h = d.hour.toString().padLeft(2, '0');
+    final m = d.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+  if (RegExp(r'^\d{1,2}:\d{2}').hasMatch(t)) {
+    return t.length >= 5 ? t.substring(0, 5) : t;
+  }
+  return t;
+}
+
+Widget _eventHeroImage(EventResponse event) {
+  final posterUrl = event.posterUrl;
+  final posterColor = event.posterColor ?? 0xFF4E1B3D;
+  final c = Color(posterColor);
+  final fallback = Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [c, c.withValues(alpha: 0.5)],
+      ),
+    ),
+    child: Center(
+      child: Icon(
+        Icons.event_rounded,
+        size: 64,
+        color: Colors.white.withValues(alpha: 0.4),
+      ),
+    ),
+  );
+  if (posterUrl == null || posterUrl.isEmpty) return fallback;
+  if (posterUrl.startsWith('data:')) {
+    try {
+      final i = posterUrl.indexOf(',');
+      if (i > 0) {
+        final bytes = base64Decode(posterUrl.substring(i + 1));
+        return Image.memory(
+          bytes,
+          height: 200,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => fallback,
+        );
+      }
+    } catch (_) {
+      return fallback;
+    }
+  }
+  return Image.network(
+    posterUrl,
+    height: 200,
+    width: double.infinity,
+    fit: BoxFit.cover,
+    errorBuilder: (_, _, _) => fallback,
+  );
+}
+
+int _maxBookableTickets(
+  EventResponse event,
+  EventReservationConfigResponse? cfg,
+) {
+  final active = cfg?.ticketTypes.where((t) => t.active).toList() ?? [];
+  if (active.isEmpty) {
+    return event.placesLeft;
+  }
+  return active.fold<int>(0, (sum, t) => sum + t.remaining);
+}
 
 class EventDetailPage extends StatefulWidget {
   const EventDetailPage({super.key, required this.eventId});
@@ -23,6 +101,7 @@ class EventDetailPage extends StatefulWidget {
 class _EventDetailPageState extends State<EventDetailPage> {
   int _quantity = 1;
   EventResponse? _event;
+  EventReservationConfigResponse? _reservationConfig;
   bool _loading = true;
   String? _error;
 
@@ -39,9 +118,24 @@ class _EventDetailPageState extends State<EventDetailPage> {
     });
     try {
       final event = await client.cinePass.getEventById(widget.eventId);
+      final config = await client.cinePass.getEventReservationConfig(
+        widget.eventId,
+      );
       if (!mounted) return;
+      if (event == null) {
+        setState(() {
+          _loading = false;
+          _error = 'Événement introuvable';
+        });
+        return;
+      }
       setState(() {
         _event = event;
+        _reservationConfig = config;
+        final maxB = _maxBookableTickets(event, config);
+        if (maxB > 0 && _quantity > maxB) {
+          _quantity = maxB;
+        }
         _loading = false;
       });
     } catch (e) {
@@ -77,8 +171,23 @@ class _EventDetailPageState extends State<EventDetailPage> {
       );
     }
     final event = _event!;
-    final maxQty = event.placesLeft.clamp(1, 999);
-    final total = event.price * _quantity;
+    final cfg = _reservationConfig;
+    final activeTypes =
+        cfg?.ticketTypes.where((t) => t.active).toList() ?? const [];
+    final maxBookable = _maxBookableTickets(event, cfg);
+    final maxPerOrder = cfg?.maxTicketsPerOrder ?? 8;
+    final maxQty = maxBookable <= 0 ? 0 : math.min(maxBookable, maxPerOrder);
+    final referenceUnitPrice = activeTypes.isEmpty
+        ? event.price
+        : activeTypes.map((t) => t.price).reduce((a, b) => a < b ? a : b);
+    final maxUnitPrice = activeTypes.isEmpty
+        ? event.price
+        : activeTypes.map((t) => t.price).reduce((a, b) => a > b ? a : b);
+    final multiTarif =
+        activeTypes.length > 1 &&
+        (maxUnitPrice - referenceUnitPrice).abs() > 0.009;
+    final minEstimateTotal = referenceUnitPrice * _quantity;
+    final maxEstimateTotal = maxUnitPrice * _quantity;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -99,49 +208,16 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   style: TextStyle(color: AppTheme.textSecondary),
                 ),
                 const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryRed,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    event.category,
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
+                EventTypeBadge(event: event),
               ],
             ),
           ),
           const SizedBox(height: 24),
           Stack(
             children: [
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(event.posterColor ?? 0xFF4E1B3D),
-                      Color(
-                        event.posterColor ?? 0xFF4E1B3D,
-                      ).withValues(alpha: 0.5),
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.event_rounded,
-                    size: 64,
-                    color: Colors.white.withValues(alpha: 0.4),
-                  ),
-                ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: _eventHeroImage(event),
               ),
               if (context.watch<AuthState>().isLoggedIn)
                 Positioned(
@@ -149,6 +225,11 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   right: 16,
                   child: _EventFavoriteHeart(eventId: event.id),
                 ),
+              Positioned(
+                top: 16,
+                left: 16,
+                child: EventTypeBadge(event: event),
+              ),
               Positioned(
                 left: 24,
                 bottom: 24,
@@ -191,6 +272,46 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                 color: AppTheme.textSecondary,
                                 height: 1.5,
                               ),
+                            ),
+                            const SizedBox(height: 14),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                if ((event.eventType ?? '').isNotEmpty)
+                                  _detailChip(
+                                    'Type',
+                                    eventTypeDisplayLabel(event),
+                                  ),
+                                if ((event.eventLanguage ?? '').isNotEmpty)
+                                  _detailChip('Langue', event.eventLanguage!),
+                                if ((event.filmGenre ?? '').isNotEmpty)
+                                  _detailChip('Genre film', event.filmGenre!),
+                                if ((event.filmDirector ?? '').isNotEmpty)
+                                  _detailChip(
+                                    'Réalisateur',
+                                    event.filmDirector!,
+                                  ),
+                                if ((event.festivalTheme ?? '').isNotEmpty)
+                                  _detailChip(
+                                    'Thématique',
+                                    event.festivalTheme!,
+                                  ),
+                                if ((event.standupMainArtist ?? '').isNotEmpty)
+                                  _detailChip(
+                                    'Humoriste',
+                                    event.standupMainArtist!,
+                                  ),
+                                if ((event.concertArtist ?? '').isNotEmpty)
+                                  _detailChip('Artiste', event.concertArtist!),
+                                if ((event.concertMusicGenre ?? '').isNotEmpty)
+                                  _detailChip(
+                                    'Genre musical',
+                                    event.concertMusicGenre!,
+                                  ),
+                                if ((event.theatreAuthor ?? '').isNotEmpty)
+                                  _detailChip('Auteur', event.theatreAuthor!),
+                              ],
                             ),
                           ],
                         ),
@@ -275,10 +396,12 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                   color: AppTheme.textSecondary,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  event.time,
-                                  style: const TextStyle(
-                                    color: AppTheme.textSecondary,
+                                Expanded(
+                                  child: Text(
+                                    _formatEventTimeLabel(event.time),
+                                    style: const TextStyle(
+                                      color: AppTheme.textSecondary,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -293,7 +416,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  '${event.placesLeft} places disponibles',
+                                  maxBookable <= 0
+                                      ? 'Complet'
+                                      : '$maxBookable place${maxBookable > 1 ? 's' : ''} disponible${maxBookable > 1 ? 's' : ''}',
                                   style: const TextStyle(
                                     color: AppTheme.textPrimary,
                                   ),
@@ -325,7 +450,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Prix par billet',
+                          multiTarif ? 'Tarifs' : 'Prix par billet',
                           style: TextStyle(
                             color: AppTheme.textSecondary,
                             fontSize: 12,
@@ -333,13 +458,67 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${event.price.toStringAsFixed(2)} €',
-                          style: const TextStyle(
+                          multiTarif
+                              ? '${referenceUnitPrice.toStringAsFixed(2)} MAD — ${maxUnitPrice.toStringAsFixed(2)} MAD'
+                              : '${referenceUnitPrice.toStringAsFixed(2)} MAD',
+                          style: TextStyle(
                             color: AppTheme.accentGreen,
                             fontWeight: FontWeight.bold,
-                            fontSize: 24,
+                            fontSize: multiTarif ? 20 : 24,
                           ),
                         ),
+                        if (multiTarif) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            'Le total exact dépend des types choisis à l’étape suivante.',
+                            style: TextStyle(
+                              color: AppTheme.textSecondary.withValues(
+                                alpha: 0.9,
+                              ),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                        if (activeTypes.isNotEmpty &&
+                            activeTypes.length <= 4) ...[
+                          const SizedBox(height: 10),
+                          ...activeTypes.map(
+                            (t) => Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      t.label,
+                                      style: const TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${t.price.toStringAsFixed(2)} MAD',
+                                    style: const TextStyle(
+                                      color: AppTheme.textPrimary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '(${t.remaining} rest.)',
+                                    style: TextStyle(
+                                      color: AppTheme.textSecondary.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         const Text(
                           'Nombre de billets',
@@ -386,46 +565,89 @@ class _EventDetailPageState extends State<EventDetailPage> {
                           ],
                         ),
                         Text(
-                          'Maximum : ${event.placesLeft} billets',
+                          maxQty <= 0
+                              ? 'Aucune place disponible pour le moment.'
+                              : 'Maximum : $maxQty billet(s) (stock & limite commande)',
                           style: const TextStyle(
                             color: AppTheme.textSecondary,
                             fontSize: 12,
                           ),
                         ),
+                        if (_reservationConfig != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            _reservationConfig!.reservationMode == 'AVEC_SIEGES'
+                                ? 'Mode: réservation avec sièges.'
+                                : 'Mode: placement libre.',
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         const Divider(color: AppTheme.textSecondary),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Sous-total',
-                              style: TextStyle(color: AppTheme.textSecondary),
+                            Text(
+                              multiTarif ? 'Estimation (min.)' : 'Sous-total',
+                              style: const TextStyle(
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
                             Text(
-                              '${total.toStringAsFixed(2)} €',
+                              '${minEstimateTotal.toStringAsFixed(2)} MAD',
                               style: const TextStyle(
                                 color: AppTheme.textPrimary,
                               ),
                             ),
                           ],
                         ),
+                        if (multiTarif) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Estimation (max.)',
+                                style: TextStyle(color: AppTheme.textSecondary),
+                              ),
+                              Text(
+                                '${maxEstimateTotal.toStringAsFixed(2)} MAD',
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 8),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Total',
-                              style: TextStyle(
-                                color: AppTheme.textPrimary,
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Text(
+                                multiTarif ? 'Total (à confirmer)' : 'Total',
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            Text(
-                              '${total.toStringAsFixed(2)} €',
-                              style: const TextStyle(
-                                color: AppTheme.accentGreen,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                            Flexible(
+                              child: Text(
+                                multiTarif
+                                    ? 'À partir de ${minEstimateTotal.toStringAsFixed(2)} MAD'
+                                    : '${minEstimateTotal.toStringAsFixed(2)} MAD',
+                                textAlign: TextAlign.end,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: AppTheme.accentGreen,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ],
@@ -434,38 +656,46 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
-                            onPressed: () {
-                              final auth = context.read<AuthState>();
-                              if (!auth.isLoggedIn) {
-                                context
-                                    .read<PendingReservationState>()
-                                    .setPendingEvent(
-                                      eventId: event.id,
-                                      eventTitle: event.title,
-                                      eventLocation:
-                                          '${event.location}, ${event.city}',
-                                      eventDateTime:
-                                          '${event.date} à ${event.time}',
-                                      quantity: _quantity,
-                                      pricePerTicket: event.price,
-                                      availableOptions:
-                                          event.availableOptions ?? [],
+                            onPressed: maxQty <= 0
+                                ? null
+                                : () {
+                                    final auth = context.read<AuthState>();
+                                    if (!auth.isLoggedIn) {
+                                      context
+                                          .read<PendingReservationState>()
+                                          .setPendingEvent(
+                                            eventId: event.id,
+                                            eventTitle: event.title,
+                                            eventLocation:
+                                                '${event.location}, ${event.city}',
+                                            eventDateTime:
+                                                '${event.date} à ${event.time}',
+                                            quantity: _quantity,
+                                            pricePerTicket: referenceUnitPrice,
+                                            availableOptions:
+                                                event.availableOptions ?? [],
+                                          );
+                                      context.go(AppRouter.connexion);
+                                      return;
+                                    }
+                                    ReservationState.instance
+                                        .setEventReservation(
+                                          eventId: event.id,
+                                          eventTitle: event.title,
+                                          eventLocation:
+                                              '${event.location}, ${event.city}',
+                                          eventDateTime:
+                                              '${event.date} à ${event.time}',
+                                          quantity: _quantity,
+                                          pricePerTicket: referenceUnitPrice,
+                                          availableOptions:
+                                              event.availableOptions ?? [],
+                                          reservationConfig: _reservationConfig,
+                                        );
+                                    context.push(
+                                      AppRouter.reservationTypeBillet,
                                     );
-                                context.go(AppRouter.connexion);
-                                return;
-                              }
-                              ReservationState.instance.setEventReservation(
-                                eventId: event.id,
-                                eventTitle: event.title,
-                                eventLocation:
-                                    '${event.location}, ${event.city}',
-                                eventDateTime: '${event.date} à ${event.time}',
-                                quantity: _quantity,
-                                pricePerTicket: event.price,
-                                availableOptions: event.availableOptions ?? [],
-                              );
-                              context.push(AppRouter.reservationTypeBillet);
-                            },
+                                  },
                             style: FilledButton.styleFrom(
                               backgroundColor: AppTheme.primaryRed,
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -492,6 +722,21 @@ class _EventDetailPageState extends State<EventDetailPage> {
       ),
     );
   }
+}
+
+Widget _detailChip(String label, String value) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: AppTheme.surfaceDark,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: AppTheme.textSecondary.withValues(alpha: 0.25)),
+    ),
+    child: Text(
+      '$label: $value',
+      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+    ),
+  );
 }
 
 class _EventFavoriteHeart extends StatelessWidget {

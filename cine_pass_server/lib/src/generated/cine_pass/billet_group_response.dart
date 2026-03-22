@@ -27,6 +27,7 @@ abstract class BilletGroupResponse
     this.room,
     this.ticketTypes,
     required this.sessionDateTime,
+    required this.status,
   });
 
   factory BilletGroupResponse({
@@ -41,6 +42,7 @@ abstract class BilletGroupResponse
     String? room,
     List<String>? ticketTypes,
     required DateTime sessionDateTime,
+    required String status,
   }) = _BilletGroupResponseImpl;
 
   factory BilletGroupResponse.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -66,6 +68,7 @@ abstract class BilletGroupResponse
       sessionDateTime: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['sessionDateTime'],
       ),
+      status: jsonSerialization['status'] as String,
     );
   }
 
@@ -91,6 +94,8 @@ abstract class BilletGroupResponse
 
   DateTime sessionDateTime;
 
+  String status;
+
   /// Returns a shallow copy of this [BilletGroupResponse]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -106,6 +111,7 @@ abstract class BilletGroupResponse
     String? room,
     List<String>? ticketTypes,
     DateTime? sessionDateTime,
+    String? status,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -122,6 +128,7 @@ abstract class BilletGroupResponse
       if (room != null) 'room': room,
       if (ticketTypes != null) 'ticketTypes': ticketTypes?.toJson(),
       'sessionDateTime': sessionDateTime.toJson(),
+      'status': status,
     };
   }
 
@@ -140,6 +147,7 @@ abstract class BilletGroupResponse
       if (room != null) 'room': room,
       if (ticketTypes != null) 'ticketTypes': ticketTypes?.toJson(),
       'sessionDateTime': sessionDateTime.toJson(),
+      'status': status,
     };
   }
 
@@ -164,6 +172,7 @@ class _BilletGroupResponseImpl extends BilletGroupResponse {
     String? room,
     List<String>? ticketTypes,
     required DateTime sessionDateTime,
+    required String status,
   }) : super._(
          id: id,
          title: title,
@@ -176,6 +185,7 @@ class _BilletGroupResponseImpl extends BilletGroupResponse {
          room: room,
          ticketTypes: ticketTypes,
          sessionDateTime: sessionDateTime,
+         status: status,
        );
 
   /// Returns a shallow copy of this [BilletGroupResponse]
@@ -194,6 +204,7 @@ class _BilletGroupResponseImpl extends BilletGroupResponse {
     Object? room = _Undefined,
     Object? ticketTypes = _Undefined,
     DateTime? sessionDateTime,
+    String? status,
   }) {
     return BilletGroupResponse(
       id: id ?? this.id,
@@ -211,6 +222,7 @@ class _BilletGroupResponseImpl extends BilletGroupResponse {
           ? ticketTypes
           : this.ticketTypes?.map((e0) => e0).toList(),
       sessionDateTime: sessionDateTime ?? this.sessionDateTime,
+      status: status ?? this.status,
     );
   }
 }

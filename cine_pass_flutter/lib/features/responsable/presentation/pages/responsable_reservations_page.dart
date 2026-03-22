@@ -1,6 +1,10 @@
 import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
+import '../../../../core/pdf/pdf_branding.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
 
@@ -40,6 +44,128 @@ class _ResponsableReservationsPageState
         _loading = false;
       });
     }
+  }
+
+  Future<void> _showBillets(ReservationResponse r) async {
+    final lines = await client.cinePass.getReservationBilletDetailsForMyStructures(
+      reservationId: r.id,
+    );
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: Text('Billets • ${r.numero}'),
+        content: SizedBox(
+          width: 560,
+          child: lines.isEmpty
+              ? const Text('Aucun billet trouvé.')
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: lines
+                        .map(
+                          (l) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              '- $l',
+                              style: const TextStyle(color: AppTheme.textPrimary),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _manageStatus(ReservationResponse r) async {
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Changer le statut'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: ['pending', 'paid', 'cancelled', 'refunded']
+              .map(
+                (s) => ListTile(
+                  title: Text(s),
+                  onTap: () => Navigator.pop(ctx, s),
+                ),
+              )
+              .toList(),
+        ),
+      ),
+    );
+    if (selected == null) return;
+    final ok = await client.cinePass.updateReservationStatusForMyStructures(
+      reservationId: r.id,
+      status: selected,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Statut mis à jour.' : 'Mise à jour impossible.'),
+        backgroundColor: ok ? AppTheme.accentGreen : AppTheme.primaryRed,
+      ),
+    );
+    if (ok) {
+      await _load();
+    }
+  }
+
+  Future<void> _exportReservationPdf(ReservationResponse r) async {
+    final lines = await client.cinePass.getReservationBilletDetailsForMyStructures(
+      reservationId: r.id,
+    );
+    final header = await cinePassPdfHeader(
+      title: 'CinePass — Réservation',
+      subtitle: 'N° ${r.numero}',
+    );
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(28),
+        build: (_) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            header,
+            pw.SizedBox(height: 12),
+            pw.Text('Numero: ${r.numero}'),
+            pw.Text('Evenement: ${r.eventTitle ?? '-'}'),
+            pw.Text('Date: ${r.createdAtStr}'),
+            pw.Text('Billets: ${r.nbBillets}'),
+            pw.Text('Total: ${r.totalAmount.toStringAsFixed(2)} MAD'),
+            pw.Text('Statut: ${r.statut}'),
+            pw.SizedBox(height: 14),
+            pw.Text(
+              'Details billets',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 8),
+            if (lines.isEmpty)
+              pw.Text('Aucun billet detaille.')
+            else
+              ...lines.map((l) => pw.Padding(
+                    padding: const pw.EdgeInsets.only(bottom: 4),
+                    child: pw.Text('- $l'),
+                  )),
+          ],
+        ),
+      ),
+    );
+    await Printing.layoutPdf(onLayout: (_) async => pdf.save());
   }
 
   void _showDetail(ReservationResponse r) {
@@ -106,22 +232,14 @@ class _ResponsableReservationsPageState
               _DetailRow(label: 'Billets', value: '${r.nbBillets}'),
               _DetailRow(
                 label: 'Total',
-                value: '${r.totalAmount.toStringAsFixed(2)} €',
+                value: '${r.totalAmount.toStringAsFixed(2)} MAD',
               ),
               _DetailRow(label: 'Statut', value: r.statut),
               const SizedBox(height: 24),
               Row(
                 children: [
                   TextButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Ouverture page de détail complète / billets — à brancher',
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _showBillets(r),
                     icon: const Icon(Icons.receipt_long_rounded, size: 20),
                     label: const Text('Voir les billets'),
                     style: TextButton.styleFrom(
@@ -130,15 +248,7 @@ class _ResponsableReservationsPageState
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Changer le statut (annuler / rembourser) — à brancher',
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _manageStatus(r),
                     icon: const Icon(Icons.swap_horiz_rounded, size: 20),
                     label: const Text('Gérer le statut'),
                     style: OutlinedButton.styleFrom(
@@ -152,11 +262,9 @@ class _ResponsableReservationsPageState
               Row(
                 children: [
                   OutlinedButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Export PDF à venir')),
-                      );
+                      await _exportReservationPdf(r);
                     },
                     icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
                     label: const Text('Exporter PDF'),
@@ -185,9 +293,13 @@ class _ResponsableReservationsPageState
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
+    return RefreshIndicator(
+      color: AppTheme.accentGreen,
+      onRefresh: _load,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -269,7 +381,7 @@ class _ResponsableReservationsPageState
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${r.eventTitle ?? '—'}\n${r.totalAmount.toStringAsFixed(2)} € • ${r.createdAtStr}',
+                                  '${r.eventTitle ?? '—'}\n${r.totalAmount.toStringAsFixed(2)} MAD • ${r.createdAtStr}',
                                   style: TextStyle(
                                     color: AppTheme.textSecondary,
                                     fontSize: 13,
@@ -302,6 +414,7 @@ class _ResponsableReservationsPageState
             ),
         ],
       ),
+    ),
     );
   }
 }

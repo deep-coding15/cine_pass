@@ -1,0 +1,7 @@
+class: EventReservationConfigResponse
+fields:
+  eventId: String
+  reservationMode: String
+  maxTicketsPerOrder: int
+  adjacentBestEffort: bool
+  ticketTypes: List<EventTicketTypeConfigResponse>

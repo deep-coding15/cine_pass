@@ -1,0 +1,7 @@
+class: ReservationConfirmResponse
+fields:
+  success: bool
+  message: String
+  reservationNumber: String?
+  totalAmount: double
+  placementLabel: String?

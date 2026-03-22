@@ -1,0 +1,9 @@
+class: ReservationQuoteResponse
+fields:
+  eventId: String
+  reservationMode: String
+  available: bool
+  message: String
+  totalAmount: double
+  ticketCount: int
+  lines: List<ReservationQuoteLineResponse>

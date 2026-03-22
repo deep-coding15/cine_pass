@@ -450,7 +450,7 @@ class _SeanceCard extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '${seance.price.toStringAsFixed(2)} €',
+                        '${seance.price.toStringAsFixed(2)} MAD',
                         style: const TextStyle(
                           color: AppTheme.accentGreen,
                           fontWeight: FontWeight.bold,

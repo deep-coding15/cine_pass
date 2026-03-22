@@ -1,6 +1,7 @@
 @echo off
 REM =============================================================================
 REM CinePass — Reset complet du schéma métier + seed (base propre)
+REM cine_pass_schema.sql inclut déjà le DROP (phase 0) puis la recréation.
 REM À lancer depuis cine_pass_server avec Docker qui tourne.
 REM Usage: schema\reset_and_seed.cmd
 REM =============================================================================
@@ -10,25 +11,16 @@ set DB=cine_pass
 set USER=postgres
 
 echo.
-echo [1/3] Suppression des tables metier CinePass...
-type schema\drop_cine_pass_tables.sql | docker exec -i %CONTAINER% psql -U %USER% -d %DB%
-if errorlevel 1 (
-    echo ERREUR: drop a echoue. Verifiez que Docker tourne et que le conteneur s appelle %CONTAINER%
-    pause
-    exit /b 1
-)
-
-echo.
-echo [2/3] Creation du schema...
+echo [1/2] Drop + creation du schema (fichier unique cine_pass_schema.sql^)...
 type schema\cine_pass_schema.sql | docker exec -i %CONTAINER% psql -U %USER% -d %DB%
 if errorlevel 1 (
-    echo ERREUR: schema a echoue.
+    echo ERREUR: schema a echoue. Verifiez Docker et le nom du conteneur %CONTAINER%
     pause
     exit /b 1
 )
 
 echo.
-echo [3/3] Insertion des donnees de test (seed)...
+echo [2/2] Insertion des donnees de test (seed^)...
 type schema\seed_data.sql | docker exec -i %CONTAINER% psql -U %USER% -d %DB%
 if errorlevel 1 (
     echo ERREUR: seed a echoue.

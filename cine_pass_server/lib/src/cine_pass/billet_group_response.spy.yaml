@@ -11,4 +11,5 @@ fields:
   room: String?
   ticketTypes: List<String>?
   sessionDateTime: DateTime
+  status: String
 

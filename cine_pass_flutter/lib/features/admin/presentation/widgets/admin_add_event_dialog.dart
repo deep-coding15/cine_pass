@@ -130,8 +130,8 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
-                          // ignore: deprecated_member_use
-                          value: _venueType,
+                          key: ValueKey<String>(_venueType),
+                          initialValue: _venueType,
                           decoration: _decoration('Type de lieu'),
                           dropdownColor: AppTheme.cardDark,
                           items: const [
@@ -218,7 +218,7 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
                                     ),
-                                decoration: _decoration('Prix (€)'),
+                                decoration: _decoration('Prix (MAD)'),
                                 style: const TextStyle(
                                   color: AppTheme.textPrimary,
                                 ),
@@ -322,10 +322,12 @@ class _AdminAddEventDialogState extends State<AdminAddEventDialog> {
                                               35.0,
                                           posterColor: null,
                                           posterUrl:
-                                              _posterUrlController.text.trim().isEmpty
-                                                  ? null
-                                                  : _posterUrlController.text
-                                                      .trim(),
+                                              _posterUrlController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? null
+                                              : _posterUrlController.text
+                                                    .trim(),
                                         );
                                     if (!context.mounted) return;
                                     if (created != null) {

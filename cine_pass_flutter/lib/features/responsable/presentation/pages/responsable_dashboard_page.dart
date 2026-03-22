@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
-
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/state/auth_state.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../main.dart';
 
-/// Tableau de bord responsable : CA, indicateurs clés, graphiques détaillés.
+/// Tableau de bord responsable : indicateurs et accès rapides.
 class ResponsableDashboardPage extends StatefulWidget {
   const ResponsableDashboardPage({super.key});
 
@@ -23,17 +22,6 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
   double _chiffreAffaires = 0;
   bool _loading = true;
 
-  /// CA par mois (6 derniers mois) — mock.
-  final List<double> _caParMois = [120.0, 340.0, 180.0, 520.0, 410.0, 380.0];
-  final List<String> _moisLabels = ['Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar'];
-
-  /// Réservations / CA par événement — mock.
-  final List<_EventStats> _eventStats = [
-    _EventStats(title: 'Concert Jazz', reservations: 12, ca: 540.0),
-    _EventStats(title: 'Théâtre', reservations: 8, ca: 320.0),
-    _EventStats(title: 'Soirée Ciné', reservations: 5, ca: 75.0),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -41,15 +29,24 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
   }
 
   Future<void> _load() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _countStructures = 1;
-      _countEvents = 1;
-      _countReservations = 3;
-      _chiffreAffaires = _caParMois.reduce((a, b) => a + b);
-      _loading = false;
-    });
+    try {
+      final structure = await client.cinePass.getMyStructure();
+      final events = await client.cinePass.getMyEvents();
+      final rapport = await client.cinePass.getRapportCA('30j');
+      if (!mounted) return;
+      setState(() {
+        _countStructures = structure != null ? 1 : 0;
+        _countEvents = events.length;
+        _countReservations = rapport.nbReservations;
+        _chiffreAffaires = rapport.totalCA;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -89,8 +86,8 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
               Expanded(
                 child: _KpiCard(
                   title: 'Chiffre d\'affaires',
-                  value: '${_chiffreAffaires.toStringAsFixed(0)} €',
-                  subtitle: 'Total période',
+                  value: '${_chiffreAffaires.toStringAsFixed(0)} MAD',
+                  subtitle: '30 derniers jours',
                   icon: Icons.euro_rounded,
                   color: AppTheme.accentGreen,
                 ),
@@ -100,7 +97,7 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
                 child: _KpiCard(
                   title: 'Réservations',
                   value: '$_countReservations',
-                  subtitle: 'Toutes structures',
+                  subtitle: '30 derniers jours',
                   icon: Icons.confirmation_number_rounded,
                   color: AppTheme.primaryRed,
                 ),
@@ -131,179 +128,12 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
               ),
             ],
           ),
-          const SizedBox(height: 32),
-
-          // Graphique CA par mois
+          const SizedBox(height: 24),
           Text(
-            'Chiffre d\'affaires par mois',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 220,
-            child: Card(
-              color: AppTheme.cardDark,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 20,
-                  right: 16,
-                  left: 8,
-                  bottom: 12,
-                ),
-                child: BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    maxY: (_caParMois.reduce((a, b) => a > b ? a : b) * 1.2)
-                        .ceilToDouble(),
-                    barTouchData: BarTouchData(enabled: true),
-                    titlesData: FlTitlesData(
-                      show: true,
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            final i = value.toInt();
-                            if (i >= 0 && i < _moisLabels.length) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  _moisLabels[i],
-                                  style: const TextStyle(
-                                    color: AppTheme.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          },
-                          reservedSize: 28,
-                          interval: 1,
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 36,
-                          getTitlesWidget: (value, meta) => Text(
-                            '${value.toInt()} €',
-                            style: const TextStyle(
-                              color: AppTheme.textSecondary,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: 100,
-                      getDrawingHorizontalLine: (value) => FlLine(
-                        color: AppTheme.textSecondary.withValues(alpha: 0.15),
-                        strokeWidth: 1,
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    barGroups: _caParMois
-                        .asMap()
-                        .entries
-                        .map(
-                          (e) => BarChartGroupData(
-                            x: e.key,
-                            barRods: [
-                              BarChartRodData(
-                                toY: e.value,
-                                color: AppTheme.accentGreen,
-                                width: 24,
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(6),
-                                ),
-                              ),
-                            ],
-                            showingTooltipIndicators: [0],
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  duration: const Duration(milliseconds: 300),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 28),
-
-          // CA / réservations par événement
-          Text(
-            'Réservations et CA par événement',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            color: AppTheme.cardDark,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: _eventStats.map((e) {
-                  final maxCa = _eventStats
-                      .map((x) => x.ca)
-                      .reduce((a, b) => a > b ? a : b);
-                  final pct = maxCa > 0 ? (e.ca / maxCa) : 0.0;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                e.title,
-                                style: const TextStyle(
-                                  color: AppTheme.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Text(
-                              '${e.reservations} rés. • ${e.ca.toStringAsFixed(0)} €',
-                              style: TextStyle(
-                                color: AppTheme.textSecondary,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: pct,
-                            minHeight: 8,
-                            backgroundColor: AppTheme.surfaceDark,
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppTheme.primaryRed,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+            'Les montants détaillés et exports sont dans l’onglet Rapports.',
+            style: TextStyle(
+              color: AppTheme.textSecondary.withValues(alpha: 0.95),
+              fontSize: 13,
             ),
           ),
           const SizedBox(height: 28),
@@ -512,13 +342,3 @@ class _DashboardCard extends StatelessWidget {
   }
 }
 
-class _EventStats {
-  final String title;
-  final int reservations;
-  final double ca;
-  _EventStats({
-    required this.title,
-    required this.reservations,
-    required this.ca,
-  });
-}

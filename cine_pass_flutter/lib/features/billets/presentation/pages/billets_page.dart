@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/billets_state.dart';
 import '../../data/billets_cache_store.dart';
+import '../../data/billet_pdf_export.dart';
 import '../../data/mock_billets_data.dart';
 import '../../../../main.dart';
 
@@ -158,7 +159,7 @@ class _BilletsPageState extends State<BilletsPage> {
               }
               if (snap.hasError) {
                 return Text(
-                  'Impossible de charger vos billets pour le moment. Connectez-vous a internet puis reessayez.',
+                  'Impossible de charger vos billets pour le moment. Connectez-vous à Internet puis réessayez.',
                   style: const TextStyle(color: Colors.redAccent),
                 );
               }
@@ -210,7 +211,14 @@ class _BilletsPageState extends State<BilletsPage> {
                         ],
                       ),
                     ),
-                  ...list.map((b) => _BilletCard(billet: b)),
+                  ...list.map(
+                    (b) => _BilletCard(
+                      billet: b,
+                      onCancelled: () {
+                        setState(() => _future = _loadBilletsWithOfflineFallback());
+                      },
+                    ),
+                  ),
                 ],
               );
             },
@@ -222,16 +230,18 @@ class _BilletsPageState extends State<BilletsPage> {
 }
 
 class _BilletCard extends StatelessWidget {
-  const _BilletCard({required this.billet});
+  const _BilletCard({required this.billet, required this.onCancelled});
 
   final BilletGroupResponse billet;
+  final VoidCallback onCancelled;
 
   @override
   Widget build(BuildContext context) {
     final billetsState = context.watch<BilletsState>();
-    final cancelled = billetsState.isCancelled(billet.id);
+    final cancelled =
+        billet.status.toLowerCase() == 'cancelled' || billetsState.isCancelled(billet.id);
     final canCancel =
-        !cancelled && canCancelReservation(billet.sessionDateTime);
+        billet.isEvent && !cancelled && canCancelReservation(billet.sessionDateTime);
     final refundPercent = getRefundPercent(billet.sessionDateTime);
     final refundWhenCancelled = billetsState.getRefundPercentWhenCancelled(
       billet.id,
@@ -472,7 +482,7 @@ class _BilletCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${billet.totalAmount.toStringAsFixed(2)} €',
+                        '${billet.totalAmount.toStringAsFixed(2)} MAD',
                         style: const TextStyle(
                           color: AppTheme.accentGreen,
                           fontWeight: FontWeight.bold,
@@ -501,11 +511,26 @@ class _BilletCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     OutlinedButton.icon(
-                      onPressed: () {
+                      onPressed: () async {
                         final percent = getRefundPercent(
                           billet.sessionDateTime,
                         );
+                        final ok = await client.cinePass.cancelMyEventReservation(
+                          reservationNumber: billet.id,
+                        );
+                        if (!context.mounted) return;
+                        if (!ok) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Annulation impossible (délai dépassé ou réservation déjà annulée).',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
                         billetsState.cancel(billet.id, percent);
+                        onCancelled();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -524,9 +549,10 @@ class _BilletCard extends StatelessWidget {
                     const SizedBox(height: 12),
                   ] else if (!cancelled &&
                       !canCancel &&
+                      billet.isEvent &&
                       DateTime.now().isBefore(billet.sessionDateTime)) ...[
                     Text(
-                      'Annulation non possible (moins de 2 h avant la séance)',
+                      'Annulation non possible (moins de 2 h avant le début de l\'événement)',
                       style: TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 12,
@@ -534,7 +560,7 @@ class _BilletCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                   ],
-                  if (!cancelled)
+                  if (!cancelled) ...[
                     Row(
                       children: [
                         Icon(
@@ -553,6 +579,30 @@ class _BilletCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        try {
+                          await shareBilletPdf(billet);
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Impossible de générer le PDF : $e'),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                      label: const Text('Télécharger le billet (PDF)'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.textPrimary,
+                        side: BorderSide(
+                          color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

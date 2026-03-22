@@ -7,6 +7,14 @@ fields:
   structureName: String
   structureCity: String
   structureAddress: String?
+  structureWebsite: String?
+  structureSiret: String?
+  structurePhone: String?
+  contactRole: String?
+  description: String?
+  socialLinks: String?
+  professionalEmail: String?
   status: String
   createdAt: String
   userName: String?
+  userEmail: String?

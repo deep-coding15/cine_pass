@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
-import '../../data/mock_admin_data.dart';
 import '../widgets/admin_add_film_dialog.dart';
 
 class AdminFilmsPage extends StatefulWidget {
@@ -15,6 +14,7 @@ class AdminFilmsPage extends StatefulWidget {
 
 class _AdminFilmsPageState extends State<AdminFilmsPage> {
   final _searchController = TextEditingController();
+  List<FilmResponse> _allFilms = [];
   List<FilmResponse> _films = [];
   bool _loading = true;
 
@@ -36,13 +36,14 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
       final films = await client.cinePass.getFilms();
       if (!mounted) return;
       setState(() {
-        _films = films;
+        _allFilms = films;
         _loading = false;
         _applySearch();
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
+        _allFilms = [];
         _films = [];
         _loading = false;
       });
@@ -52,7 +53,7 @@ class _AdminFilmsPageState extends State<AdminFilmsPage> {
   void _applySearch() {
     final q = _searchController.text.trim().toLowerCase();
     setState(() {
-      _films = _films.where((f) {
+      _films = _allFilms.where((f) {
         return q.isEmpty ||
             f.title.toLowerCase().contains(q) ||
             f.genre.toLowerCase().contains(q) ||
@@ -146,7 +147,9 @@ class _FilmAdminCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final audience = audienceForFilmId(film.id);
+    final audience = (film.audience?.trim().isNotEmpty ?? false)
+        ? film.audience!.trim()
+        : 'Non renseigné';
     final posterColor = film.posterColor ?? 0xFF2D1B4E;
     return Card(
       color: AppTheme.cardDark,
@@ -214,14 +217,14 @@ class _FilmAdminCard extends StatelessWidget {
                     runSpacing: 4,
                     children: [
                       Text(
-                        'Sortie: ${releaseDateForFilmId(film.id)}',
+                        'Sortie: ${film.dateSortieStr ?? '—'}',
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 12,
                         ),
                       ),
                       Text(
-                        'Fin: ${endDateForFilmId(film.id)}',
+                        'Fin: ${film.dateFinStr ?? '—'}',
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 12,

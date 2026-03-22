@@ -4,6 +4,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../../core/pdf/pdf_branding.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
 
@@ -66,6 +67,10 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
   }
 
   Future<void> _exportPdfCa() async {
+    final header = await cinePassPdfHeader(
+      title: 'Rapport CA — Espace responsable',
+      subtitle: 'Période: $_periodeLabel',
+    );
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -74,14 +79,9 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text(
-                'Rapport CA — Espace responsable',
-                style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-              ),
-              pw.SizedBox(height: 8),
-              pw.Text('Période: $_periodeLabel', style: const pw.TextStyle(fontSize: 12)),
-              pw.SizedBox(height: 24),
-              pw.Text('Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} €', style: const pw.TextStyle(fontSize: 14)),
+              header,
+              pw.SizedBox(height: 20),
+              pw.Text('Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} MAD', style: const pw.TextStyle(fontSize: 14)),
               pw.SizedBox(height: 8),
               pw.Text('Nombre de réservations: $_nbReservations', style: const pw.TextStyle(fontSize: 14)),
             ],
@@ -92,9 +92,53 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
     await Printing.sharePdf(bytes: await pdf.save(), filename: 'cinepass-rapport-ca-$_selectedPeriode.pdf');
   }
 
-  void _export(String type) {
+  Future<void> _exportPdfStatsEvenements() async {
+    final events = await client.cinePass.getMyEvents();
+    events.sort((a, b) {
+      final c = a.title.compareTo(b.title);
+      if (c != 0) return c;
+      return a.date.compareTo(b.date);
+    });
+    final header = await cinePassPdfHeader(
+      title: 'Statistiques événements',
+      subtitle: 'Structures assignées — ${events.length} événement(s)',
+    );
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (ctx) => [
+          header,
+          pw.SizedBox(height: 16),
+          pw.Text(
+            'Places : réservées / total (restantes)',
+            style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 8),
+          ...events.map((e) {
+            final sold = e.placesTotal - e.placesLeft;
+            return pw.Padding(
+              padding: const pw.EdgeInsets.only(bottom: 8),
+              child: pw.Text(
+                '${e.title} — ${e.date} (${e.city}) — '
+                '$sold/${e.placesTotal} réservées, ${e.placesLeft} restantes',
+                style: const pw.TextStyle(fontSize: 10),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+    await Printing.sharePdf(
+      bytes: await pdf.save(),
+      filename: 'cinepass-stats-evenements-responsable.pdf',
+    );
+  }
+
+  Future<void> _export(String type) async {
     if (type == 'pdf_ca') {
-      _exportPdfCa();
+      await _exportPdfCa();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -105,6 +149,30 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
       }
       return;
     }
+    if (type == 'pdf_stats') {
+      try {
+        await _exportPdfStatsEvenements();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Statistiques événements (PDF) exportées'),
+              backgroundColor: AppTheme.accentGreen,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Export PDF impossible: $e'),
+              backgroundColor: AppTheme.primaryRed,
+            ),
+          );
+        }
+      }
+      return;
+    }
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Export $type (période: $_selectedPeriode) — à venir'),
@@ -209,7 +277,7 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
                 Expanded(
                   child: _StatCard(
                     title: 'Chiffre d\'affaires',
-                    value: '${_totalCA.toStringAsFixed(2)} €',
+                    value: '${_totalCA.toStringAsFixed(2)} MAD',
                     icon: Icons.euro_rounded,
                   ),
                 ),

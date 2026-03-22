@@ -6,6 +6,11 @@ managedMigration: false
 fields:
   titre: String
   categorie: String
+  ### Colonnes alignées sur schema/cine_pass_schema.sql (snake_case en base).
+  event_type: String, default="AUTRE"
+  event_subtype: String?
+  custom_type_label: String?
+  event_language: String?
   description: String?
   lieu: String
   adresse: String?
@@ -18,3 +23,11 @@ fields:
   posterUrl: String?
   availableOptions: List<String>?
   structureId: UuidValue?, relation(parent=cine_pass_structure, onDelete=SetNull)
+  archived: bool, default=false
+indexes:
+  cine_pass_evenement_event_type_idx:
+    fields: event_type
+  cine_pass_evenement_event_subtype_idx:
+    fields: event_subtype
+  cine_pass_evenement_archived_idx:
+    fields: archived

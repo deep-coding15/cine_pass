@@ -255,10 +255,18 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
                     ),
                   );
                   if (confirm == true && context.mounted) {
+                    final ok = await client.cinePass.banStructure(s.id.uuid);
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Fonction bannir à brancher sur l\'API'),
-                        backgroundColor: AppTheme.textSecondary,
+                      SnackBar(
+                        content: Text(
+                          ok
+                              ? 'Structure bannie (assignations désactivées).'
+                              : 'Échec du bannissement.',
+                        ),
+                        backgroundColor: ok
+                            ? AppTheme.textSecondary
+                            : AppTheme.primaryRed,
                       ),
                     );
                   }
@@ -296,15 +304,23 @@ class _AdminStructureDetailPageState extends State<AdminStructureDetailPage> {
                     ),
                   );
                   if (confirm == true && context.mounted) {
+                    final ok = await client.cinePass.deleteStructure(s.id.uuid);
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'Fonction supprimer à brancher sur l\'API',
+                          ok
+                              ? 'Structure supprimée.'
+                              : 'Suppression impossible.',
                         ),
-                        backgroundColor: AppTheme.primaryRed,
+                        backgroundColor: ok
+                            ? AppTheme.accentGreen
+                            : AppTheme.primaryRed,
                       ),
                     );
-                    context.go('/admin/structures');
+                    if (ok) {
+                      context.go('/admin/structures');
+                    }
                   }
                 },
                 style: OutlinedButton.styleFrom(

@@ -21,6 +21,9 @@ abstract class ReservationResponse implements _i1.SerializableModel {
     required this.createdAtStr,
     required this.statut,
     required this.nbBillets,
+    this.userEmail,
+    this.locationLabel,
+    this.sessionAtStr,
   });
 
   factory ReservationResponse({
@@ -31,6 +34,9 @@ abstract class ReservationResponse implements _i1.SerializableModel {
     required String createdAtStr,
     required String statut,
     required int nbBillets,
+    String? userEmail,
+    String? locationLabel,
+    String? sessionAtStr,
   }) = _ReservationResponseImpl;
 
   factory ReservationResponse.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -42,6 +48,9 @@ abstract class ReservationResponse implements _i1.SerializableModel {
       createdAtStr: jsonSerialization['createdAtStr'] as String,
       statut: jsonSerialization['statut'] as String,
       nbBillets: jsonSerialization['nbBillets'] as int,
+      userEmail: jsonSerialization['userEmail'] as String?,
+      locationLabel: jsonSerialization['locationLabel'] as String?,
+      sessionAtStr: jsonSerialization['sessionAtStr'] as String?,
     );
   }
 
@@ -59,6 +68,12 @@ abstract class ReservationResponse implements _i1.SerializableModel {
 
   int nbBillets;
 
+  String? userEmail;
+
+  String? locationLabel;
+
+  String? sessionAtStr;
+
   /// Returns a shallow copy of this [ReservationResponse]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -70,6 +85,9 @@ abstract class ReservationResponse implements _i1.SerializableModel {
     String? createdAtStr,
     String? statut,
     int? nbBillets,
+    String? userEmail,
+    String? locationLabel,
+    String? sessionAtStr,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -82,6 +100,9 @@ abstract class ReservationResponse implements _i1.SerializableModel {
       'createdAtStr': createdAtStr,
       'statut': statut,
       'nbBillets': nbBillets,
+      if (userEmail != null) 'userEmail': userEmail,
+      if (locationLabel != null) 'locationLabel': locationLabel,
+      if (sessionAtStr != null) 'sessionAtStr': sessionAtStr,
     };
   }
 
@@ -102,6 +123,9 @@ class _ReservationResponseImpl extends ReservationResponse {
     required String createdAtStr,
     required String statut,
     required int nbBillets,
+    String? userEmail,
+    String? locationLabel,
+    String? sessionAtStr,
   }) : super._(
          id: id,
          numero: numero,
@@ -110,6 +134,9 @@ class _ReservationResponseImpl extends ReservationResponse {
          createdAtStr: createdAtStr,
          statut: statut,
          nbBillets: nbBillets,
+         userEmail: userEmail,
+         locationLabel: locationLabel,
+         sessionAtStr: sessionAtStr,
        );
 
   /// Returns a shallow copy of this [ReservationResponse]
@@ -124,6 +151,9 @@ class _ReservationResponseImpl extends ReservationResponse {
     String? createdAtStr,
     String? statut,
     int? nbBillets,
+    Object? userEmail = _Undefined,
+    Object? locationLabel = _Undefined,
+    Object? sessionAtStr = _Undefined,
   }) {
     return ReservationResponse(
       id: id ?? this.id,
@@ -133,6 +163,11 @@ class _ReservationResponseImpl extends ReservationResponse {
       createdAtStr: createdAtStr ?? this.createdAtStr,
       statut: statut ?? this.statut,
       nbBillets: nbBillets ?? this.nbBillets,
+      userEmail: userEmail is String? ? userEmail : this.userEmail,
+      locationLabel: locationLabel is String?
+          ? locationLabel
+          : this.locationLabel,
+      sessionAtStr: sessionAtStr is String? ? sessionAtStr : this.sessionAtStr,
     );
   }
 }

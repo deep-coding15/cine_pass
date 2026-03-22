@@ -31,6 +31,22 @@ abstract class EventResponse
     this.posterColor,
     this.posterUrl,
     this.availableOptions,
+    this.priceFrom,
+    this.priceTo,
+    this.reservationMode,
+    this.eventType,
+    this.eventSubtype,
+    this.customTypeLabel,
+    this.eventLanguage,
+    this.filmGenre,
+    this.filmDirector,
+    this.festivalTheme,
+    this.standupMainArtist,
+    this.concertArtist,
+    this.concertMusicGenre,
+    this.theatreAuthor,
+    this.structureName,
+    this.archived,
   });
 
   factory EventResponse({
@@ -49,6 +65,22 @@ abstract class EventResponse
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    double? priceFrom,
+    double? priceTo,
+    String? reservationMode,
+    String? eventType,
+    String? eventSubtype,
+    String? customTypeLabel,
+    String? eventLanguage,
+    String? filmGenre,
+    String? filmDirector,
+    String? festivalTheme,
+    String? standupMainArtist,
+    String? concertArtist,
+    String? concertMusicGenre,
+    String? theatreAuthor,
+    String? structureName,
+    bool? archived,
   }) = _EventResponseImpl;
 
   factory EventResponse.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -72,6 +104,24 @@ abstract class EventResponse
           : _i2.Protocol().deserialize<List<String>>(
               jsonSerialization['availableOptions'],
             ),
+      priceFrom: (jsonSerialization['priceFrom'] as num?)?.toDouble(),
+      priceTo: (jsonSerialization['priceTo'] as num?)?.toDouble(),
+      reservationMode: jsonSerialization['reservationMode'] as String?,
+      eventType: jsonSerialization['eventType'] as String?,
+      eventSubtype: jsonSerialization['eventSubtype'] as String?,
+      customTypeLabel: jsonSerialization['customTypeLabel'] as String?,
+      eventLanguage: jsonSerialization['eventLanguage'] as String?,
+      filmGenre: jsonSerialization['filmGenre'] as String?,
+      filmDirector: jsonSerialization['filmDirector'] as String?,
+      festivalTheme: jsonSerialization['festivalTheme'] as String?,
+      standupMainArtist: jsonSerialization['standupMainArtist'] as String?,
+      concertArtist: jsonSerialization['concertArtist'] as String?,
+      concertMusicGenre: jsonSerialization['concertMusicGenre'] as String?,
+      theatreAuthor: jsonSerialization['theatreAuthor'] as String?,
+      structureName: jsonSerialization['structureName'] as String?,
+      archived: jsonSerialization['archived'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['archived']),
     );
   }
 
@@ -105,6 +155,38 @@ abstract class EventResponse
 
   List<String>? availableOptions;
 
+  double? priceFrom;
+
+  double? priceTo;
+
+  String? reservationMode;
+
+  String? eventType;
+
+  String? eventSubtype;
+
+  String? customTypeLabel;
+
+  String? eventLanguage;
+
+  String? filmGenre;
+
+  String? filmDirector;
+
+  String? festivalTheme;
+
+  String? standupMainArtist;
+
+  String? concertArtist;
+
+  String? concertMusicGenre;
+
+  String? theatreAuthor;
+
+  String? structureName;
+
+  bool? archived;
+
   /// Returns a shallow copy of this [EventResponse]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -124,6 +206,22 @@ abstract class EventResponse
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    double? priceFrom,
+    double? priceTo,
+    String? reservationMode,
+    String? eventType,
+    String? eventSubtype,
+    String? customTypeLabel,
+    String? eventLanguage,
+    String? filmGenre,
+    String? filmDirector,
+    String? festivalTheme,
+    String? standupMainArtist,
+    String? concertArtist,
+    String? concertMusicGenre,
+    String? theatreAuthor,
+    String? structureName,
+    bool? archived,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -145,6 +243,22 @@ abstract class EventResponse
       if (posterUrl != null) 'posterUrl': posterUrl,
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
+      if (priceFrom != null) 'priceFrom': priceFrom,
+      if (priceTo != null) 'priceTo': priceTo,
+      if (reservationMode != null) 'reservationMode': reservationMode,
+      if (eventType != null) 'eventType': eventType,
+      if (eventSubtype != null) 'eventSubtype': eventSubtype,
+      if (customTypeLabel != null) 'customTypeLabel': customTypeLabel,
+      if (eventLanguage != null) 'eventLanguage': eventLanguage,
+      if (filmGenre != null) 'filmGenre': filmGenre,
+      if (filmDirector != null) 'filmDirector': filmDirector,
+      if (festivalTheme != null) 'festivalTheme': festivalTheme,
+      if (standupMainArtist != null) 'standupMainArtist': standupMainArtist,
+      if (concertArtist != null) 'concertArtist': concertArtist,
+      if (concertMusicGenre != null) 'concertMusicGenre': concertMusicGenre,
+      if (theatreAuthor != null) 'theatreAuthor': theatreAuthor,
+      if (structureName != null) 'structureName': structureName,
+      if (archived != null) 'archived': archived,
     };
   }
 
@@ -168,6 +282,22 @@ abstract class EventResponse
       if (posterUrl != null) 'posterUrl': posterUrl,
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
+      if (priceFrom != null) 'priceFrom': priceFrom,
+      if (priceTo != null) 'priceTo': priceTo,
+      if (reservationMode != null) 'reservationMode': reservationMode,
+      if (eventType != null) 'eventType': eventType,
+      if (eventSubtype != null) 'eventSubtype': eventSubtype,
+      if (customTypeLabel != null) 'customTypeLabel': customTypeLabel,
+      if (eventLanguage != null) 'eventLanguage': eventLanguage,
+      if (filmGenre != null) 'filmGenre': filmGenre,
+      if (filmDirector != null) 'filmDirector': filmDirector,
+      if (festivalTheme != null) 'festivalTheme': festivalTheme,
+      if (standupMainArtist != null) 'standupMainArtist': standupMainArtist,
+      if (concertArtist != null) 'concertArtist': concertArtist,
+      if (concertMusicGenre != null) 'concertMusicGenre': concertMusicGenre,
+      if (theatreAuthor != null) 'theatreAuthor': theatreAuthor,
+      if (structureName != null) 'structureName': structureName,
+      if (archived != null) 'archived': archived,
     };
   }
 
@@ -196,6 +326,22 @@ class _EventResponseImpl extends EventResponse {
     int? posterColor,
     String? posterUrl,
     List<String>? availableOptions,
+    double? priceFrom,
+    double? priceTo,
+    String? reservationMode,
+    String? eventType,
+    String? eventSubtype,
+    String? customTypeLabel,
+    String? eventLanguage,
+    String? filmGenre,
+    String? filmDirector,
+    String? festivalTheme,
+    String? standupMainArtist,
+    String? concertArtist,
+    String? concertMusicGenre,
+    String? theatreAuthor,
+    String? structureName,
+    bool? archived,
   }) : super._(
          id: id,
          title: title,
@@ -212,6 +358,22 @@ class _EventResponseImpl extends EventResponse {
          posterColor: posterColor,
          posterUrl: posterUrl,
          availableOptions: availableOptions,
+         priceFrom: priceFrom,
+         priceTo: priceTo,
+         reservationMode: reservationMode,
+         eventType: eventType,
+         eventSubtype: eventSubtype,
+         customTypeLabel: customTypeLabel,
+         eventLanguage: eventLanguage,
+         filmGenre: filmGenre,
+         filmDirector: filmDirector,
+         festivalTheme: festivalTheme,
+         standupMainArtist: standupMainArtist,
+         concertArtist: concertArtist,
+         concertMusicGenre: concertMusicGenre,
+         theatreAuthor: theatreAuthor,
+         structureName: structureName,
+         archived: archived,
        );
 
   /// Returns a shallow copy of this [EventResponse]
@@ -234,6 +396,22 @@ class _EventResponseImpl extends EventResponse {
     Object? posterColor = _Undefined,
     Object? posterUrl = _Undefined,
     Object? availableOptions = _Undefined,
+    Object? priceFrom = _Undefined,
+    Object? priceTo = _Undefined,
+    Object? reservationMode = _Undefined,
+    Object? eventType = _Undefined,
+    Object? eventSubtype = _Undefined,
+    Object? customTypeLabel = _Undefined,
+    Object? eventLanguage = _Undefined,
+    Object? filmGenre = _Undefined,
+    Object? filmDirector = _Undefined,
+    Object? festivalTheme = _Undefined,
+    Object? standupMainArtist = _Undefined,
+    Object? concertArtist = _Undefined,
+    Object? concertMusicGenre = _Undefined,
+    Object? theatreAuthor = _Undefined,
+    Object? structureName = _Undefined,
+    Object? archived = _Undefined,
   }) {
     return EventResponse(
       id: id ?? this.id,
@@ -253,6 +431,40 @@ class _EventResponseImpl extends EventResponse {
       availableOptions: availableOptions is List<String>?
           ? availableOptions
           : this.availableOptions?.map((e0) => e0).toList(),
+      priceFrom: priceFrom is double? ? priceFrom : this.priceFrom,
+      priceTo: priceTo is double? ? priceTo : this.priceTo,
+      reservationMode: reservationMode is String?
+          ? reservationMode
+          : this.reservationMode,
+      eventType: eventType is String? ? eventType : this.eventType,
+      eventSubtype: eventSubtype is String? ? eventSubtype : this.eventSubtype,
+      customTypeLabel: customTypeLabel is String?
+          ? customTypeLabel
+          : this.customTypeLabel,
+      eventLanguage: eventLanguage is String?
+          ? eventLanguage
+          : this.eventLanguage,
+      filmGenre: filmGenre is String? ? filmGenre : this.filmGenre,
+      filmDirector: filmDirector is String? ? filmDirector : this.filmDirector,
+      festivalTheme: festivalTheme is String?
+          ? festivalTheme
+          : this.festivalTheme,
+      standupMainArtist: standupMainArtist is String?
+          ? standupMainArtist
+          : this.standupMainArtist,
+      concertArtist: concertArtist is String?
+          ? concertArtist
+          : this.concertArtist,
+      concertMusicGenre: concertMusicGenre is String?
+          ? concertMusicGenre
+          : this.concertMusicGenre,
+      theatreAuthor: theatreAuthor is String?
+          ? theatreAuthor
+          : this.theatreAuthor,
+      structureName: structureName is String?
+          ? structureName
+          : this.structureName,
+      archived: archived is bool? ? archived : this.archived,
     );
   }
 }

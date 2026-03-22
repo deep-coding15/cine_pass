@@ -16,3 +16,23 @@ fields:
   posterColor: int?
   posterUrl: String?
   availableOptions: List<String>?
+  # Tarifs issus des types de billets actifs (sinon null → utiliser price / prixBase).
+  priceFrom: double?
+  priceTo: double?
+  # SANS_SIEGES | AVEC_SIEGES si configuré.
+  reservationMode: String?
+  eventType: String?
+  eventSubtype: String?
+  customTypeLabel: String?
+  eventLanguage: String?
+  filmGenre: String?
+  filmDirector: String?
+  festivalTheme: String?
+  standupMainArtist: String?
+  concertArtist: String?
+  concertMusicGenre: String?
+  theatreAuthor: String?
+  # Nom de la structure organisatrice (jointure), si connue.
+  structureName: String?
+  # True si archivé : masqué du catalogue public, visible côté responsable.
+  archived: bool?

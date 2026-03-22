@@ -47,38 +47,44 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
     return Stack(
       fit: StackFit.expand,
       children: [
-        AnimatedBuilder(
-          animation: _gradientAnimation,
-          builder: (context, _) {
-            return Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(
-                    0.3 +
-                        0.4 * math.sin(_gradientAnimation.value * 2 * math.pi),
-                    0.4 +
-                        0.3 * math.cos(_gradientAnimation.value * 2 * math.pi),
-                  ),
-                  radius: 1.2,
-                  colors: [
-                    AppTheme.primaryRed.withValues(alpha: widget.opacity),
-                    AppTheme.accentGreen.withValues(
-                      alpha: widget.opacity * 0.5,
-                    ),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
-            );
-          },
-        ),
-        CustomPaint(
-          painter: _ParticlesPainter(
+        IgnorePointer(
+          child: AnimatedBuilder(
             animation: _gradientAnimation,
-            opacity: widget.opacity,
+            builder: (context, _) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment(
+                      0.3 +
+                          0.4 *
+                              math.sin(_gradientAnimation.value * 2 * math.pi),
+                      0.4 +
+                          0.3 *
+                              math.cos(_gradientAnimation.value * 2 * math.pi),
+                    ),
+                    radius: 1.2,
+                    colors: [
+                      AppTheme.primaryRed.withValues(alpha: widget.opacity),
+                      AppTheme.accentGreen.withValues(
+                        alpha: widget.opacity * 0.5,
+                      ),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                ),
+              );
+            },
           ),
-          size: Size.infinite,
+        ),
+        IgnorePointer(
+          child: CustomPaint(
+            painter: _ParticlesPainter(
+              animation: _gradientAnimation,
+              opacity: widget.opacity,
+            ),
+            size: Size.infinite,
+          ),
         ),
         widget.child,
       ],

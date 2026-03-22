@@ -24,6 +24,9 @@ abstract class FilmResponse
     this.casting,
     this.posterColor,
     this.posterUrl,
+    this.dateSortieStr,
+    this.dateFinStr,
+    this.audience,
   });
 
   factory FilmResponse({
@@ -36,6 +39,9 @@ abstract class FilmResponse
     String? casting,
     int? posterColor,
     String? posterUrl,
+    String? dateSortieStr,
+    String? dateFinStr,
+    String? audience,
   }) = _FilmResponseImpl;
 
   factory FilmResponse.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -49,6 +55,9 @@ abstract class FilmResponse
       casting: jsonSerialization['casting'] as String?,
       posterColor: jsonSerialization['posterColor'] as int?,
       posterUrl: jsonSerialization['posterUrl'] as String?,
+      dateSortieStr: jsonSerialization['dateSortieStr'] as String?,
+      dateFinStr: jsonSerialization['dateFinStr'] as String?,
+      audience: jsonSerialization['audience'] as String?,
     );
   }
 
@@ -70,6 +79,12 @@ abstract class FilmResponse
 
   String? posterUrl;
 
+  String? dateSortieStr;
+
+  String? dateFinStr;
+
+  String? audience;
+
   /// Returns a shallow copy of this [FilmResponse]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -83,6 +98,9 @@ abstract class FilmResponse
     String? casting,
     int? posterColor,
     String? posterUrl,
+    String? dateSortieStr,
+    String? dateFinStr,
+    String? audience,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -97,6 +115,9 @@ abstract class FilmResponse
       if (casting != null) 'casting': casting,
       if (posterColor != null) 'posterColor': posterColor,
       if (posterUrl != null) 'posterUrl': posterUrl,
+      if (dateSortieStr != null) 'dateSortieStr': dateSortieStr,
+      if (dateFinStr != null) 'dateFinStr': dateFinStr,
+      if (audience != null) 'audience': audience,
     };
   }
 
@@ -113,6 +134,9 @@ abstract class FilmResponse
       if (casting != null) 'casting': casting,
       if (posterColor != null) 'posterColor': posterColor,
       if (posterUrl != null) 'posterUrl': posterUrl,
+      if (dateSortieStr != null) 'dateSortieStr': dateSortieStr,
+      if (dateFinStr != null) 'dateFinStr': dateFinStr,
+      if (audience != null) 'audience': audience,
     };
   }
 
@@ -135,6 +159,9 @@ class _FilmResponseImpl extends FilmResponse {
     String? casting,
     int? posterColor,
     String? posterUrl,
+    String? dateSortieStr,
+    String? dateFinStr,
+    String? audience,
   }) : super._(
          id: id,
          title: title,
@@ -145,6 +172,9 @@ class _FilmResponseImpl extends FilmResponse {
          casting: casting,
          posterColor: posterColor,
          posterUrl: posterUrl,
+         dateSortieStr: dateSortieStr,
+         dateFinStr: dateFinStr,
+         audience: audience,
        );
 
   /// Returns a shallow copy of this [FilmResponse]
@@ -161,6 +191,9 @@ class _FilmResponseImpl extends FilmResponse {
     Object? casting = _Undefined,
     Object? posterColor = _Undefined,
     Object? posterUrl = _Undefined,
+    Object? dateSortieStr = _Undefined,
+    Object? dateFinStr = _Undefined,
+    Object? audience = _Undefined,
   }) {
     return FilmResponse(
       id: id ?? this.id,
@@ -172,6 +205,11 @@ class _FilmResponseImpl extends FilmResponse {
       casting: casting is String? ? casting : this.casting,
       posterColor: posterColor is int? ? posterColor : this.posterColor,
       posterUrl: posterUrl is String? ? posterUrl : this.posterUrl,
+      dateSortieStr: dateSortieStr is String?
+          ? dateSortieStr
+          : this.dateSortieStr,
+      dateFinStr: dateFinStr is String? ? dateFinStr : this.dateFinStr,
+      audience: audience is String? ? audience : this.audience,
     );
   }
 }

@@ -8,6 +8,7 @@ import '../state/auth_state.dart';
 import '../state/pending_reservation_state.dart';
 import 'app_drawer.dart';
 import 'animated_background.dart';
+import 'app_bottom_bar.dart';
 import 'cinepass_logo.dart';
 import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 
@@ -70,6 +71,20 @@ class _MainScaffoldState extends State<MainScaffold> {
               onPressed: () => context.go(AppRouter.billets),
               child: const Text('Billets'),
             ),
+            if (auth.isResponsable) ...[
+              const SizedBox(width: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: FilledButton(
+                  onPressed: () => context.go(AppRouter.responsable),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.accentGreen,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  child: const Text('Espace responsable'),
+                ),
+              ),
+            ],
             PopupMenuButton<String>(
               offset: const Offset(0, 48),
               tooltip: 'Profil · Devenir responsable · Déconnexion',
@@ -100,20 +115,21 @@ class _MainScaffoldState extends State<MainScaffold> {
                   value: 'profil',
                   child: Text('Voir mon profil'),
                 ),
-                const PopupMenuItem(
-                  value: 'devenir_responsable',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.badge_outlined,
-                        size: 20,
-                        color: AppTheme.textSecondary,
-                      ),
-                      SizedBox(width: 12),
-                      Text('Devenir responsable'),
-                    ],
+                if (!auth.isResponsable)
+                  const PopupMenuItem(
+                    value: 'devenir_responsable',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.badge_outlined,
+                          size: 20,
+                          color: AppTheme.textSecondary,
+                        ),
+                        SizedBox(width: 12),
+                        Text('Devenir responsable'),
+                      ],
+                    ),
                   ),
-                ),
                 const PopupMenuItem(
                   value: 'deconnexion',
                   child: Text('Déconnexion'),
@@ -161,7 +177,15 @@ class _MainScaffoldState extends State<MainScaffold> {
             ? Row(
                 children: [
                   const AdminSidebar(),
-                  Expanded(child: widget.child),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(child: widget.child),
+                        const AppBottomBar(compactLinks: true),
+                      ],
+                    ),
+                  ),
                 ],
               )
             : Stack(
@@ -169,7 +193,13 @@ class _MainScaffoldState extends State<MainScaffold> {
                 children: [
                   AnimatedBackground(
                     opacity: 0.06,
-                    child: widget.child,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(child: widget.child),
+                        const AppBottomBar(),
+                      ],
+                    ),
                   ),
                   // Bande gauche : survol pour ouvrir le drawer (sidebar)
                   Positioned(

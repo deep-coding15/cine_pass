@@ -1,14 +1,65 @@
+import 'dart:convert';
+
 import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import 'event_type_badge.dart';
 
 class EventCard extends StatelessWidget {
   const EventCard({super.key, required this.event});
 
   final EventResponse event;
+
+  static Widget _posterImage(String? posterUrl, int posterColor) {
+    final c = Color(posterColor);
+    final placeholder = Container(
+      color: c,
+      child: Center(
+        child: Icon(
+          Icons.event_rounded,
+          size: 28,
+          color: Colors.white.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+    if (posterUrl == null || posterUrl.isEmpty) return placeholder;
+    if (posterUrl.startsWith('data:')) {
+      try {
+        final i = posterUrl.indexOf(',');
+        if (i > 0) {
+          final bytes = base64Decode(posterUrl.substring(i + 1));
+          return Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => placeholder,
+          );
+        }
+      } catch (_) {
+        return placeholder;
+      }
+    }
+    return Image.network(
+      posterUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => placeholder,
+    );
+  }
+
+  /// Libellé tarifaire pour la liste (multi-tarifs ou prix unique).
+  String get _priceLabel {
+    final from = event.priceFrom;
+    final to = event.priceTo;
+    if (from != null) {
+      if (to != null && (to - from).abs() > 0.009) {
+        return '${from.toStringAsFixed(2)} – ${to.toStringAsFixed(2)} MAD';
+      }
+      return 'À partir de ${from.toStringAsFixed(2)} MAD';
+    }
+    return '${event.price.toStringAsFixed(2)} MAD';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,59 +81,18 @@ class EventCard extends StatelessWidget {
             Stack(
               children: [
                 AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: posterUrl == null || posterUrl.isEmpty
-                      ? Container(
-                          color: Color(posterColor),
-                          child: Center(
-                            child: Icon(
-                              Icons.event_rounded,
-                              size: 28,
-                              color: Colors.white.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        )
-                      : ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(10),
-                          ),
-                          child: Image.network(
-                            posterUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, _, __) => Container(
-                              color: Color(posterColor),
-                              child: Center(
-                                child: Icon(
-                                  Icons.event_rounded,
-                                  size: 28,
-                                  color: Colors.white.withValues(alpha: 0.5),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                  aspectRatio: 2 / 3,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(10),
+                    ),
+                    child: _posterImage(posterUrl, posterColor),
+                  ),
                 ),
                 Positioned(
                   top: 6,
                   right: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryRed,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      event.category,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  child: EventTypeBadge(event: event, compact: true),
                 ),
               ],
             ),
@@ -143,33 +153,35 @@ class EventCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${event.price.toStringAsFixed(2)} €',
-                        style: const TextStyle(
-                          color: AppTheme.accentGreen,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      FilledButton(
-                        onPressed: () =>
-                            context.push(AppRouter.eventDetailPath(event.id)),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppTheme.primaryRed,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: const Text('Réserver', style: TextStyle(fontSize: 11)),
-                      ),
-                    ],
+                  Text(
+                    _priceLabel,
+                    style: const TextStyle(
+                      color: AppTheme.accentGreen,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () =>
+                          context.push(AppRouter.eventDetailPath(event.id)),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.primaryRed,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        minimumSize: const Size(0, 36),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Réserver',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
                   Text(
                     '${event.placesLeft} places',
                     style: const TextStyle(
@@ -188,13 +200,13 @@ class EventCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.neonMagenta,
+          color: AppTheme.primaryRed,
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.neonMagenta.withValues(alpha: 0.35),
-            blurRadius: 10,
+            color: AppTheme.primaryRed.withValues(alpha: 0.45),
+            blurRadius: 12,
             spreadRadius: 0,
           ),
         ],

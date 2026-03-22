@@ -2,28 +2,29 @@
 
 ## En place
 
-- **Tableau de bord** : cartes Ma structure, Mes événements, Réservations (compteurs + navigation).
-- **Ma structure** : affichage de la structure que le responsable représente (type "about us"), sans possibilité d’en ajouter une autre. Infos : nom, type, ville, adresse, site, téléphone, description.
-- **Mes événements** : liste des événements du responsable, création / édition.
-- **Réservations** : liste des réservations avec actions de gestion : **Voir détails**, **Voir les billets** (à brancher), **Gérer le statut** (annulation / remboursement à brancher), **Exporter PDF** (à brancher).
+- **Plan de sièges (événements AVEC_SIEGES)** : dans le détail d’un événement, édition du plan — grille type cinéma, zones (ex. `VIP`), sièges **bloqués**. Les clients ne choisissent pas manuellement : au paiement, le serveur attribue les sièges.
+- **Tableau de bord** : indicateurs **30 derniers jours** (CA et nombre de réservations via l’API), compteurs événements / structure ; graphiques en barres et le bloc « par événement » sont des **aperçus visuels** — les totaux détaillés sont dans l’onglet **Rapports**.
+- **Ma structure** : structure assignée au responsable ; **modification** des infos (nom, ville, adresse, site, téléphone, description selon API).
+- **Mes événements** : liste des événements du responsable, **création / édition / archivage** ; chaque événement = une date et un lieu (pour une autre représentation, créer un nouvel événement).
+- **Réservations** : réservations des événements des structures du responsable ; détails et gestion de statut côté API selon implémentation.
+- **Rapports** : CA et réservations par période (`getRapportCA`), export PDF.
+- **Réclamations** : **non géré** dans l’application (pas de page dédiée).
 
-## À brancher côté backend
+## Animations
 
-- `getMyStructure(session)` : renvoyer la structure assignée au responsable (via `cine_pass_responsable_assignment` + `cine_pass_structure`), ou les infos de la demande approuvée.
-- `getReservationsForMyStructures(session)` : renvoyer les réservations des événements liés aux structures du responsable (événements dont `structureId` ∈ structures du responsable).
+- **AnimatedBackground** sur l’app principale (`MainScaffold`), l’espace responsable (`ResponsableScaffold`) et l’admin (`AdminScaffold`).
 
-## Sections / pages éventuellement manquantes
+## Pistes d’évolution (hors périmètre actuel)
 
-| Section / page | Description | Priorité |
-|----------------|-------------|----------|
-| **Détail réservation (page dédiée)** | Page complète avec billets associés, statut, historique. Actuellement seul le bottom sheet "Voir détails" existe. | Moyenne |
-| **Export PDF réservation** | Action "Exporter PDF" dans le détail réservation (billet / reçu). | Moyenne |
-| **Modifier ma structure** | Édition limitée des infos "about us" (description, site, téléphone) sans changer la structure assignée. | Basse |
-| **Statistiques responsable** | Chiffres (réservations par événement, taux de remplissage, CA). | Basse |
-| **Paramètres espace responsable** | Notifications, préférences d’affichage. | Basse |
+| Idée | Priorité |
+|------|----------|
+| Page dédiée « détail réservation » (billets, historique) | Moyenne |
+| Export PDF réservation depuis la liste | Moyenne |
+| Statistiques avancées (taux de remplissage, CA par événement réel dans le dashboard) | Basse |
+| Paramètres espace responsable (notifications) | Basse |
 
-## Règles métier vérifiées
+## Règles métier rappel
 
-- Le responsable **ne peut pas ajouter** une structure différente de celle qu’il représente (pas de bouton "Ajouter une structure" sur Ma structure).
-- Les **favoris événement** (cœur) ne s’affichent **que pour un utilisateur connecté** (détail événement).
-- **Animations de fond** : appliquées sur l’app principale (`MainScaffold`), l’espace responsable (`ResponsableScaffold`) et l’espace admin (`AdminScaffold`) via `AnimatedBackground`.
+- Un responsable **ne peut pas** ajouter une autre structure que celle qui lui est assignée.
+- Les **favoris** événement (cœur) : **utilisateur connecté** uniquement.
+- **Approbation « devenir responsable »** : e-mail transactionnel à l’utilisateur si SMTP configuré (sinon log serveur).

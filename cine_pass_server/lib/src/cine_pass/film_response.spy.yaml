@@ -10,3 +10,7 @@ fields:
   casting: String?
   posterColor: int?
   posterUrl: String?
+  # Depuis la BDD (cine_pass_film) — affichage admin / fiche
+  dateSortieStr: String?
+  dateFinStr: String?
+  audience: String?

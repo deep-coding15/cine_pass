@@ -38,8 +38,82 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> _confirmPaymentAndCreateBillets(BuildContext context) async {
     final state = ReservationState.instance;
 
+    if (state.isEvent) {
+      final eventId = state.eventId;
+      if (eventId == null || eventId.isEmpty) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Événement introuvable pour cette réservation.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
+
+      final List<String> perTypes;
+      final List<String> optionCsv;
+      if (state.eventReservationConfig != null) {
+        perTypes = state.eventTickets.map((t) => t.eventTypeCode).toList();
+        optionCsv = state.eventTickets
+            .map((t) => t.eventPayantOptionCodes.join(','))
+            .toList();
+      } else {
+        perTypes = state.eventTickets
+            .map((t) => t.isVip ? 'VIP' : 'STANDARD')
+            .toList();
+        if (perTypes.isEmpty) {
+          perTypes.addAll(
+            List.filled(state.eventQuantity, 'STANDARD'),
+          );
+        }
+        optionCsv = List.filled(perTypes.length, '');
+      }
+
+      // En mode AVEC_SIEGES : l’attribution des sièges se fait côté serveur,
+      // donc on n’envoie aucune sélection manuelle (liste vide).
+      final seatLabels = <String>[];
+
+      try {
+        final confirm = await client.cinePass.confirmEventReservation(
+          eventId: eventId,
+          perBilletTypeCodes: perTypes,
+          perBilletPayantOptionCsv: optionCsv,
+          perBilletSeatLabels: seatLabels,
+        );
+        if (!context.mounted) return;
+        if (!confirm.success || confirm.reservationNumber == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(confirm.message),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+          return;
+        }
+
+        ReservationState.instance.setReservationNumber(confirm.reservationNumber!);
+        try {
+          final billets = await client.cinePass.getMyBillets();
+          await BilletsCacheStore().saveBillets(billets);
+        } catch (_) {}
+        if (!context.mounted) return;
+        context.go(AppRouter.billets);
+        return;
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur confirmation réservation événement: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
+    }
+
     final reservationNumber = 'BOOK-${DateTime.now().millisecondsSinceEpoch}';
-    final seatLabels = state.isEvent ? <String>[] : state.selectedSeats;
+    final seatLabels = state.selectedSeats;
 
     final ticketTypes = <String>[];
     final optParking = <bool>[];
@@ -47,22 +121,7 @@ class _PaymentPageState extends State<PaymentPage> {
     final optBoisson = <bool>[];
     final prices = <double>[];
 
-    if (state.isEvent) {
-      for (final t in state.eventTickets) {
-        final isVip = t.isVip;
-        final base = isVip ? state.eventPricePerTicket * 1.5 : state.eventPricePerTicket;
-        final opts = isVip
-            ? 0.0
-            : (t.optionParking ? 3.0 : 0.0) +
-                (t.optionPopcorn ? 5.0 : 0.0) +
-                (t.optionBoisson ? 2.0 : 0.0);
-        ticketTypes.add(isVip ? 'vip' : 'normal');
-        optParking.add(t.optionParking);
-        optPopcorn.add(t.optionPopcorn);
-        optBoisson.add(t.optionBoisson);
-        prices.add(base + opts);
-      }
-    } else if (state.filmTickets.isNotEmpty) {
+    if (state.filmTickets.isNotEmpty) {
       for (final t in state.filmTickets) {
         final isVip = t.isVip;
         final base = isVip ? state.pricePerSeat * 1.5 : state.pricePerSeat;
@@ -292,7 +351,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
                             child: Text(
-                              'Confirmer le paiement de ${_total.toStringAsFixed(2)} €',
+                              'Confirmer le paiement de ${_total.toStringAsFixed(2)} MAD',
                             ),
                           ),
                         ),
@@ -354,9 +413,18 @@ class _PaymentPageState extends State<PaymentPage> {
                       _recapRow('Date', state.eventDateTime ?? ''),
                       _recapRow('Nombre de billets', '${state.eventQuantity}'),
                       _recapRow('Détail', () {
-                        final vip = state.eventTickets
-                            .where((t) => t.isVip)
-                            .length;
+                        if (state.eventReservationConfig != null) {
+                          final buf = <String>[];
+                          final by = <String, int>{};
+                          for (final t in state.eventTickets) {
+                            final k = t.eventTypeCode.toUpperCase();
+                            by[k] = (by[k] ?? 0) + 1;
+                          }
+                          by.forEach((k, v) => buf.add('$v × $k'));
+                          return buf.isEmpty ? '—' : buf.join(', ');
+                        }
+                        final vip =
+                            state.eventTickets.where((t) => t.isVip).length;
                         final normal = state.eventTickets.length - vip;
                         if (vip == 0) return '$normal Normal';
                         if (normal == 0) return '$vip VIP';
@@ -373,7 +441,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             ),
                           ),
                           Text(
-                            '${state.totalEvent.toStringAsFixed(2)} €',
+                            '${state.totalEvent.toStringAsFixed(2)} MAD',
                             style: const TextStyle(color: AppTheme.textPrimary),
                           ),
                         ],
@@ -422,13 +490,13 @@ class _PaymentPageState extends State<PaymentPage> {
                           Text(
                             state.filmTickets.isNotEmpty
                                 ? 'Total (${state.filmTickets.length} billet(s))'
-                                : '${state.selectedSeats.length} x ${state.pricePerSeat.toStringAsFixed(2)} €',
+                                : '${state.selectedSeats.length} x ${state.pricePerSeat.toStringAsFixed(2)} MAD',
                             style: const TextStyle(
                               color: AppTheme.textSecondary,
                             ),
                           ),
                           Text(
-                            '${state.totalFilm.toStringAsFixed(2)} €',
+                            '${state.totalFilm.toStringAsFixed(2)} MAD',
                             style: const TextStyle(color: AppTheme.textPrimary),
                           ),
                         ],
@@ -446,7 +514,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           ),
                         ),
                         Text(
-                          '${_total.toStringAsFixed(2)} €',
+                          '${_total.toStringAsFixed(2)} MAD',
                           style: const TextStyle(
                             color: AppTheme.accentGreen,
                             fontWeight: FontWeight.bold,

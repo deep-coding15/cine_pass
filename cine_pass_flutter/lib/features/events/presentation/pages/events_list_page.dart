@@ -5,11 +5,13 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
 import '../../../films/presentation/widgets/film_card.dart';
 import '../widgets/event_card.dart';
+import '../widgets/event_type_badge.dart';
 
-/// Page unifiée : films + événements avec filtres qui s'adaptent au type choisi.
-/// - Type "Film" → filtre Genre (et Ville si disponible).
-/// - Type catégorie (Concert, Théâtre...) → filtre Ville, Catégorie.
-/// - Type "Tous" → tous les filtres.
+/// Page unifiée : films + événements avec filtres qui s’adaptent au type choisi.
+/// - Menu « Type » = catégories API + Film (pas de doublon dans la liste).
+/// - Type "Film" → catalogue films + événements ciné (genre, ville, dates).
+/// - Autre type → filtre par libellé catégorie ou badge type + ville + filtre dynamique.
+/// - Type "Tous" → genre film, ville, dates.
 class EventsListPage extends StatefulWidget {
   const EventsListPage({super.key});
 
@@ -23,16 +25,46 @@ class _EventsListPageState extends State<EventsListPage> {
   String _selectedType = 'Tous';
   String _selectedCity = 'Toutes';
   String _selectedGenre = 'Tous';
-  String _selectedCategory = 'Toutes';
   DateTime? _dateFrom;
   DateTime? _dateTo;
+  String _selectedDynamicFilterKey = '';
+  String _selectedDynamicFilterLabel = '';
+  String _selectedDynamicFilterValue = 'Tous';
+  List<String> _dynamicFilterValues = ['Tous'];
 
   List<FilmResponse> _films = [];
   List<EventResponse> _events = [];
   List<String> _cities = ['Toutes'];
   List<String> _genres = ['Tous'];
-  List<String> _categories = ['Toutes'];
-  List<String> _typeOptions = ['Tous', 'Film'];
+  /// Résultat brut de [getGenres] (recalcul des options avec films + événements ciné).
+  List<String> _genrePoolFromApi = const [];
+
+  /// Genres du formulaire création (même liste que l’espace responsable) — évite liste vide sans BDD.
+  static const List<String> _fallbackFilmGenres = [
+    'Action',
+    'Comédie',
+    'Drame',
+    'Thriller',
+    'Animation',
+    'Documentaire',
+    'Science-fiction',
+    'Romance',
+    'Horreur',
+    'Aventure',
+  ];
+
+  /// Valeurs fixes alignées sur les libellés affichés (badge type), sans doublon catégorie/API.
+  static const List<String> _typeFilterChoices = [
+    'Tous',
+    'Film',
+    'Festival',
+    'Stand-up',
+    'Concert',
+    'Théâtre',
+    'Autre',
+  ];
+
+  List<String> _typeOptions = List<String>.from(_typeFilterChoices);
 
   List<FilmResponse> _filteredFilms = [];
   List<EventResponse> _filteredEvents = [];
@@ -71,22 +103,37 @@ class _EventsListPageState extends State<EventsListPage> {
       final genres = results[3] as List<String>;
       final categories = results[4] as List<String>;
 
-      final typeOpts = [
+      // Éviter les doublons (ex. API renvoie aussi « Film ») → crash DropdownButton.
+      final typeOpts = <String>[];
+      final seen = <String>{};
+      for (final t in [
         'Tous',
         'Film',
         ...categories.where((c) => c != 'Toutes'),
-      ];
+      ]) {
+        if (seen.add(t)) typeOpts.add(t);
+      }
 
       setState(() {
         _films = films;
         _events = events;
         _cities = cities;
-        _genres = genres;
-        _categories = categories;
+        _genrePoolFromApi = genres;
+        _genres = _mergedGenreDropdown();
         _typeOptions = typeOpts;
+        if (!typeOpts.contains(_selectedType)) {
+          _selectedType = 'Tous';
+        }
+        if (!_genres.contains(_selectedGenre)) {
+          _selectedGenre = 'Tous';
+        }
+        if (!_cities.contains(_selectedCity)) {
+          _selectedCity = 'Toutes';
+        }
         _loading = false;
         _applyFilters();
       });
+      await _refreshDynamicFilterOptions();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -98,6 +145,63 @@ class _EventsListPageState extends State<EventsListPage> {
     }
   }
 
+  bool _eventMatchesCity(EventResponse e) {
+    if (_selectedCity == 'Toutes') return true;
+    return e.city.trim().toLowerCase() ==
+        _selectedCity.trim().toLowerCase();
+  }
+
+  /// Même logique que le serveur (`_extractPrefixedValue` / lignes « Genre: … »).
+  String? _genreLineFromDescription(String? description) {
+    if (description == null || description.trim().isEmpty) return null;
+    const needle = 'genre:';
+    for (final line in description.split('\n')) {
+      final t = line.trim();
+      if (t.toLowerCase().startsWith(needle)) {
+        final value = t.substring(needle.length).trim();
+        if (value.isNotEmpty) return value;
+      }
+    }
+    return null;
+  }
+
+  /// Genre film affiché / filtré : API (`filmGenre`) ou repli sur la description.
+  String _resolvedFilmGenre(EventResponse e) {
+    final fromApi = (e.filmGenre ?? '').trim();
+    if (fromApi.isNotEmpty) return fromApi;
+    return (_genreLineFromDescription(e.description) ?? '').trim();
+  }
+
+  /// Genres pour le menu « Genre film » : API + catalogue + événements ciné + liste par défaut.
+  List<String> _mergedGenreDropdown() {
+    final set = <String>{};
+    for (final g in _fallbackFilmGenres) {
+      set.add(g);
+    }
+    for (final g in _genrePoolFromApi) {
+      if (g != 'Tous' && g.trim().isNotEmpty) {
+        set.add(g.trim());
+      }
+    }
+    for (final f in _films) {
+      if (f.genre.trim().isNotEmpty) {
+        set.add(f.genre.trim());
+      }
+    }
+    for (final e in _events) {
+      if (!_eventMatchesDisplayType(e, 'Film')) continue;
+      final fg = _resolvedFilmGenre(e);
+      if (fg.isNotEmpty) {
+        set.add(fg);
+      }
+    }
+    final list = set.toList()
+      ..sort(
+        (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+      );
+    return ['Tous', ...list];
+  }
+
   void _applyFilters() {
     final query = _searchController.text.trim().toLowerCase();
 
@@ -105,28 +209,64 @@ class _EventsListPageState extends State<EventsListPage> {
     List<EventResponse> events = _events;
 
     if (_selectedType == 'Film') {
-      events = [];
-      if (_selectedGenre != 'Tous') {
-        films = films.where((f) => f.genre == _selectedGenre).toList();
+      events = events.where((e) => _eventMatchesDisplayType(e, 'Film')).toList();
+      if (_selectedCity != 'Toutes') {
+        events = events.where(_eventMatchesCity).toList();
       }
-      if (query.isNotEmpty) {
+      events = _filterEventsByDate(events);
+      if (_selectedGenre != 'Tous') {
+        final gSel = _selectedGenre.toLowerCase();
         films = films
+            .where((f) => f.genre.toLowerCase() == gSel)
+            .toList();
+        events = events
             .where(
-              (f) =>
-                  f.title.toLowerCase().contains(query) ||
-                  (f.genre.toLowerCase().contains(query)),
+              (e) => _resolvedFilmGenre(e).toLowerCase() == gSel,
             )
             .toList();
       }
+      if (query.isNotEmpty) {
+        final q = query;
+        films = films
+            .where(
+              (f) =>
+                  f.title.toLowerCase().contains(q) ||
+                  (f.genre.toLowerCase().contains(q)),
+            )
+            .toList();
+        events = events
+            .where(
+              (e) =>
+                  e.title.toLowerCase().contains(q) ||
+                  e.category.toLowerCase().contains(q) ||
+                  (e.description?.toLowerCase().contains(q) ?? false) ||
+                  e.location.toLowerCase().contains(q) ||
+                  e.city.toLowerCase().contains(q) ||
+                  (e.filmDirector?.toLowerCase().contains(q) ?? false) ||
+                  _resolvedFilmGenre(e).toLowerCase().contains(q),
+            )
+            .toList();
+      }
+      if (_selectedDynamicFilterKey.isNotEmpty &&
+          _selectedDynamicFilterValue != 'Tous') {
+        events = events.where((e) {
+          final v = _eventDynamicValue(e, _selectedDynamicFilterKey);
+          return v.toLowerCase() == _selectedDynamicFilterValue.toLowerCase();
+        }).toList();
+      }
     } else if (_selectedType == 'Tous') {
       if (_selectedGenre != 'Tous') {
-        films = films.where((f) => f.genre == _selectedGenre).toList();
-      }
-      if (_selectedCategory != 'Toutes') {
-        events = events.where((e) => e.category == _selectedCategory).toList();
+        final gSel = _selectedGenre.toLowerCase();
+        films = films
+            .where((f) => f.genre.toLowerCase() == gSel)
+            .toList();
+        events = events.where((e) {
+          if (!_eventMatchesDisplayType(e, 'Film')) return true;
+          return _resolvedFilmGenre(e).toLowerCase() == gSel;
+        }).toList();
       }
       if (_selectedCity != 'Toutes') {
-        events = events.where((e) => e.city == _selectedCity).toList();
+        events = events.where(_eventMatchesCity).toList();
       }
       // Filtre par date (événements)
       events = _filterEventsByDate(events);
@@ -143,6 +283,7 @@ class _EventsListPageState extends State<EventsListPage> {
               (e) =>
                   e.title.toLowerCase().contains(query) ||
                   e.category.toLowerCase().contains(query) ||
+                  (e.description?.toLowerCase().contains(query) ?? false) ||
                   e.location.toLowerCase().contains(query) ||
                   e.city.toLowerCase().contains(query),
             )
@@ -150,9 +291,9 @@ class _EventsListPageState extends State<EventsListPage> {
       }
     } else {
       films = [];
-      events = events.where((e) => e.category == _selectedType).toList();
+      events = events.where(_eventMatchesSelectedType).toList();
       if (_selectedCity != 'Toutes') {
-        events = events.where((e) => e.city == _selectedCity).toList();
+        events = events.where(_eventMatchesCity).toList();
       }
       events = _filterEventsByDate(events);
       if (query.isNotEmpty) {
@@ -160,10 +301,18 @@ class _EventsListPageState extends State<EventsListPage> {
             .where(
               (e) =>
                   e.title.toLowerCase().contains(query) ||
+                  (e.description?.toLowerCase().contains(query) ?? false) ||
                   e.location.toLowerCase().contains(query) ||
                   e.city.toLowerCase().contains(query),
             )
             .toList();
+      }
+      if (_selectedDynamicFilterKey.isNotEmpty &&
+          _selectedDynamicFilterValue != 'Tous') {
+        events = events.where((e) {
+          final v = _eventDynamicValue(e, _selectedDynamicFilterKey);
+          return v.toLowerCase() == _selectedDynamicFilterValue.toLowerCase();
+        }).toList();
       }
     }
 
@@ -173,16 +322,168 @@ class _EventsListPageState extends State<EventsListPage> {
     });
   }
 
+  /// Filtre type : priorité à `eventType` en base, puis catégorie / détails / libellé affiché.
+  bool _eventMatchesSelectedType(EventResponse e) =>
+      _eventMatchesDisplayType(e, _selectedType);
+
+  bool _eventMatchesDisplayType(EventResponse e, String displayType) {
+    if (displayType == 'Autre') {
+      final t = (e.eventType ?? '').trim().toUpperCase();
+      if (t == 'AUTRE') return true;
+      if (t.isNotEmpty &&
+          !const {
+            'FILM',
+            'FESTIVAL',
+            'STANDUP',
+            'CONCERT',
+            'THEATRE',
+          }.contains(t)) {
+        return true;
+      }
+      final cat = e.category.trim().toLowerCase();
+      const known = {
+        'film',
+        'festival',
+        'stand-up',
+        'standup',
+        'concert',
+        'théâtre',
+        'theatre',
+        'autre',
+      };
+      return cat.isNotEmpty && !known.contains(cat);
+    }
+    final sel = displayType.trim();
+    final code = _eventTypeCodeFromLabel(sel);
+    final typeUpper = (e.eventType ?? '').trim().toUpperCase();
+    if (code == 'FILM') {
+      if (typeUpper == 'FILM') return true;
+      final cat = e.category.trim().toLowerCase();
+      if (cat.contains('film') ||
+          cat.contains('cinéma') ||
+          cat.contains('cinema')) {
+        return true;
+      }
+      if (_resolvedFilmGenre(e).isNotEmpty ||
+          (e.filmDirector ?? '').trim().isNotEmpty) {
+        return true;
+      }
+    }
+    if (code.isNotEmpty && typeUpper == code) return true;
+    if (e.category.trim().toLowerCase() == sel.toLowerCase()) return true;
+    return eventTypeDisplayLabel(e) == sel;
+  }
+
+  String _eventTypeCodeFromLabel(String type) {
+    switch (type.toLowerCase()) {
+      case 'film':
+        return 'FILM';
+      case 'festival':
+        return 'FESTIVAL';
+      case 'stand-up':
+      case 'standup':
+        return 'STANDUP';
+      case 'concert':
+        return 'CONCERT';
+      case 'théâtre':
+      case 'theatre':
+        return 'THEATRE';
+      default:
+        return '';
+    }
+  }
+
+  String _eventDynamicValue(EventResponse e, String key) {
+    switch (key) {
+      case 'director':
+        return e.filmDirector ?? '';
+      case 'genre':
+        return _resolvedFilmGenre(e);
+      case 'language':
+        return e.eventLanguage ?? '';
+      case 'artist':
+        return e.concertArtist ?? '';
+      case 'music_genre':
+        return e.concertMusicGenre ?? '';
+      case 'theme':
+        return e.festivalTheme ?? '';
+      case 'main_artist':
+        return e.standupMainArtist ?? '';
+      case 'author':
+        return e.theatreAuthor ?? '';
+      default:
+        return '';
+    }
+  }
+
+  Future<void> _refreshDynamicFilterOptions() async {
+    final typeCode = _eventTypeCodeFromLabel(_selectedType);
+    if (typeCode.isEmpty || _selectedType == 'Tous') {
+      if (!mounted) return;
+      setState(() {
+        _selectedDynamicFilterKey = '';
+        _selectedDynamicFilterLabel = '';
+        _selectedDynamicFilterValue = 'Tous';
+        _dynamicFilterValues = ['Tous'];
+      });
+      return;
+    }
+    final defs = <(String, String)>[];
+    if (typeCode == 'FILM') {
+      // « Genre film » est le menu dédié ; ici : réalisateur + langue (données détail).
+      defs.add(('director', 'Réalisateur'));
+      defs.add(('language', 'Langue'));
+    } else if (typeCode == 'CONCERT') {
+      defs.add(('artist', 'Artiste'));
+      defs.add(('music_genre', 'Genre musical'));
+    } else if (typeCode == 'FESTIVAL') {
+      defs.add(('theme', 'Thématique'));
+    } else if (typeCode == 'STANDUP') {
+      defs.add(('main_artist', 'Humoriste'));
+    } else if (typeCode == 'THEATRE') {
+      defs.add(('author', 'Auteur'));
+    }
+    if (defs.isEmpty) return;
+    try {
+      /// Un seul filtre dynamique (le plus important) pour garder l’UI lisible.
+      final def = defs.first;
+      final values = await client.cinePass.getEventDynamicFilterValues(
+        eventType: typeCode,
+        filterKey: def.$1,
+      );
+      if (!mounted) return;
+      setState(() {
+        _selectedDynamicFilterKey = def.$1;
+        _selectedDynamicFilterLabel = def.$2;
+        _dynamicFilterValues = values.isEmpty ? ['Tous'] : values;
+        _selectedDynamicFilterValue = 'Tous';
+      });
+      _applyFilters();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _selectedDynamicFilterKey = '';
+        _selectedDynamicFilterLabel = '';
+        _selectedDynamicFilterValue = 'Tous';
+        _dynamicFilterValues = ['Tous'];
+      });
+    }
+  }
+
   List<EventResponse> _filterEventsByDate(List<EventResponse> list) {
     if (_dateFrom == null && _dateTo == null) return list;
     return list.where((e) {
       final d = DateTime.tryParse(e.date);
       if (d == null) return true;
       final day = DateTime(d.year, d.month, d.day);
-      if (_dateFrom != null && day.isBefore(DateTime(_dateFrom!.year, _dateFrom!.month, _dateFrom!.day))) {
+      if (_dateFrom != null &&
+          day.isBefore(
+            DateTime(_dateFrom!.year, _dateFrom!.month, _dateFrom!.day),
+          )) {
         return false;
       }
-      if (_dateTo != null && day.isAfter(DateTime(_dateTo!.year, _dateTo!.month, _dateTo!.day))) {
+      if (_dateTo != null &&
+          day.isAfter(DateTime(_dateTo!.year, _dateTo!.month, _dateTo!.day))) {
         return false;
       }
       return true;
@@ -194,9 +495,12 @@ class _EventsListPageState extends State<EventsListPage> {
       _selectedType = 'Tous';
       _selectedCity = 'Toutes';
       _selectedGenre = 'Tous';
-      _selectedCategory = 'Toutes';
       _dateFrom = null;
       _dateTo = null;
+      _selectedDynamicFilterKey = '';
+      _selectedDynamicFilterLabel = '';
+      _selectedDynamicFilterValue = 'Tous';
+      _dynamicFilterValues = ['Tous'];
       _searchController.clear();
     });
     _applyFilters();
@@ -259,8 +563,8 @@ class _EventsListPageState extends State<EventsListPage> {
     }
 
     final showGenre = _selectedType == 'Tous' || _selectedType == 'Film';
-    final showCategory = _selectedType == 'Tous';
-    final showCity = _selectedType == 'Tous' || _selectedType != 'Film';
+    // « Film » inclut aussi les événements ciné : ville + dates utiles.
+    final showCity = true;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -296,35 +600,35 @@ class _EventsListPageState extends State<EventsListPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (_) => _applyFilters(),
-                          decoration: InputDecoration(
-                            hintText: 'Titre, lieu...',
-                            hintStyle: const TextStyle(
-                              color: AppTheme.textSecondary,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: AppTheme.textSecondary,
-                            ),
-                            filled: true,
-                            fillColor: AppTheme.surfaceDark,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          style: const TextStyle(color: AppTheme.textPrimary),
-                        ),
+                  TextField(
+                    controller: _searchController,
+                    onChanged: (_) => _applyFilters(),
+                    decoration: InputDecoration(
+                      hintText: 'Titre, lieu, ville…',
+                      hintStyle: const TextStyle(
+                        color: AppTheme.textSecondary,
                       ),
-                      const SizedBox(width: 12),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: AppTheme.textSecondary,
+                      ),
+                      filled: true,
+                      fillColor: AppTheme.surfaceDark,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    style: const TextStyle(color: AppTheme.textPrimary),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
                       SizedBox(
-                        width: 140,
+                        width: 160,
                         child: _DropdownFilter<String>(
                           value: _selectedType,
                           items: _typeOptions,
@@ -332,19 +636,26 @@ class _EventsListPageState extends State<EventsListPage> {
                           onChanged: (v) {
                             setState(() {
                               _selectedType = v ?? 'Tous';
+                              if (_selectedType == 'Tous' ||
+                                  _selectedType == 'Film') {
+                                _genres = _mergedGenreDropdown();
+                                if (!_genres.contains(_selectedGenre)) {
+                                  _selectedGenre = 'Tous';
+                                }
+                              }
                               _applyFilters();
                             });
+                            _refreshDynamicFilterOptions();
                           },
                         ),
                       ),
-                      if (showGenre) ...[
-                        const SizedBox(width: 12),
+                      if (showGenre)
                         SizedBox(
-                          width: 130,
+                          width: 150,
                           child: _DropdownFilter<String>(
                             value: _selectedGenre,
                             items: _genres,
-                            label: 'Genre',
+                            label: 'Genre film',
                             onChanged: (v) {
                               setState(() {
                                 _selectedGenre = v ?? 'Tous';
@@ -353,28 +664,9 @@ class _EventsListPageState extends State<EventsListPage> {
                             },
                           ),
                         ),
-                      ],
-                      if (showCategory) ...[
-                        const SizedBox(width: 12),
+                      if (showCity)
                         SizedBox(
-                          width: 130,
-                          child: _DropdownFilter<String>(
-                            value: _selectedCategory,
-                            items: _categories,
-                            label: 'Catégorie',
-                            onChanged: (v) {
-                              setState(() {
-                                _selectedCategory = v ?? 'Toutes';
-                                _applyFilters();
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                      if (showCity) ...[
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 120,
+                          width: 150,
                           child: _DropdownFilter<String>(
                             value: _selectedCity,
                             items: _cities,
@@ -387,34 +679,45 @@ class _EventsListPageState extends State<EventsListPage> {
                             },
                           ),
                         ),
-                      ],
-                      if (_selectedType != 'Film') ...[
-                        const SizedBox(width: 12),
-                        _DateFilterChip(
-                          label: 'Du',
-                          date: _dateFrom,
-                          onTap: _pickDateFrom,
-                          onClear: () {
-                            setState(() {
-                              _dateFrom = null;
-                              _applyFilters();
-                            });
-                          },
+                      _DateFilterChip(
+                        label: 'Du',
+                        date: _dateFrom,
+                        onTap: _pickDateFrom,
+                        onClear: () {
+                          setState(() {
+                            _dateFrom = null;
+                            _applyFilters();
+                          });
+                        },
+                      ),
+                      _DateFilterChip(
+                        label: 'Au',
+                        date: _dateTo,
+                        onTap: _pickDateTo,
+                        onClear: () {
+                          setState(() {
+                            _dateTo = null;
+                            _applyFilters();
+                          });
+                        },
+                      ),
+                      // N’affiche le menu que s’il existe au moins une valeur autre que « Tous ».
+                      if (_selectedDynamicFilterKey.isNotEmpty &&
+                          _dynamicFilterValues.any((v) => v != 'Tous'))
+                        SizedBox(
+                          width: 180,
+                          child: _DropdownFilter<String>(
+                            value: _selectedDynamicFilterValue,
+                            items: _dynamicFilterValues,
+                            label: _selectedDynamicFilterLabel,
+                            onChanged: (v) {
+                              setState(() {
+                                _selectedDynamicFilterValue = v ?? 'Tous';
+                                _applyFilters();
+                              });
+                            },
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        _DateFilterChip(
-                          label: 'Au',
-                          date: _dateTo,
-                          onTap: _pickDateTo,
-                          onClear: () {
-                            setState(() {
-                              _dateTo = null;
-                              _applyFilters();
-                            });
-                          },
-                        ),
-                      ],
-                      const SizedBox(width: 12),
                       TextButton.icon(
                         onPressed: _resetFilters,
                         icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -473,34 +776,12 @@ class _EventsListPageState extends State<EventsListPage> {
                     ),
                   ),
                   ..._filteredEvents.map(
-                    (event) => ClipRect(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Chip(
-                            label: Text(event.category),
-                            backgroundColor: AppTheme.accentGreen.withValues(
-                              alpha: 0.3,
-                            ),
-                            labelStyle: const TextStyle(
-                              color: AppTheme.accentGreen,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          const SizedBox(height: 4),
-                          EventCard(event: event),
-                        ],
-                      ),
-                    ),
+                    (event) => ClipRect(child: EventCard(event: event)),
                   ),
                 ];
                 // Cartes compactes : ratio pour éviter overflow
+                // Plus haut : évite le débordement des cartes événement (prix + bouton).
+                // Cartes avec affiche plus haute (2/3) : cellule un peu plus haute.
                 final childAspectRatio = w > 900 ? 0.48 : 0.44;
                 return GridView.count(
                   shrinkWrap: true,
@@ -535,25 +816,46 @@ class _DropdownFilter<T extends String> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceDark,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          isExpanded: true,
-          dropdownColor: AppTheme.cardDark,
-          style: const TextStyle(color: AppTheme.textPrimary),
-          hint: label != null ? Text(label!) : null,
-          items: items
-              .map((e) => DropdownMenuItem<T>(value: e, child: Text(e)))
-              .toList(),
-          onChanged: onChanged,
+    // Toujours au moins une entrée + mêmes valeurs que le bouton (évite liste vide).
+    final safeItems = items.isEmpty ? <T>[value] : items;
+    final effective = safeItems.contains(value) ? value : safeItems.first;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label != null) ...[
+          Text(
+            label!,
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: effective,
+              isExpanded: true,
+              dropdownColor: AppTheme.cardDark,
+              style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+              items: safeItems
+                  .map(
+                    (e) => DropdownMenuItem<T>(value: e, child: Text(e)),
+                  )
+                  .toList(),
+              onChanged: onChanged,
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -587,8 +889,11 @@ class _DateFilterChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.calendar_today_rounded,
-                  size: 16, color: AppTheme.textSecondary),
+              Icon(
+                Icons.calendar_today_rounded,
+                size: 16,
+                color: AppTheme.textSecondary,
+              ),
               const SizedBox(width: 6),
               Text(
                 text,
@@ -601,7 +906,11 @@ class _DateFilterChip extends StatelessWidget {
                 const SizedBox(width: 4),
                 GestureDetector(
                   onTap: onClear,
-                  child: Icon(Icons.close, size: 16, color: AppTheme.textSecondary),
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ],

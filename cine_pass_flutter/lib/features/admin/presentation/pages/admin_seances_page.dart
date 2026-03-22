@@ -162,7 +162,7 @@ class _AdminSeancesPageState extends State<AdminSeancesPage> {
                           ),
                         ),
                       ),
-                      DataCell(Text('${s.price.toStringAsFixed(2)} €')),
+                      DataCell(Text('${s.price.toStringAsFixed(2)} MAD')),
                       DataCell(
                         Text(
                           '${s.placesTotal - s.placesLeft}/${s.placesTotal}',

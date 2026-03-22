@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/state/auth_state.dart';
+import '../../../../main.dart';
 
 /// Types de structure alignés sur la BDD : CINEMA | VENUE | ORGANIZER | OTHER
 const List<Map<String, String>> _structureTypes = [
@@ -21,9 +24,6 @@ class DevenirResponsablePage extends StatefulWidget {
 
 class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
   final _formKey = GlobalKey<FormState>();
-  final _professionalEmailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final _structureNameController = TextEditingController();
   final _structureCityController = TextEditingController();
   final _structureAddressController = TextEditingController();
@@ -36,16 +36,15 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
   final _socialLinksController = TextEditingController();
 
   String _selectedStructureType = 'CINEMA';
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
   bool _isSubmitting = false;
   bool _submitted = false;
 
+  Future<bool> _hasMyPendingRequest() {
+    return client.cinePass.hasMyPendingDemandeResponsable();
+  }
+
   @override
   void dispose() {
-    _professionalEmailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
     _structureNameController.dispose();
     _structureCityController.dispose();
     _structureAddressController.dispose();
@@ -63,9 +62,65 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
     if (_formKey.currentState?.validate() != true) return;
     setState(() => _isSubmitting = true);
     try {
-      // TODO: appeler l'endpoint backend createDemandeResponsable (email pro, password hashé, autres champs)
-      await Future.delayed(const Duration(milliseconds: 800));
+      await context.read<AuthState>().refreshProfileFromServer();
       if (!mounted) return;
+      final auth = context.read<AuthState>();
+      if (auth.isResponsable) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Vous êtes déjà responsable. Accédez directement à votre espace responsable.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
+      final hasPending = await _hasMyPendingRequest();
+      if (!mounted) return;
+      if (hasPending) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Vous avez déjà une demande en attente de validation admin.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
+      final created = await client.cinePass.createDemandeResponsable(
+        structureType: _selectedStructureType,
+        structureName: _structureNameController.text.trim(),
+        structureCity: _structureCityController.text.trim(),
+        structureAddress: _structureAddressController.text.trim().isEmpty
+            ? null
+            : _structureAddressController.text.trim(),
+        structureWebsite: _structureWebsiteController.text.trim().isEmpty
+            ? null
+            : _structureWebsiteController.text.trim(),
+        structurePhone: _structurePhoneController.text.trim().isEmpty
+            ? null
+            : _structurePhoneController.text.trim(),
+        description: _descriptionController.text.trim(),
+      );
+      if (!mounted) return;
+      if (created == null) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Demande non envoyée. Vérifiez votre connexion puis réessayez.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
       setState(() {
         _isSubmitting = false;
         _submitted = true;
@@ -115,7 +170,7 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Vous pourrez vous connecter à votre espace responsable avec votre email professionnel et le mot de passe que vous avez choisi, une fois la demande approuvée.',
+                  'Une fois approuvée par un admin, votre compte actuel aura directement accès à l\'espace responsable.',
                   style: TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 14,
@@ -154,7 +209,7 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Gérez les séances et événements de votre cinéma, salle ou structure. Après approbation, vous vous connecterez à l\'espace responsable avec l\'email professionnel et le mot de passe ci-dessous.',
+                'Gérez les séances et événements de votre cinéma, salle ou structure. Après approbation, votre compte actuel deviendra responsable.',
                 style: TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 14,
@@ -162,95 +217,12 @@ class _DevenirResponsablePageState extends State<DevenirResponsablePage> {
               ),
               const SizedBox(height: 28),
 
-              // ---------- Section Identifiants espace responsable ----------
-              _sectionTitle('Identifiants espace responsable'),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _professionalEmailController,
-                decoration: InputDecoration(
-                  labelText: 'Email professionnel *',
-                  hintText: 'ex. contact@moncinema.fr',
-                  filled: true,
-                  fillColor: AppTheme.cardDark,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                autocorrect: false,
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Requis';
-                  if (!RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(v.trim())) {
-                    return 'Email professionnel invalide';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Mot de passe *',
-                  hintText: 'Min. 8 caractères',
-                  filled: true,
-                  fillColor: AppTheme.cardDark,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.lock_outline_rounded),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Requis';
-                  if (v.length < 8) return 'Min. 8 caractères';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: _obscureConfirm,
-                decoration: InputDecoration(
-                  labelText: 'Confirmer le mot de passe *',
-                  filled: true,
-                  fillColor: AppTheme.cardDark,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.lock_outline_rounded),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirm ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscureConfirm = !_obscureConfirm),
-                  ),
-                ),
-                validator: (v) {
-                  if (v != _passwordController.text) {
-                    return 'Les mots de passe ne correspondent pas';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 28),
-
               // ---------- Section Structure ----------
               _sectionTitle('Votre structure'),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
-                value: _selectedStructureType,
+                key: ValueKey<String>(_selectedStructureType),
+                initialValue: _selectedStructureType,
                 decoration: InputDecoration(
                   labelText: 'Type de structure *',
                   filled: true,

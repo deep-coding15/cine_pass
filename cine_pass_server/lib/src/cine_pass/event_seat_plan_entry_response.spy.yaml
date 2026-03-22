@@ -1,0 +1,8 @@
+class: EventSeatPlanEntryResponse
+fields:
+  label: String
+  rowIndex: int
+  colIndex: int
+  blocked: bool
+  taken: bool
+  zone: String

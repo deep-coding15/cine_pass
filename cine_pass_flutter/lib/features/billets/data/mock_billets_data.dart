@@ -32,23 +32,20 @@ class MockBillet {
 /// Liste vide : à alimenter via le backend.
 final mockBillets = <MockBillet>[];
 
-/// Barème remboursement : ≥48h 100%, 24-48h 80%, 2-24h 50%, <2h 0%.
+/// Barème indicatif : ≥48h 100%, 24–48h 80%, 2–24h 50%, moins de 2h 0% (non annulable dans l’app).
 int getRefundPercent(DateTime sessionDateTime) {
   final now = DateTime.now();
-  if (now.isAfter(sessionDateTime)) return 0;
+  if (!sessionDateTime.isAfter(now)) return 0;
   final diff = sessionDateTime.difference(now);
-  final hours = diff.inHours + diff.inMinutes / 60;
-  if (hours >= 48) return 100;
-  if (hours >= 24) return 80;
-  if (hours >= 2) return 50;
+  if (diff >= const Duration(hours: 48)) return 100;
+  if (diff >= const Duration(hours: 24)) return 80;
+  if (diff >= const Duration(hours: 2)) return 50;
   return 0;
 }
 
-/// Annulation possible uniquement si ≥ 2 h avant (sinon 0% remboursement).
+/// Annulation possible uniquement s’il reste **au moins 2 h** avant le début.
 bool canCancelReservation(DateTime sessionDateTime) {
   final now = DateTime.now();
-  if (now.isAfter(sessionDateTime)) return false;
-  final diff = sessionDateTime.difference(now);
-  final hours = diff.inHours + diff.inMinutes / 60;
-  return hours >= 2;
+  if (!sessionDateTime.isAfter(now)) return false;
+  return sessionDateTime.difference(now) >= const Duration(hours: 2);
 }

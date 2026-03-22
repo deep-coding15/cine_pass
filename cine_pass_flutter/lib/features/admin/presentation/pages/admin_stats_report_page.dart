@@ -1,9 +1,9 @@
-import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../../core/pdf/pdf_branding.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
 
@@ -21,7 +21,6 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
   String? _error;
   int _nbReservations = 0;
   double _totalCA = 0;
-  int _nbFilms = 0;
   int _nbEvents = 0;
 
   Future<void> _loadReport() async {
@@ -32,7 +31,6 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
     });
     try {
       final reservations = await client.cinePass.getReservations();
-      final films = await client.cinePass.getFilms();
       final events = await client.cinePass.getEvents();
 
       final start = DateTime(_dateStart!.year, _dateStart!.month, _dateStart!.day);
@@ -52,7 +50,6 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
       setState(() {
         _nbReservations = nb;
         _totalCA = ca;
-        _nbFilms = films.length;
         _nbEvents = events.length;
         _loading = false;
       });
@@ -67,6 +64,11 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
 
   Future<void> _exportPdf() async {
     if (_dateStart == null || _dateEnd == null) return;
+    final header = await cinePassPdfHeader(
+      title: 'Rapport de statistiques CinePass',
+      subtitle:
+          'Période: ${_dateStart!.day}/${_dateStart!.month}/${_dateStart!.year} - ${_dateEnd!.day}/${_dateEnd!.month}/${_dateEnd!.year}',
+    );
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -75,26 +77,13 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text(
-                'Rapport de statistiques CinePass',
-                style: pw.TextStyle(
-                  fontSize: 20,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.SizedBox(height: 8),
-              pw.Text(
-                'Période: ${_dateStart!.day}/${_dateStart!.month}/${_dateStart!.year} - ${_dateEnd!.day}/${_dateEnd!.month}/${_dateEnd!.year}',
-                style: const pw.TextStyle(fontSize: 12),
-              ),
+              header,
               pw.SizedBox(height: 24),
               pw.Text('Réservations: $_nbReservations', style: const pw.TextStyle(fontSize: 14)),
               pw.SizedBox(height: 4),
-              pw.Text('Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} €', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text('Chiffre d\'affaires: ${_totalCA.toStringAsFixed(2)} MAD', style: const pw.TextStyle(fontSize: 14)),
               pw.SizedBox(height: 4),
-              pw.Text('Films au catalogue: $_nbFilms', style: const pw.TextStyle(fontSize: 14)),
-              pw.SizedBox(height: 4),
-              pw.Text('Événements: $_nbEvents', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text('Événements (catalogue): $_nbEvents', style: const pw.TextStyle(fontSize: 14)),
             ],
           );
         },
@@ -199,7 +188,7 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                         style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
                       ),
                       const SizedBox(width: 12),
-                      if (_nbReservations > 0 || _totalCA > 0 || _nbFilms > 0 || _nbEvents > 0)
+                      if (_nbReservations > 0 || _totalCA > 0 || _nbEvents > 0)
                         OutlinedButton.icon(
                           onPressed: _exportPdf,
                           icon: const Icon(Icons.picture_as_pdf),
@@ -215,7 +204,7 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
               ),
             ),
           ),
-          if (_nbReservations > 0 || _totalCA > 0 || _nbFilms > 0 || _nbEvents > 0) ...[
+          if (_nbReservations > 0 || _totalCA > 0 || _nbEvents > 0) ...[
             const SizedBox(height: 32),
             Text(
               'Résumé',
@@ -235,16 +224,8 @@ class _AdminStatsReportPageState extends State<AdminStatsReportPage> {
                 Expanded(
                   child: _StatCard(
                     title: 'Chiffre d\'affaires',
-                    value: '${_totalCA.toStringAsFixed(0)} €',
+                    value: '${_totalCA.toStringAsFixed(0)} MAD',
                     icon: Icons.euro_rounded,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _StatCard(
-                    title: 'Films',
-                    value: '$_nbFilms',
-                    icon: Icons.movie_rounded,
                   ),
                 ),
                 const SizedBox(width: 16),

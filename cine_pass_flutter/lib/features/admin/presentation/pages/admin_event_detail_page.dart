@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
+import '../../../events/presentation/widgets/event_type_badge.dart';
 
-/// Page admin : détail d'un événement avec séances et boutons d'action (modifier, archiver, supprimer).
+/// Page admin : détail d'un événement avec séances et boutons d'action (modifier, supprimer).
 class AdminEventDetailPage extends StatefulWidget {
   const AdminEventDetailPage({super.key, required this.eventId});
 
@@ -18,6 +19,146 @@ class AdminEventDetailPage extends StatefulWidget {
 class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
   EventResponse? _event;
   bool _loading = true;
+
+  Future<void> _editEvent(EventResponse e) async {
+    final titleController = TextEditingController(text: e.title);
+    final categoryController = TextEditingController(text: e.category);
+    final cityController = TextEditingController(text: e.city);
+    final venueController = TextEditingController(text: e.location);
+    final addressController = TextEditingController(text: e.address ?? '');
+    final descController = TextEditingController(text: e.description ?? '');
+    final priceController = TextEditingController(
+      text: e.price.toStringAsFixed(2),
+    );
+    final placesController = TextEditingController(text: '${e.placesTotal}');
+    final formKey = GlobalKey<FormState>();
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Modifier événement'),
+        content: SizedBox(
+          width: 560,
+          child: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: titleController,
+                    decoration: const InputDecoration(labelText: 'Titre *'),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Requis' : null,
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: categoryController,
+                    decoration: const InputDecoration(labelText: 'Catégorie'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: venueController,
+                    decoration: const InputDecoration(labelText: 'Lieu *'),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Requis' : null,
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: cityController,
+                    decoration: const InputDecoration(labelText: 'Ville *'),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Requis' : null,
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: addressController,
+                    decoration: const InputDecoration(labelText: 'Adresse'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: descController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(labelText: 'Description'),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: priceController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Prix (MAD)',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextFormField(
+                          controller: placesController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Places',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (formKey.currentState?.validate() != true) return;
+              final updated = await client.cinePass.updateEvent(
+                id: e.id,
+                titre: titleController.text.trim(),
+                categorie: categoryController.text.trim(),
+                description: descController.text.trim().isEmpty
+                    ? null
+                    : descController.text.trim(),
+                lieu: venueController.text.trim(),
+                ville: cityController.text.trim(),
+                adresse: addressController.text.trim().isEmpty
+                    ? null
+                    : addressController.text.trim(),
+                prixBase: double.tryParse(
+                  priceController.text.trim().replaceAll(',', '.'),
+                ),
+                placesTotal: int.tryParse(placesController.text.trim()),
+              );
+              if (!mounted) return;
+              Navigator.pop(ctx, updated != null);
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    );
+
+    if (saved == true) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Événement mis à jour.'),
+          backgroundColor: AppTheme.accentGreen,
+        ),
+      );
+      await _load();
+    }
+  }
 
   @override
   void initState() {
@@ -130,14 +271,18 @@ class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              e.category,
-                              style: TextStyle(
-                                color: AppTheme.primaryRed,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                            EventTypeBadge(event: e),
+                            if (e.category.trim().isNotEmpty &&
+                                e.category != eventTypeDisplayLabel(e)) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                'Catégorie affichée : ${e.category}',
+                                style: const TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
+                            ],
                             const SizedBox(height: 8),
                             Text(
                               'Structure / Lieu : ${e.location}',
@@ -166,7 +311,7 @@ class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '${e.price.toStringAsFixed(2)} € • ${e.placesTotal - e.placesLeft}/${e.placesTotal} places',
+                              '${e.price.toStringAsFixed(2)} MAD • ${e.placesTotal - e.placesLeft}/${e.placesTotal} places',
                               style: const TextStyle(
                                 color: AppTheme.textSecondary,
                                 fontSize: 13,
@@ -238,7 +383,7 @@ class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
                           DataColumn(label: Text('Places totales')),
                           DataColumn(label: Text('Places restantes')),
                           DataColumn(label: Text('Places réservées')),
-                          DataColumn(label: Text('Prix (€)')),
+                          DataColumn(label: Text('Prix (MAD)')),
                         ],
                         rows: [
                           DataRow(
@@ -267,27 +412,12 @@ class _AdminEventDetailPageState extends State<AdminEventDetailPage> {
             runSpacing: 12,
             children: [
               FilledButton.icon(
-                onPressed: () {
-                  // TODO: ouvrir dialogue modification
-                },
+                onPressed: () => _editEvent(e),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.primaryRed,
                 ),
                 icon: const Icon(Icons.edit_rounded, size: 20),
                 label: const Text('Modifier'),
-              ),
-              OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: archiver l'événement
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Fonction archiver à brancher'),
-                      backgroundColor: AppTheme.textSecondary,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.archive_rounded, size: 20),
-                label: const Text('Archiver'),
               ),
               OutlinedButton.icon(
                 onPressed: () async {

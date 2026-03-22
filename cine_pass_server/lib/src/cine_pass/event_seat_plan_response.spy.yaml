@@ -1,0 +1,5 @@
+class: EventSeatPlanResponse
+fields:
+  eventId: String
+  reservationMode: String
+  seats: List<EventSeatPlanEntryResponse>

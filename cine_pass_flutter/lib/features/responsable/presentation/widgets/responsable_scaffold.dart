@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/animated_background.dart';
+import '../../../../core/widgets/app_bottom_bar.dart';
 
 class ResponsableScaffold extends StatelessWidget {
   const ResponsableScaffold({super.key, required this.child});
@@ -110,7 +111,13 @@ class ResponsableScaffold extends StatelessWidget {
           Expanded(
             child: AnimatedBackground(
               opacity: 0.06,
-              child: child,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: child),
+                  const AppBottomBar(compactLinks: true),
+                ],
+              ),
             ),
           ),
         ],

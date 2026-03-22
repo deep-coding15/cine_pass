@@ -16,7 +16,7 @@ class FaqPage extends StatelessWidget {
     _FaqItem(
       question: 'Puis-je annuler ou modifier ma réservation ?',
       answer:
-          'Vous pouvez annuler ou modifier votre réservation jusqu\'à 2 heures avant le début de la séance, depuis la page "Mes billets". Au-delà, les billets ne sont plus modifiables.',
+          'Pour une séance de cinéma ou un événement, vous pouvez annuler votre réservation depuis « Mes billets » tant qu’il reste au moins 2 heures avant le début. Le changement de places ou d’horaire n’est pas proposé dans l’app après achat.',
     ),
     _FaqItem(
       question: 'Comment utiliser mon billet électronique ?',

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
+import '../../../events/presentation/widgets/event_type_badge.dart';
 
 class AdminEventsPage extends StatefulWidget {
   const AdminEventsPage({super.key});
@@ -22,6 +23,39 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
     _load();
   }
 
+  String _structureEtLieu(EventResponse e) {
+    final lieu = e.location.trim();
+    final s = e.structureName?.trim();
+    if (s != null && s.isNotEmpty && lieu.isNotEmpty) {
+      return '$s / $lieu';
+    }
+    if (s != null && s.isNotEmpty) {
+      return s;
+    }
+    return lieu.isNotEmpty ? lieu : '—';
+  }
+
+  /// Heure lisible : évite « 2026- » si `time` est une date ISO complète.
+  String _dateHeure(EventResponse e) {
+    final d = e.date.trim();
+    final raw = e.time.trim();
+    String timeShort = raw;
+    final parsed = DateTime.tryParse(raw);
+    if (parsed != null) {
+      timeShort =
+          '${parsed.hour.toString().padLeft(2, '0')}:'
+          '${parsed.minute.toString().padLeft(2, '0')}';
+    } else {
+      final m = RegExp(r'(\d{1,2}:\d{2})').firstMatch(raw);
+      if (m != null) {
+        timeShort = m.group(1)!;
+      } else if (raw.length >= 5 && raw.substring(2, 3) == ':') {
+        timeShort = raw.substring(0, 5);
+      }
+    }
+    return '$d $timeShort';
+  }
+
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
@@ -38,6 +72,49 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _openEdit(EventResponse e) async {
+    if (!mounted) return;
+    await context.push('/admin/events/${e.id}');
+    if (mounted) await _load();
+  }
+
+  Future<void> _confirmDelete(EventResponse e) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Supprimer l\'événement ?'),
+        content: Text(
+          '« ${e.title} » sera supprimé définitivement.',
+          style: const TextStyle(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final deleted = await client.cinePass.deleteEvent(e.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          deleted ? 'Événement supprimé.' : 'Suppression impossible.',
+        ),
+        backgroundColor: deleted ? AppTheme.accentGreen : AppTheme.primaryRed,
+      ),
+    );
+    if (deleted) await _load();
   }
 
   @override
@@ -107,7 +184,7 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
   DataRow _buildRow(BuildContext context, EventResponse e) {
     final sold = e.placesTotal - e.placesLeft;
     return DataRow(
-      onSelectChanged: (_) => context.go('/admin/events/${e.id}'),
+      onSelectChanged: (_) => _openEdit(e),
       cells: [
         DataCell(
           Row(
@@ -148,30 +225,23 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
             ],
           ),
         ),
-        DataCell(Text(e.location)),
+        DataCell(Text(_structureEtLieu(e))),
         DataCell(
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryRed.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              e.category,
-              style: const TextStyle(color: AppTheme.primaryRed, fontSize: 12),
-            ),
+          SizedBox(
+            width: 120,
+            child: EventTypeBadge(event: e, compact: true, maxWidth: 120),
           ),
         ),
         DataCell(Text(e.city)),
-        DataCell(Text('${e.date} ${e.time}')),
-        DataCell(Text('${e.price.toStringAsFixed(2)} €')),
+        DataCell(Text(_dateHeure(e))),
+        DataCell(Text('${e.price.toStringAsFixed(2)} MAD')),
         DataCell(Text('$sold/${e.placesTotal}')),
         DataCell(
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () => _openEdit(e),
                 icon: const Icon(
                   Icons.edit_outlined,
                   size: 20,
@@ -179,7 +249,7 @@ class _AdminEventsPageState extends State<AdminEventsPage> {
                 ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () => _confirmDelete(e),
                 icon: const Icon(
                   Icons.delete_outline,
                   size: 20,

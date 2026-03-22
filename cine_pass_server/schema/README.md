@@ -14,7 +14,7 @@ Puis lancer le serveur :
 dart run bin/main.dart
 ```
 
-Le script `reset_and_seed.cmd` fait dans l’ordre : drop des tables métier → création du schéma → insertion du seed. Aucun warning Serverpod si la base est cohérente.
+Le script `reset_and_seed.cmd` exécute `cine_pass_schema.sql` (qui **supprime puis recrée** tout le schéma métier en un seul fichier) puis le seed. Aucun warning Serverpod si la base est cohérente.
 
 ---
 
@@ -54,9 +54,9 @@ Le script `reset_and_seed.cmd` fait dans l’ordre : drop des tables métier →
 
 | Étape   | Commande |
 |--------|----------|
-| Drop   | `type schema\drop_cine_pass_tables.sql \| docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass` |
-| Schéma | `type schema\cine_pass_schema.sql \| docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass` |
+| Schéma complet (drop + tables + rôles) | `type schema\cine_pass_schema.sql \| docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass` |
 | Seed   | `type schema\seed_data.sql \| docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass` |
+| Drop seul (sans recréer) | `type schema\drop_cine_pass_tables.sql \| docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass` |
 
 **FK manquante sur `structureId`** : déjà gérée dans `cine_pass_schema.sql` (bloc DO). Inutile d’exécuter un script à part.
 

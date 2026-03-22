@@ -27,6 +27,42 @@ Future<void> sendRegistrationVerificationCode(
 }
 
 /// Sends password reset verification code by email (or logs fallback in dev).
+/// Email transactionnel : demande « devenir responsable » approuvée par l’admin.
+Future<void> sendResponsableDemandApprovedEmail(
+  Session session, {
+  required String email,
+  required String structureName,
+}) async {
+  final name = structureName.trim().isEmpty ? 'votre structure' : structureName.trim();
+  await _sendEmailOrLog(
+    session,
+    toEmail: email,
+    subject: 'CinePass — Votre compte responsable est approuvé',
+    textBody:
+        'Bonjour,\n\n'
+        'Bonne nouvelle : votre demande pour représenter la structure « $name » '
+        'a été approuvée.\n\n'
+        'Vous pouvez vous connecter à CinePass et accéder à l’espace Responsable '
+        '(menu ou page de connexion dédiée) pour gérer vos événements et réservations.\n\n'
+        'L’équipe CinePass',
+    htmlBody:
+        '<p>Bonjour,</p>'
+        '<p>Bonne nouvelle : votre demande pour représenter la structure '
+        '<strong>${_htmlEscape(name)}</strong> a été <strong>approuvée</strong>.</p>'
+        '<p>Vous pouvez vous connecter à CinePass et accéder à l’<strong>espace Responsable</strong> '
+        'pour gérer vos événements et réservations.</p>'
+        '<p>L’équipe CinePass</p>',
+  );
+}
+
+String _htmlEscape(String s) {
+  return s
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
+}
+
 Future<void> sendPasswordResetVerificationCode(
   Session session, {
   required String email,

@@ -126,6 +126,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       _dropdown<String>(
                         label: 'Film',
                         hint: 'Sélectionner un film',
+                        value: _selectedFilmId,
                         items: widget.films
                             .map(
                               (f) => DropdownMenuItem(
@@ -140,6 +141,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       _dropdown<String>(
                         label: 'Cinéma',
                         hint: 'Sélectionner un cinéma',
+                        value: _selectedCinemaId,
                         items: _cinemas
                             .map(
                               (c) => DropdownMenuItem(
@@ -193,6 +195,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       _dropdown<String>(
                         label: 'Heure',
                         hint: '--:--',
+                        value: _selectedSlot,
                         items: _slots
                             .map(
                               (s) => DropdownMenuItem(
@@ -217,6 +220,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       _dropdown<String>(
                         label: 'Type de projection',
                         hint: 'Type',
+                        value: _type,
                         items: const [
                           DropdownMenuItem(value: '2D', child: Text('2D')),
                           DropdownMenuItem(value: '3D', child: Text('3D')),
@@ -231,7 +235,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                           decimal: true,
                         ),
                         decoration: const InputDecoration(
-                          labelText: 'Prix (€)',
+                          labelText: 'Prix (MAD)',
                           filled: true,
                           fillColor: AppTheme.surfaceDark,
                           border: OutlineInputBorder(
@@ -349,8 +353,11 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
     required String hint,
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?> onChanged,
+    T? value,
   }) {
     return DropdownButtonFormField<T>(
+      key: ValueKey<Object?>('$label-$value'),
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         filled: true,

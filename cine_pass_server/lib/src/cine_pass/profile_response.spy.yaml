@@ -1,6 +1,10 @@
 class: ProfileResponse
 fields:
+  userId: String?
   displayName: String?
   email: String?
   phone: String?
   birthDate: String?
+  role: String?
+  active: bool?
+  createdAt: String?

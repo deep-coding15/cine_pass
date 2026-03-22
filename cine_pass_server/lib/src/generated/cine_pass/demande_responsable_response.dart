@@ -21,9 +21,17 @@ abstract class DemandeResponsableResponse
     required this.structureName,
     required this.structureCity,
     this.structureAddress,
+    this.structureWebsite,
+    this.structureSiret,
+    this.structurePhone,
+    this.contactRole,
+    this.description,
+    this.socialLinks,
+    this.professionalEmail,
     required this.status,
     required this.createdAt,
     this.userName,
+    this.userEmail,
   });
 
   factory DemandeResponsableResponse({
@@ -33,9 +41,17 @@ abstract class DemandeResponsableResponse
     required String structureName,
     required String structureCity,
     String? structureAddress,
+    String? structureWebsite,
+    String? structureSiret,
+    String? structurePhone,
+    String? contactRole,
+    String? description,
+    String? socialLinks,
+    String? professionalEmail,
     required String status,
     required String createdAt,
     String? userName,
+    String? userEmail,
   }) = _DemandeResponsableResponseImpl;
 
   factory DemandeResponsableResponse.fromJson(
@@ -48,9 +64,17 @@ abstract class DemandeResponsableResponse
       structureName: jsonSerialization['structureName'] as String,
       structureCity: jsonSerialization['structureCity'] as String,
       structureAddress: jsonSerialization['structureAddress'] as String?,
+      structureWebsite: jsonSerialization['structureWebsite'] as String?,
+      structureSiret: jsonSerialization['structureSiret'] as String?,
+      structurePhone: jsonSerialization['structurePhone'] as String?,
+      contactRole: jsonSerialization['contactRole'] as String?,
+      description: jsonSerialization['description'] as String?,
+      socialLinks: jsonSerialization['socialLinks'] as String?,
+      professionalEmail: jsonSerialization['professionalEmail'] as String?,
       status: jsonSerialization['status'] as String,
       createdAt: jsonSerialization['createdAt'] as String,
       userName: jsonSerialization['userName'] as String?,
+      userEmail: jsonSerialization['userEmail'] as String?,
     );
   }
 
@@ -66,11 +90,27 @@ abstract class DemandeResponsableResponse
 
   String? structureAddress;
 
+  String? structureWebsite;
+
+  String? structureSiret;
+
+  String? structurePhone;
+
+  String? contactRole;
+
+  String? description;
+
+  String? socialLinks;
+
+  String? professionalEmail;
+
   String status;
 
   String createdAt;
 
   String? userName;
+
+  String? userEmail;
 
   /// Returns a shallow copy of this [DemandeResponsableResponse]
   /// with some or all fields replaced by the given arguments.
@@ -82,9 +122,17 @@ abstract class DemandeResponsableResponse
     String? structureName,
     String? structureCity,
     String? structureAddress,
+    String? structureWebsite,
+    String? structureSiret,
+    String? structurePhone,
+    String? contactRole,
+    String? description,
+    String? socialLinks,
+    String? professionalEmail,
     String? status,
     String? createdAt,
     String? userName,
+    String? userEmail,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -96,9 +144,17 @@ abstract class DemandeResponsableResponse
       'structureName': structureName,
       'structureCity': structureCity,
       if (structureAddress != null) 'structureAddress': structureAddress,
+      if (structureWebsite != null) 'structureWebsite': structureWebsite,
+      if (structureSiret != null) 'structureSiret': structureSiret,
+      if (structurePhone != null) 'structurePhone': structurePhone,
+      if (contactRole != null) 'contactRole': contactRole,
+      if (description != null) 'description': description,
+      if (socialLinks != null) 'socialLinks': socialLinks,
+      if (professionalEmail != null) 'professionalEmail': professionalEmail,
       'status': status,
       'createdAt': createdAt,
       if (userName != null) 'userName': userName,
+      if (userEmail != null) 'userEmail': userEmail,
     };
   }
 
@@ -112,9 +168,17 @@ abstract class DemandeResponsableResponse
       'structureName': structureName,
       'structureCity': structureCity,
       if (structureAddress != null) 'structureAddress': structureAddress,
+      if (structureWebsite != null) 'structureWebsite': structureWebsite,
+      if (structureSiret != null) 'structureSiret': structureSiret,
+      if (structurePhone != null) 'structurePhone': structurePhone,
+      if (contactRole != null) 'contactRole': contactRole,
+      if (description != null) 'description': description,
+      if (socialLinks != null) 'socialLinks': socialLinks,
+      if (professionalEmail != null) 'professionalEmail': professionalEmail,
       'status': status,
       'createdAt': createdAt,
       if (userName != null) 'userName': userName,
+      if (userEmail != null) 'userEmail': userEmail,
     };
   }
 
@@ -134,9 +198,17 @@ class _DemandeResponsableResponseImpl extends DemandeResponsableResponse {
     required String structureName,
     required String structureCity,
     String? structureAddress,
+    String? structureWebsite,
+    String? structureSiret,
+    String? structurePhone,
+    String? contactRole,
+    String? description,
+    String? socialLinks,
+    String? professionalEmail,
     required String status,
     required String createdAt,
     String? userName,
+    String? userEmail,
   }) : super._(
          id: id,
          userId: userId,
@@ -144,9 +216,17 @@ class _DemandeResponsableResponseImpl extends DemandeResponsableResponse {
          structureName: structureName,
          structureCity: structureCity,
          structureAddress: structureAddress,
+         structureWebsite: structureWebsite,
+         structureSiret: structureSiret,
+         structurePhone: structurePhone,
+         contactRole: contactRole,
+         description: description,
+         socialLinks: socialLinks,
+         professionalEmail: professionalEmail,
          status: status,
          createdAt: createdAt,
          userName: userName,
+         userEmail: userEmail,
        );
 
   /// Returns a shallow copy of this [DemandeResponsableResponse]
@@ -160,9 +240,17 @@ class _DemandeResponsableResponseImpl extends DemandeResponsableResponse {
     String? structureName,
     String? structureCity,
     Object? structureAddress = _Undefined,
+    Object? structureWebsite = _Undefined,
+    Object? structureSiret = _Undefined,
+    Object? structurePhone = _Undefined,
+    Object? contactRole = _Undefined,
+    Object? description = _Undefined,
+    Object? socialLinks = _Undefined,
+    Object? professionalEmail = _Undefined,
     String? status,
     String? createdAt,
     Object? userName = _Undefined,
+    Object? userEmail = _Undefined,
   }) {
     return DemandeResponsableResponse(
       id: id ?? this.id,
@@ -173,9 +261,25 @@ class _DemandeResponsableResponseImpl extends DemandeResponsableResponse {
       structureAddress: structureAddress is String?
           ? structureAddress
           : this.structureAddress,
+      structureWebsite: structureWebsite is String?
+          ? structureWebsite
+          : this.structureWebsite,
+      structureSiret: structureSiret is String?
+          ? structureSiret
+          : this.structureSiret,
+      structurePhone: structurePhone is String?
+          ? structurePhone
+          : this.structurePhone,
+      contactRole: contactRole is String? ? contactRole : this.contactRole,
+      description: description is String? ? description : this.description,
+      socialLinks: socialLinks is String? ? socialLinks : this.socialLinks,
+      professionalEmail: professionalEmail is String?
+          ? professionalEmail
+          : this.professionalEmail,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       userName: userName is String? ? userName : this.userName,
+      userEmail: userEmail is String? ? userEmail : this.userEmail,
     );
   }
 }

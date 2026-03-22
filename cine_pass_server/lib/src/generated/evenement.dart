@@ -22,6 +22,10 @@ abstract class Evenement extends _i1.CinePassRow
     super.createdAt,
     required this.titre,
     required this.categorie,
+    String? event_type,
+    this.event_subtype,
+    this.custom_type_label,
+    this.event_language,
     this.description,
     required this.lieu,
     this.adresse,
@@ -34,13 +38,20 @@ abstract class Evenement extends _i1.CinePassRow
     this.posterUrl,
     this.availableOptions,
     this.structureId,
-  }) : id = id ?? const _i2.Uuid().v4obj();
+    bool? archived,
+  }) : id = id ?? const _i2.Uuid().v4obj(),
+       event_type = event_type ?? 'AUTRE',
+       archived = archived ?? false;
 
   factory Evenement({
     _i2.UuidValue? id,
     DateTime? createdAt,
     required String titre,
     required String categorie,
+    String? event_type,
+    String? event_subtype,
+    String? custom_type_label,
+    String? event_language,
     String? description,
     required String lieu,
     String? adresse,
@@ -53,6 +64,7 @@ abstract class Evenement extends _i1.CinePassRow
     String? posterUrl,
     List<String>? availableOptions,
     _i2.UuidValue? structureId,
+    bool? archived,
   }) = _EvenementImpl;
 
   factory Evenement.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -65,6 +77,10 @@ abstract class Evenement extends _i1.CinePassRow
           : _i2.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       titre: jsonSerialization['titre'] as String,
       categorie: jsonSerialization['categorie'] as String,
+      event_type: jsonSerialization['event_type'] as String?,
+      event_subtype: jsonSerialization['event_subtype'] as String?,
+      custom_type_label: jsonSerialization['custom_type_label'] as String?,
+      event_language: jsonSerialization['event_language'] as String?,
       description: jsonSerialization['description'] as String?,
       lieu: jsonSerialization['lieu'] as String,
       adresse: jsonSerialization['adresse'] as String?,
@@ -89,6 +105,9 @@ abstract class Evenement extends _i1.CinePassRow
           : _i2.UuidValueJsonExtension.fromJson(
               jsonSerialization['structureId'],
             ),
+      archived: jsonSerialization['archived'] == null
+          ? null
+          : _i2.BoolJsonExtension.fromJson(jsonSerialization['archived']),
     );
   }
 
@@ -102,6 +121,15 @@ abstract class Evenement extends _i1.CinePassRow
   String titre;
 
   String categorie;
+
+  /// Colonnes alignées sur schema/cine_pass_schema.sql (snake_case en base).
+  String event_type;
+
+  String? event_subtype;
+
+  String? custom_type_label;
+
+  String? event_language;
 
   String? description;
 
@@ -127,6 +155,8 @@ abstract class Evenement extends _i1.CinePassRow
 
   _i2.UuidValue? structureId;
 
+  bool archived;
+
   @override
   _i2.Table<_i2.UuidValue> get table => t;
 
@@ -139,6 +169,10 @@ abstract class Evenement extends _i1.CinePassRow
     DateTime? createdAt,
     String? titre,
     String? categorie,
+    String? event_type,
+    String? event_subtype,
+    String? custom_type_label,
+    String? event_language,
     String? description,
     String? lieu,
     String? adresse,
@@ -151,6 +185,7 @@ abstract class Evenement extends _i1.CinePassRow
     String? posterUrl,
     List<String>? availableOptions,
     _i2.UuidValue? structureId,
+    bool? archived,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -160,6 +195,10 @@ abstract class Evenement extends _i1.CinePassRow
       'createdAt': createdAt.toJson(),
       'titre': titre,
       'categorie': categorie,
+      'event_type': event_type,
+      if (event_subtype != null) 'event_subtype': event_subtype,
+      if (custom_type_label != null) 'custom_type_label': custom_type_label,
+      if (event_language != null) 'event_language': event_language,
       if (description != null) 'description': description,
       'lieu': lieu,
       if (adresse != null) 'adresse': adresse,
@@ -173,6 +212,7 @@ abstract class Evenement extends _i1.CinePassRow
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
       if (structureId != null) 'structureId': structureId?.toJson(),
+      'archived': archived,
     };
   }
 
@@ -184,6 +224,10 @@ abstract class Evenement extends _i1.CinePassRow
       'createdAt': createdAt.toJson(),
       'titre': titre,
       'categorie': categorie,
+      'event_type': event_type,
+      if (event_subtype != null) 'event_subtype': event_subtype,
+      if (custom_type_label != null) 'custom_type_label': custom_type_label,
+      if (event_language != null) 'event_language': event_language,
       if (description != null) 'description': description,
       'lieu': lieu,
       if (adresse != null) 'adresse': adresse,
@@ -197,6 +241,7 @@ abstract class Evenement extends _i1.CinePassRow
       if (availableOptions != null)
         'availableOptions': availableOptions?.toJson(),
       if (structureId != null) 'structureId': structureId?.toJson(),
+      'archived': archived,
     };
   }
 
@@ -238,6 +283,10 @@ class _EvenementImpl extends Evenement {
     DateTime? createdAt,
     required String titre,
     required String categorie,
+    String? event_type,
+    String? event_subtype,
+    String? custom_type_label,
+    String? event_language,
     String? description,
     required String lieu,
     String? adresse,
@@ -250,11 +299,16 @@ class _EvenementImpl extends Evenement {
     String? posterUrl,
     List<String>? availableOptions,
     _i2.UuidValue? structureId,
+    bool? archived,
   }) : super._(
          id: id,
          createdAt: createdAt,
          titre: titre,
          categorie: categorie,
+         event_type: event_type,
+         event_subtype: event_subtype,
+         custom_type_label: custom_type_label,
+         event_language: event_language,
          description: description,
          lieu: lieu,
          adresse: adresse,
@@ -267,6 +321,7 @@ class _EvenementImpl extends Evenement {
          posterUrl: posterUrl,
          availableOptions: availableOptions,
          structureId: structureId,
+         archived: archived,
        );
 
   /// Returns a shallow copy of this [Evenement]
@@ -278,6 +333,10 @@ class _EvenementImpl extends Evenement {
     DateTime? createdAt,
     String? titre,
     String? categorie,
+    String? event_type,
+    Object? event_subtype = _Undefined,
+    Object? custom_type_label = _Undefined,
+    Object? event_language = _Undefined,
     Object? description = _Undefined,
     String? lieu,
     Object? adresse = _Undefined,
@@ -290,12 +349,23 @@ class _EvenementImpl extends Evenement {
     Object? posterUrl = _Undefined,
     Object? availableOptions = _Undefined,
     Object? structureId = _Undefined,
+    bool? archived,
   }) {
     return Evenement(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
       titre: titre ?? this.titre,
       categorie: categorie ?? this.categorie,
+      event_type: event_type ?? this.event_type,
+      event_subtype: event_subtype is String?
+          ? event_subtype
+          : this.event_subtype,
+      custom_type_label: custom_type_label is String?
+          ? custom_type_label
+          : this.custom_type_label,
+      event_language: event_language is String?
+          ? event_language
+          : this.event_language,
       description: description is String? ? description : this.description,
       lieu: lieu ?? this.lieu,
       adresse: adresse is String? ? adresse : this.adresse,
@@ -312,6 +382,7 @@ class _EvenementImpl extends Evenement {
       structureId: structureId is _i2.UuidValue?
           ? structureId
           : this.structureId,
+      archived: archived ?? this.archived,
     );
   }
 }
@@ -334,6 +405,29 @@ class EvenementUpdateTable extends _i2.UpdateTable<EvenementTable> {
     table.categorie,
     value,
   );
+
+  _i2.ColumnValue<String, String> event_type(String value) => _i2.ColumnValue(
+    table.event_type,
+    value,
+  );
+
+  _i2.ColumnValue<String, String> event_subtype(String? value) =>
+      _i2.ColumnValue(
+        table.event_subtype,
+        value,
+      );
+
+  _i2.ColumnValue<String, String> custom_type_label(String? value) =>
+      _i2.ColumnValue(
+        table.custom_type_label,
+        value,
+      );
+
+  _i2.ColumnValue<String, String> event_language(String? value) =>
+      _i2.ColumnValue(
+        table.event_language,
+        value,
+      );
 
   _i2.ColumnValue<String, String> description(String? value) => _i2.ColumnValue(
     table.description,
@@ -400,6 +494,11 @@ class EvenementUpdateTable extends _i2.UpdateTable<EvenementTable> {
     table.structureId,
     value,
   );
+
+  _i2.ColumnValue<bool, bool> archived(bool value) => _i2.ColumnValue(
+    table.archived,
+    value,
+  );
 }
 
 class EvenementTable extends _i2.Table<_i2.UuidValue> {
@@ -417,6 +516,23 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
     );
     categorie = _i2.ColumnString(
       'categorie',
+      this,
+    );
+    event_type = _i2.ColumnString(
+      'event_type',
+      this,
+      hasDefault: true,
+    );
+    event_subtype = _i2.ColumnString(
+      'event_subtype',
+      this,
+    );
+    custom_type_label = _i2.ColumnString(
+      'custom_type_label',
+      this,
+    );
+    event_language = _i2.ColumnString(
+      'event_language',
       this,
     );
     description = _i2.ColumnString(
@@ -467,6 +583,11 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
       'structureId',
       this,
     );
+    archived = _i2.ColumnBool(
+      'archived',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final EvenementUpdateTable updateTable;
@@ -476,6 +597,15 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
   late final _i2.ColumnString titre;
 
   late final _i2.ColumnString categorie;
+
+  /// Colonnes alignées sur schema/cine_pass_schema.sql (snake_case en base).
+  late final _i2.ColumnString event_type;
+
+  late final _i2.ColumnString event_subtype;
+
+  late final _i2.ColumnString custom_type_label;
+
+  late final _i2.ColumnString event_language;
 
   late final _i2.ColumnString description;
 
@@ -501,12 +631,18 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
 
   late final _i2.ColumnUuid structureId;
 
+  late final _i2.ColumnBool archived;
+
   @override
   List<_i2.Column> get columns => [
     id,
     createdAt,
     titre,
     categorie,
+    event_type,
+    event_subtype,
+    custom_type_label,
+    event_language,
     description,
     lieu,
     adresse,
@@ -519,6 +655,7 @@ class EvenementTable extends _i2.Table<_i2.UuidValue> {
     posterUrl,
     availableOptions,
     structureId,
+    archived,
   ];
 }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cine_pass_client/cine_pass_client.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -162,6 +163,12 @@ class _ConnexionPageState extends State<ConnexionPage> {
           pending.eventTitle != null &&
           pending.eventLocation != null &&
           pending.eventDateTime != null) {
+        EventReservationConfigResponse? evCfg;
+        try {
+          evCfg = await client.cinePass
+              .getEventReservationConfig(pending.eventId!);
+        } catch (_) {}
+        if (!mounted) return;
         reservationState.setEventReservation(
           eventId: pending.eventId!,
           eventTitle: pending.eventTitle!,
@@ -170,6 +177,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
           quantity: pending.quantity,
           pricePerTicket: pending.eventPricePerTicket,
           availableOptions: pending.availableOptionsEvent,
+          reservationConfig: evCfg,
         );
       }
 
@@ -178,7 +186,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
       return;
     }
 
-    context.go(AppRouter.home);
+      context.go(AppRouter.home);
   }
 
   Future<void> _loginWithEmail() async {
@@ -238,6 +246,58 @@ class _ConnexionPageState extends State<ConnexionPage> {
     String? localInfo;
     UuidValue? requestId;
     String? finishToken;
+    bool isNewPasswordValid = false;
+
+    bool hasNoOuterWhitespace(String password) => password.trim() == password;
+    bool hasLowercase(String password) => RegExp(r'[a-z]').hasMatch(password);
+    bool hasUppercase(String password) => RegExp(r'[A-Z]').hasMatch(password);
+    bool hasDigit(String password) => RegExp(r'[0-9]').hasMatch(password);
+
+    Widget buildRuleRow({
+      required bool ok,
+      required String label,
+    }) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Row(
+          children: [
+            Icon(
+              ok ? Icons.check_circle : Icons.cancel,
+              size: 14,
+              color: ok ? AppTheme.accentGreen : AppTheme.textSecondary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: ok ? AppTheme.accentGreen : AppTheme.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    String? passwordValidationError(String password) {
+      final pw = password;
+      if (pw.length < 8) {
+        return 'Le mot de passe doit contenir au moins 8 caractères.';
+      }
+      if (!hasNoOuterWhitespace(pw)) {
+        return 'Pas d’espaces au début/à la fin.';
+      }
+      if (!hasDigit(pw)) {
+        return 'Ajoute au moins 1 chiffre.';
+      }
+      if (!hasUppercase(pw)) {
+        return 'Ajoute au moins 1 lettre majuscule.';
+      }
+      if (!hasLowercase(pw)) {
+        return 'Ajoute au moins 1 lettre minuscule.';
+      }
+      return null;
+    }
 
     try {
       final result = await showDialog<Map<String, String>?>(
@@ -326,6 +386,35 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           labelStyle: const TextStyle(color: AppTheme.textSecondary),
                         ),
                         style: const TextStyle(color: AppTheme.textPrimary),
+                        onChanged: (value) {
+                          final err = passwordValidationError(value);
+                          setModalState(() {
+                            localError = null;
+                            isNewPasswordValid = err == null;
+                            localInfo = null;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      buildRuleRow(
+                        ok: newPasswordController.text.length >= 8,
+                        label: 'Au moins 8 caractères',
+                      ),
+                      buildRuleRow(
+                        ok: hasUppercase(newPasswordController.text),
+                        label: 'Au moins 1 lettre majuscule',
+                      ),
+                      buildRuleRow(
+                        ok: hasLowercase(newPasswordController.text),
+                        label: 'Au moins 1 lettre minuscule',
+                      ),
+                      buildRuleRow(
+                        ok: hasDigit(newPasswordController.text),
+                        label: 'Au moins 1 chiffre',
+                      ),
+                      buildRuleRow(
+                        ok: hasNoOuterWhitespace(newPasswordController.text),
+                        label: 'Pas d espaces au début/fin',
                       ),
                       const SizedBox(height: 12),
                       TextField(
@@ -383,7 +472,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                     child: const Text('Annuler'),
                   ),
                   FilledButton(
-                    onPressed: isSubmitting
+                    onPressed: (isSubmitting || (step == 2 && !isNewPasswordValid))
                         ? null
                         : () async {
                             final dialogNavigator = Navigator.of(context);
@@ -428,7 +517,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
                             }
 
                             if (step == 1) {
-                              final code = codeController.text.trim();
+                              final normalizedCode =
+                                  codeController.text.trim().toLowerCase();
                               if (requestId == null) {
                                 setModalState(() {
                                   localError =
@@ -436,8 +526,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                 });
                                 return;
                               }
-                              if (code.length < 4) {
-                                setModalState(() => localError = 'Code invalide.');
+                              if (normalizedCode.length != 8) {
+                                setModalState(() => localError =
+                                    'Code invalide : colle exactement 8 caractères (sans espaces).');
                                 return;
                               }
 
@@ -446,7 +537,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                 finishToken = await _EmailAuthEndpoint(client)
                                     .verifyPasswordResetCode(
                                       passwordResetRequestId: requestId!,
-                                      verificationCode: code,
+                                      verificationCode: normalizedCode,
                                     );
                                 setModalState(() {
                                   step = 2;
@@ -474,10 +565,10 @@ class _ConnexionPageState extends State<ConnexionPage> {
                               });
                               return;
                             }
-                            if (newPassword.length < 8) {
+                            final pwErr = passwordValidationError(newPassword);
+                            if (pwErr != null) {
                               setModalState(() {
-                                localError =
-                                    'Le mot de passe doit contenir au moins 8 caracteres.';
+                                localError = pwErr;
                               });
                               return;
                             }
@@ -568,29 +659,29 @@ class _ConnexionPageState extends State<ConnexionPage> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 24),
-          const CinePassLogo(size: LogoSize.medium),
-          const SizedBox(height: 32),
-          Text(
-            'Connexion',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 24),
+            const CinePassLogo(size: LogoSize.medium),
+            const SizedBox(height: 32),
+            Text(
+              'Connexion',
             style: Theme.of(context)
                 .textTheme
                 .headlineMedium
                 ?.copyWith(color: AppTheme.textPrimary),
-          ),
-          const SizedBox(height: 8),
+            ),
+            const SizedBox(height: 8),
           Text(
-            pending.hasPending
+                  pending.hasPending
                 ? 'Connectez-vous pour poursuivre votre reservation'
                 : 'Connectez-vous avec email ou Google',
-            style: TextStyle(
-              color: pending.hasPending
-                  ? AppTheme.primaryRed
-                  : AppTheme.textSecondary,
-              fontSize: 14,
+                  style: TextStyle(
+                    color: pending.hasPending
+                        ? AppTheme.primaryRed
+                        : AppTheme.textSecondary,
+                    fontSize: 14,
               fontWeight:
                   pending.hasPending ? FontWeight.w600 : FontWeight.normal,
             ),
@@ -598,47 +689,47 @@ class _ConnexionPageState extends State<ConnexionPage> {
           const SizedBox(height: 24),
           const AuthModeTabs(activeTab: AuthModeTab.connexion),
           const SizedBox(height: 20),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
-              labelText: 'Email',
-              hintText: 'votre@email.com',
-              prefixIcon: const Icon(Icons.email_outlined),
-              filled: true,
-              fillColor: AppTheme.cardDark,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              labelStyle: const TextStyle(color: AppTheme.textSecondary),
-            ),
-            style: const TextStyle(color: AppTheme.textPrimary),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Mot de passe',
-              hintText: '••••••••',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                  color: AppTheme.textSecondary,
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                hintText: 'votre@email.com',
+                prefixIcon: const Icon(Icons.email_outlined),
+                filled: true,
+                fillColor: AppTheme.cardDark,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                labelStyle: const TextStyle(color: AppTheme.textSecondary),
+              ),
+              style: const TextStyle(color: AppTheme.textPrimary),
+            ),
+          const SizedBox(height: 12),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Mot de passe',
+                hintText: '••••••••',
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: AppTheme.textSecondary,
+                  ),
                 onPressed: () {
                   setState(() => _obscurePassword = !_obscurePassword);
                 },
+                ),
+                filled: true,
+                fillColor: AppTheme.cardDark,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                labelStyle: const TextStyle(color: AppTheme.textSecondary),
               ),
-              filled: true,
-              fillColor: AppTheme.cardDark,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              labelStyle: const TextStyle(color: AppTheme.textSecondary),
-            ),
-            style: const TextStyle(color: AppTheme.textPrimary),
+              style: const TextStyle(color: AppTheme.textPrimary),
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -647,20 +738,20 @@ class _ConnexionPageState extends State<ConnexionPage> {
               child: const Text('Mot de passe oublie ?'),
             ),
           ),
-          FilledButton(
+            FilledButton(
             onPressed: _isEmailSubmitting ? null : _loginWithEmail,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.primaryRed,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.primaryRed,
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-            ),
             child: Text(_isEmailSubmitting ? 'Connexion...' : 'Se connecter'),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
               Expanded(
                 child: Divider(
                   color: AppTheme.textSecondary.withValues(alpha: 0.35),
@@ -677,9 +768,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 child: Divider(
                   color: AppTheme.textSecondary.withValues(alpha: 0.35),
                 ),
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
           const SizedBox(height: 20),
           GoogleSignInWidget(
             key: ValueKey('google-sign-in-$_googleWidgetNonce'),
@@ -702,6 +793,28 @@ class _ConnexionPageState extends State<ConnexionPage> {
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
             ),
           ],
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Pas encore de compte ? ',
+                style: const TextStyle(color: AppTheme.textSecondary),
+              ),
+              TextButton(
+                onPressed: () => context.go(AppRouter.inscription),
+                child: const Text("S'inscrire"),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Connexion via Google',
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 14,
+            ),
+          ),
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -709,17 +822,6 @@ class _ConnexionPageState extends State<ConnexionPage> {
               style: const TextStyle(color: Colors.redAccent, fontSize: 13),
             ),
           ],
-          const SizedBox(height: 16),
-          Center(
-            child: TextButton.icon(
-              onPressed: () => context.go(AppRouter.connexionResponsable),
-              icon: const Icon(Icons.store_rounded, size: 18),
-              label: const Text('Connexion espace responsable'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.accentGreen,
-              ),
-            ),
-          ),
           const SizedBox(height: 24),
           Text(
             'Pour tester en admin : connectez-vous avec admin@cinepass.com (mot de passe au choix).',
