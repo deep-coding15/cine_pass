@@ -857,12 +857,6 @@ class _ConnexionPageState extends State<ConnexionPage> {
               style: const TextStyle(color: Colors.redAccent, fontSize: 13),
             ),
           ],
-          const SizedBox(height: 24),
-          Text(
-            'Pour tester en admin : connectez-vous avec admin@cinepass.com (mot de passe au choix).',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
-          ),
         ],
       ),
     );

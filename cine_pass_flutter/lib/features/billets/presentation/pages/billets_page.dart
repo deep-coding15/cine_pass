@@ -515,9 +515,18 @@ class _BilletCard extends StatelessWidget {
                     const SizedBox(height: 12),
                   ] else if (canCancel) ...[
                     Text(
-                      'Annulable : remboursement $refundPercent % si annulation maintenant',
-                      style: TextStyle(
+                      'L’annulation n’est acceptée que s’il reste au moins 2 h avant le début de l’événement.',
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Remboursement indicatif : $refundPercent % si vous annulez maintenant.',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary.withValues(alpha: 0.9),
                         fontSize: 12,
                       ),
                     ),
