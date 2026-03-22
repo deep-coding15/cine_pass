@@ -30,6 +30,29 @@ jobs:
         working-directory: cine_pass_server
         run: docker compose up --build -d
 
+      - name: Install PostgreSQL client (psql)
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Wait for test Postgres
+        env:
+          PGPASSWORD: 'mervy'
+        run: |
+          for i in $(seq 1 60); do
+            if pg_isready -h localhost -p 9090 -U postgres -d cine_pass_test; then
+              echo "Postgres is ready."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Postgres did not become ready in time." >&2
+          exit 1
+
+      - name: Apply Serverpod dependency migrations (pub packages)
+        working-directory: cine_pass_server
+        env:
+          PGPASSWORD: 'mervy'
+        run: bash scripts/apply_serverpod_dependency_migrations.sh
+
       - name: Install Serverpod CLI
         working-directory: cine_pass_server
         run: dart pub global activate serverpod_cli $VERSION
