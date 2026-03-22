@@ -13,6 +13,10 @@ class PhoneAuthEndpoint extends Endpoint {
   static const _resendCooldown = Duration(seconds: 45);
   static const _maxAttempts = 5;
 
+  /// Fixed OTP when [Session.server] runs in [ServerpodRunMode.test] so
+  /// integration tests can verify without reading the DB between calls.
+  static const testModeVerificationCode = '424242';
+
   @unauthenticatedClientCall
   Future<void> sendVerificationCode(Session session, String phoneNumber) async {
     final normalizedPhone = _normalizePhone(phoneNumber);
@@ -31,7 +35,9 @@ class PhoneAuthEndpoint extends Endpoint {
       throw Exception('Veuillez patienter avant de demander un nouveau code.');
     }
 
-    final verificationCode = _generateVerificationCode();
+    final verificationCode = session.server.runMode == ServerpodRunMode.test
+        ? testModeVerificationCode
+        : _generateVerificationCode();
     await PhoneAuthCode.db.insertRow(
       session,
       PhoneAuthCode(
