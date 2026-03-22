@@ -20,16 +20,9 @@ phoneAuth:
 cinePass:
   - createReservationAndBillets:
   - getMyBillets:
-  - getUserRoles:
   - isCurrentUserAdmin:
   - isCurrentUserResponsable:
-  - setRoleStatus:
-  - createRoleChangeRequest:
-  - approveRoleChangeRequest:
-  - rejectRoleChangeRequest:
-  - grantRoleByEmail:
-  - revokeRoleByEmail:
-  - getRolesByEmail:
+  - setResponsableActiveByEmail:
   - getFilms:
   - getFilmById:
   - getSeancesForFilm:
@@ -37,35 +30,45 @@ cinePass:
   - getSalles:
   - getEvents:
   - getEventById:
-  - getEventSeances:
-  - createEventSeance:
-  - updateEventSeance:
-  - deleteEventSeance:
+  - getEventReservationConfig:
+  - setEventReservationConfig:
+  - getEventSeatPlan:
+  - setEventSeatPlan:
+  - quoteEventReservation:
+  - confirmEventReservation:
   - getCities:
   - getGenres:
   - getEventCategories:
+  - getEventDynamicFilterValues:
   - createFilm:
   - createEvent:
   - getStructures:
   - getStructureById:
   - updateEvent:
   - deleteEvent:
-  - deleteSeance:
   - getMyStructure:
+  - updateMyStructure:
+  - banStructure:
+  - deleteStructure:
   - getMyEvents:
   - getDemandesEnAttente:
   - approuverDemande:
   - rejeterDemande:
   - createDemandeResponsable:
+  - hasMyPendingDemandeResponsable:
+  - cancelMyEventReservation:
   - getReservations:
   - getReservationsForMyStructures:
-  - getBilletsForReservationForMyStructures:
-  - updateBilletStatusForMyStructures:
-  - updateReservationStatusForMyStructures:
   - archiveEvent:
+  - unarchiveEvent:
+  - getReservationBilletDetailsForMyStructures:
+  - updateReservationStatusForMyStructures:
   - getRapportCA:
   - createSeance:
   - getProfile:
+  - getAdminUsers:
+  - setAdminUserRole:
+  - deleteAdminUser:
   - updateProfile:
 greeting:
   - hello:

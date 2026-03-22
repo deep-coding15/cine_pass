@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Configuration de l'application CinePass
@@ -40,10 +42,10 @@ Future<AppConfig> loadAppConfig() async {
     final configString = await rootBundle.loadString('assets/config.json');
     final jsonData = jsonDecode(configString) as Map<String, dynamic>;
     final config = AppConfig.fromJson(jsonData);
-    print('✓ Configuration chargée: ${config.apiUrl}');
+    debugPrint('✓ Configuration chargée: ${config.apiUrl}');
     return config;
   } catch (e) {
-    print('✗ Erreur lors du chargement de config.json: $e');
+    debugPrint('✗ Erreur lors du chargement de config.json: $e');
     // Retourne la configuration par défaut en cas d'erreur
     return AppConfig(apiUrl: 'http://localhost:9080');
   }

@@ -100,10 +100,9 @@ class AuthState extends ChangeNotifier {
     _isRefreshingProfile = true;
     try {
       final ProfileResponse? profile = await client.cinePass.getProfile();
-      final List<String> roles = await client.cinePass.getUserRoles();
-
-      final bool isAdmin = roles.contains('admin');
-      final bool isResponsable = roles.contains('responsable');
+      final bool isAdmin = await client.cinePass.isCurrentUserAdmin();
+      final bool isResponsable =
+          await client.cinePass.isCurrentUserResponsable();
 
       final nextEmail = (profile?.email ?? '').trim();
       final backendName = (profile?.displayName ?? '').trim();
@@ -142,14 +141,6 @@ class AuthState extends ChangeNotifier {
     }
   }
 
-  bool _isGenericName(String name) {
-    final value = name.trim().toLowerCase();
-    return value.isEmpty ||
-        value == 'utilisateur' ||
-        value == 'utilisateur google' ||
-        value == 'utilisateur mobile';
-  }
-
   bool _isGenericEmailLabel(String emailLabel) {
     final value = emailLabel.trim().toLowerCase();
     return value.isEmpty ||
@@ -177,14 +168,6 @@ class AuthState extends ChangeNotifier {
       return 'Utilisateur mobile';
     }
     return 'Utilisateur';
-  }
-
-  String _emailLabelForStrategy(String strategy) {
-    // Legacy helper kept for compatibility; real email comes from backend profile.
-    if (_userEmail.trim().isNotEmpty) {
-      return _userEmail.trim();
-    }
-    return '';
   }
 
   /// Deconnexion reelle (backend/session) + reset state local.

@@ -47,7 +47,8 @@ class FilmCard extends StatelessWidget {
                       child: Image.network(
                         posterUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, _, __) => Container(
+                        errorBuilder: (context, Object? error, StackTrace? _) =>
+                            Container(
                           color: Color(posterColor),
                           child: Center(
                             child: Icon(

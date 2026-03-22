@@ -12,7 +12,6 @@ import '../../features/events/presentation/pages/events_list_page.dart';
 import '../../features/events/presentation/pages/event_detail_page.dart';
 import '../../features/billets/presentation/pages/billets_page.dart';
 import '../../features/profil/presentation/pages/profil_page.dart';
-import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 import '../../features/admin/presentation/pages/admin_events_page.dart';
 import '../../features/admin/presentation/pages/admin_event_detail_page.dart';

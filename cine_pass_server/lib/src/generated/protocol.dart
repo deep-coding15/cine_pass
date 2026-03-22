@@ -18,43 +18,56 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i5;
 import 'billet_group_response.dart' as _i6;
-import 'cinema.dart' as _i7;
-import 'evenement.dart' as _i8;
-import 'film.dart' as _i9;
-import 'seance.dart' as _i10;
-import 'cine_pass_row.dart' as _i11;
-import 'cinema_response.dart' as _i12;
-import 'demande_responsable_response.dart' as _i13;
-import 'event_response.dart' as _i14;
-import 'event_seance_response.dart' as _i15;
-import 'film_response.dart' as _i16;
-import 'greetings/greeting.dart' as _i17;
-import 'phone_auth_code.dart' as _i18;
-import 'profile_response.dart' as _i19;
-import 'rapport_ca_response.dart' as _i20;
-import 'reservation_response.dart' as _i21;
-import 'responsable_billet_response.dart' as _i22;
-import 'salle.dart' as _i23;
-import 'seance_response.dart' as _i24;
-import 'siege.dart' as _i25;
-import 'structure.dart' as _i26;
+import 'cine_pass/event_reservation_config_response.dart' as _i7;
+import 'cine_pass/event_seat_plan_entry_response.dart' as _i8;
+import 'cine_pass/event_seat_plan_response.dart' as _i9;
+import 'cine_pass/event_ticket_option_response.dart' as _i10;
+import 'cine_pass/event_ticket_type_config_response.dart' as _i11;
+import 'cine_pass/reservation_confirm_response.dart' as _i12;
+import 'cine_pass/reservation_quote_line_response.dart' as _i13;
+import 'cine_pass/reservation_quote_response.dart' as _i14;
+import 'cinema.dart' as _i15;
+import 'evenement.dart' as _i16;
+import 'film.dart' as _i17;
+import 'seance.dart' as _i18;
+import 'cine_pass_row.dart' as _i19;
+import 'cinema_response.dart' as _i20;
+import 'demande_responsable_response.dart' as _i21;
+import 'event_response.dart' as _i22;
+import 'event_seance_response.dart' as _i23;
+import 'film_response.dart' as _i24;
+import 'greetings/greeting.dart' as _i25;
+import 'phone_auth_code.dart' as _i26;
+import 'profile_response.dart' as _i27;
+import 'rapport_ca_response.dart' as _i28;
+import 'reservation_response.dart' as _i29;
+import 'responsable_billet_response.dart' as _i30;
+import 'salle.dart' as _i31;
+import 'seance_response.dart' as _i32;
+import 'siege.dart' as _i33;
+import 'structure.dart' as _i34;
 import 'package:cine_pass_server/src/generated/billet_group_response.dart'
-    as _i27;
-import 'package:cine_pass_server/src/generated/film_response.dart' as _i28;
-import 'package:cine_pass_server/src/generated/seance_response.dart' as _i29;
-import 'package:cine_pass_server/src/generated/cinema_response.dart' as _i30;
-import 'package:cine_pass_server/src/generated/salle.dart' as _i31;
-import 'package:cine_pass_server/src/generated/event_response.dart' as _i32;
-import 'package:cine_pass_server/src/generated/event_seance_response.dart'
-    as _i33;
-import 'package:cine_pass_server/src/generated/structure.dart' as _i34;
-import 'package:cine_pass_server/src/generated/demande_responsable_response.dart'
     as _i35;
+import 'package:cine_pass_server/src/generated/film_response.dart' as _i36;
+import 'package:cine_pass_server/src/generated/seance_response.dart' as _i37;
+import 'package:cine_pass_server/src/generated/cinema_response.dart' as _i38;
+import 'package:cine_pass_server/src/generated/salle.dart' as _i39;
+import 'package:cine_pass_server/src/generated/event_response.dart' as _i40;
+import 'package:cine_pass_server/src/generated/structure.dart' as _i41;
+import 'package:cine_pass_server/src/generated/demande_responsable_response.dart'
+    as _i42;
 import 'package:cine_pass_server/src/generated/reservation_response.dart'
-    as _i36;
-import 'package:cine_pass_server/src/generated/responsable_billet_response.dart'
-    as _i37;
+    as _i43;
+import 'package:cine_pass_server/src/generated/profile_response.dart' as _i44;
 export 'billet_group_response.dart';
+export 'cine_pass/event_reservation_config_response.dart';
+export 'cine_pass/event_seat_plan_entry_response.dart';
+export 'cine_pass/event_seat_plan_response.dart';
+export 'cine_pass/event_ticket_option_response.dart';
+export 'cine_pass/event_ticket_type_config_response.dart';
+export 'cine_pass/reservation_confirm_response.dart';
+export 'cine_pass/reservation_quote_line_response.dart';
+export 'cine_pass/reservation_quote_response.dart';
 export 'cinema.dart';
 export 'evenement.dart';
 export 'film.dart';
@@ -180,6 +193,31 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'String',
         ),
         _i2.ColumnDefinition(
+          name: 'event_type',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'AUTRE\'::text',
+        ),
+        _i2.ColumnDefinition(
+          name: 'event_subtype',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'custom_type_label',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'event_language',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
           name: 'description',
           columnType: _i2.ColumnType.text,
           isNullable: true,
@@ -251,6 +289,13 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: true,
           dartType: 'UuidValue?',
         ),
+        _i2.ColumnDefinition(
+          name: 'archived',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
       ],
       foreignKeys: [
         _i2.ForeignKeyDefinition(
@@ -277,6 +322,45 @@ class Protocol extends _i1.SerializationManagerServer {
           type: 'btree',
           isUnique: true,
           isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_evenement_event_type_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'event_type',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_evenement_event_subtype_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'event_subtype',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'cine_pass_evenement_archived_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'archived',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
         ),
       ],
       managed: true,
@@ -832,137 +916,207 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i6.BilletGroupResponse) {
       return _i6.BilletGroupResponse.fromJson(data) as T;
     }
-    if (t == _i7.Cinema) {
-      return _i7.Cinema.fromJson(data) as T;
+    if (t == _i7.EventReservationConfigResponse) {
+      return _i7.EventReservationConfigResponse.fromJson(data) as T;
     }
-    if (t == _i8.Evenement) {
-      return _i8.Evenement.fromJson(data) as T;
+    if (t == _i8.EventSeatPlanEntryResponse) {
+      return _i8.EventSeatPlanEntryResponse.fromJson(data) as T;
     }
-    if (t == _i9.Film) {
-      return _i9.Film.fromJson(data) as T;
+    if (t == _i9.EventSeatPlanResponse) {
+      return _i9.EventSeatPlanResponse.fromJson(data) as T;
     }
-    if (t == _i10.Seance) {
-      return _i10.Seance.fromJson(data) as T;
+    if (t == _i10.EventTicketOptionResponse) {
+      return _i10.EventTicketOptionResponse.fromJson(data) as T;
     }
-    if (t == _i11.CinePassRow) {
-      return _i11.CinePassRow.fromJson(data) as T;
+    if (t == _i11.EventTicketTypeConfigResponse) {
+      return _i11.EventTicketTypeConfigResponse.fromJson(data) as T;
     }
-    if (t == _i12.CinemaResponse) {
-      return _i12.CinemaResponse.fromJson(data) as T;
+    if (t == _i12.ReservationConfirmResponse) {
+      return _i12.ReservationConfirmResponse.fromJson(data) as T;
     }
-    if (t == _i13.DemandeResponsableResponse) {
-      return _i13.DemandeResponsableResponse.fromJson(data) as T;
+    if (t == _i13.ReservationQuoteLineResponse) {
+      return _i13.ReservationQuoteLineResponse.fromJson(data) as T;
     }
-    if (t == _i14.EventResponse) {
-      return _i14.EventResponse.fromJson(data) as T;
+    if (t == _i14.ReservationQuoteResponse) {
+      return _i14.ReservationQuoteResponse.fromJson(data) as T;
     }
-    if (t == _i15.EventSeanceResponse) {
-      return _i15.EventSeanceResponse.fromJson(data) as T;
+    if (t == _i15.Cinema) {
+      return _i15.Cinema.fromJson(data) as T;
     }
-    if (t == _i16.FilmResponse) {
-      return _i16.FilmResponse.fromJson(data) as T;
+    if (t == _i16.Evenement) {
+      return _i16.Evenement.fromJson(data) as T;
     }
-    if (t == _i17.Greeting) {
-      return _i17.Greeting.fromJson(data) as T;
+    if (t == _i17.Film) {
+      return _i17.Film.fromJson(data) as T;
     }
-    if (t == _i18.PhoneAuthCode) {
-      return _i18.PhoneAuthCode.fromJson(data) as T;
+    if (t == _i18.Seance) {
+      return _i18.Seance.fromJson(data) as T;
     }
-    if (t == _i19.ProfileResponse) {
-      return _i19.ProfileResponse.fromJson(data) as T;
+    if (t == _i19.CinePassRow) {
+      return _i19.CinePassRow.fromJson(data) as T;
     }
-    if (t == _i20.RapportCAResponse) {
-      return _i20.RapportCAResponse.fromJson(data) as T;
+    if (t == _i20.CinemaResponse) {
+      return _i20.CinemaResponse.fromJson(data) as T;
     }
-    if (t == _i21.ReservationResponse) {
-      return _i21.ReservationResponse.fromJson(data) as T;
+    if (t == _i21.DemandeResponsableResponse) {
+      return _i21.DemandeResponsableResponse.fromJson(data) as T;
     }
-    if (t == _i22.ResponsableBilletResponse) {
-      return _i22.ResponsableBilletResponse.fromJson(data) as T;
+    if (t == _i22.EventResponse) {
+      return _i22.EventResponse.fromJson(data) as T;
     }
-    if (t == _i23.Salle) {
-      return _i23.Salle.fromJson(data) as T;
+    if (t == _i23.EventSeanceResponse) {
+      return _i23.EventSeanceResponse.fromJson(data) as T;
     }
-    if (t == _i24.SeanceResponse) {
-      return _i24.SeanceResponse.fromJson(data) as T;
+    if (t == _i24.FilmResponse) {
+      return _i24.FilmResponse.fromJson(data) as T;
     }
-    if (t == _i25.Siege) {
-      return _i25.Siege.fromJson(data) as T;
+    if (t == _i25.Greeting) {
+      return _i25.Greeting.fromJson(data) as T;
     }
-    if (t == _i26.Structure) {
-      return _i26.Structure.fromJson(data) as T;
+    if (t == _i26.PhoneAuthCode) {
+      return _i26.PhoneAuthCode.fromJson(data) as T;
+    }
+    if (t == _i27.ProfileResponse) {
+      return _i27.ProfileResponse.fromJson(data) as T;
+    }
+    if (t == _i28.RapportCAResponse) {
+      return _i28.RapportCAResponse.fromJson(data) as T;
+    }
+    if (t == _i29.ReservationResponse) {
+      return _i29.ReservationResponse.fromJson(data) as T;
+    }
+    if (t == _i30.ResponsableBilletResponse) {
+      return _i30.ResponsableBilletResponse.fromJson(data) as T;
+    }
+    if (t == _i31.Salle) {
+      return _i31.Salle.fromJson(data) as T;
+    }
+    if (t == _i32.SeanceResponse) {
+      return _i32.SeanceResponse.fromJson(data) as T;
+    }
+    if (t == _i33.Siege) {
+      return _i33.Siege.fromJson(data) as T;
+    }
+    if (t == _i34.Structure) {
+      return _i34.Structure.fromJson(data) as T;
     }
     if (t == _i1.getType<_i6.BilletGroupResponse?>()) {
       return (data != null ? _i6.BilletGroupResponse.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i7.Cinema?>()) {
-      return (data != null ? _i7.Cinema.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i8.Evenement?>()) {
-      return (data != null ? _i8.Evenement.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i9.Film?>()) {
-      return (data != null ? _i9.Film.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i10.Seance?>()) {
-      return (data != null ? _i10.Seance.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i11.CinePassRow?>()) {
-      return (data != null ? _i11.CinePassRow.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i12.CinemaResponse?>()) {
-      return (data != null ? _i12.CinemaResponse.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i13.DemandeResponsableResponse?>()) {
+    if (t == _i1.getType<_i7.EventReservationConfigResponse?>()) {
       return (data != null
-              ? _i13.DemandeResponsableResponse.fromJson(data)
+              ? _i7.EventReservationConfigResponse.fromJson(data)
               : null)
           as T;
     }
-    if (t == _i1.getType<_i14.EventResponse?>()) {
-      return (data != null ? _i14.EventResponse.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i15.EventSeanceResponse?>()) {
-      return (data != null ? _i15.EventSeanceResponse.fromJson(data) : null)
-          as T;
-    }
-    if (t == _i1.getType<_i16.FilmResponse?>()) {
-      return (data != null ? _i16.FilmResponse.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i17.Greeting?>()) {
-      return (data != null ? _i17.Greeting.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i18.PhoneAuthCode?>()) {
-      return (data != null ? _i18.PhoneAuthCode.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i19.ProfileResponse?>()) {
-      return (data != null ? _i19.ProfileResponse.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i20.RapportCAResponse?>()) {
-      return (data != null ? _i20.RapportCAResponse.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i21.ReservationResponse?>()) {
-      return (data != null ? _i21.ReservationResponse.fromJson(data) : null)
-          as T;
-    }
-    if (t == _i1.getType<_i22.ResponsableBilletResponse?>()) {
+    if (t == _i1.getType<_i8.EventSeatPlanEntryResponse?>()) {
       return (data != null
-              ? _i22.ResponsableBilletResponse.fromJson(data)
+              ? _i8.EventSeatPlanEntryResponse.fromJson(data)
               : null)
           as T;
     }
-    if (t == _i1.getType<_i23.Salle?>()) {
-      return (data != null ? _i23.Salle.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.EventSeatPlanResponse?>()) {
+      return (data != null ? _i9.EventSeatPlanResponse.fromJson(data) : null)
+          as T;
     }
-    if (t == _i1.getType<_i24.SeanceResponse?>()) {
-      return (data != null ? _i24.SeanceResponse.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.EventTicketOptionResponse?>()) {
+      return (data != null
+              ? _i10.EventTicketOptionResponse.fromJson(data)
+              : null)
+          as T;
     }
-    if (t == _i1.getType<_i25.Siege?>()) {
-      return (data != null ? _i25.Siege.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.EventTicketTypeConfigResponse?>()) {
+      return (data != null
+              ? _i11.EventTicketTypeConfigResponse.fromJson(data)
+              : null)
+          as T;
     }
-    if (t == _i1.getType<_i26.Structure?>()) {
-      return (data != null ? _i26.Structure.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.ReservationConfirmResponse?>()) {
+      return (data != null
+              ? _i12.ReservationConfirmResponse.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _i1.getType<_i13.ReservationQuoteLineResponse?>()) {
+      return (data != null
+              ? _i13.ReservationQuoteLineResponse.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _i1.getType<_i14.ReservationQuoteResponse?>()) {
+      return (data != null
+              ? _i14.ReservationQuoteResponse.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _i1.getType<_i15.Cinema?>()) {
+      return (data != null ? _i15.Cinema.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i16.Evenement?>()) {
+      return (data != null ? _i16.Evenement.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i17.Film?>()) {
+      return (data != null ? _i17.Film.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i18.Seance?>()) {
+      return (data != null ? _i18.Seance.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i19.CinePassRow?>()) {
+      return (data != null ? _i19.CinePassRow.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i20.CinemaResponse?>()) {
+      return (data != null ? _i20.CinemaResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i21.DemandeResponsableResponse?>()) {
+      return (data != null
+              ? _i21.DemandeResponsableResponse.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _i1.getType<_i22.EventResponse?>()) {
+      return (data != null ? _i22.EventResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i23.EventSeanceResponse?>()) {
+      return (data != null ? _i23.EventSeanceResponse.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i24.FilmResponse?>()) {
+      return (data != null ? _i24.FilmResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i25.Greeting?>()) {
+      return (data != null ? _i25.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i26.PhoneAuthCode?>()) {
+      return (data != null ? _i26.PhoneAuthCode.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i27.ProfileResponse?>()) {
+      return (data != null ? _i27.ProfileResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i28.RapportCAResponse?>()) {
+      return (data != null ? _i28.RapportCAResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i29.ReservationResponse?>()) {
+      return (data != null ? _i29.ReservationResponse.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i30.ResponsableBilletResponse?>()) {
+      return (data != null
+              ? _i30.ResponsableBilletResponse.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _i1.getType<_i31.Salle?>()) {
+      return (data != null ? _i31.Salle.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i32.SeanceResponse?>()) {
+      return (data != null ? _i32.SeanceResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i33.Siege?>()) {
+      return (data != null ? _i33.Siege.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i34.Structure?>()) {
+      return (data != null ? _i34.Structure.fromJson(data) : null) as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
@@ -971,6 +1125,30 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null
               ? (data as List).map((e) => deserialize<String>(e)).toList()
               : null)
+          as T;
+    }
+    if (t == List<_i11.EventTicketTypeConfigResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i11.EventTicketTypeConfigResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i8.EventSeatPlanEntryResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i8.EventSeatPlanEntryResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i10.EventTicketOptionResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i10.EventTicketOptionResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i13.ReservationQuoteLineResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i13.ReservationQuoteLineResponse>(e))
+              .toList()
           as T;
     }
     if (t == List<String>) {
@@ -982,65 +1160,62 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == List<double>) {
       return (data as List).map((e) => deserialize<double>(e)).toList() as T;
     }
-    if (t == List<_i27.BilletGroupResponse>) {
+    if (t == List<_i35.BilletGroupResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i27.BilletGroupResponse>(e))
+              .map((e) => deserialize<_i35.BilletGroupResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i28.FilmResponse>) {
+    if (t == List<_i36.FilmResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i28.FilmResponse>(e))
+              .map((e) => deserialize<_i36.FilmResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i29.SeanceResponse>) {
+    if (t == List<_i37.SeanceResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i29.SeanceResponse>(e))
+              .map((e) => deserialize<_i37.SeanceResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i30.CinemaResponse>) {
+    if (t == List<_i38.CinemaResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i30.CinemaResponse>(e))
+              .map((e) => deserialize<_i38.CinemaResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i31.Salle>) {
-      return (data as List).map((e) => deserialize<_i31.Salle>(e)).toList()
+    if (t == List<_i39.Salle>) {
+      return (data as List).map((e) => deserialize<_i39.Salle>(e)).toList()
           as T;
     }
-    if (t == List<_i32.EventResponse>) {
+    if (t == List<_i40.EventResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i32.EventResponse>(e))
+              .map((e) => deserialize<_i40.EventResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i33.EventSeanceResponse>) {
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
+    if (t == List<_i41.Structure>) {
+      return (data as List).map((e) => deserialize<_i41.Structure>(e)).toList()
+          as T;
+    }
+    if (t == List<_i42.DemandeResponsableResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i33.EventSeanceResponse>(e))
+              .map((e) => deserialize<_i42.DemandeResponsableResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i34.Structure>) {
-      return (data as List).map((e) => deserialize<_i34.Structure>(e)).toList()
-          as T;
-    }
-    if (t == List<_i35.DemandeResponsableResponse>) {
+    if (t == List<_i43.ReservationResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i35.DemandeResponsableResponse>(e))
+              .map((e) => deserialize<_i43.ReservationResponse>(e))
               .toList()
           as T;
     }
-    if (t == List<_i36.ReservationResponse>) {
+    if (t == List<_i44.ProfileResponse>) {
       return (data as List)
-              .map((e) => deserialize<_i36.ReservationResponse>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_i37.ResponsableBilletResponse>) {
-      return (data as List)
-              .map((e) => deserialize<_i37.ResponsableBilletResponse>(e))
+              .map((e) => deserialize<_i44.ProfileResponse>(e))
               .toList()
           as T;
     }
@@ -1062,26 +1237,34 @@ class Protocol extends _i1.SerializationManagerServer {
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _i6.BilletGroupResponse => 'BilletGroupResponse',
-      _i7.Cinema => 'Cinema',
-      _i8.Evenement => 'Evenement',
-      _i9.Film => 'Film',
-      _i10.Seance => 'Seance',
-      _i11.CinePassRow => 'CinePassRow',
-      _i12.CinemaResponse => 'CinemaResponse',
-      _i13.DemandeResponsableResponse => 'DemandeResponsableResponse',
-      _i14.EventResponse => 'EventResponse',
-      _i15.EventSeanceResponse => 'EventSeanceResponse',
-      _i16.FilmResponse => 'FilmResponse',
-      _i17.Greeting => 'Greeting',
-      _i18.PhoneAuthCode => 'PhoneAuthCode',
-      _i19.ProfileResponse => 'ProfileResponse',
-      _i20.RapportCAResponse => 'RapportCAResponse',
-      _i21.ReservationResponse => 'ReservationResponse',
-      _i22.ResponsableBilletResponse => 'ResponsableBilletResponse',
-      _i23.Salle => 'Salle',
-      _i24.SeanceResponse => 'SeanceResponse',
-      _i25.Siege => 'Siege',
-      _i26.Structure => 'Structure',
+      _i7.EventReservationConfigResponse => 'EventReservationConfigResponse',
+      _i8.EventSeatPlanEntryResponse => 'EventSeatPlanEntryResponse',
+      _i9.EventSeatPlanResponse => 'EventSeatPlanResponse',
+      _i10.EventTicketOptionResponse => 'EventTicketOptionResponse',
+      _i11.EventTicketTypeConfigResponse => 'EventTicketTypeConfigResponse',
+      _i12.ReservationConfirmResponse => 'ReservationConfirmResponse',
+      _i13.ReservationQuoteLineResponse => 'ReservationQuoteLineResponse',
+      _i14.ReservationQuoteResponse => 'ReservationQuoteResponse',
+      _i15.Cinema => 'Cinema',
+      _i16.Evenement => 'Evenement',
+      _i17.Film => 'Film',
+      _i18.Seance => 'Seance',
+      _i19.CinePassRow => 'CinePassRow',
+      _i20.CinemaResponse => 'CinemaResponse',
+      _i21.DemandeResponsableResponse => 'DemandeResponsableResponse',
+      _i22.EventResponse => 'EventResponse',
+      _i23.EventSeanceResponse => 'EventSeanceResponse',
+      _i24.FilmResponse => 'FilmResponse',
+      _i25.Greeting => 'Greeting',
+      _i26.PhoneAuthCode => 'PhoneAuthCode',
+      _i27.ProfileResponse => 'ProfileResponse',
+      _i28.RapportCAResponse => 'RapportCAResponse',
+      _i29.ReservationResponse => 'ReservationResponse',
+      _i30.ResponsableBilletResponse => 'ResponsableBilletResponse',
+      _i31.Salle => 'Salle',
+      _i32.SeanceResponse => 'SeanceResponse',
+      _i33.Siege => 'Siege',
+      _i34.Structure => 'Structure',
       _ => null,
     };
   }
@@ -1098,45 +1281,61 @@ class Protocol extends _i1.SerializationManagerServer {
     switch (data) {
       case _i6.BilletGroupResponse():
         return 'BilletGroupResponse';
-      case _i7.Cinema():
+      case _i7.EventReservationConfigResponse():
+        return 'EventReservationConfigResponse';
+      case _i8.EventSeatPlanEntryResponse():
+        return 'EventSeatPlanEntryResponse';
+      case _i9.EventSeatPlanResponse():
+        return 'EventSeatPlanResponse';
+      case _i10.EventTicketOptionResponse():
+        return 'EventTicketOptionResponse';
+      case _i11.EventTicketTypeConfigResponse():
+        return 'EventTicketTypeConfigResponse';
+      case _i12.ReservationConfirmResponse():
+        return 'ReservationConfirmResponse';
+      case _i13.ReservationQuoteLineResponse():
+        return 'ReservationQuoteLineResponse';
+      case _i14.ReservationQuoteResponse():
+        return 'ReservationQuoteResponse';
+      case _i15.Cinema():
         return 'Cinema';
-      case _i8.Evenement():
+      case _i16.Evenement():
         return 'Evenement';
-      case _i9.Film():
+      case _i17.Film():
         return 'Film';
-      case _i10.Seance():
+      case _i18.Seance():
         return 'Seance';
-      case _i11.CinePassRow():
+      case _i19.CinePassRow():
         return 'CinePassRow';
-      case _i12.CinemaResponse():
+      case _i20.CinemaResponse():
         return 'CinemaResponse';
-      case _i13.DemandeResponsableResponse():
+      case _i21.DemandeResponsableResponse():
         return 'DemandeResponsableResponse';
-      case _i14.EventResponse():
+      case _i22.EventResponse():
         return 'EventResponse';
-      case _i15.EventSeanceResponse():
+      case _i23.EventSeanceResponse():
         return 'EventSeanceResponse';
-      case _i16.FilmResponse():
+      case _i24.FilmResponse():
         return 'FilmResponse';
-      case _i17.Greeting():
+      case _i25.Greeting():
         return 'Greeting';
-      case _i18.PhoneAuthCode():
+      case _i26.PhoneAuthCode():
         return 'PhoneAuthCode';
-      case _i19.ProfileResponse():
+      case _i27.ProfileResponse():
         return 'ProfileResponse';
-      case _i20.RapportCAResponse():
+      case _i28.RapportCAResponse():
         return 'RapportCAResponse';
-      case _i21.ReservationResponse():
+      case _i29.ReservationResponse():
         return 'ReservationResponse';
-      case _i22.ResponsableBilletResponse():
+      case _i30.ResponsableBilletResponse():
         return 'ResponsableBilletResponse';
-      case _i23.Salle():
+      case _i31.Salle():
         return 'Salle';
-      case _i24.SeanceResponse():
+      case _i32.SeanceResponse():
         return 'SeanceResponse';
-      case _i25.Siege():
+      case _i33.Siege():
         return 'Siege';
-      case _i26.Structure():
+      case _i34.Structure():
         return 'Structure';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1167,65 +1366,89 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'BilletGroupResponse') {
       return deserialize<_i6.BilletGroupResponse>(data['data']);
     }
+    if (dataClassName == 'EventReservationConfigResponse') {
+      return deserialize<_i7.EventReservationConfigResponse>(data['data']);
+    }
+    if (dataClassName == 'EventSeatPlanEntryResponse') {
+      return deserialize<_i8.EventSeatPlanEntryResponse>(data['data']);
+    }
+    if (dataClassName == 'EventSeatPlanResponse') {
+      return deserialize<_i9.EventSeatPlanResponse>(data['data']);
+    }
+    if (dataClassName == 'EventTicketOptionResponse') {
+      return deserialize<_i10.EventTicketOptionResponse>(data['data']);
+    }
+    if (dataClassName == 'EventTicketTypeConfigResponse') {
+      return deserialize<_i11.EventTicketTypeConfigResponse>(data['data']);
+    }
+    if (dataClassName == 'ReservationConfirmResponse') {
+      return deserialize<_i12.ReservationConfirmResponse>(data['data']);
+    }
+    if (dataClassName == 'ReservationQuoteLineResponse') {
+      return deserialize<_i13.ReservationQuoteLineResponse>(data['data']);
+    }
+    if (dataClassName == 'ReservationQuoteResponse') {
+      return deserialize<_i14.ReservationQuoteResponse>(data['data']);
+    }
     if (dataClassName == 'Cinema') {
-      return deserialize<_i7.Cinema>(data['data']);
+      return deserialize<_i15.Cinema>(data['data']);
     }
     if (dataClassName == 'Evenement') {
-      return deserialize<_i8.Evenement>(data['data']);
+      return deserialize<_i16.Evenement>(data['data']);
     }
     if (dataClassName == 'Film') {
-      return deserialize<_i9.Film>(data['data']);
+      return deserialize<_i17.Film>(data['data']);
     }
     if (dataClassName == 'Seance') {
-      return deserialize<_i10.Seance>(data['data']);
+      return deserialize<_i18.Seance>(data['data']);
     }
     if (dataClassName == 'CinePassRow') {
-      return deserialize<_i11.CinePassRow>(data['data']);
+      return deserialize<_i19.CinePassRow>(data['data']);
     }
     if (dataClassName == 'CinemaResponse') {
-      return deserialize<_i12.CinemaResponse>(data['data']);
+      return deserialize<_i20.CinemaResponse>(data['data']);
     }
     if (dataClassName == 'DemandeResponsableResponse') {
-      return deserialize<_i13.DemandeResponsableResponse>(data['data']);
+      return deserialize<_i21.DemandeResponsableResponse>(data['data']);
     }
     if (dataClassName == 'EventResponse') {
-      return deserialize<_i14.EventResponse>(data['data']);
+      return deserialize<_i22.EventResponse>(data['data']);
     }
     if (dataClassName == 'EventSeanceResponse') {
-      return deserialize<_i15.EventSeanceResponse>(data['data']);
+      return deserialize<_i23.EventSeanceResponse>(data['data']);
     }
     if (dataClassName == 'FilmResponse') {
-      return deserialize<_i16.FilmResponse>(data['data']);
+      return deserialize<_i24.FilmResponse>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i17.Greeting>(data['data']);
+      return deserialize<_i25.Greeting>(data['data']);
     }
     if (dataClassName == 'PhoneAuthCode') {
-      return deserialize<_i18.PhoneAuthCode>(data['data']);
+      return deserialize<_i26.PhoneAuthCode>(data['data']);
     }
     if (dataClassName == 'ProfileResponse') {
-      return deserialize<_i19.ProfileResponse>(data['data']);
+      return deserialize<_i27.ProfileResponse>(data['data']);
     }
     if (dataClassName == 'RapportCAResponse') {
-      return deserialize<_i20.RapportCAResponse>(data['data']);
+      return deserialize<_i28.RapportCAResponse>(data['data']);
     }
     if (dataClassName == 'ReservationResponse') {
-      return deserialize<_i21.ReservationResponse>(data['data']);
+      return deserialize<_i29.ReservationResponse>(data['data']);
     }
     if (dataClassName == 'ResponsableBilletResponse') {
-      return deserialize<_i22.ResponsableBilletResponse>(data['data']);
+      return deserialize<_i30.ResponsableBilletResponse>(data['data']);
     }
     if (dataClassName == 'Salle') {
-      return deserialize<_i23.Salle>(data['data']);
+      return deserialize<_i31.Salle>(data['data']);
     }
     if (dataClassName == 'SeanceResponse') {
-      return deserialize<_i24.SeanceResponse>(data['data']);
+      return deserialize<_i32.SeanceResponse>(data['data']);
     }
     if (dataClassName == 'Siege') {
-      return deserialize<_i25.Siege>(data['data']);
+      return deserialize<_i33.Siege>(data['data']);
     }
     if (dataClassName == 'Structure') {
-      return deserialize<_i26.Structure>(data['data']);
+      return deserialize<_i34.Structure>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1273,22 +1496,22 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i7.Cinema:
-        return _i7.Cinema.t;
-      case _i8.Evenement:
-        return _i8.Evenement.t;
-      case _i9.Film:
-        return _i9.Film.t;
-      case _i10.Seance:
-        return _i10.Seance.t;
-      case _i18.PhoneAuthCode:
-        return _i18.PhoneAuthCode.t;
-      case _i23.Salle:
-        return _i23.Salle.t;
-      case _i25.Siege:
-        return _i25.Siege.t;
-      case _i26.Structure:
-        return _i26.Structure.t;
+      case _i15.Cinema:
+        return _i15.Cinema.t;
+      case _i16.Evenement:
+        return _i16.Evenement.t;
+      case _i17.Film:
+        return _i17.Film.t;
+      case _i18.Seance:
+        return _i18.Seance.t;
+      case _i26.PhoneAuthCode:
+        return _i26.PhoneAuthCode.t;
+      case _i31.Salle:
+        return _i31.Salle.t;
+      case _i33.Siege:
+        return _i33.Siege.t;
+      case _i34.Structure:
+        return _i34.Structure.t;
     }
     return null;
   }
