@@ -6,8 +6,13 @@
 # not auto-apply dependency packages' migrations. Local dev DBs are often seeded once;
 # CI starts from an empty volume, so we must bootstrap dependency schemas here.
 #
-# Update the versioned folder names when bumping serverpod_* in pubspec (see each
-# package's migrations/migration_registry.txt last line).
+# Each package's definition.sql is a *merged* snapshot (includes dependency tables).
+# Applying several definitions in a row fails (e.g. serverpod_cloud_storage already exists).
+# The latest serverpod_auth_idp definition.sql merges serverpod + serverpod_auth_core +
+# serverpod_auth_idp; that is enough for this app (uses Email/Google idp).
+#
+# Update the versioned folder when bumping serverpod_auth_idp_server (see
+# migrations/migration_registry.txt last line).
 
 set -euo pipefail
 
@@ -31,10 +36,7 @@ apply() {
   psql -v ON_ERROR_STOP=1 -f "$f"
 }
 
-# Order: serverpod core -> auth_server -> auth_core -> auth_idp (FK / module deps)
-apply "$ROOT/serverpod-3.4.0/migrations/20260129180959368/definition.sql"
-apply "$ROOT/serverpod_auth_server-3.4.0/migrations/20260129181059877/definition.sql"
-apply "$ROOT/serverpod_auth_core_server-3.4.0/migrations/20260129181112269/definition.sql"
+# Single merged definition (do not chain serverpod + auth_* definitions).
 apply "$ROOT/serverpod_auth_idp_server-3.4.0/migrations/20260213194423028/definition.sql"
 
 echo "Serverpod dependency migrations applied."
