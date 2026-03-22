@@ -15,7 +15,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.8'
+          flutter-version: '3.33.0'
           cache: true
 
       - name: Install dependencies (workspace needs Flutter SDK)

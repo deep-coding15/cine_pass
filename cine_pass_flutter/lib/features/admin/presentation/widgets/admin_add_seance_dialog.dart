@@ -160,6 +160,7 @@ class _AdminAddSeanceDialogState extends State<AdminAddSeanceDialog> {
                       _dropdown<String>(
                         label: 'Salle',
                         hint: 'Sélectionner une salle',
+                        value: _selectedSalleId,
                         items: _roomsForCinema
                             .map(
                               (r) => DropdownMenuItem(
