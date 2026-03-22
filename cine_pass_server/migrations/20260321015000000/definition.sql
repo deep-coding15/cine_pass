@@ -371,6 +371,19 @@ ALTER TABLE "cine_pass_seance"
     FOREIGN KEY ("salleId") REFERENCES "cine_pass_salle"("id")
     ON DELETE CASCADE ON UPDATE NO ACTION;
 
+-- =============================================================================
+-- PHONE AUTH (codes SMS — PhoneAuthCode.spy.yaml)
+-- =============================================================================
+CREATE TABLE "phone_auth_code" (
+    "id" bigserial PRIMARY KEY,
+    "phone" text NOT NULL,
+    "code" text NOT NULL,
+    "createdAt" timestamp without time zone NOT NULL,
+    "expiresAt" timestamp without time zone NOT NULL,
+    "attemptCount" bigint NOT NULL DEFAULT 0,
+    "consumedAt" timestamp without time zone
+);
+
 --
 -- MIGRATION VERSION FOR cine_pass
 --
