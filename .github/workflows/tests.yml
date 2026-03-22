@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: '3.4.0'
-      SERVERPOD_PASSWORD_database: 'dXjXcP4LlgeINCHHWQg9lferR8YmNKUx'
+      # Must match cine_pass_server/docker-compose.yaml (postgres / postgres_test POSTGRES_PASSWORD)
+      SERVERPOD_PASSWORD_database: 'mervy'
       SERVERPOD_PASSWORD_redis: 'rM75gPjdpqRz8IN1AhKGuG712P1FeP24'
 
     steps:
