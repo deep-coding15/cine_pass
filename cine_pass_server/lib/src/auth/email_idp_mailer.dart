@@ -33,7 +33,9 @@ Future<void> sendResponsableDemandApprovedEmail(
   required String email,
   required String structureName,
 }) async {
-  final name = structureName.trim().isEmpty ? 'votre structure' : structureName.trim();
+  final name = structureName.trim().isEmpty
+      ? 'votre structure'
+      : structureName.trim();
   await _sendEmailOrLog(
     session,
     toEmail: email,
@@ -93,8 +95,12 @@ Future<void> _sendEmailOrLog(
   required String textBody,
   required String htmlBody,
 }) async {
-  final smtpHost = _normalizedSecret(Serverpod.instance.getPassword('smtpHost'));
-  final smtpPortRaw = _normalizedSecret(Serverpod.instance.getPassword('smtpPort'));
+  final smtpHost = _normalizedSecret(
+    Serverpod.instance.getPassword('smtpHost'),
+  );
+  final smtpPortRaw = _normalizedSecret(
+    Serverpod.instance.getPassword('smtpPort'),
+  );
   final smtpUsername = _normalizedSecret(
     Serverpod.instance.getPassword('smtpUsername'),
   );

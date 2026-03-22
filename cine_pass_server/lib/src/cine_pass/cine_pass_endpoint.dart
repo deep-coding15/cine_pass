@@ -190,9 +190,10 @@ class CinePassEndpoint extends Endpoint {
             }),
             'durationMin': _typedPickInt(td, 'durationMin', () {
               return _parsePositiveInt(
-                _extractPrefixedValue(description, 'Durée')
-                    ?.replaceAll('min', '')
-                    .trim(),
+                _extractPrefixedValue(
+                  description,
+                  'Durée',
+                )?.replaceAll('min', '').trim(),
               );
             }),
             'filmFormat': _typedPickStr(td, 'filmFormat', () {
@@ -2504,6 +2505,7 @@ class CinePassEndpoint extends Endpoint {
     int? posterColor,
     String? posterUrl,
     String? structureId,
+
     /// JSON des champs typés (film, concert, etc.) — alimente les tables `cine_pass_event_*_details`.
     String? eventTypedDetailsJson,
   }) async {
@@ -2765,8 +2767,8 @@ class CinePassEndpoint extends Endpoint {
         await _syncEventTypedDetails(
           session,
           eventId: row[0].toString(),
-          eventType: eventTypeForRow ??
-              _eventTypeFromCategory(row[2]?.toString()),
+          eventType:
+              eventTypeForRow ?? _eventTypeFromCategory(row[2]?.toString()),
           category: normalizedCategory.isNotEmpty
               ? normalizedCategory
               : row[2]?.toString(),
@@ -4036,8 +4038,7 @@ class CinePassEndpoint extends Endpoint {
         final s = time.toString();
         final hm = RegExp(r'(\d{1,2}):(\d{2})').firstMatch(s);
         if (hm != null) {
-          timeStr =
-              '${hm.group(1)!.padLeft(2, '0')}:${hm.group(2)}';
+          timeStr = '${hm.group(1)!.padLeft(2, '0')}:${hm.group(2)}';
         }
       }
     }
@@ -4081,8 +4082,10 @@ class CinePassEndpoint extends Endpoint {
         archived = v.toString().toLowerCase() == 'true';
       }
     }
-    final placesLeft =
-        (placesTotal - ticketsSold).clamp(0, placesTotal > 0 ? placesTotal : 0);
+    final placesLeft = (placesTotal - ticketsSold).clamp(
+      0,
+      placesTotal > 0 ? placesTotal : 0,
+    );
 
     return EventResponse(
       id: row[0].toString(),
@@ -4217,10 +4220,12 @@ class CinePassEndpoint extends Endpoint {
         statut: statut,
         nbBillets: _safeInt(row[8]),
         userEmail: row.length > 9 ? row[9] as String? : null,
-        locationLabel:
-            (loc == null || loc.trim().isEmpty || loc.trim() == '—') ? null : loc,
-        sessionAtStr:
-            (sess == null || sess.trim().isEmpty) ? null : sess.trim(),
+        locationLabel: (loc == null || loc.trim().isEmpty || loc.trim() == '—')
+            ? null
+            : loc,
+        sessionAtStr: (sess == null || sess.trim().isEmpty)
+            ? null
+            : sess.trim(),
       );
     }
 

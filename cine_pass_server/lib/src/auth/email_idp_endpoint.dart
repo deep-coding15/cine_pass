@@ -106,7 +106,8 @@ class EmailAuthEndpoint extends EmailIdpBaseEndpoint {
         authUser.id,
         UserProfileData(
           email: normalizedEmail,
-          fullName: (normalizedFullName != null && normalizedFullName.isNotEmpty)
+          fullName:
+              (normalizedFullName != null && normalizedFullName.isNotEmpty)
               ? normalizedFullName
               : null,
         ),

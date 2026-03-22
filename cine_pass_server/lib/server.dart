@@ -14,11 +14,7 @@ import 'src/web/routes/root.dart';
 /// The starting point of the Serverpod server.
 void run(List<String> args) async {
   // Initialize Serverpod and connect it with your generated code.
-  final pod = Serverpod(
-    args, 
-    Protocol(), 
-    Endpoints()
-  );
+  final pod = Serverpod(args, Protocol(), Endpoints());
 
   // Initialize authentication services for the server.
   // Token managers will be used to validate and issue authentication keys,
@@ -30,9 +26,9 @@ void run(List<String> args) async {
         // Pepper used to hash the refresh token secret.
         refreshTokenHashPepper: pod.getPassword('jwtRefreshTokenHashPepper')!,
         algorithm: JwtAlgorithm.hmacSha512(
-        // Private key to sign the tokens. Must be a valid HMAC SHA-512 key.
+          // Private key to sign the tokens. Must be a valid HMAC SHA-512 key.
           SecretKey(pod.getPassword('jwtHmacSha512PrivateKey')!),
-        )
+        ),
       ),
     ],
     identityProviderBuilders: [
