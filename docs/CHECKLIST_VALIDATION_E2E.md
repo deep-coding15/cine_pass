@@ -29,7 +29,7 @@
 - [ ] **Détail événement** : infos, favoris si connecté.
 - [ ] **Réservation** :
   - Événement **SANS_SIEGES** : parcours jusqu’au paiement (simulé) et confirmation.
-  - Événement **AVEC_SIEGES** : si plan vide, le parcours doit être bloqué avec message adapté ; avec plan valide, paiement et **attribution automatique** des sièges (pas de choix manuel grille côté client).
+  - Événement **AVEC_SIEGES** :  avec plan valide, paiement et **attribution automatique** des sièges .
 - [ ] **Mes billets** : la réservation apparaît avec QR / statut **payé**.
 
 ## 4. Annulation réservation (règle 2 h)
