@@ -3,11 +3,6 @@ CinePass — GUIDE D'INSTALLATION (Web, Android, iOS + backend Serverpod)
 Projet : application de reservation d'evenements (cinema, concerts, etc.)
 ================================================================================
 
-NOTE POUR LE DEPOT GitHub (consigne enseignant) :
-Si le nom exact "guide_d'installation.txt" est exige, renommez ce fichier ainsi.
-Sur certains systemes, l'apostrophe dans le nom de fichier pose probleme : gardez
-alors "guide_d_installation.txt" et indiquez-le au correcteur.
-
 --------------------------------------------------------------------------------
 1. PREREQUIS
 --------------------------------------------------------------------------------
@@ -62,12 +57,18 @@ regenerer des secrets uniques (ne pas reutiliser ceux du cours).
 3.3 SMTP (e-mails : inscription, mot de passe oublie)
 ------------------------------------------------------
 Remplacer dans passwords.yaml :
-  smtpUsername, smtpPassword, smtpFromEmail
-par un compte Gmail (ou autre SMTP) et un mot de passe d'application Gmail
-(compte Google > Securite > validation en 2 etapes > mots de passe d'application).
-
-Sans SMTP valide, le serveur demarre mais l'envoi de codes e-mail echouera.
-
+development:
+  database: mervy
+  jwtRefreshTokenHashPepper: "8Fh29dKxQpLmZs71AaPq"
+  jwtHmacSha512PrivateKey: "sK82Jd9F2mK38QaZx1PpL9VnE8rW5U2yT0aB6Cx9LkM4NpR7Qv3Hj6S8DfG2"
+  emailSecretHashPepper: "R8d2LpQx7NsK1Wv9Aa"
+  googleClientSecret: '{"web":{"client_id":"780713404787-qgeac9u7gn7an6kntv5kg24ntp30u2dq.apps.googleusercontent.com","project_id":"cine-pass-gi2-ensa-tetouan","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost:9080/auth/google/callback"]}}'
+  smtpHost: "smtp.gmail.com"
+  smtpPort: "587"
+  smtpUsername: "da805632@gmail.com"
+  smtpPassword: "yqjj ioww stak epjg"
+  smtpFromEmail: "da805632@gmail.com"
+  smtpFromName: "CinePass"
 3.4 Connexion Google (optionnel)
 ------------------------------------------------------
 Remplacer googleClientSecret dans passwords.yaml par le JSON exporte depuis
@@ -109,20 +110,17 @@ Remplacer le nom du conteneur si different : docker ps (souvent cine_pass_server
 
 Windows PowerShell (depuis cine_pass_server) :
 
-  Get-Content schema\drop_cine_pass_tables.sql -Raw | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
-  Get-Content schema\cine_pass_schema.sql -Raw      | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+   Get-Content schema\cine_pass_schema.sql -Raw      | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
   Get-Content schema\seed_data.sql -Raw             | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
 
 Alternative Windows (cmd) :
 
-  type schema\drop_cine_pass_tables.sql | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
-  type schema\cine_pass_schema.sql      | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+   type schema\cine_pass_schema.sql      | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
   type schema\seed_data.sql             | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
 
 macOS / Linux (depuis cine_pass_server) :
 
-  docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass < schema/drop_cine_pass_tables.sql
-  docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass < schema/cine_pass_schema.sql
+   docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass < schema/cine_pass_schema.sql
   docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass < schema/seed_data.sql
 
 --------------------------------------------------------------------------------
