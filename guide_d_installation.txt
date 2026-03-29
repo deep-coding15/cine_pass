@@ -28,59 +28,46 @@ Serverpod CLI (si besoin de regenerer le client) :
   cd cine_pass
 
 --------------------------------------------------------------------------------
-3. SECRETS SERVEUR (OBLIGATOIRE APRES CHAQUE CLONE)
+3. SECRETS SERVEUR (passwords.yaml)
 --------------------------------------------------------------------------------
-Le depot contient le MODELE versionne :
-  cine_pass_server/config/passwords.yaml.example
-
-Le fichier reel passwords.yaml n'est PAS versionne (.gitignore) : chaque machine
-garde sa copie locale (SMTP / Google personnels).
+Le depot contient config/passwords.yaml.example (valeurs de demo + emplacements
+a remplir). Le fichier reel config/passwords.yaml n'est PAS versionne.
 
 Etapes :
   cd cine_pass_server
   copy config\passwords.yaml.example config\passwords.yaml
   (macOS/Linux : cp config/passwords.yaml.example config/passwords.yaml)
 
-3.1 Mot de passe PostgreSQL (Docker du projet)
-----------------------------------------------
-Dans docker-compose.yaml, le service postgres utilise :
-  POSTGRES_USER: postgres
-  POSTGRES_DB:   cine_pass
-  POSTGRES_PASSWORD: mervy
+3.1 Mots de passe et acces deja fixes (Docker / demo)
+------------------------------------------------------
+Postgres (fichier cine_pass_server/docker-compose.yaml, service postgres) :
+  - utilisateur : postgres
+  - base        : cine_pass
+  - mot de passe: mervy
+  - port hote   : 8090 (voir config/development.yaml, cle database.port)
 
-Donc dans passwords.yaml, la cle development.database doit etre exactement :
-  mervy
+Ces valeurs sont alignees avec passwords.yaml.example (development.database).
 
-(Port Postgres sur la machine hote : 8090, voir development.yaml du serveur.)
+3.2 JWT et peppers (fichier example)
+------------------------------------------------------
+Le fichier passwords.yaml.example contient des chaines de demonstration assez
+longues pour demarrer Serverpod en local. Pour une vraie mise en production,
+regenerer des secrets uniques (ne pas reutiliser ceux du cours).
 
-3.2 JWT et peppers (tests locaux — deja dans passwords.yaml.example)
-----------------------------------------------------------------------
-Apres copie du .example, vous pouvez garder tel quel pour une demo cours :
-
-  jwtRefreshTokenHashPepper: "dev-pepper-refresh-token-minimum-dix-caracteres"
-  jwtHmacSha512PrivateKey: "dev-hmac-sha512-cle-minimum-soixante-quatre-caracteres-pour-tests-locaux-uniquement-xx"
-  emailSecretHashPepper: "dev-pepper-email-min-dix"
-
-En production, generez des chaines uniques et gardez-les secretes.
-
-3.3 SMTP (emails de verification / mot de passe oublie)
----------------------------------------------------------
-Remplacez dans passwords.yaml :
+3.3 SMTP (e-mails : inscription, mot de passe oublie)
+------------------------------------------------------
+Remplacer dans passwords.yaml :
   smtpUsername, smtpPassword, smtpFromEmail
-par un compte Gmail (recommande : mot de passe d'application Google, pas le mot
-de passe du compte). Sans SMTP valide, le serveur demarre mais l'envoi de codes
-email peut echouer.
+par un compte Gmail (ou autre SMTP) et un mot de passe d'application Gmail
+(compte Google > Securite > validation en 2 etapes > mots de passe d'application).
+
+Sans SMTP valide, le serveur demarre mais l'envoi de codes e-mail echouera.
 
 3.4 Connexion Google (optionnel)
---------------------------------
-Remplacez googleClientSecret par le JSON Web client OAuth (une seule ligne),
-conforme a SETUP_APRES_CLONE.md et au redirect :
-  http://localhost:9080/auth/google/callback
-
-Sans remplacement, la connexion Google dans l'app ne fonctionnera pas ; email /
-mot de passe peuvent suffire pour les tests.
-
-Ne jamais committer passwords.yaml ni google_client_secret.json sur GitHub.
+------------------------------------------------------
+Remplacer googleClientSecret dans passwords.yaml par le JSON exporte depuis
+Google Cloud Console (client OAuth Web), et suivre SETUP_APRES_CLONE.md pour
+les dart-define cote Flutter (GOOGLE_CLIENT_ID, GOOGLE_SERVER_CLIENT_ID).
 
 --------------------------------------------------------------------------------
 4. BASE DE DONNEES (Docker)
@@ -113,13 +100,19 @@ A la racine du monorepo puis Flutter :
 --------------------------------------------------------------------------------
 7. SCHEMA METIER + DONNEES DE TEST (FORTEMENT RECOMMANDE)
 --------------------------------------------------------------------------------
-Remplacer le nom du conteneur si different (commande : docker ps).
+Remplacer le nom du conteneur si different : docker ps (souvent cine_pass_server-postgres-1).
 
 Windows PowerShell (depuis cine_pass_server) :
 
   Get-Content schema\drop_cine_pass_tables.sql -Raw | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
   Get-Content schema\cine_pass_schema.sql -Raw      | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
   Get-Content schema\seed_data.sql -Raw             | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+
+Alternative Windows (cmd) :
+
+  type schema\drop_cine_pass_tables.sql | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+  type schema\cine_pass_schema.sql      | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+  type schema\seed_data.sql             | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
 
 macOS / Linux (depuis cine_pass_server) :
 
@@ -212,9 +205,10 @@ Sous Windows seul : prevoir un Mac, un emulateur cloud, ou une CI pour le build 
 --------------------------------------------------------------------------------
 15. FICHIERS A NE PAS COMMITER
 --------------------------------------------------------------------------------
-- cine_pass_server/config/passwords.yaml (copie locale)
+- cine_pass_server/config/passwords.yaml (copie locale avec vos SMTP / Google reels)
 - cine_pass_server/config/google_client_secret.json
-- .env, cles API, mots de passe reels
+- cles API, .env
 
-Documentation complementaire : cine_pass_server/SETUP_APRES_CLONE.md
+Documentation complementaire : cine_pass_server/SETUP_APRES_CLONE.md,
+GUIDE_INSTALLATION_PRESENTATION.md
 ================================================================================
