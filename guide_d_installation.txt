@@ -1,0 +1,220 @@
+================================================================================
+CinePass — GUIDE D'INSTALLATION (Web, Android, iOS + backend Serverpod)
+Projet : application de reservation d'evenements (cinema, concerts, etc.)
+================================================================================
+
+--------------------------------------------------------------------------------
+1. PREREQUIS
+--------------------------------------------------------------------------------
+- Git
+- Flutter SDK (stable) + Dart
+- Docker Desktop
+- Android Studio (emulateur Android)
+- Xcode + CocoaPods (uniquement sur macOS pour compiler iOS)
+
+Verifications :
+  flutter --version
+  dart --version
+  docker --version
+  flutter doctor
+
+Serverpod CLI (si besoin de regenerer le client) :
+  dart pub global activate serverpod_cli
+
+--------------------------------------------------------------------------------
+2. CLONER LE DEPOT
+--------------------------------------------------------------------------------
+  git clone https://github.com/deep-coding15/cine_pass
+  cd cine_pass
+
+--------------------------------------------------------------------------------
+3. SECRETS SERVEUR (OBLIGATOIRE APRES CHAQUE CLONE)
+--------------------------------------------------------------------------------
+Le depot contient le MODELE versionne :
+  cine_pass_server/config/passwords.yaml.example
+
+Le fichier reel passwords.yaml n'est PAS versionne (.gitignore) : chaque machine
+garde sa copie locale (SMTP / Google personnels).
+
+Etapes :
+  cd cine_pass_server
+  copy config\passwords.yaml.example config\passwords.yaml
+  (macOS/Linux : cp config/passwords.yaml.example config/passwords.yaml)
+
+3.1 Mot de passe PostgreSQL (Docker du projet)
+----------------------------------------------
+Dans docker-compose.yaml, le service postgres utilise :
+  POSTGRES_USER: postgres
+  POSTGRES_DB:   cine_pass
+  POSTGRES_PASSWORD: mervy
+
+Donc dans passwords.yaml, la cle development.database doit etre exactement :
+  mervy
+
+(Port Postgres sur la machine hote : 8090, voir development.yaml du serveur.)
+
+3.2 JWT et peppers (tests locaux — deja dans passwords.yaml.example)
+----------------------------------------------------------------------
+Apres copie du .example, vous pouvez garder tel quel pour une demo cours :
+
+  jwtRefreshTokenHashPepper: "dev-pepper-refresh-token-minimum-dix-caracteres"
+  jwtHmacSha512PrivateKey: "dev-hmac-sha512-cle-minimum-soixante-quatre-caracteres-pour-tests-locaux-uniquement-xx"
+  emailSecretHashPepper: "dev-pepper-email-min-dix"
+
+En production, generez des chaines uniques et gardez-les secretes.
+
+3.3 SMTP (emails de verification / mot de passe oublie)
+---------------------------------------------------------
+Remplacez dans passwords.yaml :
+  smtpUsername, smtpPassword, smtpFromEmail
+par un compte Gmail (recommande : mot de passe d'application Google, pas le mot
+de passe du compte). Sans SMTP valide, le serveur demarre mais l'envoi de codes
+email peut echouer.
+
+3.4 Connexion Google (optionnel)
+--------------------------------
+Remplacez googleClientSecret par le JSON Web client OAuth (une seule ligne),
+conforme a SETUP_APRES_CLONE.md et au redirect :
+  http://localhost:9080/auth/google/callback
+
+Sans remplacement, la connexion Google dans l'app ne fonctionnera pas ; email /
+mot de passe peuvent suffire pour les tests.
+
+Ne jamais committer passwords.yaml ni google_client_secret.json sur GitHub.
+
+--------------------------------------------------------------------------------
+4. BASE DE DONNEES (Docker)
+--------------------------------------------------------------------------------
+Depuis le dossier cine_pass_server :
+
+  docker compose up --build -d
+
+Verifier que le conteneur Postgres tourne :
+  docker ps
+
+--------------------------------------------------------------------------------
+5. DEPENDANCES
+--------------------------------------------------------------------------------
+A la racine du monorepo puis Flutter :
+
+  cd cine_pass
+  dart pub get
+  cd cine_pass_flutter
+  flutter pub get
+  cd ../cine_pass_server
+  dart pub get
+
+--------------------------------------------------------------------------------
+6. MIGRATIONS Serverpod
+--------------------------------------------------------------------------------
+  cd cine_pass_server
+  dart run bin/main.dart --apply-migrations
+
+--------------------------------------------------------------------------------
+7. SCHEMA METIER + DONNEES DE TEST (FORTEMENT RECOMMANDE)
+--------------------------------------------------------------------------------
+Remplacer le nom du conteneur si different (commande : docker ps).
+
+Windows PowerShell (depuis cine_pass_server) :
+
+  Get-Content schema\drop_cine_pass_tables.sql -Raw | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+  Get-Content schema\cine_pass_schema.sql -Raw      | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+  Get-Content schema\seed_data.sql -Raw             | docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass
+
+macOS / Linux (depuis cine_pass_server) :
+
+  docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass < schema/drop_cine_pass_tables.sql
+  docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass < schema/cine_pass_schema.sql
+  docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass < schema/seed_data.sql
+
+--------------------------------------------------------------------------------
+8. LANCER LE BACKEND
+--------------------------------------------------------------------------------
+  cd cine_pass_server
+  dart run bin/main.dart --mode development
+
+Ports habituels :
+  - API : http://localhost:9080
+  - Interface web serveur : http://localhost:9082
+
+Laisser ce terminal ouvert pendant les tests de l'application.
+
+--------------------------------------------------------------------------------
+9. APPLICATION WEB (Flutter)
+--------------------------------------------------------------------------------
+Nouveau terminal :
+
+  cd cine_pass/cine_pass_flutter
+  flutter pub get
+  flutter run -d chrome --web-hostname localhost --web-port 7357
+
+Si authentification Google est requise, ajouter les dart-define indiques dans
+SETUP_APRES_CLONE.md (GOOGLE_CLIENT_ID, GOOGLE_SERVER_CLIENT_ID).
+
+--------------------------------------------------------------------------------
+10. APPLICATION ANDROID — EMULATEUR
+--------------------------------------------------------------------------------
+Important : sur l'emulateur, 127.0.0.1 designe l'emulateur lui-meme, PAS le PC.
+Utiliser l'alias 10.0.2.2 pour joindre le serveur sur la machine hote.
+
+Demarrer l'emulateur (Android Studio > Device Manager), puis :
+
+  flutter devices
+  flutter run -d emulator-5554 --dart-define=API_URL=http://10.0.2.2:9080
+
+(Remplacer emulator-5554 par l'ID affiche par flutter devices si besoin.)
+
+Sans --dart-define=API_URL, l'app peut rester configuree sur http://127.0.0.1:9080
+et echouer avec "Connection refused" sur Android.
+
+--------------------------------------------------------------------------------
+11. APPLICATION ANDROID — TELEPHONE PHYSIQUE (meme Wi-Fi que le PC)
+--------------------------------------------------------------------------------
+Trouver l'adresse IPv4 du PC (ipconfig sur Windows, ifconfig/ip sur Mac/Linux).
+
+  flutter run -d <DEVICE_ID> --dart-define=API_URL=http://<IP_DU_PC>:9080
+
+Exemple :
+
+  flutter run -d 104883735H004624 --dart-define=API_URL=http://192.168.1.160:9080
+
+--------------------------------------------------------------------------------
+12. APPLICATION iOS
+--------------------------------------------------------------------------------
+La compilation iOS necessite macOS et Xcode.
+
+  cd cine_pass/cine_pass_flutter
+  flutter pub get
+  flutter run -d ios
+
+Sous Windows seul : prevoir un Mac, un emulateur cloud, ou une CI pour le build iOS.
+
+--------------------------------------------------------------------------------
+13. VERIFICATION RAPIDE (SOUTENANCE)
+--------------------------------------------------------------------------------
+1) Le serveur repond (pas d'erreur au demarrage).
+2) L'app affiche l'accueil et la liste des evenements.
+3) Connexion / inscription utilisateur.
+4) Parcours reservation (selon implementation) et affichage des billets.
+
+--------------------------------------------------------------------------------
+14. PROBLEMES FREQUENTS
+--------------------------------------------------------------------------------
+- Connection refused + 127.0.0.1 sur telephone ou emulateur
+    => Utiliser API_URL avec IP du PC ou 10.0.2.2 (emulateur).
+
+- Port 9080 deja utilise
+    => Arreter l'ancienne instance du serveur (processus Dart).
+
+- Migrations manquantes
+    => Relancer : dart run bin/main.dart --apply-migrations
+
+--------------------------------------------------------------------------------
+15. FICHIERS A NE PAS COMMITER
+--------------------------------------------------------------------------------
+- cine_pass_server/config/passwords.yaml (copie locale)
+- cine_pass_server/config/google_client_secret.json
+- .env, cles API, mots de passe reels
+
+Documentation complementaire : cine_pass_server/SETUP_APRES_CLONE.md
+================================================================================
