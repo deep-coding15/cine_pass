@@ -16,9 +16,27 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i5;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i6;
-import 'protocol.dart' as _i7;
+import 'package:cine_pass_client/src/protocol/billet_group_response.dart'
+    as _i5;
+import 'package:cine_pass_client/src/protocol/event_response.dart' as _i6;
+import 'package:cine_pass_client/src/protocol/cine_pass/event_reservation_config_response.dart'
+    as _i7;
+import 'package:cine_pass_client/src/protocol/cine_pass/event_seat_plan_response.dart'
+    as _i8;
+import 'package:cine_pass_client/src/protocol/cine_pass/reservation_quote_response.dart'
+    as _i9;
+import 'package:cine_pass_client/src/protocol/cine_pass/reservation_confirm_response.dart'
+    as _i10;
+import 'package:cine_pass_client/src/protocol/structure.dart' as _i11;
+import 'package:cine_pass_client/src/protocol/demande_responsable_response.dart'
+    as _i12;
+import 'package:cine_pass_client/src/protocol/reservation_response.dart'
+    as _i13;
+import 'package:cine_pass_client/src/protocol/rapport_ca_response.dart' as _i14;
+import 'package:cine_pass_client/src/protocol/profile_response.dart' as _i15;
+import 'package:cine_pass_client/src/protocol/greetings/greeting.dart' as _i16;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i17;
+import 'protocol.dart' as _i18;
 
 /// Exposes email/password auth and a simplified registration flow.
 /// {@category Endpoint}
@@ -328,6 +346,595 @@ class EndpointPhoneAuth extends _i2.EndpointRef {
   );
 }
 
+/// Endpoint CinePass : films, séances, cinémas, événements (données BDD).
+/// {@category Endpoint}
+class EndpointCinePass extends _i2.EndpointRef {
+  EndpointCinePass(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'cinePass';
+
+  /// Crée une réservation + billets après paiement (simulé) pour un **événement** uniquement.
+  /// Retourne le numéro de réservation (ex: BOOK-...).
+  _i3.Future<String?> createReservationAndBillets({
+    required String eventId,
+    String? reservationNumber,
+    required List<String> ticketTypes,
+    required List<bool> optionParking,
+    required List<bool> optionPopcorn,
+    required List<bool> optionBoisson,
+    required List<double> prices,
+    required double totalAmount,
+  }) => caller.callServerEndpoint<String?>(
+    'cinePass',
+    'createReservationAndBillets',
+    {
+      'eventId': eventId,
+      'reservationNumber': reservationNumber,
+      'ticketTypes': ticketTypes,
+      'optionParking': optionParking,
+      'optionPopcorn': optionPopcorn,
+      'optionBoisson': optionBoisson,
+      'prices': prices,
+      'totalAmount': totalAmount,
+    },
+  );
+
+  /// Mes billets (1 entrée par réservation, avec la liste des billets associés).
+  _i3.Future<List<_i5.BilletGroupResponse>> getMyBillets() =>
+      caller.callServerEndpoint<List<_i5.BilletGroupResponse>>(
+        'cinePass',
+        'getMyBillets',
+        {},
+      );
+
+  /// Frontend: indique si l'utilisateur connecté est admin plateforme.
+  _i3.Future<bool> isCurrentUserAdmin() => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'isCurrentUserAdmin',
+    {},
+  );
+
+  /// Frontend: indique si l'utilisateur connecté est responsable d'au moins une structure.
+  _i3.Future<bool> isCurrentUserResponsable() =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'isCurrentUserResponsable',
+        {},
+      );
+
+  /// Admin: active/desactive le role responsable pour un utilisateur via son email.
+  _i3.Future<bool> setResponsableActiveByEmail({
+    required String email,
+    required bool active,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setResponsableActiveByEmail',
+    {
+      'email': email,
+      'active': active,
+    },
+  );
+
+  /// Liste des événements à venir.
+  _i3.Future<List<_i6.EventResponse>> getEvents() =>
+      caller.callServerEndpoint<List<_i6.EventResponse>>(
+        'cinePass',
+        'getEvents',
+        {},
+      );
+
+  /// Détail d'un événement par id.
+  _i3.Future<_i6.EventResponse?> getEventById(String id) =>
+      caller.callServerEndpoint<_i6.EventResponse?>(
+        'cinePass',
+        'getEventById',
+        {'id': id},
+      );
+
+  /// Configuration réservation d'un événement (publique côté lecture).
+  _i3.Future<_i7.EventReservationConfigResponse?> getEventReservationConfig(
+    String eventId,
+  ) => caller.callServerEndpoint<_i7.EventReservationConfigResponse?>(
+    'cinePass',
+    'getEventReservationConfig',
+    {'eventId': eventId},
+  );
+
+  /// Admin / Responsable: configure mode de réservation + types + options.
+  _i3.Future<bool> setEventReservationConfig({
+    required String eventId,
+    required String reservationMode,
+    required int maxTicketsPerOrder,
+    required bool adjacentBestEffort,
+    required List<String> ticketTypeCodes,
+    required List<String> ticketTypeLabels,
+    required List<double> ticketTypePrices,
+    required List<int> ticketTypeQuotas,
+    required List<String> optionTicketTypeCodes,
+    required List<String> optionCodes,
+    required List<String> optionLabels,
+    required List<double> optionPrices,
+    required List<bool> optionIncluded,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setEventReservationConfig',
+    {
+      'eventId': eventId,
+      'reservationMode': reservationMode,
+      'maxTicketsPerOrder': maxTicketsPerOrder,
+      'adjacentBestEffort': adjacentBestEffort,
+      'ticketTypeCodes': ticketTypeCodes,
+      'ticketTypeLabels': ticketTypeLabels,
+      'ticketTypePrices': ticketTypePrices,
+      'ticketTypeQuotas': ticketTypeQuotas,
+      'optionTicketTypeCodes': optionTicketTypeCodes,
+      'optionCodes': optionCodes,
+      'optionLabels': optionLabels,
+      'optionPrices': optionPrices,
+      'optionIncluded': optionIncluded,
+    },
+  );
+
+  /// Plan de sièges défini par le responsable (lecture publique).
+  _i3.Future<_i8.EventSeatPlanResponse?> getEventSeatPlan(String eventId) =>
+      caller.callServerEndpoint<_i8.EventSeatPlanResponse?>(
+        'cinePass',
+        'getEventSeatPlan',
+        {'eventId': eventId},
+      );
+
+  /// Admin / Responsable : remplace tout le plan de sièges de l’événement.
+  _i3.Future<bool> setEventSeatPlan({
+    required String eventId,
+    required List<String> seatLabels,
+    required List<int> seatRowIndices,
+    required List<int> seatColIndices,
+    required List<bool> seatBlocked,
+    required List<String> seatZones,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setEventSeatPlan',
+    {
+      'eventId': eventId,
+      'seatLabels': seatLabels,
+      'seatRowIndices': seatRowIndices,
+      'seatColIndices': seatColIndices,
+      'seatBlocked': seatBlocked,
+      'seatZones': seatZones,
+    },
+  );
+
+  /// Prévisualisation de réservation (sans écriture DB).
+  _i3.Future<_i9.ReservationQuoteResponse?> quoteEventReservation({
+    required String eventId,
+    required List<String> ticketTypeCodes,
+    required List<int> quantities,
+  }) => caller.callServerEndpoint<_i9.ReservationQuoteResponse?>(
+    'cinePass',
+    'quoteEventReservation',
+    {
+      'eventId': eventId,
+      'ticketTypeCodes': ticketTypeCodes,
+      'quantities': quantities,
+    },
+  );
+
+  /// Confirme une réservation événement en mode transactionnel.
+  /// [perBilletTypeCodes] : un type par billet (ex. STANDARD, VIP).
+  /// [perBilletPayantOptionCsv] : pour chaque billet, codes d'options payantes séparés par des virgules (ex. "PARKING,SNACK").
+  /// [perBilletSeatLabels] : si l’événement est en AVEC_SIEGES, un libellé par billet (ex. A3), ordre aligné sur [perBilletTypeCodes].
+  _i3.Future<_i10.ReservationConfirmResponse> confirmEventReservation({
+    required String eventId,
+    required List<String> perBilletTypeCodes,
+    required List<String> perBilletPayantOptionCsv,
+    required List<String> perBilletSeatLabels,
+  }) => caller.callServerEndpoint<_i10.ReservationConfirmResponse>(
+    'cinePass',
+    'confirmEventReservation',
+    {
+      'eventId': eventId,
+      'perBilletTypeCodes': perBilletTypeCodes,
+      'perBilletPayantOptionCsv': perBilletPayantOptionCsv,
+      'perBilletSeatLabels': perBilletSeatLabels,
+    },
+  );
+
+  /// Villes distinctes (événements) pour les filtres.
+  _i3.Future<List<String>> getCities() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getCities',
+        {},
+      );
+
+  /// Genres distincts (événements type FILM) pour les filtres.
+  _i3.Future<List<String>> getGenres() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getGenres',
+        {},
+      );
+
+  /// Catégories d'événements pour les filtres.
+  _i3.Future<List<String>> getEventCategories() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getEventCategories',
+        {},
+      );
+
+  /// Valeurs de filtre dynamiques selon le type d'événement.
+  _i3.Future<List<String>> getEventDynamicFilterValues({
+    required String eventType,
+    required String filterKey,
+  }) => caller.callServerEndpoint<List<String>>(
+    'cinePass',
+    'getEventDynamicFilterValues',
+    {
+      'eventType': eventType,
+      'filterKey': filterKey,
+    },
+  );
+
+  /// Admin / Responsable: créer un événement (optionnellement lié à une structure).
+  _i3.Future<_i6.EventResponse?> createEvent({
+    required String titre,
+    required String categorie,
+    String? description,
+    required String lieu,
+    String? adresse,
+    required String ville,
+    required DateTime eventDate,
+    required String eventTimeStr,
+    required int placesTotal,
+    required double prixBase,
+    int? posterColor,
+    String? posterUrl,
+    String? structureId,
+    String? eventTypedDetailsJson,
+  }) => caller.callServerEndpoint<_i6.EventResponse?>(
+    'cinePass',
+    'createEvent',
+    {
+      'titre': titre,
+      'categorie': categorie,
+      'description': description,
+      'lieu': lieu,
+      'adresse': adresse,
+      'ville': ville,
+      'eventDate': eventDate,
+      'eventTimeStr': eventTimeStr,
+      'placesTotal': placesTotal,
+      'prixBase': prixBase,
+      'posterColor': posterColor,
+      'posterUrl': posterUrl,
+      'structureId': structureId,
+      'eventTypedDetailsJson': eventTypedDetailsJson,
+    },
+  );
+
+  /// Liste de toutes les structures (admin).
+  _i3.Future<List<_i11.Structure>> getStructures() =>
+      caller.callServerEndpoint<List<_i11.Structure>>(
+        'cinePass',
+        'getStructures',
+        {},
+      );
+
+  /// Détail d'une structure par id (admin).
+  _i3.Future<_i11.Structure?> getStructureById(String id) =>
+      caller.callServerEndpoint<_i11.Structure?>(
+        'cinePass',
+        'getStructureById',
+        {'id': id},
+      );
+
+  /// Mettre à jour un événement (admin ou responsable de la structure).
+  _i3.Future<_i6.EventResponse?> updateEvent({
+    required String id,
+    String? titre,
+    String? categorie,
+    String? description,
+    String? lieu,
+    String? adresse,
+    String? ville,
+    DateTime? eventDate,
+    String? eventTimeStr,
+    int? placesTotal,
+    double? prixBase,
+    int? posterColor,
+    String? posterUrl,
+    String? eventTypedDetailsJson,
+  }) => caller.callServerEndpoint<_i6.EventResponse?>(
+    'cinePass',
+    'updateEvent',
+    {
+      'id': id,
+      'titre': titre,
+      'categorie': categorie,
+      'description': description,
+      'lieu': lieu,
+      'adresse': adresse,
+      'ville': ville,
+      'eventDate': eventDate,
+      'eventTimeStr': eventTimeStr,
+      'placesTotal': placesTotal,
+      'prixBase': prixBase,
+      'posterColor': posterColor,
+      'posterUrl': posterUrl,
+      'eventTypedDetailsJson': eventTypedDetailsJson,
+    },
+  );
+
+  /// Supprimer un événement (admin ou responsable de la structure).
+  _i3.Future<bool> deleteEvent(String id) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'deleteEvent',
+    {'id': id},
+  );
+
+  /// Structure(s) assignée(s) au responsable connecté.
+  _i3.Future<_i11.Structure?> getMyStructure() =>
+      caller.callServerEndpoint<_i11.Structure?>(
+        'cinePass',
+        'getMyStructure',
+        {},
+      );
+
+  /// Responsable: mettre à jour les informations de sa structure assignée.
+  /// Admin: peut aussi mettre à jour n'importe quelle structure via structureId.
+  _i3.Future<_i11.Structure?> updateMyStructure({
+    String? structureId,
+    String? name,
+    String? city,
+    String? address,
+    String? website,
+    String? phone,
+  }) => caller.callServerEndpoint<_i11.Structure?>(
+    'cinePass',
+    'updateMyStructure',
+    {
+      'structureId': structureId,
+      'name': name,
+      'city': city,
+      'address': address,
+      'website': website,
+      'phone': phone,
+    },
+  );
+
+  /// Admin: désactiver une structure côté responsable (assignments inactifs).
+  _i3.Future<bool> banStructure(String structureId) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'banStructure',
+        {'structureId': structureId},
+      );
+
+  /// Admin: supprimer une structure.
+  _i3.Future<bool> deleteStructure(String structureId) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'deleteStructure',
+        {'structureId': structureId},
+      );
+
+  /// Événements des structures du responsable connecté.
+  _i3.Future<List<_i6.EventResponse>> getMyEvents() =>
+      caller.callServerEndpoint<List<_i6.EventResponse>>(
+        'cinePass',
+        'getMyEvents',
+        {},
+      );
+
+  /// Admin: demandes en attente (devenir responsable).
+  _i3.Future<List<_i12.DemandeResponsableResponse>> getDemandesEnAttente() =>
+      caller.callServerEndpoint<List<_i12.DemandeResponsableResponse>>(
+        'cinePass',
+        'getDemandesEnAttente',
+        {},
+      );
+
+  /// Admin: approuver une demande responsable → crée la structure et l'assignment.
+  _i3.Future<bool> approuverDemande(String id) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'approuverDemande',
+        {'id': id},
+      );
+
+  /// Admin: rejeter une demande responsable.
+  _i3.Future<bool> rejeterDemande(
+    String id,
+    String reason,
+  ) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'rejeterDemande',
+    {
+      'id': id,
+      'reason': reason,
+    },
+  );
+
+  /// Créer une demande pour devenir responsable (utilisateur connecté).
+  _i3.Future<_i12.DemandeResponsableResponse?> createDemandeResponsable({
+    required String structureType,
+    required String structureName,
+    required String structureCity,
+    String? structureAddress,
+    String? structureWebsite,
+    String? structurePhone,
+    required String description,
+  }) => caller.callServerEndpoint<_i12.DemandeResponsableResponse?>(
+    'cinePass',
+    'createDemandeResponsable',
+    {
+      'structureType': structureType,
+      'structureName': structureName,
+      'structureCity': structureCity,
+      'structureAddress': structureAddress,
+      'structureWebsite': structureWebsite,
+      'structurePhone': structurePhone,
+      'description': description,
+    },
+  );
+
+  /// Utilisateur connecté: indique s'il a déjà une demande responsable en attente.
+  _i3.Future<bool> hasMyPendingDemandeResponsable() =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'hasMyPendingDemandeResponsable',
+        {},
+      );
+
+  /// Liste des événements favoris de l'utilisateur connecté.
+  _i3.Future<List<String>> getMyFavoriteEventIds() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getMyFavoriteEventIds',
+        {},
+      );
+
+  /// Ajoute / retire un événement des favoris de l'utilisateur connecté.
+  _i3.Future<bool> setMyEventFavorite({
+    required String eventId,
+    required bool isFavorite,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setMyEventFavorite',
+    {
+      'eventId': eventId,
+      'isFavorite': isFavorite,
+    },
+  );
+
+  /// Client: annuler sa réservation événement si >= 2h avant le début.
+  _i3.Future<bool> cancelMyEventReservation({
+    required String reservationNumber,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'cancelMyEventReservation',
+    {'reservationNumber': reservationNumber},
+  );
+
+  /// Admin: toutes les réservations (événements).
+  _i3.Future<List<_i13.ReservationResponse>> getReservations() =>
+      caller.callServerEndpoint<List<_i13.ReservationResponse>>(
+        'cinePass',
+        'getReservations',
+        {},
+      );
+
+  /// Responsable: réservations pour les événements de ses structures.
+  _i3.Future<List<_i13.ReservationResponse>> getReservationsForMyStructures() =>
+      caller.callServerEndpoint<List<_i13.ReservationResponse>>(
+        'cinePass',
+        'getReservationsForMyStructures',
+        {},
+      );
+
+  /// Admin/Responsable: archiver un événement (retire des listings futurs).
+  _i3.Future<bool> archiveEvent(String eventId) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'archiveEvent',
+        {'eventId': eventId},
+      );
+
+  /// Admin/Responsable: désarchiver un événement (réaffiche au catalogue public).
+  _i3.Future<bool> unarchiveEvent(String eventId) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'unarchiveEvent',
+        {'eventId': eventId},
+      );
+
+  /// Responsable: détails billets d'une réservation de ses structures.
+  _i3.Future<List<String>> getReservationBilletDetailsForMyStructures({
+    required String reservationId,
+  }) => caller.callServerEndpoint<List<String>>(
+    'cinePass',
+    'getReservationBilletDetailsForMyStructures',
+    {'reservationId': reservationId},
+  );
+
+  /// Responsable: changement de statut d'une réservation de ses structures.
+  _i3.Future<bool> updateReservationStatusForMyStructures({
+    required String reservationId,
+    required String status,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'updateReservationStatusForMyStructures',
+    {
+      'reservationId': reservationId,
+      'status': status,
+    },
+  );
+
+  /// Responsable: rapport CA sur une période (7j, 30j, 3m, 1an).
+  _i3.Future<_i14.RapportCAResponse> getRapportCA(String periode) =>
+      caller.callServerEndpoint<_i14.RapportCAResponse>(
+        'cinePass',
+        'getRapportCA',
+        {'periode': periode},
+      );
+
+  /// Profil de l'utilisateur connecté (displayName, phone, birthDate).
+  /// Retourne null si non authentifié.
+  _i3.Future<_i15.ProfileResponse?> getProfile() =>
+      caller.callServerEndpoint<_i15.ProfileResponse?>(
+        'cinePass',
+        'getProfile',
+        {},
+      );
+
+  /// Admin: liste des utilisateurs (profil auth + téléphone/date locale si disponible).
+  _i3.Future<List<_i15.ProfileResponse>> getAdminUsers() =>
+      caller.callServerEndpoint<List<_i15.ProfileResponse>>(
+        'cinePass',
+        'getAdminUsers',
+        {},
+      );
+
+  /// Admin: modifier le rôle d'un utilisateur.
+  _i3.Future<bool> setAdminUserRole({
+    required String userId,
+    required String role,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setAdminUserRole',
+    {
+      'userId': userId,
+      'role': role,
+    },
+  );
+
+  /// Admin: supprimer un utilisateur.
+  _i3.Future<bool> deleteAdminUser({required String userId}) =>
+      caller.callServerEndpoint<bool>(
+        'cinePass',
+        'deleteAdminUser',
+        {'userId': userId},
+      );
+
+  /// Met à jour le profil de l'utilisateur connecté.
+  /// Seuls les champs non null sont mis à jour.
+  _i3.Future<bool> updateProfile({
+    String? displayName,
+    String? phone,
+    String? birthDate,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'updateProfile',
+    {
+      'displayName': displayName,
+      'phone': phone,
+      'birthDate': birthDate,
+    },
+  );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -338,8 +945,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i3.Future<_i16.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i16.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -348,12 +955,12 @@ class EndpointGreeting extends _i2.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i6.Caller(client);
+    auth = _i17.Caller(client);
     serverpod_auth_idp = _i1.Caller(client);
     serverpod_auth_core = _i4.Caller(client);
   }
 
-  late final _i6.Caller auth;
+  late final _i17.Caller auth;
 
   late final _i1.Caller serverpod_auth_idp;
 
@@ -380,7 +987,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i7.Protocol(),
+         _i18.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -393,6 +1000,7 @@ class Client extends _i2.ServerpodClientShared {
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
     phoneAuth = EndpointPhoneAuth(this);
+    cinePass = EndpointCinePass(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
@@ -405,6 +1013,8 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointPhoneAuth phoneAuth;
 
+  late final EndpointCinePass cinePass;
+
   late final EndpointGreeting greeting;
 
   late final Modules modules;
@@ -415,6 +1025,7 @@ class Client extends _i2.ServerpodClientShared {
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
     'phoneAuth': phoneAuth,
+    'cinePass': cinePass,
     'greeting': greeting,
   };
 

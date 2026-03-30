@@ -1,7 +1,9 @@
 -- =============================================================================
 -- CinePass — SCHÉMA MÉTIER UNIQUE (PostgreSQL)
 -- Source de vérité : reset DB, seed, alignement avec le backend (cine_pass_endpoint).
--- À exécuter après les migrations Serverpod (auth : serverpod_auth_core_user).
+-- À exécuter UNIQUEMENT après que la base contienne déjà les tables Serverpod
+-- (dont serverpod_auth_core_user). Sinon : erreur « relation does not exist » puis ROLLBACK.
+-- Ordre : voir schema/README.md (migrations dépendances + --apply-migrations, puis ce fichier).
 --
 -- Colonnes camelCase sur les tables Serverpod (evenement, structure, etc.).
 -- =============================================================================
@@ -14,7 +16,6 @@ BEGIN;
 DROP VIEW IF EXISTS "cine_pass_event_search_v" CASCADE;
 DROP VIEW IF EXISTS "cine_pass_effective_roles" CASCADE;
 
-DROP TABLE IF EXISTS "cine_pass_paiement" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_billet" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_reservation" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_event_ticket_option" CASCADE;
@@ -46,6 +47,7 @@ DROP TABLE IF EXISTS "cine_pass_responsable_user" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_structure" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_cinema" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_responsable_request" CASCADE;
+DROP TABLE IF EXISTS "phone_auth_code" CASCADE;
 
 -- =============================================================================
 -- STRUCTURES (avant EVENEMENT : FK structureId)
@@ -457,6 +459,19 @@ CREATE TABLE "cine_pass_responsable_user" (
 
 CREATE INDEX "cine_pass_responsable_user_active_idx"
     ON "cine_pass_responsable_user" ("active");
+
+-- =============================================================================
+-- Auth SMS (utilisé par l'endpoint phoneAuth)
+-- =============================================================================
+CREATE TABLE "phone_auth_code" (
+    "id" bigserial PRIMARY KEY,
+    "phone" text NOT NULL,
+    "code" text NOT NULL,
+    "createdAt" timestamp without time zone NOT NULL,
+    "expiresAt" timestamp without time zone NOT NULL,
+    "attemptCount" bigint NOT NULL DEFAULT 0,
+    "consumedAt" timestamp without time zone
+);
 
 -- =============================================================================
 -- Triggers updated_at (détails événement)

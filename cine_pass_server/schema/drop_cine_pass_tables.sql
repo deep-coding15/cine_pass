@@ -45,5 +45,6 @@ DROP TABLE IF EXISTS "cine_pass_responsable_user" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_structure" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_cinema" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_responsable_request" CASCADE;
+DROP TABLE IF EXISTS "phone_auth_code" CASCADE;
 
 COMMIT;

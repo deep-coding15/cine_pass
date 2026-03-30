@@ -17,5 +17,53 @@ jwtRefresh:
 phoneAuth:
   - sendVerificationCode:
   - verifyCode:
+cinePass:
+  - createReservationAndBillets:
+  - getMyBillets:
+  - isCurrentUserAdmin:
+  - isCurrentUserResponsable:
+  - setResponsableActiveByEmail:
+  - getEvents:
+  - getEventById:
+  - getEventReservationConfig:
+  - setEventReservationConfig:
+  - getEventSeatPlan:
+  - setEventSeatPlan:
+  - quoteEventReservation:
+  - confirmEventReservation:
+  - getCities:
+  - getGenres:
+  - getEventCategories:
+  - getEventDynamicFilterValues:
+  - createEvent:
+  - getStructures:
+  - getStructureById:
+  - updateEvent:
+  - deleteEvent:
+  - getMyStructure:
+  - updateMyStructure:
+  - banStructure:
+  - deleteStructure:
+  - getMyEvents:
+  - getDemandesEnAttente:
+  - approuverDemande:
+  - rejeterDemande:
+  - createDemandeResponsable:
+  - hasMyPendingDemandeResponsable:
+  - getMyFavoriteEventIds:
+  - setMyEventFavorite:
+  - cancelMyEventReservation:
+  - getReservations:
+  - getReservationsForMyStructures:
+  - archiveEvent:
+  - unarchiveEvent:
+  - getReservationBilletDetailsForMyStructures:
+  - updateReservationStatusForMyStructures:
+  - getRapportCA:
+  - getProfile:
+  - getAdminUsers:
+  - setAdminUserRole:
+  - deleteAdminUser:
+  - updateProfile:
 greeting:
   - hello:

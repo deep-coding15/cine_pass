@@ -18,7 +18,6 @@ class PreferencesPage extends StatefulWidget {
 }
 
 class _PreferencesPageState extends State<PreferencesPage> {
-  List<FilmResponse> _films = [];
   List<EventResponse> _events = [];
   bool _loading = true;
 
@@ -30,15 +29,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
 
   Future<void> _load() async {
     final favorites = FavoritesState.instance;
-    final filmIds = favorites.filmIds;
     final eventIds = favorites.eventIds;
     setState(() => _loading = true);
     try {
-      final films = <FilmResponse>[];
-      for (final id in filmIds) {
-        final f = await client.cinePass.getFilmById(id);
-        if (f != null) films.add(f);
-      }
       final events = <EventResponse>[];
       for (final id in eventIds) {
         final e = await client.cinePass.getEventById(id);
@@ -46,14 +39,12 @@ class _PreferencesPageState extends State<PreferencesPage> {
       }
       if (!mounted) return;
       setState(() {
-        _films = films;
         _events = events;
         _loading = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _films = [];
         _events = [];
         _loading = false;
       });
@@ -104,7 +95,6 @@ class _PreferencesPageState extends State<PreferencesPage> {
       );
     }
 
-    final films = _films;
     final events = _events;
 
     return SingleChildScrollView(
@@ -130,11 +120,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Films et événements que vous avez mis en favoris',
+            'Événements que vous avez mis en favoris',
             style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
           ),
           const SizedBox(height: 32),
-          if (films.isEmpty && events.isEmpty)
+          if (events.isEmpty)
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -152,7 +142,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Cliquez sur le cœur sur un film ou un événement pour l\'ajouter ici.',
+                      'Cliquez sur le cœur sur un événement pour l\'ajouter ici.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppTheme.textSecondary,
@@ -164,23 +154,6 @@ class _PreferencesPageState extends State<PreferencesPage> {
               ),
             )
           else ...[
-            if (films.isNotEmpty) ...[
-              Text(
-                'Films',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary),
-              ),
-              const SizedBox(height: 12),
-              ...films.map(
-                (f) => _FavoriteTile(
-                  title: f.title,
-                  subtitle: f.genre,
-                  onTap: () => context.go(AppRouter.filmDetailPath(f.id)),
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
             if (events.isNotEmpty) ...[
               Text(
                 'Événements',

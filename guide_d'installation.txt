@@ -28,6 +28,29 @@ Serverpod CLI (si besoin de regenerer le client) :
   cd cine_pass
 
 --------------------------------------------------------------------------------
+2bis. DEMARRAGE RAPIDE (POWERHELL) — COPIER/COLLER
+--------------------------------------------------------------------------------
+Depuis la racine du projet :
+
+  cd cine_pass_server
+  docker compose down -v
+  docker compose up --build -d
+  dart pub get
+  dart run bin/main.dart --apply-migrations
+  .\schema\reset_and_seed.cmd
+  dart run bin/main.dart
+
+Puis dans un 2e terminal :
+
+  cd ..\cine_pass_flutter
+  flutter pub get
+  flutter run
+
+IMPORTANT :
+- garder le terminal backend ouvert
+- si port 9080 deja pris : fermer l'ancien process Dart
+
+--------------------------------------------------------------------------------
 3. SECRETS SERVEUR (passwords.yaml)
 --------------------------------------------------------------------------------
 Le depot contient config/passwords.yaml.example (valeurs de demo + emplacements
@@ -103,10 +126,24 @@ A la racine du monorepo puis Flutter :
   cd cine_pass_server
   dart run bin/main.dart --apply-migrations
 
+Remarque importante :
+- Si tu pars d'une base vide, les tables auth/dependances Serverpod doivent
+  exister avant le schema metier.
+- En pratique pour l'equipe, la sequence "2bis. DEMARRAGE RAPIDE" est la plus
+  sure.
+
 --------------------------------------------------------------------------------
 7. SCHEMA METIER + DONNEES DE TEST (FORTEMENT RECOMMANDE)
 --------------------------------------------------------------------------------
-Remplacer le nom du conteneur si different : docker ps (souvent cine_pass_server-postgres-1).
+Remplacer le nom du conteneur si different : docker ps (souvent
+cine_pass_server-postgres-1).
+
+METHODE RECOMMANDEE (Windows) :
+
+  .\schema\reset_and_seed.cmd
+
+Cette commande applique d'abord cine_pass_schema.sql puis seed_data.sql dans le
+bon enchainement. Eviter l'execution manuelle du SQL tant que possible.
 
 Windows PowerShell (depuis cine_pass_server) :
 

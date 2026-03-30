@@ -10,84 +10,49 @@
 
 BEGIN;
 
--- FILMS
 -- -----------------------------------------------------------------------------
-INSERT INTO "cine_pass_film" (
-  "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur", "casting",
-  "posterColor", "dateSortie", "dateFin", "audience"
+-- STRUCTURES
+-- -----------------------------------------------------------------------------
+INSERT INTO "cine_pass_structure" (
+  "id", "type", "name", "city", "address", "website", "phone"
 ) VALUES
-  ('a1000001-1000-7000-8000-000000000001', 'Horizon Quantique', 'Science-Fiction', 128,
-   'En 2157, une physicienne doit traverser un trou de ver pour sauver l''humanité.', 'Jean Dupont', 'Marie Martin, Paul Bernard', 2955054,
-   '2026-01-15', '2026-04-30', 'Tous publics'),
-  ('a1000002-1000-7000-8000-000000000002', 'Les Gardiens du Temps', 'Action', 112,
-   'Une équipe de soldats voyage dans le temps pour empêcher une catastrophe.', 'Sophie Leroy', 'Thomas Dubois, Julie Petit', 1792334,
-   '2026-02-01', '2026-05-15', 'Tous publics'),
-  ('a1000003-1000-7000-8000-000000000003', 'Rire et Préjugés', 'Comédie', 98,
-   'Adaptation moderne d''un classique dans le monde du travail.', 'Marc Fontaine', 'Léa Blanc, Lucas Moreau', 5130011,
-   '2026-02-14', '2026-05-31', 'Tous publics'),
-  ('a1000004-1000-7000-8000-000000000004', 'Le Dernier Refuge', 'Drame', 105,
-   'Un père et sa fille tentent de survivre dans un monde post-apocalyptique.', 'Claire Mercier', 'Pierre Durand, Emma Roux', 3026474,
-   '2026-03-01', '2026-06-15', 'Tous publics')
-ON CONFLICT (id) DO NOTHING;
-
--- -----------------------------------------------------------------------------
--- CINÉMAS
--- -----------------------------------------------------------------------------
-INSERT INTO "cine_pass_cinema" ("id", "nom", "ville", "adresse", "codePostal") VALUES
-  ('b2000001-2000-7000-8000-000000000001', 'Gaumont Opéra', 'Paris', '2 Boulevard des Capucines', '75009'),
-  ('b2000002-2000-7000-8000-000000000002', 'UGC Ciné Cité Confluence', 'Lyon', '112 Cours Charlemagne', '69002')
-ON CONFLICT (id) DO NOTHING;
-
--- -----------------------------------------------------------------------------
--- SALLES
--- -----------------------------------------------------------------------------
-INSERT INTO "cine_pass_salle" ("id", "cinemaId", "nom", "capacite") VALUES
-  ('c3000001-3000-7000-8000-000000000001', 'b2000001-2000-7000-8000-000000000001', 'Salle 1', 120),
-  ('c3000002-3000-7000-8000-000000000002', 'b2000001-2000-7000-8000-000000000001', 'Salle 2', 80),
-  ('c3000003-3000-7000-8000-000000000003', 'b2000002-2000-7000-8000-000000000002', 'Salle 1', 150)
-ON CONFLICT (id) DO NOTHING;
-
--- -----------------------------------------------------------------------------
--- SIÈGES (rangées A–E, numéros 1–5 par salle)
--- -----------------------------------------------------------------------------
-DO $$
-DECLARE
-  salle_rec RECORD;
-  r TEXT;
-  n INT;
-BEGIN
-  FOR salle_rec IN SELECT "id" FROM "cine_pass_salle"
-  LOOP
-    FOR r IN SELECT unnest(ARRAY['A','B','C','D','E'])
-    LOOP
-      FOR n IN 1..5
-      LOOP
-        INSERT INTO "cine_pass_siege" ("salleId", "rangee", "numero")
-        VALUES (salle_rec.id, r, n);
-      END LOOP;
-    END LOOP;
-  END LOOP;
-END $$;
-
--- -----------------------------------------------------------------------------
--- SÉANCES (films + salles + créneaux)
--- -----------------------------------------------------------------------------
-INSERT INTO "cine_pass_seance" ("filmId", "salleId", "debutAt", "finAt", "format", "type", "prixBase") VALUES
-  ('a1000001-1000-7000-8000-000000000001', 'c3000001-3000-7000-8000-000000000001', '2026-03-15 14:00:00', '2026-03-15 16:08:00', 'VF', '2D', 12.50),
-  ('a1000001-1000-7000-8000-000000000001', 'c3000001-3000-7000-8000-000000000001', '2026-03-15 18:30:00', '2026-03-15 20:38:00', 'VF', '2D', 12.50),
-  ('a1000002-1000-7000-8000-000000000002', 'c3000002-3000-7000-8000-000000000002', '2026-03-15 20:00:00', '2026-03-15 21:52:00', 'VOSTFR', '2D', 13.00),
-  ('a1000003-1000-7000-8000-000000000003', 'c3000001-3000-7000-8000-000000000001', '2026-03-16 10:30:00', '2026-03-16 12:08:00', 'VF', '2D', 10.00),
-  ('a1000004-1000-7000-8000-000000000004', 'c3000003-3000-7000-8000-000000000003', '2026-03-16 14:00:00', '2026-03-16 15:45:00', 'VF', '2D', 11.00),
-  ('a1000001-1000-7000-8000-000000000001', 'c3000003-3000-7000-8000-000000000003', '2026-03-17 21:00:00', '2026-03-17 23:08:00', 'VF', '2D', 12.50);
+  ('b2000001-2000-7000-8000-000000000001', 'VENUE', 'Gaumont Opéra', 'Paris', '2 Boulevard des Capucines, 75009 Paris', 'https://example.com/opera', '+33 1 40 00 00 01'),
+  ('b2000002-2000-7000-8000-000000000002', 'VENUE', 'Salle Pleyel', 'Paris', '252 Rue du Faubourg Saint-Honoré, 75008 Paris', 'https://example.com/pleyel', '+33 1 40 00 00 02'),
+  ('b2000003-2000-7000-8000-000000000003', 'VENUE', 'Confluence Live', 'Lyon', '112 Cours Charlemagne, 69002 Lyon', 'https://example.com/confluence', '+33 4 70 00 00 03')
+ON CONFLICT ("id") DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- ÉVÉNEMENTS
 -- -----------------------------------------------------------------------------
-INSERT INTO "cine_pass_evenement" ("id", "titre", "categorie", "description", "lieu", "adresse", "ville", "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor") VALUES
-  ('d4000001-4000-7000-8000-000000000001', 'Concert Électro Night', 'Concert', 'Soirée exceptionnelle avec les meilleurs DJs de la scène électronique.', 'Gaumont Opéra', '2 Boulevard des Capucines, 75009 Paris', 'Paris', '2026-03-20 00:00:00', '2026-03-20 21:00:00', 300, 35.00, 5130011),
-  ('d4000002-4000-7000-8000-000000000002', 'Festival Jazz Live', 'Concert', 'Grande soirée jazz avec des artistes internationaux.', 'Salle Pleyel', 'Paris', 'Paris', '2026-03-22 00:00:00', '2026-03-22 20:00:00', 200, 45.00, 1792334),
-  ('d4000003-4000-7000-8000-000000000003', 'Spectacle Théâtral - Hamlet', 'Théâtre', 'Représentation classique de Hamlet.', 'UGC Ciné Cité Confluence', 'Lyon', 'Lyon', '2026-03-25 00:00:00', '2026-03-25 19:30:00', 150, 28.00, 4010780)
+INSERT INTO "cine_pass_evenement" (
+  "id", "titre", "categorie", "event_type", "description", "lieu", "adresse", "ville",
+  "eventDate", "eventTime", "placesTotal", "prixBase", "posterColor", "structureId"
+) VALUES
+  ('d4000001-4000-7000-8000-000000000001', 'Concert Électro Night', 'Concert', 'CONCERT',
+   'Soirée exceptionnelle avec les meilleurs DJs de la scène électronique.',
+   'Gaumont Opéra', '2 Boulevard des Capucines, 75009 Paris', 'Paris',
+   '2026-03-20 00:00:00', '2026-03-20 21:00:00', 300, 35.00, 5130011, 'b2000001-2000-7000-8000-000000000001'),
+  ('d4000002-4000-7000-8000-000000000002', 'Festival Jazz Live', 'Concert', 'FESTIVAL',
+   'Grande soirée jazz avec des artistes internationaux.',
+   'Salle Pleyel', '252 Rue du Faubourg Saint-Honoré, 75008 Paris', 'Paris',
+   '2026-03-22 00:00:00', '2026-03-22 20:00:00', 200, 45.00, 1792334, 'b2000002-2000-7000-8000-000000000002'),
+  ('d4000003-4000-7000-8000-000000000003', 'Spectacle Théâtral - Hamlet', 'Théâtre', 'THEATRE',
+   'Représentation classique de Hamlet.',
+   'Confluence Live', '112 Cours Charlemagne, 69002 Lyon', 'Lyon',
+   '2026-03-25 00:00:00', '2026-03-25 19:30:00', 150, 28.00, 4010780, 'b2000003-2000-7000-8000-000000000003')
 ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "cine_pass_event_concert_details" ("event_id", "artist", "music_genre")
+VALUES ('d4000001-4000-7000-8000-000000000001', 'DJ Nova', 'Electro')
+ON CONFLICT ("event_id") DO NOTHING;
+
+INSERT INTO "cine_pass_event_festival_details" ("event_id", "theme", "headliners")
+VALUES ('d4000002-4000-7000-8000-000000000002', 'Jazz & Impro', 'Quartet Lumiere')
+ON CONFLICT ("event_id") DO NOTHING;
+
+INSERT INTO "cine_pass_event_theatre_details" ("event_id", "author", "play_style")
+VALUES ('d4000003-4000-7000-8000-000000000003', 'William Shakespeare', 'Classique')
+ON CONFLICT ("event_id") DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- FAQ

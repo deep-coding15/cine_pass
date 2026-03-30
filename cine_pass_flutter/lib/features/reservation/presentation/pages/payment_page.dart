@@ -114,103 +114,15 @@ class _PaymentPageState extends State<PaymentPage> {
       }
     }
 
-    final reservationNumber = 'BOOK-${DateTime.now().millisecondsSinceEpoch}';
-    final seatLabels = state.selectedSeats;
-
-    final ticketTypes = <String>[];
-    final optParking = <bool>[];
-    final optPopcorn = <bool>[];
-    final optBoisson = <bool>[];
-    final prices = <double>[];
-
-    if (state.filmTickets.isNotEmpty) {
-      for (final t in state.filmTickets) {
-        final isVip = t.isVip;
-        final base = isVip ? state.pricePerSeat * 1.5 : state.pricePerSeat;
-        final opts = isVip
-            ? 0.0
-            : (t.optionParking ? 3.0 : 0.0) +
-                  (t.optionPopcorn ? 5.0 : 0.0) +
-                  (t.optionBoisson ? 2.0 : 0.0);
-        ticketTypes.add(isVip ? 'vip' : 'normal');
-        optParking.add(t.optionParking);
-        optPopcorn.add(t.optionPopcorn);
-        optBoisson.add(t.optionBoisson);
-        prices.add(base + opts);
-      }
-    } else {
-      // Fallback (older flow): one choice for all seats.
-      final isVip = state.ticketType == 'vip';
-      for (var i = 0; i < state.selectedSeats.length; i++) {
-        final base = isVip ? state.pricePerSeat * 1.5 : state.pricePerSeat;
-        final opts = isVip
-            ? 0.0
-            : (state.optionParking ? 3.0 : 0.0) +
-                  (state.optionPopcorn ? 5.0 : 0.0) +
-                  (state.optionBoisson ? 2.0 : 0.0);
-        ticketTypes.add(isVip ? 'vip' : 'normal');
-        optParking.add(state.optionParking);
-        optPopcorn.add(state.optionPopcorn);
-        optBoisson.add(state.optionBoisson);
-        prices.add(base + opts);
-      }
-    }
-
-    String? numero;
-    try {
-      numero = await client.cinePass.createReservationAndBillets(
-        isEvent: state.isEvent,
-        seanceId: state.seanceId,
-        eventId: state.eventId,
-        reservationNumber: reservationNumber,
-        seatLabels: seatLabels,
-        ticketTypes: ticketTypes,
-        optionParking: optParking,
-        optionPopcorn: optPopcorn,
-        optionBoisson: optBoisson,
-        prices: prices,
-        totalAmount: _total,
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Paiement enregistre mais creation des billets impossible pour le moment. Verifiez votre connexion puis reessayez. ($e)',
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-
-    if (numero == null) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Impossible de finaliser la reservation: utilisateur non connecte ou parametres incomplets.',
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-
-    // Persist for any UI that still uses it (e.g. confirmation).
-    ReservationState.instance.setReservationNumber(numero);
-
-    // Best-effort: warm cache so QR remains visible offline in "Mes billets".
-    try {
-      final billets = await client.cinePass.getMyBillets();
-      await BilletsCacheStore().saveBillets(billets);
-    } catch (_) {
-      // Ignore: payment succeeded, cache may be filled on next online open.
-    }
-
     if (!context.mounted) return;
-    // Direct redirect to "Mes billets" after payment.
-    context.go(AppRouter.billets);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Le flux réservation film est désactivé. Utilisez les événements.',
+        ),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
   }
 
   @override

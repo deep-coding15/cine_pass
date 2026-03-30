@@ -2,17 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import '../../main.dart';
 
-/// État des favoris (films et événements) — cœur cliquable.
+/// État des favoris événements — cœur cliquable.
 class FavoritesState extends ChangeNotifier {
   static FavoritesState? _instance;
   static FavoritesState get instance => _instance ??= FavoritesState._();
 
   FavoritesState._();
 
-  final Set<String> _filmIds = {};
   final Set<String> _eventIds = {};
 
-  Set<String> get filmIds => Set.from(_filmIds);
   Set<String> get eventIds => Set.from(_eventIds);
 
   Future<void> syncFromServer() async {
@@ -22,29 +20,18 @@ class FavoritesState extends ChangeNotifier {
     }
 
     try {
-      final filmList = await client.cinePass.getMyFavoriteFilmIds();
       final eventList = await client.cinePass.getMyFavoriteEventIds();
-      final filmNext = filmList
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toSet();
       final eventNext = eventList
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
           .toSet();
-      final filmsChanged = !_setEquals(_filmIds, filmNext);
       final eventsChanged = !_setEquals(_eventIds, eventNext);
-      if (filmsChanged) {
-        _filmIds
-          ..clear()
-          ..addAll(filmNext);
-      }
       if (eventsChanged) {
         _eventIds
           ..clear()
           ..addAll(eventNext);
       }
-      if (filmsChanged || eventsChanged) {
+      if (eventsChanged) {
         notifyListeners();
       }
     } catch (_) {
@@ -52,45 +39,12 @@ class FavoritesState extends ChangeNotifier {
     }
   }
 
-  bool isFilmFavorite(String id) => _filmIds.contains(id);
+  // Compat legacy: la logique film est désormais désactivée.
+  bool isFilmFavorite(String id) => false;
   bool isEventFavorite(String id) => _eventIds.contains(id);
 
   Future<void> toggleFilm(String id) async {
-    final normalized = id.trim();
-    if (normalized.isEmpty) return;
-
-    final willBeFavorite = !_filmIds.contains(normalized);
-    if (willBeFavorite) {
-      _filmIds.add(normalized);
-    } else {
-      _filmIds.remove(normalized);
-    }
-    notifyListeners();
-
-    if (!client.auth.isAuthenticated) return;
-
-    try {
-      final ok = await client.cinePass.setMyFilmFavorite(
-        filmId: normalized,
-        isFavorite: willBeFavorite,
-      );
-      if (!ok) {
-        // rollback si le serveur refuse.
-        if (willBeFavorite) {
-          _filmIds.remove(normalized);
-        } else {
-          _filmIds.add(normalized);
-        }
-        notifyListeners();
-      }
-    } catch (_) {
-      if (willBeFavorite) {
-        _filmIds.remove(normalized);
-      } else {
-        _filmIds.add(normalized);
-      }
-      notifyListeners();
-    }
+    // no-op (films retirés du flux API)
   }
 
   Future<void> toggleEvent(String id) async {
@@ -131,8 +85,7 @@ class FavoritesState extends ChangeNotifier {
   }
 
   void clearAll() {
-    final changed = _filmIds.isNotEmpty || _eventIds.isNotEmpty;
-    _filmIds.clear();
+    final changed = _eventIds.isNotEmpty;
     _eventIds.clear();
     if (changed) {
       notifyListeners();

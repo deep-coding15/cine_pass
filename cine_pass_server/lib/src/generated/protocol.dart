@@ -38,6 +38,15 @@ import 'rapport_ca_response.dart' as _i23;
 import 'reservation_response.dart' as _i24;
 import 'responsable_billet_response.dart' as _i25;
 import 'structure.dart' as _i26;
+import 'package:cine_pass_server/src/generated/billet_group_response.dart'
+    as _i27;
+import 'package:cine_pass_server/src/generated/event_response.dart' as _i28;
+import 'package:cine_pass_server/src/generated/structure.dart' as _i29;
+import 'package:cine_pass_server/src/generated/demande_responsable_response.dart'
+    as _i30;
+import 'package:cine_pass_server/src/generated/reservation_response.dart'
+    as _i31;
+import 'package:cine_pass_server/src/generated/profile_response.dart' as _i32;
 export 'billet_group_response.dart';
 export 'cine_pass/event_reservation_config_response.dart';
 export 'cine_pass/event_seat_plan_entry_response.dart';
@@ -647,6 +656,52 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == List<_i13.ReservationQuoteLineResponse>) {
       return (data as List)
               .map((e) => deserialize<_i13.ReservationQuoteLineResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<bool>) {
+      return (data as List).map((e) => deserialize<bool>(e)).toList() as T;
+    }
+    if (t == List<double>) {
+      return (data as List).map((e) => deserialize<double>(e)).toList() as T;
+    }
+    if (t == List<_i27.BilletGroupResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i27.BilletGroupResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i28.EventResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i28.EventResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
+    if (t == List<_i29.Structure>) {
+      return (data as List).map((e) => deserialize<_i29.Structure>(e)).toList()
+          as T;
+    }
+    if (t == List<_i30.DemandeResponsableResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i30.DemandeResponsableResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i31.ReservationResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i31.ReservationResponse>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i32.ProfileResponse>) {
+      return (data as List)
+              .map((e) => deserialize<_i32.ProfileResponse>(e))
               .toList()
           as T;
     }
