@@ -12,7 +12,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 
-/// Structure (cinéma, salle, organisateur) — table gérée par le schéma SQL.
+/// Structure (cinéma, salle de spectacle, organisateur) — table gérée par le schéma SQL.
 abstract class Structure
     implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
   Structure._({
@@ -23,7 +23,6 @@ abstract class Structure
     this.address,
     this.website,
     this.phone,
-    this.cinemaId,
   }) : id = id ?? const _i1.Uuid().v4obj();
 
   factory Structure({
@@ -34,7 +33,6 @@ abstract class Structure
     String? address,
     String? website,
     String? phone,
-    _i1.UuidValue? cinemaId,
   }) = _StructureImpl;
 
   factory Structure.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -48,9 +46,6 @@ abstract class Structure
       address: jsonSerialization['address'] as String?,
       website: jsonSerialization['website'] as String?,
       phone: jsonSerialization['phone'] as String?,
-      cinemaId: jsonSerialization['cinemaId'] == null
-          ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['cinemaId']),
     );
   }
 
@@ -73,8 +68,6 @@ abstract class Structure
 
   String? phone;
 
-  _i1.UuidValue? cinemaId;
-
   @override
   _i1.Table<_i1.UuidValue> get table => t;
 
@@ -89,7 +82,6 @@ abstract class Structure
     String? address,
     String? website,
     String? phone,
-    _i1.UuidValue? cinemaId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -102,7 +94,6 @@ abstract class Structure
       if (address != null) 'address': address,
       if (website != null) 'website': website,
       if (phone != null) 'phone': phone,
-      if (cinemaId != null) 'cinemaId': cinemaId?.toJson(),
     };
   }
 
@@ -117,7 +108,6 @@ abstract class Structure
       if (address != null) 'address': address,
       if (website != null) 'website': website,
       if (phone != null) 'phone': phone,
-      if (cinemaId != null) 'cinemaId': cinemaId?.toJson(),
     };
   }
 
@@ -162,7 +152,6 @@ class _StructureImpl extends Structure {
     String? address,
     String? website,
     String? phone,
-    _i1.UuidValue? cinemaId,
   }) : super._(
          id: id,
          type: type,
@@ -171,7 +160,6 @@ class _StructureImpl extends Structure {
          address: address,
          website: website,
          phone: phone,
-         cinemaId: cinemaId,
        );
 
   /// Returns a shallow copy of this [Structure]
@@ -186,7 +174,6 @@ class _StructureImpl extends Structure {
     Object? address = _Undefined,
     Object? website = _Undefined,
     Object? phone = _Undefined,
-    Object? cinemaId = _Undefined,
   }) {
     return Structure(
       id: id ?? this.id,
@@ -196,7 +183,6 @@ class _StructureImpl extends Structure {
       address: address is String? ? address : this.address,
       website: website is String? ? website : this.website,
       phone: phone is String? ? phone : this.phone,
-      cinemaId: cinemaId is _i1.UuidValue? ? cinemaId : this.cinemaId,
     );
   }
 }
@@ -233,13 +219,6 @@ class StructureUpdateTable extends _i1.UpdateTable<StructureTable> {
     table.phone,
     value,
   );
-
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> cinemaId(
-    _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.cinemaId,
-    value,
-  );
 }
 
 class StructureTable extends _i1.Table<_i1.UuidValue> {
@@ -270,10 +249,6 @@ class StructureTable extends _i1.Table<_i1.UuidValue> {
       'phone',
       this,
     );
-    cinemaId = _i1.ColumnUuid(
-      'cinemaId',
-      this,
-    );
   }
 
   late final StructureUpdateTable updateTable;
@@ -290,8 +265,6 @@ class StructureTable extends _i1.Table<_i1.UuidValue> {
 
   late final _i1.ColumnString phone;
 
-  late final _i1.ColumnUuid cinemaId;
-
   @override
   List<_i1.Column> get columns => [
     id,
@@ -301,7 +274,6 @@ class StructureTable extends _i1.Table<_i1.UuidValue> {
     address,
     website,
     phone,
-    cinemaId,
   ];
 }
 
@@ -361,7 +333,7 @@ class StructureRepository {
   /// );
   /// ```
   Future<List<Structure>> find(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     _i1.WhereExpressionBuilder<StructureTable>? where,
     int? limit,
     int? offset,
@@ -403,7 +375,7 @@ class StructureRepository {
   /// );
   /// ```
   Future<Structure?> findFirstRow(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     _i1.WhereExpressionBuilder<StructureTable>? where,
     int? offset,
     _i1.OrderByBuilder<StructureTable>? orderBy,
@@ -427,7 +399,7 @@ class StructureRepository {
 
   /// Finds a single [Structure] by its [id] or null if no such row exists.
   Future<Structure?> findById(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
     _i1.LockMode? lockMode,
@@ -452,7 +424,7 @@ class StructureRepository {
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
   Future<List<Structure>> insert(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     List<Structure> rows, {
     _i1.Transaction? transaction,
     bool ignoreConflicts = false,
@@ -468,7 +440,7 @@ class StructureRepository {
   ///
   /// The returned [Structure] will have its `id` field set.
   Future<Structure> insertRow(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     Structure row, {
     _i1.Transaction? transaction,
   }) async {
@@ -484,7 +456,7 @@ class StructureRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Structure>> update(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     List<Structure> rows, {
     _i1.ColumnSelections<StructureTable>? columns,
     _i1.Transaction? transaction,
@@ -500,7 +472,7 @@ class StructureRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Structure> updateRow(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     Structure row, {
     _i1.ColumnSelections<StructureTable>? columns,
     _i1.Transaction? transaction,
@@ -515,7 +487,7 @@ class StructureRepository {
   /// Updates a single [Structure] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Structure?> updateById(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<StructureUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -530,7 +502,7 @@ class StructureRepository {
   /// Updates all [Structure]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Structure>> updateWhere(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     required _i1.ColumnValueListBuilder<StructureUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<StructureTable> where,
     int? limit,
@@ -556,7 +528,7 @@ class StructureRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Structure>> delete(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     List<Structure> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -568,7 +540,7 @@ class StructureRepository {
 
   /// Deletes a single [Structure].
   Future<Structure> deleteRow(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     Structure row, {
     _i1.Transaction? transaction,
   }) async {
@@ -580,7 +552,7 @@ class StructureRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Structure>> deleteWhere(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     required _i1.WhereExpressionBuilder<StructureTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -593,7 +565,7 @@ class StructureRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     _i1.WhereExpressionBuilder<StructureTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -607,7 +579,7 @@ class StructureRepository {
 
   /// Acquires row-level locks on [Structure] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     required _i1.WhereExpressionBuilder<StructureTable> where,
     required _i1.LockMode lockMode,
     required _i1.Transaction transaction,

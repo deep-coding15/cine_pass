@@ -12,7 +12,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 
-/// Structure (cinéma, salle, organisateur) — table gérée par le schéma SQL.
+/// Structure (cinéma, salle de spectacle, organisateur) — table gérée par le schéma SQL.
 abstract class Structure implements _i1.SerializableModel {
   Structure._({
     _i1.UuidValue? id,
@@ -22,7 +22,6 @@ abstract class Structure implements _i1.SerializableModel {
     this.address,
     this.website,
     this.phone,
-    this.cinemaId,
   }) : id = id ?? const _i1.Uuid().v4obj();
 
   factory Structure({
@@ -33,7 +32,6 @@ abstract class Structure implements _i1.SerializableModel {
     String? address,
     String? website,
     String? phone,
-    _i1.UuidValue? cinemaId,
   }) = _StructureImpl;
 
   factory Structure.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -47,9 +45,6 @@ abstract class Structure implements _i1.SerializableModel {
       address: jsonSerialization['address'] as String?,
       website: jsonSerialization['website'] as String?,
       phone: jsonSerialization['phone'] as String?,
-      cinemaId: jsonSerialization['cinemaId'] == null
-          ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['cinemaId']),
     );
   }
 
@@ -68,8 +63,6 @@ abstract class Structure implements _i1.SerializableModel {
 
   String? phone;
 
-  _i1.UuidValue? cinemaId;
-
   /// Returns a shallow copy of this [Structure]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -81,7 +74,6 @@ abstract class Structure implements _i1.SerializableModel {
     String? address,
     String? website,
     String? phone,
-    _i1.UuidValue? cinemaId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -94,7 +86,6 @@ abstract class Structure implements _i1.SerializableModel {
       if (address != null) 'address': address,
       if (website != null) 'website': website,
       if (phone != null) 'phone': phone,
-      if (cinemaId != null) 'cinemaId': cinemaId?.toJson(),
     };
   }
 
@@ -115,7 +106,6 @@ class _StructureImpl extends Structure {
     String? address,
     String? website,
     String? phone,
-    _i1.UuidValue? cinemaId,
   }) : super._(
          id: id,
          type: type,
@@ -124,7 +114,6 @@ class _StructureImpl extends Structure {
          address: address,
          website: website,
          phone: phone,
-         cinemaId: cinemaId,
        );
 
   /// Returns a shallow copy of this [Structure]
@@ -139,7 +128,6 @@ class _StructureImpl extends Structure {
     Object? address = _Undefined,
     Object? website = _Undefined,
     Object? phone = _Undefined,
-    Object? cinemaId = _Undefined,
   }) {
     return Structure(
       id: id ?? this.id,
@@ -149,7 +137,6 @@ class _StructureImpl extends Structure {
       address: address is String? ? address : this.address,
       website: website is String? ? website : this.website,
       phone: phone is String? ? phone : this.phone,
-      cinemaId: cinemaId is _i1.UuidValue? ? cinemaId : this.cinemaId,
     );
   }
 }

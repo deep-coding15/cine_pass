@@ -340,7 +340,7 @@ class PhoneAuthCodeRepository {
   /// );
   /// ```
   Future<List<PhoneAuthCode>> find(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     _i1.WhereExpressionBuilder<PhoneAuthCodeTable>? where,
     int? limit,
     int? offset,
@@ -382,7 +382,7 @@ class PhoneAuthCodeRepository {
   /// );
   /// ```
   Future<PhoneAuthCode?> findFirstRow(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     _i1.WhereExpressionBuilder<PhoneAuthCodeTable>? where,
     int? offset,
     _i1.OrderByBuilder<PhoneAuthCodeTable>? orderBy,
@@ -406,7 +406,7 @@ class PhoneAuthCodeRepository {
 
   /// Finds a single [PhoneAuthCode] by its [id] or null if no such row exists.
   Future<PhoneAuthCode?> findById(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
     _i1.LockMode? lockMode,
@@ -431,7 +431,7 @@ class PhoneAuthCodeRepository {
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
   Future<List<PhoneAuthCode>> insert(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     List<PhoneAuthCode> rows, {
     _i1.Transaction? transaction,
     bool ignoreConflicts = false,
@@ -447,7 +447,7 @@ class PhoneAuthCodeRepository {
   ///
   /// The returned [PhoneAuthCode] will have its `id` field set.
   Future<PhoneAuthCode> insertRow(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     PhoneAuthCode row, {
     _i1.Transaction? transaction,
   }) async {
@@ -463,7 +463,7 @@ class PhoneAuthCodeRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<PhoneAuthCode>> update(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     List<PhoneAuthCode> rows, {
     _i1.ColumnSelections<PhoneAuthCodeTable>? columns,
     _i1.Transaction? transaction,
@@ -479,7 +479,7 @@ class PhoneAuthCodeRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<PhoneAuthCode> updateRow(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     PhoneAuthCode row, {
     _i1.ColumnSelections<PhoneAuthCodeTable>? columns,
     _i1.Transaction? transaction,
@@ -494,7 +494,7 @@ class PhoneAuthCodeRepository {
   /// Updates a single [PhoneAuthCode] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<PhoneAuthCode?> updateById(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     int id, {
     required _i1.ColumnValueListBuilder<PhoneAuthCodeUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -509,7 +509,7 @@ class PhoneAuthCodeRepository {
   /// Updates all [PhoneAuthCode]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<PhoneAuthCode>> updateWhere(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     required _i1.ColumnValueListBuilder<PhoneAuthCodeUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<PhoneAuthCodeTable> where,
     int? limit,
@@ -535,7 +535,7 @@ class PhoneAuthCodeRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<PhoneAuthCode>> delete(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     List<PhoneAuthCode> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -547,7 +547,7 @@ class PhoneAuthCodeRepository {
 
   /// Deletes a single [PhoneAuthCode].
   Future<PhoneAuthCode> deleteRow(
-    _i1.DatabaseSession session,
+    _i1.Session session,
     PhoneAuthCode row, {
     _i1.Transaction? transaction,
   }) async {
@@ -559,7 +559,7 @@ class PhoneAuthCodeRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<PhoneAuthCode>> deleteWhere(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     required _i1.WhereExpressionBuilder<PhoneAuthCodeTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -572,7 +572,7 @@ class PhoneAuthCodeRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     _i1.WhereExpressionBuilder<PhoneAuthCodeTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -586,7 +586,7 @@ class PhoneAuthCodeRepository {
 
   /// Acquires row-level locks on [PhoneAuthCode] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
+    _i1.Session session, {
     required _i1.WhereExpressionBuilder<PhoneAuthCodeTable> where,
     required _i1.LockMode lockMode,
     required _i1.Transaction transaction,

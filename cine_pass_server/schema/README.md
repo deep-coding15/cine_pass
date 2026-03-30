@@ -14,7 +14,7 @@ Puis lancer le serveur :
 dart run bin/main.dart
 ```
 
-Le script `reset_and_seed.cmd` exécute `cine_pass_schema.sql` (qui **supprime puis recrée** tout le schéma métier en un seul fichier) puis le seed. Aucun warning Serverpod si la base est cohérente.
+Le script `reset_and_seed.cmd` exécute `cine_pass_schema.sql` (phase 0 = **DROP** des tables métier, puis **CREATE** complet : événements, détails par type, config billets, sièges, rôles, vues, triggers) puis le seed. Pour une base déjà remplie sans tout effacer, commentez la phase 0 en tête de `cine_pass_schema.sql` avant d’exécuter.
 
 ---
 
@@ -58,7 +58,7 @@ Le script `reset_and_seed.cmd` exécute `cine_pass_schema.sql` (qui **supprime p
 | Seed   | `type schema\seed_data.sql \| docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass` |
 | Drop seul (sans recréer) | `type schema\drop_cine_pass_tables.sql \| docker exec -i cine_pass_server-postgres-1 psql -U postgres -d cine_pass` |
 
-**FK manquante sur `structureId`** : déjà gérée dans `cine_pass_schema.sql` (bloc DO). Inutile d’exécuter un script à part.
+**FK `structureId` sur événements** : déjà dans `cine_pass_schema.sql` (`cine_pass_evenement_fk_0`).
 
 ---
 

@@ -715,7 +715,7 @@ class EvenementRepository {
   /// );
   /// ```
   Future<List<Evenement>> find(
-    _i2.DatabaseSession session, {
+    _i2.Session session, {
     _i2.WhereExpressionBuilder<EvenementTable>? where,
     int? limit,
     int? offset,
@@ -757,7 +757,7 @@ class EvenementRepository {
   /// );
   /// ```
   Future<Evenement?> findFirstRow(
-    _i2.DatabaseSession session, {
+    _i2.Session session, {
     _i2.WhereExpressionBuilder<EvenementTable>? where,
     int? offset,
     _i2.OrderByBuilder<EvenementTable>? orderBy,
@@ -781,7 +781,7 @@ class EvenementRepository {
 
   /// Finds a single [Evenement] by its [id] or null if no such row exists.
   Future<Evenement?> findById(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     _i2.UuidValue id, {
     _i2.Transaction? transaction,
     _i2.LockMode? lockMode,
@@ -806,7 +806,7 @@ class EvenementRepository {
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
   Future<List<Evenement>> insert(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     List<Evenement> rows, {
     _i2.Transaction? transaction,
     bool ignoreConflicts = false,
@@ -822,7 +822,7 @@ class EvenementRepository {
   ///
   /// The returned [Evenement] will have its `id` field set.
   Future<Evenement> insertRow(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     Evenement row, {
     _i2.Transaction? transaction,
   }) async {
@@ -838,7 +838,7 @@ class EvenementRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Evenement>> update(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     List<Evenement> rows, {
     _i2.ColumnSelections<EvenementTable>? columns,
     _i2.Transaction? transaction,
@@ -854,7 +854,7 @@ class EvenementRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Evenement> updateRow(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     Evenement row, {
     _i2.ColumnSelections<EvenementTable>? columns,
     _i2.Transaction? transaction,
@@ -869,7 +869,7 @@ class EvenementRepository {
   /// Updates a single [Evenement] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Evenement?> updateById(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     _i2.UuidValue id, {
     required _i2.ColumnValueListBuilder<EvenementUpdateTable> columnValues,
     _i2.Transaction? transaction,
@@ -884,7 +884,7 @@ class EvenementRepository {
   /// Updates all [Evenement]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Evenement>> updateWhere(
-    _i2.DatabaseSession session, {
+    _i2.Session session, {
     required _i2.ColumnValueListBuilder<EvenementUpdateTable> columnValues,
     required _i2.WhereExpressionBuilder<EvenementTable> where,
     int? limit,
@@ -910,7 +910,7 @@ class EvenementRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Evenement>> delete(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     List<Evenement> rows, {
     _i2.Transaction? transaction,
   }) async {
@@ -922,7 +922,7 @@ class EvenementRepository {
 
   /// Deletes a single [Evenement].
   Future<Evenement> deleteRow(
-    _i2.DatabaseSession session,
+    _i2.Session session,
     Evenement row, {
     _i2.Transaction? transaction,
   }) async {
@@ -934,7 +934,7 @@ class EvenementRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Evenement>> deleteWhere(
-    _i2.DatabaseSession session, {
+    _i2.Session session, {
     required _i2.WhereExpressionBuilder<EvenementTable> where,
     _i2.Transaction? transaction,
   }) async {
@@ -947,7 +947,7 @@ class EvenementRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i2.DatabaseSession session, {
+    _i2.Session session, {
     _i2.WhereExpressionBuilder<EvenementTable>? where,
     int? limit,
     _i2.Transaction? transaction,
@@ -961,7 +961,7 @@ class EvenementRepository {
 
   /// Acquires row-level locks on [Evenement] rows matching the [where] expression.
   Future<void> lockRows(
-    _i2.DatabaseSession session, {
+    _i2.Session session, {
     required _i2.WhereExpressionBuilder<EvenementTable> where,
     required _i2.LockMode lockMode,
     required _i2.Transaction transaction,

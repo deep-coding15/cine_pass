@@ -1,4 +1,4 @@
-### Structure (cinéma, salle, organisateur) — table gérée par le schéma SQL.
+### Structure (cinéma, salle de spectacle, organisateur) — table gérée par le schéma SQL.
 class: Structure
 table: cine_pass_structure
 fields:
@@ -9,7 +9,6 @@ fields:
   address: String?
   website: String?
   phone: String?
-  cinemaId: UuidValue?, relation(parent=cine_pass_cinema, onDelete=SetNull)
 indexes:
   cine_pass_structure_type_city_idx:
     fields: type, city

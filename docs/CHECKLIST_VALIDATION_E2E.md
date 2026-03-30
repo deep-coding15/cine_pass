@@ -7,7 +7,7 @@
 - [ ] **PostgreSQL** démarré, base accessible (même URL que `cine_pass_server/config/development.yaml` ou équivalent).
 - [ ] **Réinitialisation schéma** (si besoin d’une base clean) :
   - Exécuter `cine_pass_server/schema/drop_cine_pass_tables.sql` (ou script équivalent du dépôt).
-  - Puis `cine_pass_server/schema/cine_pass_schema.sql` et migrations SQL complémentaires (`roles_sync_and_helpers.sql` si utilisé).
+  - Puis `cine_pass_server/schema/cine_pass_schema.sql` (schéma métier unique, tout y est).
 - [ ] **Ports libres** : API Serverpod (ex. 8080 selon config), ports internes (ex. 9080/9082) sans ancien `dartvm` bloquant.
 - [ ] **Secrets** : `passwords.yaml` (JWT, SMTP si envoi d’e-mails réel, Google si OAuth).
 - [ ] **Démarrer le serveur** : depuis `cine_pass_server`, `dart run bin/main.dart` (ou la commande habituelle du projet).

@@ -180,21 +180,7 @@ CREATE INDEX "cine_pass_billet_reservation_idx"
 CREATE INDEX "cine_pass_billet_siege_idx"
     ON "cine_pass_billet" USING btree ("siege_id");
 
--- =============================================================================
--- PAIEMENTS
--- =============================================================================
-CREATE TABLE "cine_pass_paiement" (
-    "id"             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "reservation_id" uuid NOT NULL REFERENCES "cine_pass_reservation"("id") ON DELETE CASCADE,
-    "montant"        numeric(10,2) NOT NULL,
-    "methode"        text,
-    "statut"         text NOT NULL DEFAULT 'pending',
-    "external_id"    text,
-    "created_at"     timestamp without time zone NOT NULL DEFAULT now()
-);
-
-CREATE INDEX "cine_pass_paiement_reservation_idx"
-    ON "cine_pass_paiement" USING btree ("reservation_id");
+-- Pas de table cine_pass_paiement : aucun modèle Serverpod ni INSERT côté endpoint (paiement simulé).
 
 -- =============================================================================
 -- FAVORIS (film ou cinéma)

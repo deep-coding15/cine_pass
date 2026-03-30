@@ -3,10 +3,7 @@ import 'dart:convert';
 import 'package:serverpod/serverpod.dart';
 
 import '../auth/email_idp_mailer.dart';
-import '../generated/film_response.dart';
-import '../generated/seance_response.dart';
 import '../generated/event_response.dart';
-import '../generated/cinema_response.dart';
 import '../generated/demande_responsable_response.dart';
 import '../generated/reservation_response.dart';
 import '../generated/rapport_ca_response.dart';
@@ -20,7 +17,6 @@ import '../generated/cine_pass/reservation_quote_line_response.dart';
 import '../generated/cine_pass/reservation_confirm_response.dart';
 import '../generated/cine_pass/event_seat_plan_response.dart';
 import '../generated/cine_pass/event_seat_plan_entry_response.dart';
-import '../generated/salle.dart';
 import '../generated/structure.dart';
 
 /// Taux de commission CinePass sur chaque réservation (en %).
@@ -370,15 +366,12 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Crée une réservation + billets après paiement (simulé).
+  /// Crée une réservation + billets après paiement (simulé) pour un **événement** uniquement.
   /// Retourne le numéro de réservation (ex: BOOK-...).
   Future<String?> createReservationAndBillets(
     Session session, {
-    required bool isEvent,
-    String? seanceId,
-    String? eventId,
+    required String eventId,
     String? reservationNumber,
-    required List<String> seatLabels,
     required List<String> ticketTypes,
     required List<bool> optionParking,
     required List<bool> optionPopcorn,
@@ -388,11 +381,7 @@ class CinePassEndpoint extends Endpoint {
   }) async {
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) return null;
-    if (isEvent) {
-      if (eventId == null || eventId.isEmpty) return null;
-    } else {
-      if (seanceId == null || seanceId.isEmpty) return null;
-    }
+    if (eventId.isEmpty) return null;
     if (prices.isEmpty) return null;
     if (ticketTypes.length != prices.length ||
         optionParking.length != prices.length ||
@@ -408,46 +397,29 @@ class CinePassEndpoint extends Endpoint {
           : 'BOOK-${DateTime.now().millisecondsSinceEpoch}';
 
       DateTime? sessionAt;
-      String? salleId;
-      if (isEvent) {
-        final rows = await session.db.unsafeQuery(
-          r'''
-          SELECT "eventDate", "eventTime"
-          FROM "cine_pass_evenement"
-          WHERE "id" = (@id)::uuid
-          ''',
-          parameters: QueryParameters.named({'id': eventId}),
-        );
-        if (rows.isNotEmpty) {
-          final d = _safeDateTime(rows.first[0]);
-          final t = _safeDateTime(rows.first[1]);
-          sessionAt = t ?? d;
-        }
-      } else {
-        final rows = await session.db.unsafeQuery(
-          r'''
-          SELECT "debutAt", "salleId"
-          FROM "cine_pass_seance"
-          WHERE "id" = (@id)::uuid
-          ''',
-          parameters: QueryParameters.named({'id': seanceId}),
-        );
-        if (rows.isNotEmpty) {
-          sessionAt = _safeDateTime(rows.first[0]);
-          salleId = rows.first.length > 1 ? rows.first[1].toString() : null;
-        }
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT "eventDate", "eventTime"
+        FROM "cine_pass_evenement"
+        WHERE "id" = (@id)::uuid
+        ''',
+        parameters: QueryParameters.named({'id': eventId}),
+      );
+      if (rows.isNotEmpty) {
+        final d = _safeDateTime(rows.first[0]);
+        final t = _safeDateTime(rows.first[1]);
+        sessionAt = t ?? d;
       }
 
       final reservationInsert = await session.db.unsafeQuery(
         r'''
         INSERT INTO "cine_pass_reservation" (
-          "user_id", "seance_id", "evenement_id", "numero", "statut",
+          "user_id", "evenement_id", "numero", "statut",
           "total_amount", "session_at"
         )
         VALUES (
           (@uid)::uuid,
-          CASE WHEN @seanceId::text = '' OR @seanceId IS NULL THEN NULL ELSE (@seanceId)::uuid END,
-          CASE WHEN @eventId::text = '' OR @eventId IS NULL THEN NULL ELSE (@eventId)::uuid END,
+          (@eventId)::uuid,
           @numero,
           'paid',
           @total,
@@ -457,8 +429,7 @@ class CinePassEndpoint extends Endpoint {
         ''',
         parameters: QueryParameters.named({
           'uid': userId,
-          'seanceId': isEvent ? '' : (seanceId ?? ''),
-          'eventId': isEvent ? (eventId ?? '') : '',
+          'eventId': eventId,
           'numero': numero,
           'total': totalAmount,
           'sessionAt': sessionAt,
@@ -468,48 +439,18 @@ class CinePassEndpoint extends Endpoint {
       final reservationId = reservationInsert.first[0].toString();
 
       for (var i = 0; i < prices.length; i++) {
-        final seatLabel = (!isEvent && i < seatLabels.length)
-            ? seatLabels[i]
-            : null;
-        String? siegeId;
-        if (!isEvent &&
-            seatLabel != null &&
-            seatLabel.isNotEmpty &&
-            salleId != null) {
-          final parsed = _parseSeatLabel(seatLabel);
-          if (parsed != null) {
-            final seatRows = await session.db.unsafeQuery(
-              r'''
-              SELECT "id"
-              FROM "cine_pass_siege"
-              WHERE "salleId" = (@sid)::uuid AND "rangee" = @rangee AND "numero" = @numero
-              LIMIT 1
-              ''',
-              parameters: QueryParameters.named({
-                'sid': salleId,
-                'rangee': parsed.$1,
-                'numero': parsed.$2,
-              }),
-            );
-            if (seatRows.isNotEmpty) {
-              siegeId = seatRows.first[0].toString();
-            }
-          }
-        }
-
         final tType = ticketTypes[i].trim().toLowerCase() == 'vip'
             ? 'vip'
             : 'normal';
         await session.db.unsafeQuery(
           r'''
           INSERT INTO "cine_pass_billet" (
-            "reservation_id", "siege_id", "ticket_type",
+            "reservation_id", "ticket_type",
             "option_parking", "option_popcorn", "option_boisson",
             "prix"
           )
           VALUES (
             (@rid)::uuid,
-            CASE WHEN @siegeId::text = '' OR @siegeId IS NULL THEN NULL ELSE (@siegeId)::uuid END,
             @ticketType,
             @parking,
             @popcorn,
@@ -519,7 +460,6 @@ class CinePassEndpoint extends Endpoint {
           ''',
           parameters: QueryParameters.named({
             'rid': reservationId,
-            'siegeId': siegeId ?? '',
             'ticketType': tType,
             'parking': optionParking[i],
             'popcorn': optionPopcorn[i],
@@ -549,24 +489,15 @@ class CinePassEndpoint extends Endpoint {
       final rows = await session.db.unsafeQuery(
         r'''
         SELECT r."id", r."numero", r."total_amount",
-               r."seance_id", r."evenement_id",
+               r."evenement_id",
                r."session_at", r."created_at", r."statut",
-               f."titre" as film_title,
-               c."nom" as cinema_nom,
-               c."ville" as cinema_ville,
-               sal."nom" as salle_nom,
-               s."debutAt" as seance_debutAt,
                e."titre" as event_title,
                e."lieu" as event_lieu,
                e."ville" as event_ville,
                e."eventDate" as event_date,
                e."eventTime" as event_time
         FROM "cine_pass_reservation" r
-        LEFT JOIN "cine_pass_seance" s ON s."id" = r."seance_id"
-        LEFT JOIN "cine_pass_film" f ON f."id" = s."filmId"
-        LEFT JOIN "cine_pass_salle" sal ON sal."id" = s."salleId"
-        LEFT JOIN "cine_pass_cinema" c ON c."id" = sal."cinemaId"
-        LEFT JOIN "cine_pass_evenement" e ON e."id" = r."evenement_id"
+        JOIN "cine_pass_evenement" e ON e."id" = r."evenement_id"
         WHERE r."user_id" = (@uid)::uuid
         ORDER BY r."created_at" DESC
         ''',
@@ -580,33 +511,23 @@ class CinePassEndpoint extends Endpoint {
         final total = row[2] is num
             ? (row[2] as num).toDouble()
             : _safeDouble(row[2]);
-        final isEvent = row[4] != null;
-        final status = (row[7] as String?) ?? 'paid';
+        final status = (row[6] as String?) ?? 'paid';
 
         DateTime sessionDt =
-            _safeDateTime(row[5]) ?? _safeDateTime(row[12]) ?? DateTime.now();
-        if (isEvent) {
-          sessionDt =
-              _safeDateTime(row[5]) ??
-              _safeDateTime(row[16]) ??
-              _safeDateTime(row[17]) ??
-              sessionDt;
-        }
+            _safeDateTime(row[4]) ??
+            _safeDateTime(row[11]) ??
+            _safeDateTime(row[10]) ??
+            DateTime.now();
 
-        final title = isEvent
-            ? (row[13] as String?) ?? ''
-            : (row[8] as String?) ?? '';
-        final location = isEvent
-            ? '${(row[14] as String?) ?? ''} - ${(row[15] as String?) ?? ''}'
-            : '${(row[9] as String?) ?? ''} - ${(row[10] as String?) ?? ''}';
-        final room = isEvent ? null : (row[11] as String?);
+        final title = (row[7] as String?) ?? '';
+        final location =
+            '${(row[8] as String?) ?? ''} - ${(row[9] as String?) ?? ''}';
         final dateTimeLabel = _formatDateTimeLabel(sessionDt);
 
         final billetRows = await session.db.unsafeQuery(
           r'''
-          SELECT b."ticket_type", sg."rangee", sg."numero", b."placement_label"
+          SELECT b."ticket_type", b."placement_label"
           FROM "cine_pass_billet" b
-          LEFT JOIN "cine_pass_siege" sg ON sg."id" = b."siege_id"
           WHERE b."reservation_id" = (@rid)::uuid
           ORDER BY b."created_at" ASC
           ''',
@@ -618,15 +539,9 @@ class CinePassEndpoint extends Endpoint {
         for (final b in billetRows) {
           final t = (b.isNotEmpty ? b[0]?.toString() : null) ?? 'normal';
           types.add(t.toLowerCase() == 'vip' ? 'VIP' : 'Normal');
-          final pl = b.length > 3 ? (b[3]?.toString() ?? '').trim() : '';
+          final pl = b.length > 1 ? (b[1]?.toString() ?? '').trim() : '';
           if (pl.isNotEmpty) {
             seats.add(pl);
-            continue;
-          }
-          final rangee = b.length > 1 ? b[1]?.toString() : null;
-          final num = b.length > 2 ? b[2] : null;
-          if (rangee != null && rangee.isNotEmpty && num != null) {
-            seats.add('$rangee${_safeInt(num)}');
           }
         }
 
@@ -638,9 +553,9 @@ class CinePassEndpoint extends Endpoint {
             dateTime: dateTimeLabel,
             totalAmount: total,
             seats: seats.isEmpty ? null : seats,
-            ticketCount: isEvent ? billetRows.length : null,
-            isEvent: isEvent,
-            room: room,
+            ticketCount: billetRows.length,
+            isEvent: true,
+            room: null,
             ticketTypes: types.isEmpty ? null : types,
             sessionDateTime: sessionDt,
             status: status,
@@ -828,116 +743,6 @@ class CinePassEndpoint extends Endpoint {
         stackTrace: st,
       );
       return false;
-    }
-  }
-
-  /// Liste de tous les films.
-  Future<List<FilmResponse>> getFilms(Session session) async {
-    try {
-      final result = await session.db.unsafeQuery(
-        r'''
-        SELECT "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-               "casting", "posterColor", "posterUrl", "dateSortie", "dateFin", "audience"
-        FROM "cine_pass_film"
-        ORDER BY "titre"
-        ''',
-      );
-      return result.map((row) => _rowToFilmResponse(row)).toList();
-    } catch (e, st) {
-      session.log(
-        'CinePass getFilms',
-        level: LogLevel.error,
-        exception: e,
-        stackTrace: st,
-      );
-      return [];
-    }
-  }
-
-  /// Détail d'un film par id.
-  Future<FilmResponse?> getFilmById(Session session, String id) async {
-    try {
-      final result = await session.db.unsafeQuery(
-        r'''
-        SELECT "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-               "casting", "posterColor", "posterUrl", "dateSortie", "dateFin", "audience"
-        FROM "cine_pass_film"
-        WHERE "id" = @id
-        ''',
-        parameters: QueryParameters.named({'id': id}),
-      );
-      if (result.isEmpty) return null;
-      return _rowToFilmResponse(result.first);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Séances pour un film (avec nom cinéma, salle, ville).
-  Future<List<SeanceResponse>> getSeancesForFilm(
-    Session session,
-    String filmId,
-  ) async {
-    try {
-      const sql = r"""
-      SELECT s."id",
-             s."debutAt",
-             s."finAt",
-             s."format",
-             s."type",
-             s."prixBase",
-             s."availableOptions",
-             c."nom"   AS cinema_nom,
-             c."ville" AS cinema_ville,
-             c."adresse" AS cinema_adresse,
-             sal."nom" AS salle_nom,
-             sal."capacite" AS salle_capacite
-      FROM "cine_pass_seance" s
-      JOIN "cine_pass_salle" sal ON sal."id" = s."salleId"
-      JOIN "cine_pass_cinema" c ON c."id" = sal."cinemaId"
-      WHERE s."filmId" = (@filmId)::uuid
-      ORDER BY s."debutAt"
-      """;
-      final result = await session.db.unsafeQuery(
-        sql,
-        parameters: QueryParameters.named({'filmId': filmId}),
-      );
-      return result.map((row) => _rowToSeanceResponse(row)).toList();
-    } catch (e, st) {
-      session.log(
-        'CinePass getSeancesForFilm',
-        level: LogLevel.error,
-        exception: e,
-        stackTrace: st,
-      );
-      return [];
-    }
-  }
-
-  /// Liste des cinémas.
-  Future<List<CinemaResponse>> getCinemas(Session session) async {
-    try {
-      final result = await session.db.unsafeQuery(
-        r'SELECT "id", "nom", "ville", "adresse" FROM "cine_pass_cinema" ORDER BY "ville", "nom"',
-      );
-      return result.map((row) => _rowToCinemaResponse(row)).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  /// Liste des salles (pour admin séances).
-  Future<List<Salle>> getSalles(Session session) async {
-    try {
-      return await Salle.db.find(session, orderBy: (t) => t.nom);
-    } catch (e, st) {
-      session.log(
-        'CinePass getSalles',
-        level: LogLevel.error,
-        exception: e,
-        stackTrace: st,
-      );
-      return [];
     }
   }
 
@@ -2169,11 +1974,11 @@ class CinePassEndpoint extends Endpoint {
         final reservationInsert = await session.db.unsafeQuery(
           r'''
           INSERT INTO "cine_pass_reservation" (
-            "user_id", "seance_id", "evenement_id", "numero", "statut",
+            "user_id", "evenement_id", "numero", "statut",
             "total_amount", "session_at"
           )
           VALUES (
-            (@uid)::uuid, NULL, (@eventId)::uuid, @numero, 'paid',
+            (@uid)::uuid, (@eventId)::uuid, @numero, 'paid',
             @totalAmount, @sessionAt
           )
           RETURNING "id"
@@ -2204,12 +2009,12 @@ class CinePassEndpoint extends Endpoint {
           await session.db.unsafeQuery(
             r'''
             INSERT INTO "cine_pass_billet" (
-              "reservation_id", "siege_id", "ticket_type",
+              "reservation_id", "ticket_type",
               "option_parking", "option_popcorn", "option_boisson", "prix",
               "placement_label"
             )
             VALUES (
-              (@rid)::uuid, NULL, @ticketType, false, false, false, @prix,
+              (@rid)::uuid, @ticketType, false, false, false, @prix,
               @placementLabel
             )
             ''',
@@ -2257,17 +2062,13 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Villes distinctes (films + événements) pour les filtres.
-  /// Une entrée par ville « logique » (insensible à la casse).
+  /// Villes distinctes (événements) pour les filtres.
   Future<List<String>> getCities(Session session) async {
     try {
       final rows = await session.db.unsafeQuery(
         r'''
         SELECT MIN(TRIM(v)) AS display_ville
         FROM (
-          SELECT "ville"::text AS v FROM "cine_pass_cinema"
-          WHERE TRIM(COALESCE("ville", '')) <> ''
-          UNION ALL
           SELECT "ville"::text AS v FROM "cine_pass_evenement"
           WHERE TRIM(COALESCE("ville", '')) <> ''
         ) AS u
@@ -2281,20 +2082,14 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Genres distincts (films) pour les filtres.
+  /// Genres distincts (événements type FILM) pour les filtres.
   Future<List<String>> getGenres(Session session) async {
     try {
       final result = await session.db.unsafeQuery(
         r'''
-        SELECT DISTINCT g FROM (
-          SELECT TRIM("genre") AS g FROM "cine_pass_film"
-          WHERE TRIM(COALESCE("genre", '')) <> ''
-          UNION
-          SELECT TRIM(f."film_genre") AS g
-          FROM "cine_pass_event_film_details" f
-          WHERE TRIM(COALESCE(f."film_genre", '')) <> ''
-        ) AS u
-        WHERE g <> ''
+        SELECT DISTINCT TRIM(f."film_genre") AS g
+        FROM "cine_pass_event_film_details" f
+        WHERE TRIM(COALESCE(f."film_genre", '')) <> ''
         ORDER BY g
         ''',
       );
@@ -2428,64 +2223,6 @@ class CinePassEndpoint extends Endpoint {
       return ['Tous', ...values];
     } catch (_) {
       return ['Tous'];
-    }
-  }
-
-  /// Admin: créer un film.
-  Future<FilmResponse?> createFilm(
-    Session session, {
-    required String title,
-    required String genre,
-    required int durationMinutes,
-    String? synopsis,
-    String? director,
-    String? casting,
-    int? posterColor,
-    String? posterUrl,
-    Object? dateSortie,
-    Object? dateFin,
-    String? audience,
-  }) async {
-    try {
-      final dSortie = _parseDateTime(dateSortie);
-      final dFin = _parseDateTime(dateFin);
-      final id = await session.db.unsafeQuery(
-        r'''
-        INSERT INTO "cine_pass_film" (
-          "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-          "casting", "posterColor", "posterUrl", "dateSortie", "dateFin", "audience"
-        )
-        VALUES (
-          @titre, @genre, @dureeMinutes, @synopsis, @directeur,
-          @casting, @posterColor, @posterUrl, @dateSortie, @dateFin, @audience
-        )
-        RETURNING "id", "titre", "genre", "dureeMinutes", "synopsis", "directeur",
-                  "casting", "posterColor", "posterUrl"
-        ''',
-        parameters: QueryParameters.named({
-          'titre': title,
-          'genre': genre,
-          'dureeMinutes': durationMinutes,
-          'synopsis': synopsis,
-          'directeur': director,
-          'casting': casting,
-          'posterColor': posterColor,
-          'posterUrl': posterUrl,
-          'dateSortie': dSortie,
-          'dateFin': dFin,
-          'audience': audience,
-        }),
-      );
-      if (id.isEmpty) return null;
-      return _rowToFilmResponse(id.first);
-    } catch (e, st) {
-      session.log(
-        'CinePass createFilm',
-        level: LogLevel.error,
-        exception: e,
-        stackTrace: st,
-      );
-      return null;
     }
   }
 
@@ -3463,78 +3200,6 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Liste des films favoris de l'utilisateur connecté.
-  Future<List<String>> getMyFavoriteFilmIds(Session session) async {
-    final userId = session.authenticated?.userIdentifier;
-    if (userId == null) return [];
-    try {
-      final rows = await session.db.unsafeQuery(
-        r'''
-        SELECT f."film_id"
-        FROM "cine_pass_favori" f
-        WHERE f."user_id" = (@uid)::uuid
-          AND f."film_id" IS NOT NULL
-        ''',
-        parameters: QueryParameters.named({'uid': userId}),
-      );
-      return rows
-          .map((row) => row[0]?.toString() ?? '')
-          .where((id) => id.isNotEmpty)
-          .toList(growable: false);
-    } catch (e, st) {
-      session.log(
-        'CinePass getMyFavoriteFilmIds',
-        level: LogLevel.error,
-        exception: e,
-        stackTrace: st,
-      );
-      return [];
-    }
-  }
-
-  /// Ajoute / retire un film des favoris de l'utilisateur connecté.
-  Future<bool> setMyFilmFavorite(
-    Session session, {
-    required String filmId,
-    required bool isFavorite,
-  }) async {
-    final userId = session.authenticated?.userIdentifier;
-    if (userId == null) return false;
-    final fid = _normalizeClientEventId(filmId);
-    if (fid == null) return false;
-
-    try {
-      if (isFavorite) {
-        await session.db.unsafeQuery(
-          r'''
-          INSERT INTO "cine_pass_favori" ("user_id", "film_id")
-          VALUES ((@uid)::uuid, (@fid)::uuid)
-          ON CONFLICT ("user_id", "film_id") WHERE "film_id" IS NOT NULL DO NOTHING
-          ''',
-          parameters: QueryParameters.named({'uid': userId, 'fid': fid}),
-        );
-      } else {
-        await session.db.unsafeQuery(
-          r'''
-          DELETE FROM "cine_pass_favori"
-          WHERE "user_id" = (@uid)::uuid
-            AND "film_id" = (@fid)::uuid
-          ''',
-          parameters: QueryParameters.named({'uid': userId, 'fid': fid}),
-        );
-      }
-      return true;
-    } catch (e, st) {
-      session.log(
-        'CinePass setMyFilmFavorite',
-        level: LogLevel.error,
-        exception: e,
-        stackTrace: st,
-      );
-      return false;
-    }
-  }
-
   /// Liste des événements favoris de l'utilisateur connecté.
   Future<List<String>> getMyFavoriteEventIds(Session session) async {
     final userId = session.authenticated?.userIdentifier;
@@ -3661,7 +3326,7 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Admin: toutes les réservations (événements et séances).
+  /// Admin: toutes les réservations (événements).
   Future<List<ReservationResponse>> getReservations(Session session) async {
     try {
       if (!await _isAdmin(session)) {
@@ -3671,27 +3336,13 @@ class CinePassEndpoint extends Endpoint {
       final result = await session.db.unsafeQuery(
         r'''
         SELECT r."id", r."numero", r."total_amount", r."created_at", r."statut",
-               COALESCE(e."titre", f."titre") AS display_title,
-               CASE
-                 WHEN e."id" IS NOT NULL THEN
-                   TRIM(CONCAT(COALESCE(e."lieu", ''), ' — ', COALESCE(e."ville", '')))
-                 ELSE
-                   TRIM(CONCAT(COALESCE(c."nom", ''), ' — ', COALESCE(sal."nom", '')))
-               END AS location_label,
-               CASE
-                 WHEN e."id" IS NOT NULL THEN
-                   to_char(e."eventDate", 'DD/MM/YYYY') || ' ' || to_char(e."eventTime", 'HH24:MI')
-                 ELSE
-                   to_char(se."debutAt", 'DD/MM/YYYY HH24:MI')
-               END AS session_at,
+               e."titre" AS display_title,
+               TRIM(CONCAT(COALESCE(e."lieu", ''), ' — ', COALESCE(e."ville", ''))) AS location_label,
+               to_char(e."eventDate", 'DD/MM/YYYY') || ' ' || to_char(e."eventTime", 'HH24:MI') AS session_at,
                (SELECT COUNT(*)::int FROM "cine_pass_billet" b WHERE b."reservation_id" = r."id") AS nb_billets,
                p."email" AS user_email
         FROM "cine_pass_reservation" r
-        LEFT JOIN "cine_pass_evenement" e ON e."id" = r."evenement_id"
-        LEFT JOIN "cine_pass_seance" se ON se."id" = r."seance_id"
-        LEFT JOIN "cine_pass_film" f ON f."id" = se."filmId"
-        LEFT JOIN "cine_pass_salle" sal ON sal."id" = se."salleId"
-        LEFT JOIN "cine_pass_cinema" c ON c."id" = sal."cinemaId"
+        JOIN "cine_pass_evenement" e ON e."id" = r."evenement_id"
         LEFT JOIN "serverpod_auth_core_profile" p ON p."authUserId" = r."user_id"
         ORDER BY r."created_at" DESC
         ''',
@@ -3880,9 +3531,8 @@ class CinePassEndpoint extends Endpoint {
 
       final rows = await session.db.unsafeQuery(
         r'''
-        SELECT b."ticket_type", b."prix", b."placement_label", sg."rangee", sg."numero"
+        SELECT b."ticket_type", b."prix", b."placement_label"
         FROM "cine_pass_billet" b
-        LEFT JOIN "cine_pass_siege" sg ON sg."id" = b."siege_id"
         WHERE b."reservation_id" = (@rid)::uuid
         ORDER BY b."created_at" ASC
         ''',
@@ -3893,14 +3543,7 @@ class CinePassEndpoint extends Endpoint {
         final type = (row[0] as String?) ?? 'normal';
         final price = _safeDouble(row[1]).toStringAsFixed(2);
         final placement = (row[2] as String?)?.trim() ?? '';
-        final rangee = row[3]?.toString();
-        final numero = row[4];
-        String seat = '';
-        if (placement.isNotEmpty) {
-          seat = placement;
-        } else if (rangee != null && rangee.isNotEmpty && numero != null) {
-          seat = '$rangee${_safeInt(numero)}';
-        }
+        final seat = placement;
         lines.add(
           'Type: ${type.toUpperCase()} • Prix: $price €${seat.isNotEmpty ? ' • Place: $seat' : ''}',
         );
@@ -4022,67 +3665,6 @@ class CinePassEndpoint extends Endpoint {
     }
   }
 
-  /// Admin: créer une séance.
-  Future<SeanceResponse?> createSeance(
-    Session session, {
-    required String filmId,
-    required String salleId,
-    required Object debutAt,
-    Object? finAt,
-    String format = 'VF',
-    String type = '2D',
-    required double prixBase,
-  }) async {
-    try {
-      final debut = _parseDateTime(debutAt);
-      if (debut == null) return null;
-      final endDt = _parseDateTime(finAt);
-      final end = endDt ?? debut.add(const Duration(minutes: 120));
-      await session.db.unsafeQuery(
-        r'''
-        INSERT INTO "cine_pass_seance" (
-          "filmId", "salleId", "debutAt", "finAt", "format", "type", "prixBase"
-        )
-        VALUES (
-          (@filmId)::uuid, (@salleId)::uuid, @debutAt, @finAt, @format, @type, @prixBase
-        )
-        ''',
-        parameters: QueryParameters.named({
-          'filmId': filmId,
-          'salleId': salleId,
-          'debutAt': debut,
-          'finAt': end,
-          'format': format,
-          'type': type,
-          'prixBase': prixBase,
-        }),
-      );
-      final salleResult = await session.db.unsafeQuery(
-        r'''
-        SELECT s."id", s."debutAt", s."finAt", s."format", s."type", s."prixBase", s."availableOptions",
-               c."nom", c."ville", c."adresse", sal."nom", sal."capacite"
-        FROM "cine_pass_seance" s
-        JOIN "cine_pass_salle" sal ON sal."id" = s."salleId"
-        JOIN "cine_pass_cinema" c ON c."id" = sal."cinemaId"
-        WHERE s."filmId" = (@filmId)::uuid
-        ORDER BY s."debutAt" DESC
-        LIMIT 1
-        ''',
-        parameters: QueryParameters.named({'filmId': filmId}),
-      );
-      if (salleResult.isEmpty) return null;
-      return _rowToSeanceResponse(salleResult.first);
-    } catch (e, st) {
-      session.log(
-        'CinePass createSeance',
-        level: LogLevel.error,
-        exception: e,
-        stackTrace: st,
-      );
-      return null;
-    }
-  }
-
   static int _safeInt(dynamic v) {
     if (v == null) return 0;
     if (v is int) return v;
@@ -4116,56 +3698,6 @@ class CinePassEndpoint extends Endpoint {
       return null;
     }
     return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-  }
-
-  static FilmResponse _rowToFilmResponse(List<dynamic> row) {
-    return FilmResponse(
-      id: row[0].toString(),
-      title: (row.length > 1 ? row[1] as String? : null) ?? '',
-      genre: (row.length > 2 ? row[2] as String? : null) ?? '',
-      durationMinutes: _safeInt(row.length > 3 ? row[3] : 0),
-      synopsis: row.length > 4 ? row[4] as String? : null,
-      director: row.length > 5 ? row[5] as String? : null,
-      casting: row.length > 6 ? row[6] as String? : null,
-      posterColor: row.length > 7 ? _safeInt(row[7]) : null,
-      posterUrl: row.length > 8 ? row[8] as String? : null,
-      dateSortieStr: row.length > 9 ? _formatDateFr(row[9]) : null,
-      dateFinStr: row.length > 10 ? _formatDateFr(row[10]) : null,
-      audience: row.length > 11 ? row[11] as String? : null,
-    );
-  }
-
-  static SeanceResponse _rowToSeanceResponse(List<dynamic> row) {
-    final debut = row.length > 1 ? _safeDateTime(row[1]) : null;
-    final format = row.length > 3 ? (row[3] as String?) ?? 'VF' : 'VF';
-    final type = row.length > 4 ? (row[4] as String?) ?? '2D' : '2D';
-    final prix = _safeDouble(row.length > 5 ? row[5] : 0);
-    final optionsJson = row.length > 6 ? row[6] : null;
-    List<String> options = const ['parking', 'popcorn', 'boisson'];
-    if (optionsJson != null && optionsJson is List) {
-      options = optionsJson.map((e) => e.toString()).toList();
-    }
-    final cinemaNom = (row.length > 7 ? row[7] as String? : null) ?? '';
-    final ville = (row.length > 8 ? row[8] as String? : null) ?? '';
-    final salleNom = (row.length > 10 ? row[10] as String? : null) ?? '';
-    final capacite = row.length > 11 ? _safeInt(row[11]) : 0;
-    final location = '$cinemaNom - $ville';
-    final dateTime = debut != null
-        ? '${debut.day.toString().padLeft(2, '0')}/${debut.month.toString().padLeft(2, '0')}/${debut.year} à ${debut.hour.toString().padLeft(2, '0')}:${debut.minute.toString().padLeft(2, '0')}'
-        : '--';
-    return SeanceResponse(
-      id: row[0].toString(),
-      cinemaName: cinemaNom,
-      location: location,
-      room: salleNom,
-      dateTime: dateTime,
-      format: format,
-      type: type,
-      placesLeft: capacite,
-      placesTotal: capacite,
-      price: prix,
-      availableOptions: options,
-    );
   }
 
   static EventResponse _rowToEventResponse(List<dynamic> row) {
@@ -4283,15 +3815,6 @@ class CinePassEndpoint extends Endpoint {
     );
   }
 
-  static CinemaResponse _rowToCinemaResponse(List<dynamic> row) {
-    return CinemaResponse(
-      id: row[0].toString(),
-      name: row.length > 1 ? (row[1] as String?) ?? '' : '',
-      city: row.length > 2 ? (row[2] as String?) ?? '' : '',
-      address: row.length > 3 ? row[3] as String? : null,
-    );
-  }
-
   static DemandeResponsableResponse _rowToDemandeResponsableResponse(
     List<dynamic> row,
   ) {
@@ -4346,9 +3869,6 @@ class CinePassEndpoint extends Endpoint {
       address: row.length > 4 ? row[4] as String? : null,
       website: row.length > 5 ? row[5] as String? : null,
       phone: row.length > 6 ? row[6] as String? : null,
-      cinemaId: row.length > 7 && row[7] != null
-          ? UuidValue.fromString(row[7].toString())
-          : null,
     );
   }
 
@@ -4698,18 +4218,6 @@ class CinePassEndpoint extends Endpoint {
       );
       return false;
     }
-  }
-
-  static (String, int)? _parseSeatLabel(String seatLabel) {
-    // Expected formats: "A12", "B7", "AA10"
-    final s = seatLabel.trim();
-    if (s.isEmpty) return null;
-    final match = RegExp(r'^([A-Za-z]+)\s*([0-9]+)$').firstMatch(s);
-    if (match == null) return null;
-    final row = match.group(1)!.toUpperCase();
-    final num = int.tryParse(match.group(2)!) ?? 0;
-    if (num <= 0) return null;
-    return (row, num);
   }
 
   static String _formatDateTimeLabel(DateTime dt) {
