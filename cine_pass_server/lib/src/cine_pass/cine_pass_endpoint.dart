@@ -972,7 +972,7 @@ class CinePassEndpoint extends Endpoint {
       LEFT JOIN "cine_pass_event_standup_details" s ON s."event_id" = e."id"
       LEFT JOIN "cine_pass_event_concert_details" c ON c."event_id" = e."id"
       LEFT JOIN "cine_pass_event_theatre_details" t ON t."event_id" = e."id"
-      WHERE e."eventDate" >= CURRENT_DATE
+      WHERE e."eventTime" >= NOW()
         AND COALESCE(e."archived", false) = false
       ORDER BY e."eventDate", e."eventTime"
       ''',
@@ -2333,7 +2333,7 @@ class CinePassEndpoint extends Endpoint {
           JOIN "cine_pass_evenement" e ON e."id" = f."event_id"
           WHERE COALESCE(f."film_genre", '') <> ''
             AND COALESCE(e."archived", false) = false
-            AND e."eventDate" >= CURRENT_DATE
+            AND e."eventTime" >= NOW()
           ORDER BY 1
         ''';
       } else if (type == 'FILM' && key == 'director') {
@@ -2343,7 +2343,7 @@ class CinePassEndpoint extends Endpoint {
           JOIN "cine_pass_evenement" e ON e."id" = f."event_id"
           WHERE COALESCE(f."director", '') <> ''
             AND COALESCE(e."archived", false) = false
-            AND e."eventDate" >= CURRENT_DATE
+            AND e."eventTime" >= NOW()
           ORDER BY 1
         ''';
       } else if (type == 'FILM' && key == 'language') {
@@ -2354,14 +2354,14 @@ class CinePassEndpoint extends Endpoint {
             JOIN "cine_pass_evenement" e ON e."id" = f."event_id"
             WHERE COALESCE(f."original_language", '') <> ''
               AND COALESCE(e."archived", false) = false
-              AND e."eventDate" >= CURRENT_DATE
+              AND e."eventTime" >= NOW()
             UNION
             SELECT COALESCE(e."event_language", '') AS v
             FROM "cine_pass_evenement" e
             WHERE e."event_type" = 'FILM'
               AND COALESCE(e."event_language", '') <> ''
               AND COALESCE(e."archived", false) = false
-              AND e."eventDate" >= CURRENT_DATE
+              AND e."eventTime" >= NOW()
           ) u WHERE v <> ''
           ORDER BY 1
         ''';
@@ -2372,7 +2372,7 @@ class CinePassEndpoint extends Endpoint {
           JOIN "cine_pass_evenement" e ON e."id" = c."event_id"
           WHERE COALESCE(c."artist", '') <> ''
             AND COALESCE(e."archived", false) = false
-            AND e."eventDate" >= CURRENT_DATE
+            AND e."eventTime" >= NOW()
           ORDER BY 1
         ''';
       } else if (type == 'CONCERT' && key == 'music_genre') {
@@ -2382,7 +2382,7 @@ class CinePassEndpoint extends Endpoint {
           JOIN "cine_pass_evenement" e ON e."id" = c."event_id"
           WHERE COALESCE(c."music_genre", '') <> ''
             AND COALESCE(e."archived", false) = false
-            AND e."eventDate" >= CURRENT_DATE
+            AND e."eventTime" >= NOW()
           ORDER BY 1
         ''';
       } else if (type == 'FESTIVAL' && key == 'theme') {
@@ -2392,7 +2392,7 @@ class CinePassEndpoint extends Endpoint {
           JOIN "cine_pass_evenement" e ON e."id" = f."event_id"
           WHERE COALESCE(f."theme", '') <> ''
             AND COALESCE(e."archived", false) = false
-            AND e."eventDate" >= CURRENT_DATE
+            AND e."eventTime" >= NOW()
           ORDER BY 1
         ''';
       } else if (type == 'STANDUP' && key == 'main_artist') {
@@ -2402,7 +2402,7 @@ class CinePassEndpoint extends Endpoint {
           JOIN "cine_pass_evenement" e ON e."id" = s."event_id"
           WHERE COALESCE(s."main_artist", '') <> ''
             AND COALESCE(e."archived", false) = false
-            AND e."eventDate" >= CURRENT_DATE
+            AND e."eventTime" >= NOW()
           ORDER BY 1
         ''';
       } else if (type == 'THEATRE' && key == 'author') {
@@ -2412,7 +2412,7 @@ class CinePassEndpoint extends Endpoint {
           JOIN "cine_pass_evenement" e ON e."id" = t."event_id"
           WHERE COALESCE(t."author", '') <> ''
             AND COALESCE(e."archived", false) = false
-            AND e."eventDate" >= CURRENT_DATE
+            AND e."eventTime" >= NOW()
           ORDER BY 1
         ''';
       }
@@ -3198,6 +3198,24 @@ class CinePassEndpoint extends Endpoint {
         parameters: QueryParameters.named({'uid': userId}),
       );
 
+      // Même logique que setAdminUserRole(responsable) : l'admin lit le rôle dans
+      // cine_pass_user_role ; sans cette ligne l'utilisateur reste affiché « client ».
+      await session.db.unsafeQuery(
+        r'''DELETE FROM "cine_pass_admin_user" WHERE "user_id" = (@uid)::uuid''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      await session.db.unsafeQuery(
+        r'''DELETE FROM "cine_pass_user_role" WHERE "user_id" = (@uid)::uuid''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      await session.db.unsafeQuery(
+        r'''
+        INSERT INTO "cine_pass_user_role" ("user_id", "role")
+        VALUES ((@uid)::uuid, 'responsable')
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+
       await session.db.unsafeQuery(
         r'''
         UPDATE "cine_pass_responsable_request"
@@ -3437,6 +3455,149 @@ class CinePassEndpoint extends Endpoint {
     } catch (e, st) {
       session.log(
         'CinePass hasMyPendingDemandeResponsable',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Liste des films favoris de l'utilisateur connecté.
+  Future<List<String>> getMyFavoriteFilmIds(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return [];
+    try {
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT f."film_id"
+        FROM "cine_pass_favori" f
+        WHERE f."user_id" = (@uid)::uuid
+          AND f."film_id" IS NOT NULL
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      return rows
+          .map((row) => row[0]?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toList(growable: false);
+    } catch (e, st) {
+      session.log(
+        'CinePass getMyFavoriteFilmIds',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return [];
+    }
+  }
+
+  /// Ajoute / retire un film des favoris de l'utilisateur connecté.
+  Future<bool> setMyFilmFavorite(
+    Session session, {
+    required String filmId,
+    required bool isFavorite,
+  }) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return false;
+    final fid = _normalizeClientEventId(filmId);
+    if (fid == null) return false;
+
+    try {
+      if (isFavorite) {
+        await session.db.unsafeQuery(
+          r'''
+          INSERT INTO "cine_pass_favori" ("user_id", "film_id")
+          VALUES ((@uid)::uuid, (@fid)::uuid)
+          ON CONFLICT ("user_id", "film_id") WHERE "film_id" IS NOT NULL DO NOTHING
+          ''',
+          parameters: QueryParameters.named({'uid': userId, 'fid': fid}),
+        );
+      } else {
+        await session.db.unsafeQuery(
+          r'''
+          DELETE FROM "cine_pass_favori"
+          WHERE "user_id" = (@uid)::uuid
+            AND "film_id" = (@fid)::uuid
+          ''',
+          parameters: QueryParameters.named({'uid': userId, 'fid': fid}),
+        );
+      }
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass setMyFilmFavorite',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
+  /// Liste des événements favoris de l'utilisateur connecté.
+  Future<List<String>> getMyFavoriteEventIds(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return [];
+    try {
+      final rows = await session.db.unsafeQuery(
+        r'''
+        SELECT fe."event_id"
+        FROM "cine_pass_favori_evenement" fe
+        WHERE fe."user_id" = (@uid)::uuid
+        ''',
+        parameters: QueryParameters.named({'uid': userId}),
+      );
+      return rows
+          .map((row) => row[0]?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toList(growable: false);
+    } catch (e, st) {
+      session.log(
+        'CinePass getMyFavoriteEventIds',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: st,
+      );
+      return [];
+    }
+  }
+
+  /// Ajoute / retire un événement des favoris de l'utilisateur connecté.
+  Future<bool> setMyEventFavorite(
+    Session session, {
+    required String eventId,
+    required bool isFavorite,
+  }) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) return false;
+    final eid = _normalizeClientEventId(eventId);
+    if (eid == null) return false;
+
+    try {
+      if (isFavorite) {
+        await session.db.unsafeQuery(
+          r'''
+          INSERT INTO "cine_pass_favori_evenement" ("user_id", "event_id")
+          VALUES ((@uid)::uuid, (@eid)::uuid)
+          ON CONFLICT ("user_id", "event_id") DO NOTHING
+          ''',
+          parameters: QueryParameters.named({'uid': userId, 'eid': eid}),
+        );
+      } else {
+        await session.db.unsafeQuery(
+          r'''
+          DELETE FROM "cine_pass_favori_evenement"
+          WHERE "user_id" = (@uid)::uuid
+            AND "event_id" = (@eid)::uuid
+          ''',
+          parameters: QueryParameters.named({'uid': userId, 'eid': eid}),
+        );
+      }
+      return true;
+    } catch (e, st) {
+      session.log(
+        'CinePass setMyEventFavorite',
         level: LogLevel.error,
         exception: e,
         stackTrace: st,

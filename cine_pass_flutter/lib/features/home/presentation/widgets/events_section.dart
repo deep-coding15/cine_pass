@@ -67,7 +67,7 @@ class _EventsSectionState extends State<EventsSection> {
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 280,
+          height: 500,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -77,7 +77,7 @@ class _EventsSectionState extends State<EventsSection> {
               return Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: SizedBox(
-                  width: 220,
+                  width: 180,
                   child: EventCard(event: e),
                 ),
               );

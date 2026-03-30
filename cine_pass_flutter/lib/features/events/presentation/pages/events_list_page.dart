@@ -780,7 +780,8 @@ class _EventsListPageState extends State<EventsListPage> {
                 // Cartes compactes : ratio pour éviter overflow
                 // Plus haut : évite le débordement des cartes événement (prix + bouton).
                 // Cartes avec affiche plus haute (2/3) : cellule un peu plus haute.
-                final childAspectRatio = w > 900 ? 0.48 : 0.44;
+                // Ratio plus bas = cellules plus hautes (évite overflow bas des EventCard).
+                final childAspectRatio = w > 900 ? 0.48 : 0.40;
                 return GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),

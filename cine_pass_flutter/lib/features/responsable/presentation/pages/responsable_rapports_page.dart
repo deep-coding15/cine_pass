@@ -227,7 +227,9 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
                       _ChipChoice(
                         label: '7 jours',
@@ -238,7 +240,6 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
                           _loadRapport();
                         },
                       ),
-                      const SizedBox(width: 8),
                       _ChipChoice(
                         label: '30 jours',
                         value: '30j',
@@ -248,7 +249,6 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
                           _loadRapport();
                         },
                       ),
-                      const SizedBox(width: 8),
                       _ChipChoice(
                         label: '3 mois',
                         value: '3m',
@@ -258,7 +258,6 @@ class _ResponsableRapportsPageState extends State<ResponsableRapportsPage> {
                           _loadRapport();
                         },
                       ),
-                      const SizedBox(width: 8),
                       _ChipChoice(
                         label: 'Année',
                         value: '1an',

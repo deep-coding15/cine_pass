@@ -85,10 +85,10 @@ class _ResponsableDashboardPageState extends State<ResponsableDashboardPage> {
             children: [
               Expanded(
                 child: _KpiCard(
-                  title: 'Chiffre d\'affaires',
+                  title: 'Revenus',
                   value: '${_chiffreAffaires.toStringAsFixed(0)} MAD',
                   subtitle: '30 derniers jours',
-                  icon: Icons.euro_rounded,
+                  icon: Icons.payments_rounded,
                   color: AppTheme.accentGreen,
                 ),
               ),
@@ -223,6 +223,7 @@ class _KpiCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -232,13 +233,18 @@ class _KpiCard extends StatelessWidget {
                   ),
                   child: Icon(icon, size: 24, color: color),
                 ),
-                const Spacer(),
-                Text(
-                  value,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.end,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -246,6 +252,8 @@ class _KpiCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 15,

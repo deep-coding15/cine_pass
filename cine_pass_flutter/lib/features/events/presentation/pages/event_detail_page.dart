@@ -207,8 +207,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   'Retour',
                   style: TextStyle(color: AppTheme.textSecondary),
                 ),
-                const SizedBox(width: 12),
-                EventTypeBadge(event: event),
               ],
             ),
           ),
@@ -231,10 +229,13 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 child: EventTypeBadge(event: event),
               ),
               Positioned(
-                left: 24,
-                bottom: 24,
+                left: 16,
+                right: 56,
+                bottom: 20,
                 child: Text(
                   event.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 28,
@@ -245,12 +246,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
             ],
           ),
           const SizedBox(height: 24),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Column(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 840;
+              final leftColumn = Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Card(
@@ -436,11 +435,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(width: 24),
-              SizedBox(
-                width: 320,
+                );
+              final bookingCard = SizedBox(
+                width: narrow ? double.infinity : 320,
                 child: Card(
                   color: AppTheme.cardDark,
                   child: Padding(
@@ -715,8 +712,26 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              );
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    leftColumn,
+                    const SizedBox(height: 16),
+                    bookingCard,
+                  ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 2, child: leftColumn),
+                  const SizedBox(width: 24),
+                  bookingCard,
+                ],
+              );
+            },
           ),
         ],
       ),

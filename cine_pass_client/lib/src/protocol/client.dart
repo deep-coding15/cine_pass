@@ -870,6 +870,48 @@ class EndpointCinePass extends _i2.EndpointRef {
         {},
       );
 
+  /// Liste des films favoris de l'utilisateur connecté.
+  _i3.Future<List<String>> getMyFavoriteFilmIds() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getMyFavoriteFilmIds',
+        {},
+      );
+
+  /// Ajoute / retire un film des favoris de l'utilisateur connecté.
+  _i3.Future<bool> setMyFilmFavorite({
+    required String filmId,
+    required bool isFavorite,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setMyFilmFavorite',
+    {
+      'filmId': filmId,
+      'isFavorite': isFavorite,
+    },
+  );
+
+  /// Liste des événements favoris de l'utilisateur connecté.
+  _i3.Future<List<String>> getMyFavoriteEventIds() =>
+      caller.callServerEndpoint<List<String>>(
+        'cinePass',
+        'getMyFavoriteEventIds',
+        {},
+      );
+
+  /// Ajoute / retire un événement des favoris de l'utilisateur connecté.
+  _i3.Future<bool> setMyEventFavorite({
+    required String eventId,
+    required bool isFavorite,
+  }) => caller.callServerEndpoint<bool>(
+    'cinePass',
+    'setMyEventFavorite',
+    {
+      'eventId': eventId,
+      'isFavorite': isFavorite,
+    },
+  );
+
   /// Client: annuler sa réservation événement si >= 2h avant le début.
   _i3.Future<bool> cancelMyEventReservation({
     required String reservationNumber,

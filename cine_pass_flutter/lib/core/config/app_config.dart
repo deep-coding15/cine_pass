@@ -52,7 +52,34 @@ Future<AppConfig> loadAppConfig() async {
 }
 
 /// Récupère l'URL du serveur API
+///
+/// Priorité :
+/// 1. `--dart-define=API_URL=http://...` (tous les modes)
+/// 2. [loadAppConfig] via `assets/config.json`
+/// 3. Sur **Android** (hors web), si l’URL vise `localhost` ou `127.0.0.1`, on
+///    remplace l’hôte par `10.0.2.2` pour joindre le PC depuis l’**émulateur**.
+///    Sur un **téléphone physique**, mettez l’IPv4 du PC dans `config.json` ou
+///    passez `API_URL` (ex. `http://192.168.x.x:9080`).
 Future<String> getServerUrl() async {
+  const fromDefine = String.fromEnvironment('API_URL', defaultValue: '');
+  final trimmedDefine = fromDefine.trim();
+  if (trimmedDefine.isNotEmpty) {
+    return trimmedDefine;
+  }
+
   final config = await loadAppConfig();
-  return config.apiUrl;
+  var url = config.apiUrl;
+
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    final uri = Uri.tryParse(url);
+    if (uri != null && uri.host.isNotEmpty) {
+      final host = uri.host.toLowerCase();
+      if (host == '127.0.0.1' || host == 'localhost') {
+        url = uri.replace(host: '10.0.2.2').toString();
+        debugPrint('✓ Android : API remappée vers émulateur → $url');
+      }
+    }
+  }
+
+  return url;
 }

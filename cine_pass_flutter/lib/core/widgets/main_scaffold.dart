@@ -12,6 +12,13 @@ import 'app_bottom_bar.dart';
 import 'cinepass_logo.dart';
 import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 
+/// Largeur en dessous de laquelle la barre du haut n’affiche plus les liens texte
+/// (Accueil / Événements / Billets) pour éviter les débordements RenderFlex sur mobile.
+const double _kCompactTopNavWidth = 900;
+
+/// Encore plus serré : menu Profil en icône seule (sans texte « Profil »).
+const double _kVeryCompactTopNavWidth = 620;
+
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key, required this.location, required this.child});
 
@@ -27,7 +34,12 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
     final isAdmin = widget.location.startsWith('/admin');
+    final narrowAdmin = isAdmin && width < kAdminSidebarBreakpoint;
+    final compactTopNav = width < _kCompactTopNavWidth;
+    final veryCompactTopNav = width < _kVeryCompactTopNavWidth;
+
     final auth = context.watch<AuthState>();
     final isAuthPage =
         widget.location == AppRouter.connexion ||
@@ -38,7 +50,13 @@ class _MainScaffoldState extends State<MainScaffold> {
       key: _scaffoldKey,
       backgroundColor: AppTheme.backgroundDark,
       appBar: isAdmin
-          ? null
+          ? (narrowAdmin
+                ? AppBar(
+                    title: const Text('Espace Admin'),
+                    backgroundColor: AppTheme.backgroundDark,
+                    foregroundColor: AppTheme.textPrimary,
+                  )
+                : null)
           : AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.menu_rounded),
@@ -59,47 +77,63 @@ class _MainScaffoldState extends State<MainScaffold> {
                     onPressed: () => context.go(AppRouter.preferences),
                     tooltip: 'Préférences',
                   ),
-                  TextButton(
-                    onPressed: () => context.go(AppRouter.home),
-                    child: const Text('Accueil'),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go(AppRouter.events),
-                    child: const Text('Événements'),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go(AppRouter.billets),
-                    child: const Text('Billets'),
-                  ),
-                  if (auth.isResponsable) ...[
-                    const SizedBox(width: 4),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: FilledButton(
-                        onPressed: () => context.go(AppRouter.responsable),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppTheme.accentGreen,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                        ),
-                        child: const Text('Espace responsable'),
-                      ),
+                  if (!compactTopNav) ...[
+                    TextButton(
+                      onPressed: () => context.go(AppRouter.home),
+                      child: const Text('Accueil'),
                     ),
+                    TextButton(
+                      onPressed: () => context.go(AppRouter.events),
+                      child: const Text('Événements'),
+                    ),
+                    TextButton(
+                      onPressed: () => context.go(AppRouter.billets),
+                      child: const Text('Billets'),
+                    ),
+                  ],
+                  if (auth.isResponsable) ...[
+                    if (compactTopNav)
+                      IconButton(
+                        icon: const Icon(Icons.business_center_rounded),
+                        color: AppTheme.accentGreen,
+                        tooltip: 'Espace responsable',
+                        onPressed: () => context.go(AppRouter.responsable),
+                      )
+                    else ...[
+                      const SizedBox(width: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: FilledButton(
+                          onPressed: () =>
+                              context.go(AppRouter.responsable),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.accentGreen,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                          ),
+                          child: const Text('Espace responsable'),
+                        ),
+                      ),
+                    ],
                   ],
                   PopupMenuButton<String>(
                     offset: const Offset(0, 48),
                     tooltip: auth.isResponsable
                         ? 'Profil · Déconnexion'
                         : 'Profil · Devenir responsable · Déconnexion',
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Profil'),
-                          SizedBox(width: 4),
-                          Icon(Icons.arrow_drop_down, size: 20),
-                        ],
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: veryCompactTopNav
+                          ? const Icon(Icons.person_rounded, size: 26)
+                          : const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('Profil'),
+                                SizedBox(width: 4),
+                                Icon(Icons.arrow_drop_down, size: 20),
+                              ],
+                            ),
                     ),
                     onSelected: (value) {
                       if (value == 'profil') {
@@ -139,17 +173,26 @@ class _MainScaffoldState extends State<MainScaffold> {
                     ],
                   ),
                   if (auth.isAdmin) ...[
-                    const SizedBox(width: 8),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: FilledButton(
+                    if (compactTopNav)
+                      IconButton(
+                        icon: const Icon(Icons.admin_panel_settings_rounded),
+                        color: AppTheme.primaryRed,
+                        tooltip: 'Espace admin',
                         onPressed: () => context.go(AppRouter.admin),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppTheme.primaryRed,
+                      )
+                    else ...[
+                      const SizedBox(width: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: FilledButton(
+                          onPressed: () => context.go(AppRouter.admin),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.primaryRed,
+                          ),
+                          child: const Text('Espace admin'),
                         ),
-                        child: const Text('Espace admin'),
                       ),
-                    ),
+                    ],
                   ],
                 ] else if (!isAuthPage) ...[
                   Padding(
@@ -167,7 +210,12 @@ class _MainScaffoldState extends State<MainScaffold> {
               ],
             ),
       drawer: isAdmin
-          ? null
+          ? (narrowAdmin
+                ? Drawer(
+                    backgroundColor: AppTheme.sidebarDark,
+                    child: const AdminSidebarPanel(),
+                  )
+                : null)
           : Drawer(
               backgroundColor: AppTheme.sidebarDark,
               elevation: 0,
@@ -176,20 +224,28 @@ class _MainScaffoldState extends State<MainScaffold> {
       body: KeyedSubtree(
         key: ValueKey<bool>(isAdmin),
         child: isAdmin
-            ? Row(
-                children: [
-                  const AdminSidebar(),
-                  Expanded(
-                    child: Column(
+            ? (narrowAdmin
+                  ? Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(child: widget.child),
                         const AppBottomBar(compactLinks: true),
                       ],
-                    ),
-                  ),
-                ],
-              )
+                    )
+                  : Row(
+                      children: [
+                        const AdminSidebar(),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(child: widget.child),
+                              const AppBottomBar(compactLinks: true),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ))
             : Stack(
                 fit: StackFit.expand,
                 children: [
@@ -203,7 +259,6 @@ class _MainScaffoldState extends State<MainScaffold> {
                       ],
                     ),
                   ),
-                  // Bande gauche : survol pour ouvrir le drawer (sidebar)
                   Positioned(
                     left: 0,
                     top: 0,
@@ -211,7 +266,8 @@ class _MainScaffoldState extends State<MainScaffold> {
                     width: 24,
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      onEnter: (_) => _scaffoldKey.currentState?.openDrawer(),
+                      onEnter: (_) =>
+                          _scaffoldKey.currentState?.openDrawer(),
                       child: const SizedBox.expand(),
                     ),
                   ),

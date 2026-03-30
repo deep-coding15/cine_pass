@@ -1500,6 +1500,76 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
                   .hasMyPendingDemandeResponsable(session),
         ),
+        'getMyFavoriteFilmIds': _i1.MethodConnector(
+          name: 'getMyFavoriteFilmIds',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .getMyFavoriteFilmIds(session),
+        ),
+        'setMyFilmFavorite': _i1.MethodConnector(
+          name: 'setMyFilmFavorite',
+          params: {
+            'filmId': _i1.ParameterDescription(
+              name: 'filmId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'isFavorite': _i1.ParameterDescription(
+              name: 'isFavorite',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .setMyFilmFavorite(
+                    session,
+                    filmId: params['filmId'],
+                    isFavorite: params['isFavorite'],
+                  ),
+        ),
+        'getMyFavoriteEventIds': _i1.MethodConnector(
+          name: 'getMyFavoriteEventIds',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .getMyFavoriteEventIds(session),
+        ),
+        'setMyEventFavorite': _i1.MethodConnector(
+          name: 'setMyEventFavorite',
+          params: {
+            'eventId': _i1.ParameterDescription(
+              name: 'eventId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'isFavorite': _i1.ParameterDescription(
+              name: 'isFavorite',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['cinePass'] as _i6.CinePassEndpoint)
+                  .setMyEventFavorite(
+                    session,
+                    eventId: params['eventId'],
+                    isFavorite: params['isFavorite'],
+                  ),
+        ),
         'cancelMyEventReservation': _i1.MethodConnector(
           name: 'cancelMyEventReservation',
           params: {

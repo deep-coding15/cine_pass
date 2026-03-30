@@ -219,11 +219,10 @@ class _PaymentPageState extends State<PaymentPage> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow = constraints.maxWidth < 840;
+          final formColumn = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 InkWell(
@@ -360,6 +359,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                         const SizedBox(height: 16),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
                               Icons.lock_rounded,
@@ -367,11 +367,13 @@ class _PaymentPageState extends State<PaymentPage> {
                               color: AppTheme.textSecondary,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Paiement sécurisé. Vos informations sont protégées.',
-                              style: TextStyle(
-                                color: AppTheme.textSecondary,
-                                fontSize: 12,
+                            Expanded(
+                              child: Text(
+                                'Paiement sécurisé. Vos informations sont protégées.',
+                                style: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ],
@@ -390,11 +392,9 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: 24),
-          SizedBox(
-            width: 340,
+            );
+          final recapCard = SizedBox(
+            width: narrow ? double.infinity : 340,
             child: Card(
               color: AppTheme.cardDark,
               child: Padding(
@@ -531,8 +531,26 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
               ),
             ),
-          ),
-        ],
+          );
+          if (narrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                formColumn,
+                const SizedBox(height: 16),
+                recapCard,
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: formColumn),
+              const SizedBox(width: 24),
+              recapCard,
+            ],
+          );
+        },
       ),
     );
   }

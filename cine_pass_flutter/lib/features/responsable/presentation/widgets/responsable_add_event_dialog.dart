@@ -755,6 +755,19 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
     if (_reprs.any((r) => r.lieu.trim().isEmpty || r.ville.trim().isEmpty)) {
       return;
     }
+    if (_structureId == null || _structureId!.trim().isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Aucune structure sélectionnée. Sélectionnez une structure avant de créer.',
+            ),
+            backgroundColor: AppTheme.primaryRed,
+          ),
+        );
+      }
+      return;
+    }
     setState(() => _saving = true);
     final stdP = double.tryParse(_stdPrice.text.replaceAll(',', '.')) ?? 35;
     final stdQ = int.tryParse(_stdQuota.text) ?? 300;
@@ -787,6 +800,7 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
     );
 
     var okCount = 0;
+    String? failReason;
     try {
       for (final r in _reprs) {
         final created = await client.cinePass.createEvent(
@@ -804,7 +818,10 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
           posterUrl: _poster.text.trim().isEmpty ? null : _poster.text.trim(),
           structureId: _structureId,
         );
-        if (created == null) break;
+        if (created == null) {
+          failReason = 'createEvent a retourné null (droits ou données invalides).';
+          break;
+        }
         final cfg = await client.cinePass.setEventReservationConfig(
           eventId: created.id,
           reservationMode: _mode,
@@ -820,7 +837,11 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
           optionPrices: optionPrices,
           optionIncluded: optionIncluded,
         );
-        if (!cfg) break;
+        if (!cfg) {
+          failReason =
+              'Configuration réservation refusée pour "${created.title}" (droits/structure/options).';
+          break;
+        }
         if (_mode == 'AVEC_SIEGES') {
           final seatPlan = _buildSeatPlan();
           final seatOk = await client.cinePass.setEventSeatPlan(
@@ -831,7 +852,11 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
             seatBlocked: seatPlan.$4,
             seatZones: seatPlan.$5,
           );
-          if (!seatOk) break;
+          if (!seatOk) {
+            failReason =
+                'Plan de sièges refusé pour "${created.title}" (mode AVEC_SIEGES / structure / labels).';
+            break;
+          }
         }
         okCount++;
       }
@@ -849,9 +874,10 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
         Navigator.of(context).pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Création interrompue. Vérifiez les données/serveur.',
+              'Création interrompue ($okCount/${_reprs.length}). '
+              '${failReason ?? 'Vérifiez les données/serveur.'}',
             ),
             backgroundColor: AppTheme.primaryRed,
           ),

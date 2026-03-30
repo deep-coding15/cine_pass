@@ -52,7 +52,8 @@ class _UnifiedEventsSectionState extends State<UnifiedEventsSection> {
   }
 
   static const double _cardWidth = 180;
-  static const double _rowHeight = 460;
+  /// Hauteur suffisante pour EventCard (affiche 2/3 + texte + bouton) sans overflow.
+  static const double _rowHeight = 500;
 
   @override
   Widget build(BuildContext context) {

@@ -1,134 +1,176 @@
-# 🎬 CinePass — Architecture & Répartition des tâches
+# CinePass
 
-## Structure générale
+Application de **billetterie et de gestion d’événements** (cinéma, concerts, spectacles) : parcours visiteur, réservation, paiement, billets avec QR, espaces **responsable de structure** et **administrateur**.
+
+Monorepo **Dart / Flutter** avec backend [**Serverpod**](https://serverpod.dev) et **PostgreSQL** sous Docker.
+
+---
+
+## Sommaire
+
+- [Fonctionnalités](#fonctionnalités)
+- [Stack technique](#stack-technique)
+- [Structure du dépôt](#structure-du-dépôt)
+- [Prérequis](#prérequis)
+- [Démarrage rapide](#démarrage-rapide)
+- [Application mobile (API)](#application-mobile-api)
+- [Documentation](#documentation)
+- [Workflow Serverpod](#workflow-serverpod)
+- [Règles et sécurité](#règles-et-sécurité)
+- [Répartition des tâches (équipe)](#répartition-des-tâches-équipe)
+
+---
+
+## Fonctionnalités
+
+- Parcours **visiteur / client** : accueil, catalogue d’événements et films, filtres, fiche détail, réservation (places / tarifs selon configuration), paiement, **mes billets** et QR.
+- **Devenir responsable** : demande soumise puis validation par un admin.
+- **Espace responsable** : structure, événements, réservations, rapports / exports.
+- **Espace admin** : utilisateurs, structures, événements, demandes responsable, statistiques.
+- Authentification (email, Google selon configuration) — voir `SETUP_APRES_CLONE.md`.
+
+---
+
+## Stack technique
+
+| Couche | Technologie |
+|--------|-------------|
+| Frontend | Flutter (SDK ^3.35), `go_router`, workspace Dart |
+| Backend | Serverpod, endpoints Dart, migrations intégrées |
+| Données | PostgreSQL (image `pgvector`), schéma métier SQL + scripts dans `cine_pass_server/schema/` |
+| Outils | Docker Compose, `serverpod_cli` pour `serverpod generate` |
+
+---
+
+## Structure du dépôt
 
 ```
 cine_pass/
-├── cine_pass_server/     # Backend Serverpod
-├── cine_pass_client/     # Client généré automatiquement (ne pas modifier !)
-└── cine_pass_flutter/    # Application Flutter (frontend)
+├── cine_pass_server/      # Backend Serverpod (API, modèles .spy.yaml, config)
+├── cine_pass_client/      # Client généré — ne pas éditer à la main
+├── cine_pass_flutter/     # Application Flutter
+├── guide_d_installation.txt
+├── guide_d'installation.txt   # même contenu ; nom avec apostrophe si exigé par l’enseignant
+└── pubspec.yaml           # Workspace racine
 ```
+
+**Modules Flutter principaux** (`cine_pass_flutter/lib/features/`) : `auth`, `home`, `events`, `films`, `reservation`, `billets`, `profil`, `admin`, `responsable`, `devenir_responsable`, `support`, `faq`, etc.
 
 ---
 
-## 📁 cine_pass_server — Backend
+## Prérequis
 
-```
-cine_pass_server/
-├── bin/
-│   └── main.dart
-├── config/
-│   ├── development.yaml
-│   └── passwords.yaml        # ⚠️ Ne pas commiter !
-└── lib/
-    └── src/
-        ├── models/           # Modèles .spy.yaml → définissent les tables BD
-        ├── endpoints/        # Fonctions appelables depuis Flutter
-        └── generated/        # ⚠️ Généré automatiquement, ne pas modifier !
-```
+- [Flutter](https://docs.flutter.dev/get-started/install) (stable) et Dart
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Git](https://git-scm.com/)
+- Pour iOS : macOS, Xcode, CocoaPods
+
+Vérifications : `flutter doctor`, `docker --version`.
 
 ---
 
-## 📁 cine_pass_client — Client généré
+## Démarrage rapide
 
-> ⚠️ **Ne jamais modifier ce dossier manuellement !**
-> Il est regénéré automatiquement à chaque `serverpod generate`.
-
----
-
-## 📁 cine_pass_flutter — Frontend Flutter
-
-```
-cine_pass_flutter/
-└── lib/
-    ├── main.dart
-    ├── core/
-    │   ├── router/            # Navigation (go_router)
-    │   └── constants/         # URL, configurations
-    └── features/
-        ├── auth/              # Personne 1
-        ├── profil/            # Personne 1
-        ├── home/              # Personne 2
-        ├── programmation/     # Personne 2
-        ├── reservation/       # Personne 3
-        ├── paiement/          # Personne 3
-        ├── billets/           # Personne 3
-        ├── admin/             # Personne 4
-        └── support/           # Personne 4
-```
-
----
-
-## 🔄 Flux de travail
-
-```
-1. Modifier un modèle dans cine_pass_server/lib/src/models/
-           ↓
-2. Lancer : serverpod generate
-           ↓
-3. Le client cine_pass_client est mis à jour automatiquement
-           ↓
-4. Flutter utilise les nouvelles classes via le client
-```
-
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Comment le projet a été conçu : stack, auth Google + SMS, IDP, schéma |
-| **[cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md)** | Guide complet pour installer et lancer le projet depuis zéro |
-
----
-
-## 🚀 Lancer le projet
-
-**Après un clone**, il faut une fois refaire la config et les migrations (mot de passe non versionné, base vide). → Voir **[cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md)** pour le guide complet.
+Après un **clone**, la base est vide et les secrets ne sont pas versionnés. Le détail (schéma métier, seed, dépannage) est dans les guides listés [ci-dessous](#documentation).
 
 ```bash
-# 1. Démarrer Postgres (Docker)
+# 1. Postgres + Redis (depuis le serveur)
 cd cine_pass_server
-docker compose up --build --detach
+docker compose up --build -d
 
-# 2. Configurer les mots de passe (fichier non versionné)
+# 2. Secrets locaux (une fois)
 cp config/passwords.yaml.example config/passwords.yaml
-# Éditer config/passwords.yaml : development.database = mervy (mot de passe Docker)
+# Éditer passwords.yaml : au minimum development.database = mervy (voir docker-compose.yaml)
 
-# 3. Installer les dépendances (à la racine ou dans chaque package)
+# 3. Dépendances workspace
+cd ..
 dart pub get
-cd ../cine_pass_flutter && flutter pub get
-cd ../cine_pass_server
+cd cine_pass_flutter && flutter pub get
+cd ../cine_pass_server && dart pub get
 
-# 4. Appliquer les migrations (obligatoire après un clone)
-dart run bin/main.dart --apply-migrations
+# 4. Migrations Serverpod
+dart run bin/main.dart --apply-migrations --mode development
 
-# 5. Lancer le serveur
-dart run bin/main.dart
+# 5. Schéma métier + données de test (recommandé)
+# Voir guide_d_installation.txt section 7 (docker exec + fichiers SQL dans schema/)
 
-# 6. Lancer Flutter (autre terminal)
+# 6. Lancer l’API
+dart run bin/main.dart --mode development
+# API : http://localhost:9080 — Web Serverpod : http://localhost:9082
+```
+
+**Flutter (web)** — autre terminal :
+
+```bash
 cd cine_pass_flutter
-flutter run -d chrome
+flutter run -d chrome --web-hostname localhost --web-port 7357
+```
+
+Connexion **Google** côté client : variables `GOOGLE_CLIENT_ID` / `GOOGLE_SERVER_CLIENT_ID` — voir [cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md).
+
+---
+
+## Application mobile (API)
+
+Sur **émulateur Android**, `localhost` pointe vers l’émulateur, pas vers le PC. Utiliser l’hôte :
+
+```bash
+flutter run -d <device_id> --dart-define=API_URL=http://10.0.2.2:9080
+```
+
+Sur un **téléphone** (même Wi-Fi que la machine qui héberge le serveur) :
+
+```bash
+flutter run -d <device_id> --dart-define=API_URL=http://<IP_LAN_DU_PC>:9080
 ```
 
 ---
 
-## ⚠️ Règles importantes
+## Documentation
 
-1. **Ne jamais modifier** les fichiers dans `generated/` et `cine_pass_client/`
-2. **Toujours lancer** `serverpod generate` après modification d'un `.spy.yaml`
-3. **Ne jamais commiter** `passwords.yaml` (après un clone : copier `passwords.yaml.example` en `passwords.yaml`)
-4. **Toujours créer une branche** avant de travailler : `git checkout -b feature/ma-fonctionnalite`
-5. **Tester le serveur** avant de pousser sur `main`
-6. **Ne pas mélanger** les tâches des autres personnes
-
----
-
-## 👥 Répartition des tâches
+| Document | Rôle |
+|----------|------|
+| [guide_d_installation.txt](guide_d_installation.txt) | Installation complète (Docker, migrations, SQL, web, Android, iOS, pièges courants) |
+| [guide_d'installation.txt](guide_d'installation.txt) | Identique ; nom avec apostrophe si demandé pour un rendu |
+| [cine_pass_server/SETUP_APRES_CLONE.md](cine_pass_server/SETUP_APRES_CLONE.md) | Clone, OAuth Google, commandes détaillées |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Vision d’ensemble du projet (si présent à la racine) |
+| [cine_pass_server/README.md](cine_pass_server/README.md) | Notes spécifiques au package serveur |
+| [cine_pass_server/schema/README.md](cine_pass_server/schema/README.md) | Scripts SQL métier |
 
 ---
 
-### 👤 Personne 1 — Auth, profil, utilisateurs
+## Workflow Serverpod
+
+```
+Modifier un modèle *.spy.yaml dans cine_pass_server/lib/src/models/
+        ↓
+serverpod generate   (depuis cine_pass_server, CLI installée : dart pub global activate serverpod_cli)
+        ↓
+Mise à jour de cine_pass_client/ et des fichiers generated/
+        ↓
+Utilisation des types côté Flutter via le client généré
+```
+
+---
+
+## Règles et sécurité
+
+1. **Ne pas modifier** `cine_pass_client/` ni les dossiers `generated/` à la main.
+2. Après changement de modèles `.spy.yaml`, lancer **`serverpod generate`** puis appliquer les migrations si besoin.
+3. **Ne jamais commiter** `cine_pass_server/config/passwords.yaml`, `google_client_secret.json`, ni de clés API — utiliser `passwords.yaml.example` comme modèle.
+4. Travailler sur une **branche** dédiée ; vérifier le serveur avant fusion sur `main`.
+5. **Ne pas publier** de secrets dans le README, les issues ou le chat : GitHub bloque les pushes contenant des identifiants OAuth / SMTP réels.
+
+---
+
+## Répartition des tâches (équipe)
+
+Le tableau ci-dessous est une **référence de partage initial** ; les chemins de fichiers peuvent avoir évolué. Pour l’état actuel du code, explorer `cine_pass_flutter/lib/features/` et `cine_pass_server/lib/src/`.
+
+<details>
+<summary><strong>Afficher la répartition détaillée (Personnes 1 à 4)</strong></summary>
+
+### Personne 1 — Auth, profil, utilisateurs
 
 #### Frontend (`cine_pass_flutter/lib/`)
 
@@ -160,9 +202,7 @@ flutter run -d chrome
 | Endpoint favoris (getFavoris, ajouterFavori, supprimerFavori) | `endpoints/profil_endpoint.dart` |
 | Endpoint historique réservations | `endpoints/profil_endpoint.dart` |
 
----
-
-### 👤 Personne 2 — Programmation (films, séances, salles, cinémas)
+### Personne 2 — Programmation (films, séances, salles, cinémas)
 
 #### Frontend (`cine_pass_flutter/lib/`)
 
@@ -195,9 +235,7 @@ flutter run -d chrome
 | Endpoint cinémas (getCinemas, getCinemasProches) | `endpoints/cinemas_endpoint.dart` |
 | Endpoint salles (getSallesByCinema) | `endpoints/salles_endpoint.dart` |
 
----
-
-### 👤 Personne 3 — Réservation, paiement, billets
+### Personne 3 — Réservation, paiement, billets
 
 #### Frontend (`cine_pass_flutter/lib/`)
 
@@ -226,9 +264,7 @@ flutter run -d chrome
 | Endpoint paiement (effectuerPaiement, appliquerCodePromo) | `endpoints/paiement_endpoint.dart` |
 | Endpoint billets (genererBillet, getBilletsByUser) | `endpoints/billets_endpoint.dart` |
 
----
-
-### 👤 Personne 4 — Admin, support, rapports
+### Personne 4 — Admin, support, rapports
 
 #### Frontend (`cine_pass_flutter/lib/`)
 
@@ -259,3 +295,5 @@ flutter run -d chrome
 | Rapports | `endpoints/rapports_endpoint.dart` |
 | Export Excel/CSV/PDF | `services/export_service.dart` |
 | Envoi emails | `services/email_service.dart` |
+
+</details>

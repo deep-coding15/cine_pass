@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../main.dart';
+import 'favorites_state.dart';
 
 /// Etat d'authentification synchronise avec Serverpod `client.auth`.
 class AuthState extends ChangeNotifier {
@@ -72,6 +73,7 @@ class AuthState extends ChangeNotifier {
         notifyListeners();
       }
 
+      unawaited(FavoritesState.instance.syncFromServer());
       unawaited(refreshProfileFromServer(notify: true));
       return;
     }
@@ -88,6 +90,7 @@ class AuthState extends ChangeNotifier {
     _isResponsable = false;
     _userName = '';
     _userEmail = '';
+    FavoritesState.instance.clearAll();
 
     if (notify && changed) {
       notifyListeners();

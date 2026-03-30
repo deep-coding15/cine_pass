@@ -220,6 +220,21 @@ CREATE INDEX "cine_pass_favori_user_idx"
     ON "cine_pass_favori" USING btree ("user_id");
 
 -- =============================================================================
+-- FAVORIS ÉVÉNEMENTS (séparé : cine_pass_favori = film ou cinéma uniquement)
+-- (IF NOT EXISTS : ré-applicable si la table manque ; exécution isolée : BEGIN…COMMIT)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS "cine_pass_favori_evenement" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+    "event_id" uuid NOT NULL REFERENCES "cine_pass_evenement"("id") ON DELETE CASCADE,
+    "created_at" timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "cine_pass_favori_evenement_user_event_uniq" UNIQUE ("user_id", "event_id")
+);
+
+CREATE INDEX IF NOT EXISTS "cine_pass_favori_evenement_user_idx"
+    ON "cine_pass_favori_evenement" ("user_id");
+
+-- =============================================================================
 -- FAQ
 -- =============================================================================
 CREATE TABLE "cine_pass_faq" (
@@ -372,3 +387,21 @@ ALTER TABLE "cine_pass_seance"
     ON DELETE CASCADE ON UPDATE NO ACTION;
 
 COMMIT;
+
+-- =============================================================================
+-- Copie manuelle pgAdmin (si seule cette table manque) — décommenter et exécuter :
+-- =============================================================================
+-- BEGIN;
+--
+-- CREATE TABLE IF NOT EXISTS "cine_pass_favori_evenement" (
+--     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--     "user_id" uuid NOT NULL REFERENCES "serverpod_auth_core_user"("id") ON DELETE CASCADE,
+--     "event_id" uuid NOT NULL REFERENCES "cine_pass_evenement"("id") ON DELETE CASCADE,
+--     "created_at" timestamp without time zone NOT NULL DEFAULT now(),
+--     CONSTRAINT "cine_pass_favori_evenement_user_event_uniq" UNIQUE ("user_id", "event_id")
+-- );
+--
+-- CREATE INDEX IF NOT EXISTS "cine_pass_favori_evenement_user_idx"
+--     ON "cine_pass_favori_evenement" ("user_id");
+--
+-- COMMIT;

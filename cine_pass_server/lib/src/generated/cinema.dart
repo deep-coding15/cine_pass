@@ -312,7 +312,7 @@ class CinemaRepository {
   /// );
   /// ```
   Future<List<Cinema>> find(
-    _i2.Session session, {
+    _i2.DatabaseSession session, {
     _i2.WhereExpressionBuilder<CinemaTable>? where,
     int? limit,
     int? offset,
@@ -354,7 +354,7 @@ class CinemaRepository {
   /// );
   /// ```
   Future<Cinema?> findFirstRow(
-    _i2.Session session, {
+    _i2.DatabaseSession session, {
     _i2.WhereExpressionBuilder<CinemaTable>? where,
     int? offset,
     _i2.OrderByBuilder<CinemaTable>? orderBy,
@@ -378,7 +378,7 @@ class CinemaRepository {
 
   /// Finds a single [Cinema] by its [id] or null if no such row exists.
   Future<Cinema?> findById(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     _i2.UuidValue id, {
     _i2.Transaction? transaction,
     _i2.LockMode? lockMode,
@@ -403,7 +403,7 @@ class CinemaRepository {
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
   Future<List<Cinema>> insert(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     List<Cinema> rows, {
     _i2.Transaction? transaction,
     bool ignoreConflicts = false,
@@ -419,7 +419,7 @@ class CinemaRepository {
   ///
   /// The returned [Cinema] will have its `id` field set.
   Future<Cinema> insertRow(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     Cinema row, {
     _i2.Transaction? transaction,
   }) async {
@@ -435,7 +435,7 @@ class CinemaRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Cinema>> update(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     List<Cinema> rows, {
     _i2.ColumnSelections<CinemaTable>? columns,
     _i2.Transaction? transaction,
@@ -451,7 +451,7 @@ class CinemaRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Cinema> updateRow(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     Cinema row, {
     _i2.ColumnSelections<CinemaTable>? columns,
     _i2.Transaction? transaction,
@@ -466,7 +466,7 @@ class CinemaRepository {
   /// Updates a single [Cinema] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Cinema?> updateById(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     _i2.UuidValue id, {
     required _i2.ColumnValueListBuilder<CinemaUpdateTable> columnValues,
     _i2.Transaction? transaction,
@@ -481,7 +481,7 @@ class CinemaRepository {
   /// Updates all [Cinema]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Cinema>> updateWhere(
-    _i2.Session session, {
+    _i2.DatabaseSession session, {
     required _i2.ColumnValueListBuilder<CinemaUpdateTable> columnValues,
     required _i2.WhereExpressionBuilder<CinemaTable> where,
     int? limit,
@@ -507,7 +507,7 @@ class CinemaRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Cinema>> delete(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     List<Cinema> rows, {
     _i2.Transaction? transaction,
   }) async {
@@ -519,7 +519,7 @@ class CinemaRepository {
 
   /// Deletes a single [Cinema].
   Future<Cinema> deleteRow(
-    _i2.Session session,
+    _i2.DatabaseSession session,
     Cinema row, {
     _i2.Transaction? transaction,
   }) async {
@@ -531,7 +531,7 @@ class CinemaRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Cinema>> deleteWhere(
-    _i2.Session session, {
+    _i2.DatabaseSession session, {
     required _i2.WhereExpressionBuilder<CinemaTable> where,
     _i2.Transaction? transaction,
   }) async {
@@ -544,7 +544,7 @@ class CinemaRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i2.Session session, {
+    _i2.DatabaseSession session, {
     _i2.WhereExpressionBuilder<CinemaTable>? where,
     int? limit,
     _i2.Transaction? transaction,
@@ -558,7 +558,7 @@ class CinemaRepository {
 
   /// Acquires row-level locks on [Cinema] rows matching the [where] expression.
   Future<void> lockRows(
-    _i2.Session session, {
+    _i2.DatabaseSession session, {
     required _i2.WhereExpressionBuilder<CinemaTable> where,
     required _i2.LockMode lockMode,
     required _i2.Transaction transaction,

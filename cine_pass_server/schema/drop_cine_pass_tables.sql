@@ -29,6 +29,8 @@ DROP TABLE IF EXISTS "cine_pass_event_concert_details" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_event_theatre_details" CASCADE;
 DROP TABLE IF EXISTS "cine_pass_event_other_details" CASCADE;
 
+DROP TABLE IF EXISTS "cine_pass_favori_evenement" CASCADE;
+
 DROP TABLE IF EXISTS "cine_pass_evenement" CASCADE;
 
 -- Cinéma / films / séances

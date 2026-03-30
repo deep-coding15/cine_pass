@@ -361,7 +361,7 @@ class StructureRepository {
   /// );
   /// ```
   Future<List<Structure>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<StructureTable>? where,
     int? limit,
     int? offset,
@@ -403,7 +403,7 @@ class StructureRepository {
   /// );
   /// ```
   Future<Structure?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<StructureTable>? where,
     int? offset,
     _i1.OrderByBuilder<StructureTable>? orderBy,
@@ -427,7 +427,7 @@ class StructureRepository {
 
   /// Finds a single [Structure] by its [id] or null if no such row exists.
   Future<Structure?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
     _i1.LockMode? lockMode,
@@ -452,7 +452,7 @@ class StructureRepository {
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
   Future<List<Structure>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Structure> rows, {
     _i1.Transaction? transaction,
     bool ignoreConflicts = false,
@@ -468,7 +468,7 @@ class StructureRepository {
   ///
   /// The returned [Structure] will have its `id` field set.
   Future<Structure> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Structure row, {
     _i1.Transaction? transaction,
   }) async {
@@ -484,7 +484,7 @@ class StructureRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Structure>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Structure> rows, {
     _i1.ColumnSelections<StructureTable>? columns,
     _i1.Transaction? transaction,
@@ -500,7 +500,7 @@ class StructureRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Structure> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Structure row, {
     _i1.ColumnSelections<StructureTable>? columns,
     _i1.Transaction? transaction,
@@ -515,7 +515,7 @@ class StructureRepository {
   /// Updates a single [Structure] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Structure?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<StructureUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -530,7 +530,7 @@ class StructureRepository {
   /// Updates all [Structure]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Structure>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<StructureUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<StructureTable> where,
     int? limit,
@@ -556,7 +556,7 @@ class StructureRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Structure>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Structure> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -568,7 +568,7 @@ class StructureRepository {
 
   /// Deletes a single [Structure].
   Future<Structure> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Structure row, {
     _i1.Transaction? transaction,
   }) async {
@@ -580,7 +580,7 @@ class StructureRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Structure>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<StructureTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -593,7 +593,7 @@ class StructureRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<StructureTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -607,7 +607,7 @@ class StructureRepository {
 
   /// Acquires row-level locks on [Structure] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<StructureTable> where,
     required _i1.LockMode lockMode,
     required _i1.Transaction transaction,

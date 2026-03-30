@@ -4,9 +4,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 
-/// Barre latérale admin (utilisée par MainScaffold pour éviter de changer de racine).
-class AdminSidebar extends StatelessWidget {
-  const AdminSidebar({super.key});
+/// Largeur minimale (px) pour afficher la sidebar admin à gauche ; en dessous = menu tiroir.
+const double kAdminSidebarBreakpoint = 840;
+
+/// Contenu du menu admin (sidebar bureau ou drawer mobile).
+class AdminSidebarPanel extends StatelessWidget {
+  const AdminSidebarPanel({super.key});
 
   static bool _isActive(BuildContext context, String path) {
     final location = GoRouterState.of(context).uri.path;
@@ -14,10 +17,14 @@ class AdminSidebar extends StatelessWidget {
         (path == '/admin' && (location == '/admin' || location == '/admin/'));
   }
 
+  void _navigate(BuildContext context, void Function() go) {
+    Scaffold.maybeOf(context)?.closeDrawer();
+    go();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 260,
       color: AppTheme.sidebarDark,
       child: SafeArea(
         child: Column(
@@ -48,49 +55,60 @@ class AdminSidebar extends StatelessWidget {
               ),
             ),
             const Divider(color: AppTheme.textSecondary, height: 1),
-            _AdminNavTile(
-              icon: Icons.dashboard_rounded,
-              label: 'Tableau de bord',
-              isActive: _isActive(context, '/admin'),
-              onTap: () => context.go(AppRouter.admin),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _AdminNavTile(
+                    icon: Icons.dashboard_rounded,
+                    label: 'Tableau de bord',
+                    isActive: _isActive(context, '/admin'),
+                    onTap: () => _navigate(
+                      context,
+                      () => context.go(AppRouter.admin),
+                    ),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.calendar_today_rounded,
+                    label: 'Événements',
+                    isActive: _isActive(context, '/admin/events'),
+                    onTap: () => _navigate(context, () => context.go('/admin/events')),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.store_rounded,
+                    label: 'Structures',
+                    isActive: _isActive(context, '/admin/structures'),
+                    onTap: () =>
+                        _navigate(context, () => context.go('/admin/structures')),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.people_rounded,
+                    label: 'Utilisateurs',
+                    isActive: _isActive(context, '/admin/users'),
+                    onTap: () => _navigate(context, () => context.go('/admin/users')),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.badge_outlined,
+                    label: 'Demandes responsable',
+                    isActive: _isActive(context, '/admin/demandes'),
+                    onTap: () => _navigate(context, () => context.go('/admin/demandes')),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.confirmation_number_rounded,
+                    label: 'Réservations',
+                    isActive: _isActive(context, '/admin/reservations'),
+                    onTap: () =>
+                        _navigate(context, () => context.go('/admin/reservations')),
+                  ),
+                  _AdminNavTile(
+                    icon: Icons.assessment_rounded,
+                    label: 'Rapport de statistiques',
+                    isActive: _isActive(context, '/admin/stats'),
+                    onTap: () => _navigate(context, () => context.go('/admin/stats')),
+                  ),
+                ],
+              ),
             ),
-            _AdminNavTile(
-              icon: Icons.calendar_today_rounded,
-              label: 'Événements',
-              isActive: _isActive(context, '/admin/events'),
-              onTap: () => context.go('/admin/events'),
-            ),
-            _AdminNavTile(
-              icon: Icons.store_rounded,
-              label: 'Structures',
-              isActive: _isActive(context, '/admin/structures'),
-              onTap: () => context.go('/admin/structures'),
-            ),
-            _AdminNavTile(
-              icon: Icons.people_rounded,
-              label: 'Utilisateurs',
-              isActive: _isActive(context, '/admin/users'),
-              onTap: () => context.go('/admin/users'),
-            ),
-            _AdminNavTile(
-              icon: Icons.badge_outlined,
-              label: 'Demandes responsable',
-              isActive: _isActive(context, '/admin/demandes'),
-              onTap: () => context.go('/admin/demandes'),
-            ),
-            _AdminNavTile(
-              icon: Icons.confirmation_number_rounded,
-              label: 'Réservations',
-              isActive: _isActive(context, '/admin/reservations'),
-              onTap: () => context.go('/admin/reservations'),
-            ),
-            _AdminNavTile(
-              icon: Icons.assessment_rounded,
-              label: 'Rapport de statistiques',
-              isActive: _isActive(context, '/admin/stats'),
-              onTap: () => context.go('/admin/stats'),
-            ),
-            const Spacer(),
             const Divider(color: AppTheme.textSecondary, height: 1),
             ListTile(
               leading: const Icon(
@@ -102,8 +120,7 @@ class AdminSidebar extends StatelessWidget {
                 style: TextStyle(color: AppTheme.textSecondary),
               ),
               onTap: () {
-                // Différer la navigation pour éviter Duplicate GlobalKey /
-                // _elements.contains lors du swap shell (admin → app).
+                Scaffold.maybeOf(context)?.closeDrawer();
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   Future<void>.delayed(const Duration(milliseconds: 100), () {
                     if (context.mounted) {
@@ -120,6 +137,19 @@ class AdminSidebar extends StatelessWidget {
   }
 }
 
+/// Barre latérale admin (bureau uniquement — largeur fixe).
+class AdminSidebar extends StatelessWidget {
+  const AdminSidebar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 260,
+      child: AdminSidebarPanel(),
+    );
+  }
+}
+
 /// Scaffold complet admin (pour usage standalone si besoin).
 class AdminScaffold extends StatelessWidget {
   const AdminScaffold({super.key, required this.child});
@@ -128,6 +158,20 @@ class AdminScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (width < kAdminSidebarBreakpoint) {
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundDark,
+        appBar: AppBar(
+          title: const Text('Espace Admin'),
+        ),
+        drawer: Drawer(
+          backgroundColor: AppTheme.sidebarDark,
+          child: const AdminSidebarPanel(),
+        ),
+        body: child,
+      );
+    }
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
       body: Row(
@@ -173,11 +217,14 @@ class _AdminNavTile extends StatelessWidget {
                   color: isActive ? Colors.white : AppTheme.textSecondary,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isActive ? Colors.white : AppTheme.textSecondary,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: isActive ? Colors.white : AppTheme.textSecondary,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
+                    ),
                   ),
                 ),
               ],

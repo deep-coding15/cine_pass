@@ -266,11 +266,10 @@ class _BilletCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 20),
       child: Padding(
         padding: const EdgeInsets.all(20),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final narrow = constraints.maxWidth < 520;
+            final details = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -484,7 +483,6 @@ class _BilletCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 12),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Montant total',
@@ -493,6 +491,7 @@ class _BilletCard extends StatelessWidget {
                           fontSize: 14,
                         ),
                       ),
+                      const SizedBox(width: 10),
                       Text(
                         '${billet.totalAmount.toStringAsFixed(2)} MAD',
                         style: const TextStyle(
@@ -515,7 +514,7 @@ class _BilletCard extends StatelessWidget {
                     const SizedBox(height: 12),
                   ] else if (canCancel) ...[
                     Text(
-                      'L’annulation n’est acceptée que s’il reste au moins 2 h avant le début de l’événement.',
+                      'L’annulation est possible uniquement s’il reste au moins 2 h avant le début de l’événement.',
                       style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 13,
@@ -628,92 +627,115 @@ class _BilletCard extends StatelessWidget {
                     ),
                   ],
                 ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            if (!cancelled)
-              InkWell(
-                onTap: () => _showQrFullScreen(context, billet),
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
+              );
+            final Widget sideWidget = !cancelled
+                ? InkWell(
+                    onTap: () => _showQrFullScreen(context, billet),
                     borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      QrImageView(
-                        data: 'CINEPASS-${billet.id}',
-                        version: QrVersions.auto,
-                        size: 100,
-                        backgroundColor: Colors.white,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      const SizedBox(height: 6),
-                      Row(
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'Scannez à l\'entrée',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 11,
-                            ),
+                          QrImageView(
+                            data: 'CINEPASS-${billet.id}',
+                            version: QrVersions.auto,
+                            size: 100,
+                            backgroundColor: Colors.white,
                           ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.touch_app_rounded,
-                            size: 14,
-                            color: Colors.black54,
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Scannez à l\'entrée',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.touch_app_rounded,
+                                size: 14,
+                                color: Colors.black54,
+                              ),
+                            ],
+                          ),
+                          if ((billet.seats != null &&
+                                  billet.seats!.length > 1) ||
+                              (billet.ticketCount != null &&
+                                  billet.ticketCount! > 1)) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '1 QR code pour toute la réservation',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 10,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                          const SizedBox(height: 2),
+                          Text(
+                            'Appuyez pour agrandir',
+                            style: TextStyle(
+                              color: Colors.black38,
+                              fontSize: 9,
+                            ),
                           ),
                         ],
                       ),
-                      if ((billet.seats != null && billet.seats!.length > 1) ||
-                          (billet.ticketCount != null &&
-                              billet.ticketCount! > 1)) ...[
-                        const SizedBox(height: 4),
+                    ),
+                  )
+                : Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceDark,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cancel_rounded,
+                          size: 48,
+                          color: AppTheme.textSecondary,
+                        ),
+                        const SizedBox(height: 6),
                         Text(
-                          '1 QR code pour toute la réservation',
-                          style: TextStyle(color: Colors.black54, fontSize: 10),
-                          textAlign: TextAlign.center,
+                          'Annulée',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
-                      const SizedBox(height: 2),
-                      Text(
-                        'Appuyez pour agrandir',
-                        style: TextStyle(color: Colors.black38, fontSize: 9),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceDark,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.cancel_rounded,
-                      size: 48,
-                      color: AppTheme.textSecondary,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Annulée',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+                  );
+            if (narrow) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  details,
+                  const SizedBox(height: 16),
+                  Center(child: sideWidget),
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: details),
+                const SizedBox(width: 20),
+                sideWidget,
+              ],
+            );
+          },
         ),
       ),
     );
