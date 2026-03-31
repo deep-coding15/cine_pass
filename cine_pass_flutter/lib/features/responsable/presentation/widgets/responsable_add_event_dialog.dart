@@ -147,6 +147,13 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
   final _theatreDirector = TextEditingController();
   final _theatreTroupe = TextEditingController();
 
+  void _syncDisplayedBasePrice() {
+    final normalized = _stdPrice.text.trim();
+    if (_price.text != normalized) {
+      _price.text = normalized;
+    }
+  }
+
   final List<EventRepr> _reprs = [];
   final Map<String, String> _vipIncludedCatalog = const {
     'SIEGE_VIP': 'Siège VIP',
@@ -479,6 +486,7 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
             }
           }
         }
+        _syncDisplayedBasePrice();
       }
     } catch (_) {
       if (mounted) {
@@ -498,6 +506,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
         e.key: TextEditingController(text: e.value.toStringAsFixed(0)),
     };
     super.initState();
+    _syncDisplayedBasePrice();
+    _stdPrice.addListener(_syncDisplayedBasePrice);
     if (widget.structures.isNotEmpty) _structureId = widget.structures.first.id;
     if (widget.editEventId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadEditData());
@@ -506,6 +516,7 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
 
   @override
   void dispose() {
+    _stdPrice.removeListener(_syncDisplayedBasePrice);
     for (final c in _paidPriceControllers.values) {
       c.dispose();
     }
@@ -1063,6 +1074,34 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
     return (labels, rowIndices, colIndices, blocked, zones);
   }
 
+  Widget _responsivePair({
+    required Widget left,
+    required Widget right,
+    double breakpoint = 420,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stacked = constraints.maxWidth < breakpoint;
+        if (stacked) {
+          return Column(
+            children: [
+              left,
+              const SizedBox(height: 10),
+              right,
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: left),
+            const SizedBox(width: 10),
+            Expanded(child: right),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _specific() {
     switch (_kind) {
       case 'film':
@@ -1075,58 +1114,43 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               style: const TextStyle(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    key: ValueKey<String>(_filmGenre),
-                    initialValue: _filmGenre,
-                    decoration: _d('Genre du film'),
-                    dropdownColor: AppTheme.cardDark,
-                    items: _filmGenres
-                        .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                        .toList(),
-                    onChanged: (v) =>
-                        setState(() => _filmGenre = v ?? _filmGenre),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextFormField(
-                    controller: _filmDirector,
-                    decoration: _d('Réalisateur'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-              ],
+            _responsivePair(
+              left: DropdownButtonFormField<String>(
+                key: ValueKey<String>(_filmGenre),
+                initialValue: _filmGenre,
+                decoration: _d('Genre du film'),
+                dropdownColor: AppTheme.cardDark,
+                items: _filmGenres
+                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                    .toList(),
+                onChanged: (v) => setState(() => _filmGenre = v ?? _filmGenre),
+              ),
+              right: TextFormField(
+                controller: _filmDirector,
+                decoration: _d('Réalisateur'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _filmDuration,
-                    decoration: _d('Durée (min)'),
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
+            _responsivePair(
+              left: TextFormField(
+                controller: _filmDuration,
+                decoration: _d('Durée (min)'),
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
+              right: DropdownButtonFormField<String>(
+                key: ValueKey<String>(_filmOriginalLanguage),
+                initialValue: _filmOriginalLanguage,
+                decoration: _d('Langue originale'),
+                dropdownColor: AppTheme.cardDark,
+                items: _commonLanguages
+                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                    .toList(),
+                onChanged: (v) => setState(
+                  () => _filmOriginalLanguage = v ?? _filmOriginalLanguage,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    key: ValueKey<String>(_filmOriginalLanguage),
-                    initialValue: _filmOriginalLanguage,
-                    decoration: _d('Langue originale'),
-                    dropdownColor: AppTheme.cardDark,
-                    items: _commonLanguages
-                        .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                        .toList(),
-                    onChanged: (v) => setState(
-                      () => _filmOriginalLanguage = v ?? _filmOriginalLanguage,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         );
@@ -1139,24 +1163,17 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               style: const TextStyle(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _festivalEdition,
-                    decoration: _d('Édition'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextFormField(
-                    controller: _festivalProgram,
-                    decoration: _d('Programme'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-              ],
+            _responsivePair(
+              left: TextFormField(
+                controller: _festivalEdition,
+                decoration: _d('Édition'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
+              right: TextFormField(
+                controller: _festivalProgram,
+                decoration: _d('Programme'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
             ),
           ],
         );
@@ -1169,24 +1186,17 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               style: const TextStyle(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _standupGuests,
-                    decoration: _d('Guests'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextFormField(
-                    controller: _standupLang,
-                    decoration: _d('Langue'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-              ],
+            _responsivePair(
+              left: TextFormField(
+                controller: _standupGuests,
+                decoration: _d('Guests'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
+              right: TextFormField(
+                controller: _standupLang,
+                decoration: _d('Langue'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
             ),
           ],
         );
@@ -1199,24 +1209,17 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               style: const TextStyle(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _concertGenre,
-                    decoration: _d('Genre musical'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextFormField(
-                    controller: _concertOpening,
-                    decoration: _d('Première partie'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-              ],
+            _responsivePair(
+              left: TextFormField(
+                controller: _concertGenre,
+                decoration: _d('Genre musical'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
+              right: TextFormField(
+                controller: _concertOpening,
+                decoration: _d('Première partie'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
             ),
           ],
         );
@@ -1229,24 +1232,17 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
               style: const TextStyle(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _theatreDirector,
-                    decoration: _d('Metteur en scène'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextFormField(
-                    controller: _theatreTroupe,
-                    decoration: _d('Troupe / compagnie'),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                  ),
-                ),
-              ],
+            _responsivePair(
+              left: TextFormField(
+                controller: _theatreDirector,
+                decoration: _d('Metteur en scène'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
+              right: TextFormField(
+                controller: _theatreTroupe,
+                decoration: _d('Troupe / compagnie'),
+                style: const TextStyle(color: AppTheme.textPrimary),
+              ),
             ),
           ],
         );
@@ -1744,12 +1740,13 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
           TextFormField(
             controller: _price,
             decoration: _d('Prix de base affiché'),
-            keyboardType: TextInputType.number,
+            readOnly: true,
+            enabled: false,
             style: const TextStyle(color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 6),
           Text(
-            'Capacité : somme des quotas STANDARD + VIP (ci-dessus).',
+            'Prix de base = prix du billet STANDARD. Capacité = somme des quotas STANDARD + VIP.',
             style: TextStyle(
               color: AppTheme.textSecondary.withValues(alpha: 0.9),
               fontSize: 11,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../main.dart';
 import '../widgets/event_card.dart';
+import '../widgets/event_type_badge.dart';
 
 /// Page événements uniquement (source API `getEvents`).
 class EventsListPage extends StatefulWidget {
@@ -18,14 +19,16 @@ class _EventsListPageState extends State<EventsListPage> {
 
   String _selectedType = 'Tous';
   String _selectedCity = 'Toutes';
+  String _selectedDynamicFilterValue = 'Tous';
   DateTime? _dateFrom;
   DateTime? _dateTo;
   List<EventResponse> _events = [];
   List<String> _cities = ['Toutes'];
-
   List<String> _typeOptions = const ['Tous'];
+  List<String> _dynamicFilterOptions = const ['Tous'];
   List<EventResponse> _filteredEvents = [];
   bool _loading = true;
+  bool _dynamicFilterLoading = false;
   String? _error;
 
   @override
@@ -49,17 +52,15 @@ class _EventsListPageState extends State<EventsListPage> {
       final results = await Future.wait<dynamic>([
         client.cinePass.getEvents(),
         client.cinePass.getCities(),
-        client.cinePass.getEventCategories(),
       ]);
       if (!mounted) return;
       final events = results[0] as List<EventResponse>;
       final cities = results[1] as List<String>;
-      final categories = results[2] as List<String>;
-      final typeOpts = ['Tous', ...categories.where((c) => c != 'Toutes')];
+      final typeOpts = _buildTypeOptions(events);
 
       setState(() {
         _events = events;
-        _cities = cities;
+        _cities = _buildCityOptions(events, selectedType: _selectedType);
         _typeOptions = typeOpts;
         if (!typeOpts.contains(_selectedType)) {
           _selectedType = 'Tous';
@@ -70,6 +71,7 @@ class _EventsListPageState extends State<EventsListPage> {
         _loading = false;
         _applyFilters();
       });
+      await _loadDynamicFilterOptions();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -85,13 +87,161 @@ class _EventsListPageState extends State<EventsListPage> {
     return e.city.trim().toLowerCase() == _selectedCity.trim().toLowerCase();
   }
 
+  List<String> _buildTypeOptions(List<EventResponse> events) {
+    final labels = events
+        .map(eventTypeDisplayLabel)
+        .map((label) => label.trim())
+        .where((label) => label.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return ['Tous', ...labels];
+  }
+
+  List<String> _buildCityOptions(
+    List<EventResponse> events, {
+    required String selectedType,
+  }) {
+    final base = selectedType == 'Tous'
+        ? events
+        : events.where((e) => _eventMatchesDisplayType(e, selectedType)).toList();
+    final cities = base
+        .map((e) => e.city.trim())
+        .where((city) => city.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return ['Toutes', ...cities];
+  }
+
+  String? _dynamicFilterKeyForSelectedType() {
+    switch (_selectedType.trim().toLowerCase()) {
+      case 'film':
+        return 'genre';
+      case 'concert':
+        return 'artist';
+      case 'festival':
+        return 'theme';
+      case 'stand-up':
+      case 'standup':
+        return 'main_artist';
+      case 'théâtre':
+      case 'theatre':
+        return 'author';
+      default:
+        return null;
+    }
+  }
+
+  String? _dynamicFilterLabelForSelectedType() {
+    switch (_selectedType.trim().toLowerCase()) {
+      case 'film':
+        return 'Genre';
+      case 'concert':
+        return 'Artiste';
+      case 'festival':
+        return 'Thématique';
+      case 'stand-up':
+      case 'standup':
+        return 'Humoriste';
+      case 'théâtre':
+      case 'theatre':
+        return 'Auteur';
+      default:
+        return null;
+    }
+  }
+
+  String _eventTypeCode(EventResponse e) => (e.eventType ?? '').trim().toUpperCase();
+
+  Future<void> _loadDynamicFilterOptions() async {
+    final key = _dynamicFilterKeyForSelectedType();
+    if (key == null || _selectedType == 'Tous') {
+      if (!mounted) return;
+      setState(() {
+        _dynamicFilterOptions = const ['Tous'];
+        _selectedDynamicFilterValue = 'Tous';
+        _dynamicFilterLoading = false;
+      });
+      return;
+    }
+    setState(() {
+      _dynamicFilterLoading = true;
+    });
+    try {
+      final eventType = _events
+          .firstWhere(
+            (e) => _eventMatchesDisplayType(e, _selectedType),
+            orElse: () => _events.first,
+          )
+          .eventType;
+      final options = await client.cinePass.getEventDynamicFilterValues(
+        eventType: (eventType ?? '').trim().toUpperCase(),
+        filterKey: key,
+      );
+      if (!mounted) return;
+      setState(() {
+        _dynamicFilterOptions = options.isEmpty ? const ['Tous'] : options;
+        if (!_dynamicFilterOptions.contains(_selectedDynamicFilterValue)) {
+          _selectedDynamicFilterValue = 'Tous';
+        }
+        _dynamicFilterLoading = false;
+        _applyFilters();
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _dynamicFilterOptions = const ['Tous'];
+        _selectedDynamicFilterValue = 'Tous';
+        _dynamicFilterLoading = false;
+      });
+    }
+  }
+
+  bool _matchesDynamicFilter(EventResponse e) {
+    if (_selectedDynamicFilterValue == 'Tous') return true;
+    final selected = _selectedDynamicFilterValue.trim().toLowerCase();
+    final desc = (e.description ?? '').toLowerCase();
+    switch (_eventTypeCode(e)) {
+      case 'FILM':
+        return (e.filmGenre ?? '').trim().toLowerCase() == selected ||
+            (e.filmDirector ?? '').trim().toLowerCase() == selected ||
+            (e.eventLanguage ?? '').trim().toLowerCase() == selected ||
+            desc.contains(selected);
+      case 'CONCERT':
+        return (e.concertArtist ?? '').trim().toLowerCase() == selected ||
+            (e.concertMusicGenre ?? '').trim().toLowerCase() == selected ||
+            desc.contains(selected);
+      case 'FESTIVAL':
+        return (e.festivalTheme ?? '').trim().toLowerCase() == selected ||
+            desc.contains(selected);
+      case 'STANDUP':
+        return (e.standupMainArtist ?? '').trim().toLowerCase() == selected ||
+            desc.contains(selected);
+      case 'THEATRE':
+        return (e.theatreAuthor ?? '').trim().toLowerCase() == selected ||
+            desc.contains(selected);
+      default:
+        return true;
+    }
+  }
+
   void _applyFilters() {
     final query = _searchController.text.trim().toLowerCase();
 
     List<EventResponse> events = _events;
 
+    final cityOptions = _buildCityOptions(_events, selectedType: _selectedType);
+    if (!cityOptions.contains(_selectedCity)) {
+      _selectedCity = 'Toutes';
+    }
+    _cities = cityOptions;
+
     if (_selectedType != 'Tous') {
       events = events.where(_eventMatchesSelectedType).toList();
+    }
+    if (_selectedDynamicFilterValue != 'Tous') {
+      events = events.where(_matchesDynamicFilter).toList();
     }
     if (_selectedCity != 'Toutes') {
       events = events.where(_eventMatchesCity).toList();
@@ -119,29 +269,8 @@ class _EventsListPageState extends State<EventsListPage> {
       _eventMatchesDisplayType(e, _selectedType);
 
   bool _eventMatchesDisplayType(EventResponse e, String displayType) {
-    final sel = displayType.trim();
-    final code = _eventTypeCodeFromLabel(sel);
-    final typeUpper = (e.eventType ?? '').trim().toUpperCase();
-    if (code.isNotEmpty && typeUpper == code) return true;
-    if (e.category.trim().toLowerCase() == sel.toLowerCase()) return true;
-    return false;
-  }
-
-  String _eventTypeCodeFromLabel(String type) {
-    switch (type.toLowerCase()) {
-      case 'festival':
-        return 'FESTIVAL';
-      case 'stand-up':
-      case 'standup':
-        return 'STANDUP';
-      case 'concert':
-        return 'CONCERT';
-      case 'théâtre':
-      case 'theatre':
-        return 'THEATRE';
-      default:
-        return '';
-    }
+    return eventTypeDisplayLabel(e).trim().toLowerCase() ==
+        displayType.trim().toLowerCase();
   }
 
   List<EventResponse> _filterEventsByDate(List<EventResponse> list) {
@@ -168,6 +297,8 @@ class _EventsListPageState extends State<EventsListPage> {
     setState(() {
       _selectedType = 'Tous';
       _selectedCity = 'Toutes';
+      _selectedDynamicFilterValue = 'Tous';
+      _dynamicFilterOptions = const ['Tous'];
       _dateFrom = null;
       _dateTo = null;
       _searchController.clear();
@@ -289,68 +420,119 @@ class _EventsListPageState extends State<EventsListPage> {
                     style: const TextStyle(color: AppTheme.textPrimary),
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 160,
-                        child: _DropdownFilter<String>(
-                          value: _selectedType,
-                          items: _typeOptions,
-                          label: 'Type',
-                          onChanged: (v) {
-                            setState(() {
-                              _selectedType = v ?? 'Tous';
-                              _applyFilters();
-                            });
-                          },
-                        ),
-                      ),
-                      if (showCity)
-                        SizedBox(
-                          width: 150,
-                          child: _DropdownFilter<String>(
-                            value: _selectedCity,
-                            items: _cities,
-                            label: 'Ville',
-                            onChanged: (v) {
-                              setState(() {
-                                _selectedCity = v ?? 'Toutes';
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isCompact = constraints.maxWidth < 430;
+                      final filterWidth = isCompact
+                          ? constraints.maxWidth
+                          : (constraints.maxWidth > 520 ? 180.0 : 160.0);
+                      final dateWidth = isCompact
+                          ? (constraints.maxWidth - 8) / 2
+                          : 132.0;
+                      final dynamicLabel = _dynamicFilterLabelForSelectedType();
+
+                      return Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: filterWidth,
+                            child: _DropdownFilter<String>(
+                              value: _selectedType,
+                              items: _typeOptions,
+                              label: 'Type',
+                              onChanged: (v) async {
+                                setState(() {
+                                  _selectedType = v ?? 'Tous';
+                                  _selectedCity = 'Toutes';
+                                  _selectedDynamicFilterValue = 'Tous';
+                                  _dynamicFilterOptions = const ['Tous'];
+                                });
                                 _applyFilters();
-                              });
-                            },
+                                await _loadDynamicFilterOptions();
+                              },
+                            ),
                           ),
-                        ),
-                      _DateFilterChip(
-                        label: 'Du',
-                        date: _dateFrom,
-                        onTap: _pickDateFrom,
-                        onClear: () {
-                          setState(() {
-                            _dateFrom = null;
-                            _applyFilters();
-                          });
-                        },
-                      ),
-                      _DateFilterChip(
-                        label: 'Au',
-                        date: _dateTo,
-                        onTap: _pickDateTo,
-                        onClear: () {
-                          setState(() {
-                            _dateTo = null;
-                            _applyFilters();
-                          });
-                        },
-                      ),
-                      TextButton.icon(
-                        onPressed: _resetFilters,
-                        icon: const Icon(Icons.refresh_rounded, size: 18),
-                        label: const Text('Réinitialiser'),
-                      ),
-                    ],
+                          if (dynamicLabel != null)
+                            SizedBox(
+                              width: filterWidth,
+                              child: _DropdownFilter<String>(
+                                value: _selectedDynamicFilterValue,
+                                items: _dynamicFilterOptions,
+                                label: _dynamicFilterLoading
+                                    ? '$dynamicLabel...'
+                                    : dynamicLabel,
+                                onChanged: _dynamicFilterLoading
+                                    ? null
+                                    : (v) {
+                                        setState(() {
+                                          _selectedDynamicFilterValue =
+                                              v ?? 'Tous';
+                                          _applyFilters();
+                                        });
+                                      },
+                              ),
+                            ),
+                          if (showCity)
+                            SizedBox(
+                              width: filterWidth,
+                              child: _DropdownFilter<String>(
+                                value: _selectedCity,
+                                items: _cities,
+                                label: 'Ville',
+                                onChanged: (v) {
+                                  setState(() {
+                                    _selectedCity = v ?? 'Toutes';
+                                    _applyFilters();
+                                  });
+                                },
+                              ),
+                            ),
+                          SizedBox(
+                            width: dateWidth,
+                            child: _DateFilterChip(
+                              label: 'Du',
+                              date: _dateFrom,
+                              onTap: _pickDateFrom,
+                              onClear: () {
+                                setState(() {
+                                  _dateFrom = null;
+                                  _applyFilters();
+                                });
+                              },
+                              expanded: true,
+                            ),
+                          ),
+                          SizedBox(
+                            width: dateWidth,
+                            child: _DateFilterChip(
+                              label: 'Au',
+                              date: _dateTo,
+                              onTap: _pickDateTo,
+                              onClear: () {
+                                setState(() {
+                                  _dateTo = null;
+                                  _applyFilters();
+                                });
+                              },
+                              expanded: true,
+                            ),
+                          ),
+                          SizedBox(
+                            width: isCompact ? constraints.maxWidth : null,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton.icon(
+                                onPressed: _resetFilters,
+                                icon: const Icon(Icons.refresh_rounded, size: 18),
+                                label: const Text('Réinitialiser'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -412,7 +594,7 @@ class _DropdownFilter<T extends String> extends StatelessWidget {
 
   final T value;
   final List<T> items;
-  final void Function(T?) onChanged;
+  final void Function(T?)? onChanged;
   final String? label;
 
   @override
@@ -467,12 +649,14 @@ class _DateFilterChip extends StatelessWidget {
     required this.date,
     required this.onTap,
     required this.onClear,
+    this.expanded = false,
   });
 
   final String label;
   final DateTime? date;
   final VoidCallback onTap;
   final VoidCallback onClear;
+  final bool expanded;
 
   @override
   Widget build(BuildContext context) {
@@ -488,7 +672,7 @@ class _DateFilterChip extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
             children: [
               Icon(
                 Icons.calendar_today_rounded,
@@ -503,6 +687,7 @@ class _DateFilterChip extends StatelessWidget {
                   fontSize: 13,
                 ),
               ),
+              if (expanded) const Spacer(),
               if (date != null) ...[
                 const SizedBox(width: 4),
                 GestureDetector(
