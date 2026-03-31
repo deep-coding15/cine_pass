@@ -55,7 +55,6 @@ class _EventsListPageState extends State<EventsListPage> {
       ]);
       if (!mounted) return;
       final events = results[0] as List<EventResponse>;
-      final cities = results[1] as List<String>;
       final typeOpts = _buildTypeOptions(events);
 
       setState(() {
