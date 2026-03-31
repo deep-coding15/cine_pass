@@ -3685,21 +3685,6 @@ class CinePassEndpoint extends Endpoint {
     return null;
   }
 
-  static DateTime? _parseDateTime(Object? v) {
-    if (v == null) return null;
-    if (v is DateTime) return v;
-    if (v is String) return DateTime.tryParse(v);
-    return null;
-  }
-
-  static String? _formatDateFr(dynamic v) {
-    final d = _safeDateTime(v);
-    if (d == null) {
-      return null;
-    }
-    return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-  }
-
   static EventResponse _rowToEventResponse(List<dynamic> row) {
     final date = row.length > 7 ? row[7] : null;
     final time = row.length > 8 ? row[8] : null;

@@ -53,6 +53,12 @@ jobs:
           PGPASSWORD: 'mervy'
         run: bash scripts/apply_serverpod_dependency_migrations.sh
 
+      - name: Apply CinePass business schema to test database
+        working-directory: cine_pass_server
+        env:
+          PGPASSWORD: 'mervy'
+        run: psql -h localhost -p 9090 -U postgres -d cine_pass_test -v ON_ERROR_STOP=1 -f schema/cine_pass_schema.sql
+
       - name: Install Serverpod CLI
         working-directory: cine_pass_server
         run: dart pub global activate serverpod_cli $VERSION
