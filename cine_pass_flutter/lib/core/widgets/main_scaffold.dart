@@ -104,8 +104,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: FilledButton(
-                          onPressed: () =>
-                              context.go(AppRouter.responsable),
+                          onPressed: () => context.go(AppRouter.responsable),
                           style: FilledButton.styleFrom(
                             backgroundColor: AppTheme.accentGreen,
                             padding: const EdgeInsets.symmetric(
@@ -266,8 +265,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                     width: 24,
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      onEnter: (_) =>
-                          _scaffoldKey.currentState?.openDrawer(),
+                      onEnter: (_) => _scaffoldKey.currentState?.openDrawer(),
                       child: const SizedBox.expand(),
                     ),
                   ),

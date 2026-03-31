@@ -72,39 +72,47 @@ class AdminSidebarPanel extends StatelessWidget {
                     icon: Icons.calendar_today_rounded,
                     label: 'Événements',
                     isActive: _isActive(context, '/admin/events'),
-                    onTap: () => _navigate(context, () => context.go('/admin/events')),
+                    onTap: () =>
+                        _navigate(context, () => context.go('/admin/events')),
                   ),
                   _AdminNavTile(
                     icon: Icons.store_rounded,
                     label: 'Structures',
                     isActive: _isActive(context, '/admin/structures'),
-                    onTap: () =>
-                        _navigate(context, () => context.go('/admin/structures')),
+                    onTap: () => _navigate(
+                      context,
+                      () => context.go('/admin/structures'),
+                    ),
                   ),
                   _AdminNavTile(
                     icon: Icons.people_rounded,
                     label: 'Utilisateurs',
                     isActive: _isActive(context, '/admin/users'),
-                    onTap: () => _navigate(context, () => context.go('/admin/users')),
+                    onTap: () =>
+                        _navigate(context, () => context.go('/admin/users')),
                   ),
                   _AdminNavTile(
                     icon: Icons.badge_outlined,
                     label: 'Demandes responsable',
                     isActive: _isActive(context, '/admin/demandes'),
-                    onTap: () => _navigate(context, () => context.go('/admin/demandes')),
+                    onTap: () =>
+                        _navigate(context, () => context.go('/admin/demandes')),
                   ),
                   _AdminNavTile(
                     icon: Icons.confirmation_number_rounded,
                     label: 'Réservations',
                     isActive: _isActive(context, '/admin/reservations'),
-                    onTap: () =>
-                        _navigate(context, () => context.go('/admin/reservations')),
+                    onTap: () => _navigate(
+                      context,
+                      () => context.go('/admin/reservations'),
+                    ),
                   ),
                   _AdminNavTile(
                     icon: Icons.assessment_rounded,
                     label: 'Rapport de statistiques',
                     isActive: _isActive(context, '/admin/stats'),
-                    onTap: () => _navigate(context, () => context.go('/admin/stats')),
+                    onTap: () =>
+                        _navigate(context, () => context.go('/admin/stats')),
                   ),
                 ],
               ),
@@ -222,8 +230,9 @@ class _AdminNavTile extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: isActive ? Colors.white : AppTheme.textSecondary,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isActive
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 ),

@@ -270,84 +270,103 @@ class _BilletCard extends StatelessWidget {
           builder: (context, constraints) {
             final narrow = constraints.maxWidth < 520;
             final details = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          billet.title,
-                          style: TextStyle(
-                            color: cancelled
-                                ? AppTheme.textSecondary
-                                : AppTheme.textPrimary,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        billet.title,
+                        style: TextStyle(
+                          color: cancelled
+                              ? AppTheme.textSecondary
+                              : AppTheme.textPrimary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (cancelled)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.textSecondary.withValues(
-                              alpha: 0.3,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'Annulée',
-                            style: TextStyle(
-                              color: AppTheme.textSecondary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Réservation #${billet.id}',
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 13,
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: AppTheme.textSecondary,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          billet.location,
-                          style: const TextStyle(
+                    if (cancelled)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.textSecondary.withValues(
+                            alpha: 0.3,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Annulée',
+                          style: TextStyle(
                             color: AppTheme.textSecondary,
-                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
                           ),
                         ),
                       ),
-                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Réservation #${billet.id}',
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
                   ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        billet.location,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      billet.dateTime,
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                if (billet.room != null && billet.room!.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   Row(
                     children: [
                       Icon(
-                        Icons.calendar_today_rounded,
+                        Icons.meeting_room_outlined,
                         size: 16,
                         color: AppTheme.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        billet.dateTime,
+                        'Salle : ${billet.room}',
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 14,
@@ -355,279 +374,259 @@ class _BilletCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (billet.room != null && billet.room!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.meeting_room_outlined,
-                          size: 16,
+                ],
+                const SizedBox(height: 10),
+                if (billet.ticketTypes != null &&
+                    billet.ticketTypes!.isNotEmpty) ...[
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      Icon(
+                        Icons.confirmation_number_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      Text(
+                        'Type : ',
+                        style: const TextStyle(
                           color: AppTheme.textSecondary,
+                          fontSize: 14,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Salle : ${billet.room}',
-                          style: const TextStyle(
-                            color: AppTheme.textSecondary,
-                            fontSize: 14,
+                      ),
+                      ...billet.ticketTypes!.asMap().entries.map((e) {
+                        final isVip = e.value == 'VIP';
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 10),
-                  if (billet.ticketTypes != null &&
-                      billet.ticketTypes!.isNotEmpty) ...[
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        Icon(
-                          Icons.confirmation_number_outlined,
-                          size: 16,
-                          color: AppTheme.textSecondary,
-                        ),
-                        Text(
-                          'Type : ',
-                          style: const TextStyle(
-                            color: AppTheme.textSecondary,
-                            fontSize: 14,
+                          decoration: BoxDecoration(
+                            color: isVip
+                                ? AppTheme.primaryRed.withValues(alpha: 0.2)
+                                : AppTheme.surfaceDark,
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                        ),
-                        ...billet.ticketTypes!.asMap().entries.map((e) {
-                          final isVip = e.value == 'VIP';
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
+                          child: Text(
+                            'Billet ${e.key + 1} ${e.value}',
+                            style: TextStyle(
                               color: isVip
-                                  ? AppTheme.primaryRed.withValues(alpha: 0.2)
-                                  : AppTheme.surfaceDark,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'Billet ${e.key + 1} ${e.value}',
-                              style: TextStyle(
-                                color: isVip
-                                    ? AppTheme.primaryRed
-                                    : AppTheme.textPrimary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  if (billet.seats != null && billet.seats!.isNotEmpty) ...[
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.event_seat_rounded,
-                          size: 16,
-                          color: AppTheme.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          'Sièges : ',
-                          style: TextStyle(
-                            color: AppTheme.textSecondary,
-                            fontSize: 14,
-                          ),
-                        ),
-                        ...billet.seats!.map(
-                          (s) => Container(
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppTheme.primaryRed),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              s,
-                              style: const TextStyle(
-                                color: AppTheme.primaryRed,
-                                fontSize: 13,
-                              ),
+                                  ? AppTheme.primaryRed
+                                  : AppTheme.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ] else if (billet.ticketCount != null) ...[
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.confirmation_number_outlined,
-                          size: 16,
-                          color: AppTheme.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${billet.ticketCount} billet(s)',
-                          style: const TextStyle(
-                            color: AppTheme.textSecondary,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 12),
+                        );
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                if (billet.seats != null && billet.seats!.isNotEmpty) ...[
                   Row(
                     children: [
+                      Icon(
+                        Icons.event_seat_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 6),
                       const Text(
-                        'Montant total',
+                        'Sièges : ',
                         style: TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 14,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      ...billet.seats!.map(
+                        (s) => Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppTheme.primaryRed),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            s,
+                            style: const TextStyle(
+                              color: AppTheme.primaryRed,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else if (billet.ticketCount != null) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.confirmation_number_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 6),
                       Text(
-                        '${billet.totalAmount.toStringAsFixed(2)} MAD',
+                        '${billet.ticketCount} billet(s)',
                         style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Text(
+                      'Montant total',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '${billet.totalAmount.toStringAsFixed(2)} MAD',
+                      style: const TextStyle(
+                        color: AppTheme.accentGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (cancelled && refundWhenCancelled != null) ...[
+                  Text(
+                    'Remboursement $refundWhenCancelled % (sous 5-10 jours)',
+                    style: TextStyle(
+                      color: AppTheme.accentGreen,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ] else if (canCancel) ...[
+                  Text(
+                    'L’annulation est possible uniquement s’il reste au moins 2 h avant le début de l’événement.',
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Remboursement indicatif : $refundPercent % si vous annulez maintenant.',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary.withValues(alpha: 0.9),
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final percent = getRefundPercent(
+                        billet.sessionDateTime,
+                      );
+                      final ok = await client.cinePass.cancelMyEventReservation(
+                        reservationNumber: billet.id,
+                      );
+                      if (!context.mounted) return;
+                      if (!ok) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Annulation impossible (délai dépassé ou réservation déjà annulée).',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      billetsState.cancel(billet.id, percent);
+                      onCancelled();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Réservation annulée. Remboursement de $percent % sous 5-10 jours.',
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.cancel_outlined, size: 18),
+                    label: const Text('Annuler la réservation'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primaryRed,
+                      side: const BorderSide(color: AppTheme.primaryRed),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ] else if (!cancelled &&
+                    !canCancel &&
+                    billet.isEvent &&
+                    DateTime.now().isBefore(billet.sessionDateTime)) ...[
+                  Text(
+                    'Annulation non possible (moins de 2 h avant le début de l\'événement)',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (!cancelled) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 18,
+                        color: AppTheme.accentGreen,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Valide',
+                        style: TextStyle(
                           color: AppTheme.accentGreen,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  if (cancelled && refundWhenCancelled != null) ...[
-                    Text(
-                      'Remboursement $refundWhenCancelled % (sous 5-10 jours)',
-                      style: TextStyle(
-                        color: AppTheme.accentGreen,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ] else if (canCancel) ...[
-                    Text(
-                      'L’annulation est possible uniquement s’il reste au moins 2 h avant le début de l’événement.',
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Remboursement indicatif : $refundPercent % si vous annulez maintenant.',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary.withValues(alpha: 0.9),
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        final percent = getRefundPercent(
-                          billet.sessionDateTime,
-                        );
-                        final ok = await client.cinePass
-                            .cancelMyEventReservation(
-                              reservationNumber: billet.id,
-                            );
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      try {
+                        await shareBilletPdf(billet);
+                      } catch (e) {
                         if (!context.mounted) return;
-                        if (!ok) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Annulation impossible (délai dépassé ou réservation déjà annulée).',
-                              ),
-                            ),
-                          );
-                          return;
-                        }
-                        billetsState.cancel(billet.id, percent);
-                        onCancelled();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Réservation annulée. Remboursement de $percent % sous 5-10 jours.',
+                              'Impossible de générer le PDF : $e',
                             ),
                           ),
                         );
-                      },
-                      icon: const Icon(Icons.cancel_outlined, size: 18),
-                      label: const Text('Annuler la réservation'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.primaryRed,
-                        side: const BorderSide(color: AppTheme.primaryRed),
+                      }
+                    },
+                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                    label: const Text('Télécharger le billet (PDF)'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.textPrimary,
+                      side: BorderSide(
+                        color: AppTheme.textSecondary.withValues(alpha: 0.5),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                  ] else if (!cancelled &&
-                      !canCancel &&
-                      billet.isEvent &&
-                      DateTime.now().isBefore(billet.sessionDateTime)) ...[
-                    Text(
-                      'Annulation non possible (moins de 2 h avant le début de l\'événement)',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  if (!cancelled) ...[
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle_rounded,
-                          size: 18,
-                          color: AppTheme.accentGreen,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Valide',
-                          style: TextStyle(
-                            color: AppTheme.accentGreen,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        try {
-                          await shareBilletPdf(billet);
-                        } catch (e) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Impossible de générer le PDF : $e',
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-                      label: const Text('Télécharger le billet (PDF)'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.textPrimary,
-                        side: BorderSide(
-                          color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
-              );
+              ],
+            );
             final Widget sideWidget = !cancelled
                 ? InkWell(
                     onTap: () => _showQrFullScreen(context, billet),

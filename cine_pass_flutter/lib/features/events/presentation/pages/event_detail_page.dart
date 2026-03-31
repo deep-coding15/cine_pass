@@ -250,192 +250,191 @@ class _EventDetailPageState extends State<EventDetailPage> {
             builder: (context, constraints) {
               final narrow = constraints.maxWidth < 840;
               final leftColumn = Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Card(
-                      color: AppTheme.cardDark,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Description',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(color: AppTheme.textPrimary),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Card(
+                    color: AppTheme.cardDark,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Description',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(color: AppTheme.textPrimary),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            event.description ?? '',
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              height: 1.5,
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              event.description ?? '',
-                              style: const TextStyle(
+                          ),
+                          const SizedBox(height: 14),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if ((event.eventType ?? '').isNotEmpty)
+                                _detailChip(
+                                  'Type',
+                                  eventTypeDisplayLabel(event),
+                                ),
+                              if ((event.eventLanguage ?? '').isNotEmpty)
+                                _detailChip('Langue', event.eventLanguage!),
+                              if ((event.filmGenre ?? '').isNotEmpty)
+                                _detailChip('Genre film', event.filmGenre!),
+                              if ((event.filmDirector ?? '').isNotEmpty)
+                                _detailChip(
+                                  'Réalisateur',
+                                  event.filmDirector!,
+                                ),
+                              if ((event.festivalTheme ?? '').isNotEmpty)
+                                _detailChip(
+                                  'Thématique',
+                                  event.festivalTheme!,
+                                ),
+                              if ((event.standupMainArtist ?? '').isNotEmpty)
+                                _detailChip(
+                                  'Humoriste',
+                                  event.standupMainArtist!,
+                                ),
+                              if ((event.concertArtist ?? '').isNotEmpty)
+                                _detailChip('Artiste', event.concertArtist!),
+                              if ((event.concertMusicGenre ?? '').isNotEmpty)
+                                _detailChip(
+                                  'Genre musical',
+                                  event.concertMusicGenre!,
+                                ),
+                              if ((event.theatreAuthor ?? '').isNotEmpty)
+                                _detailChip('Auteur', event.theatreAuthor!),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
+                    color: AppTheme.cardDark,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Informations pratiques',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(color: AppTheme.textPrimary),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: 20,
                                 color: AppTheme.textSecondary,
-                                height: 1.5,
                               ),
-                            ),
-                            const SizedBox(height: 14),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                if ((event.eventType ?? '').isNotEmpty)
-                                  _detailChip(
-                                    'Type',
-                                    eventTypeDisplayLabel(event),
-                                  ),
-                                if ((event.eventLanguage ?? '').isNotEmpty)
-                                  _detailChip('Langue', event.eventLanguage!),
-                                if ((event.filmGenre ?? '').isNotEmpty)
-                                  _detailChip('Genre film', event.filmGenre!),
-                                if ((event.filmDirector ?? '').isNotEmpty)
-                                  _detailChip(
-                                    'Réalisateur',
-                                    event.filmDirector!,
-                                  ),
-                                if ((event.festivalTheme ?? '').isNotEmpty)
-                                  _detailChip(
-                                    'Thématique',
-                                    event.festivalTheme!,
-                                  ),
-                                if ((event.standupMainArtist ?? '').isNotEmpty)
-                                  _detailChip(
-                                    'Humoriste',
-                                    event.standupMainArtist!,
-                                  ),
-                                if ((event.concertArtist ?? '').isNotEmpty)
-                                  _detailChip('Artiste', event.concertArtist!),
-                                if ((event.concertMusicGenre ?? '').isNotEmpty)
-                                  _detailChip(
-                                    'Genre musical',
-                                    event.concertMusicGenre!,
-                                  ),
-                                if ((event.theatreAuthor ?? '').isNotEmpty)
-                                  _detailChip('Auteur', event.theatreAuthor!),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Card(
-                      color: AppTheme.cardDark,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Informations pratiques',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(color: AppTheme.textPrimary),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  size: 20,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        event.location,
-                                        style: const TextStyle(
-                                          color: AppTheme.textPrimary,
-                                        ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      event.location,
+                                      style: const TextStyle(
+                                        color: AppTheme.textPrimary,
                                       ),
-                                      Text(
-                                        event.address ?? '',
-                                        style: const TextStyle(
-                                          color: AppTheme.textSecondary,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                      Text(
-                                        event.city,
-                                        style: const TextStyle(
-                                          color: AppTheme.textSecondary,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_today_rounded,
-                                  size: 20,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  event.date,
-                                  style: const TextStyle(
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time_rounded,
-                                  size: 20,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _formatEventTimeLabel(event.time),
-                                    style: const TextStyle(
-                                      color: AppTheme.textSecondary,
                                     ),
-                                  ),
+                                    Text(
+                                      event.address ?? '',
+                                      style: const TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    Text(
+                                      event.city,
+                                      style: const TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.people_outline_rounded,
-                                  size: 20,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                event.date,
+                                style: const TextStyle(
                                   color: AppTheme.textSecondary,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  maxBookable <= 0
-                                      ? 'Complet'
-                                      : '$maxBookable place${maxBookable > 1 ? 's' : ''} disponible${maxBookable > 1 ? 's' : ''}',
-                                  style: const TextStyle(
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                                Text(
-                                  ' sur ${event.placesTotal} au total',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _formatEventTimeLabel(event.time),
                                   style: const TextStyle(
                                     color: AppTheme.textSecondary,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.people_outline_rounded,
+                                size: 20,
+                                color: AppTheme.textSecondary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                maxBookable <= 0
+                                    ? 'Complet'
+                                    : '$maxBookable place${maxBookable > 1 ? 's' : ''} disponible${maxBookable > 1 ? 's' : ''}',
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                ' sur ${event.placesTotal} au total',
+                                style: const TextStyle(
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                );
+                  ),
+                ],
+              );
               final bookingCard = SizedBox(
                 width: narrow ? double.infinity : 320,
                 child: Card(

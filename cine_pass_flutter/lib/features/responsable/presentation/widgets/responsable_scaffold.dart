@@ -232,8 +232,9 @@ class _ResponsableNavTile extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: isActive ? Colors.white : AppTheme.textSecondary,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isActive
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 ),

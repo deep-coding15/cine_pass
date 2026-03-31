@@ -38,7 +38,9 @@ class _AdminAddFilmDialogState extends State<AdminAddFilmDialog> {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.primaryRed,
+              ),
               child: const Text('Fermer'),
             ),
           ],

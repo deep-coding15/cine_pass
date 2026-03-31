@@ -830,7 +830,8 @@ class _ResponsableAddEventDialogState extends State<ResponsableAddEventDialog> {
           structureId: _structureId,
         );
         if (created == null) {
-          failReason = 'createEvent a retourné null (droits ou données invalides).';
+          failReason =
+              'createEvent a retourné null (droits ou données invalides).';
           break;
         }
         final cfg = await client.cinePass.setEventReservationConfig(

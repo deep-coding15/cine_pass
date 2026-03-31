@@ -87,13 +87,14 @@ class _EventsListPageState extends State<EventsListPage> {
   }
 
   List<String> _buildTypeOptions(List<EventResponse> events) {
-    final labels = events
-        .map(eventTypeDisplayLabel)
-        .map((label) => label.trim())
-        .where((label) => label.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final labels =
+        events
+            .map(eventTypeDisplayLabel)
+            .map((label) => label.trim())
+            .where((label) => label.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return ['Tous', ...labels];
   }
 
@@ -103,13 +104,16 @@ class _EventsListPageState extends State<EventsListPage> {
   }) {
     final base = selectedType == 'Tous'
         ? events
-        : events.where((e) => _eventMatchesDisplayType(e, selectedType)).toList();
-    final cities = base
-        .map((e) => e.city.trim())
-        .where((city) => city.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+        : events
+              .where((e) => _eventMatchesDisplayType(e, selectedType))
+              .toList();
+    final cities =
+        base
+            .map((e) => e.city.trim())
+            .where((city) => city.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return ['Toutes', ...cities];
   }
 
@@ -151,7 +155,8 @@ class _EventsListPageState extends State<EventsListPage> {
     }
   }
 
-  String _eventTypeCode(EventResponse e) => (e.eventType ?? '').trim().toUpperCase();
+  String _eventTypeCode(EventResponse e) =>
+      (e.eventType ?? '').trim().toUpperCase();
 
   Future<void> _loadDynamicFilterOptions() async {
     final key = _dynamicFilterKeyForSelectedType();
@@ -524,7 +529,10 @@ class _EventsListPageState extends State<EventsListPage> {
                               alignment: Alignment.centerLeft,
                               child: TextButton.icon(
                                 onPressed: _resetFilters,
-                                icon: const Icon(Icons.refresh_rounded, size: 18),
+                                icon: const Icon(
+                                  Icons.refresh_rounded,
+                                  size: 18,
+                                ),
                                 label: const Text('Réinitialiser'),
                               ),
                             ),

@@ -135,176 +135,176 @@ class _PaymentPageState extends State<PaymentPage> {
         builder: (context, constraints) {
           final narrow = constraints.maxWidth < 840;
           final formColumn = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(
-                  onTap: () {
-                    if (state.isEvent) {
-                      context.go(AppRouter.reservationTypeBillet);
-                    } else {
-                      context.go(AppRouter.reservationSieges);
-                    }
-                  },
-                  child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: () {
+                  if (state.isEvent) {
+                    context.go(AppRouter.reservationTypeBillet);
+                  } else {
+                    context.go(AppRouter.reservationSieges);
+                  }
+                },
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Retour',
+                      style: TextStyle(color: AppTheme.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Paiement',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Card(
+                color: AppTheme.cardDark,
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.arrow_back_rounded,
-                        color: AppTheme.textSecondary,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.credit_card_rounded,
+                            color: AppTheme.textSecondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Informations de paiement',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(color: AppTheme.textPrimary),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _cardNumberController,
+                        decoration: const InputDecoration(
+                          labelText: 'Numéro de carte',
+                          labelStyle: TextStyle(
+                            color: AppTheme.textSecondary,
+                          ),
+                          hintText: '1234 5678 9012 3456',
+                          filled: true,
+                          fillColor: AppTheme.surfaceDark,
+                        ),
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nom sur la carte',
+                          labelStyle: TextStyle(
+                            color: AppTheme.textSecondary,
+                          ),
+                          filled: true,
+                          fillColor: AppTheme.surfaceDark,
+                        ),
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _expiryController,
+                              decoration: const InputDecoration(
+                                labelText: 'Date d\'expiration',
+                                labelStyle: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                ),
+                                hintText: 'MM/AA',
+                                filled: true,
+                                fillColor: AppTheme.surfaceDark,
+                              ),
+                              style: const TextStyle(
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextField(
+                              controller: _cvvController,
+                              decoration: const InputDecoration(
+                                labelText: 'CVV',
+                                labelStyle: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                ),
+                                filled: true,
+                                fillColor: AppTheme.surfaceDark,
+                              ),
+                              style: const TextStyle(
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () =>
+                              _confirmPaymentAndCreateBillets(context),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.primaryRed,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: Text(
+                            'Confirmer le paiement de ${_total.toStringAsFixed(2)} MAD',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.lock_rounded,
+                            size: 16,
+                            color: AppTheme.textSecondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Paiement sécurisé. Vos informations sont protégées.',
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        'Retour',
-                        style: TextStyle(color: AppTheme.textSecondary),
+                        'Note: Ceci est une démo. Aucun paiement réel ne sera effectué.',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  'Paiement',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Card(
-                  color: AppTheme.cardDark,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.credit_card_rounded,
-                              color: AppTheme.textSecondary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Informations de paiement',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(color: AppTheme.textPrimary),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: _cardNumberController,
-                          decoration: const InputDecoration(
-                            labelText: 'Numéro de carte',
-                            labelStyle: TextStyle(
-                              color: AppTheme.textSecondary,
-                            ),
-                            hintText: '1234 5678 9012 3456',
-                            filled: true,
-                            fillColor: AppTheme.surfaceDark,
-                          ),
-                          style: const TextStyle(color: AppTheme.textPrimary),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nom sur la carte',
-                            labelStyle: TextStyle(
-                              color: AppTheme.textSecondary,
-                            ),
-                            filled: true,
-                            fillColor: AppTheme.surfaceDark,
-                          ),
-                          style: const TextStyle(color: AppTheme.textPrimary),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _expiryController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Date d\'expiration',
-                                  labelStyle: TextStyle(
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                  hintText: 'MM/AA',
-                                  filled: true,
-                                  fillColor: AppTheme.surfaceDark,
-                                ),
-                                style: const TextStyle(
-                                  color: AppTheme.textPrimary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextField(
-                                controller: _cvvController,
-                                decoration: const InputDecoration(
-                                  labelText: 'CVV',
-                                  labelStyle: TextStyle(
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                  filled: true,
-                                  fillColor: AppTheme.surfaceDark,
-                                ),
-                                style: const TextStyle(
-                                  color: AppTheme.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: () =>
-                                _confirmPaymentAndCreateBillets(context),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppTheme.primaryRed,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: Text(
-                              'Confirmer le paiement de ${_total.toStringAsFixed(2)} MAD',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.lock_rounded,
-                              size: 16,
-                              color: AppTheme.textSecondary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Paiement sécurisé. Vos informations sont protégées.',
-                                style: TextStyle(
-                                  color: AppTheme.textSecondary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Note: Ceci est une démo. Aucun paiement réel ne sera effectué.',
-                          style: TextStyle(
-                            color: AppTheme.textSecondary,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
+              ),
+            ],
+          );
           final recapCard = SizedBox(
             width: narrow ? double.infinity : 340,
             child: Card(
